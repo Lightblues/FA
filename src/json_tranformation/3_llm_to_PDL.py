@@ -1,8 +1,8 @@
 
 import os
 from easonsi import utils
-from easonsi.llm.jinja_templates import jinja_render
 from easonsi.llm.openai_client import OpenAIClient, Formater
+from utils.jinja_templates import jinja_render
 
 
 client = OpenAIClient()
