@@ -1,0 +1,497 @@
+{
+  "TaskFlowName": "同程开发票",
+  "TaskFlowDesc": "咨询开具发票的方法",
+  "Nodes": [
+    {
+      "NodeID": "start",
+      "NodeName": "开始",
+      "NodeType": "START",
+      "Branches": [
+        {
+          "ConditionInfo": {},
+          "NextNodeID": "node-000"
+        }
+      ]
+    },
+    {
+      "NodeID": "node-000",
+      "NodeName": "查询开票方式",
+      "NodeType": "API",
+      "ApiNodeData": {
+        "API": {
+          "URL": "http://11.141.203.151:8089/get_invoicing_method",
+          "Method": "GET"
+        },
+        "Headers": [],
+        "Request": [
+          {
+            "ParamID": "184021aa-3ea8-f4cd-efe6-b318c1a169d1",
+            "ParamName": "order_id",
+            "ParamType": "string",
+            "SourceType": "SLOT",
+            "IsRequired": true,
+            "SlotValueData": {
+              "AskType": "LLM",
+              "CustomAsk": "",
+              "SlotID": "88e4ae53-ca9b-4b60-b089-f0efe521e0e3",
+              "FormatDesc": ""
+            }
+          }
+        ],
+        "Response": [
+          {
+            "ParamID": "9a611425-8b9e-0b83-1c68-3e9aca2ad46e",
+            "ParamName": "invoicing_method",
+            "ParamTitle": "开票方式",
+            "ParamType": "string",
+            "JSONPath": "invoicing_method"
+          }
+        ],
+        "DoubleCheck": true,
+        "LLMAskPreview": []
+      },
+      "Branches": [
+        {
+          "ConditionInfo": {
+            "Condition": {
+              "SourceType": "API_RESP",
+              "Comparison": "EQ",
+              "InputValues": [
+                "平台开具"
+              ],
+              "APIRespValueData": {
+                "ParamID": "9a611425-8b9e-0b83-1c68-3e9aca2ad46e"
+              }
+            }
+          },
+          "NextNodeID": "node-001"
+        },
+        {
+          "ConditionInfo": {
+            "Condition": {
+              "SourceType": "API_RESP",
+              "Comparison": "EQ",
+              "InputValues": [
+                "酒店开具"
+              ],
+              "APIRespValueData": {
+                "ParamID": "9a611425-8b9e-0b83-1c68-3e9aca2ad46e"
+              }
+            }
+          },
+          "NextNodeID": "node-002"
+        }
+      ]
+    },
+    {
+      "NodeID": "node-001",
+      "NodeName": "开票进度查询",
+      "NodeType": "API",
+      "ApiNodeData": {
+        "API": {
+          "URL": "http://11.141.203.151:8089/search_invoicing_progress",
+          "Method": "POST"
+        },
+        "Headers": [],
+        "Request": [
+          {
+            "ParamID": "2fac8538-7c38-04e2-50c9-51d174637837",
+            "ParamName": "name",
+            "ParamType": "string",
+            "SourceType": "SLOT",
+            "IsRequired": true,
+            "SlotValueData": {
+              "AskType": "LLM",
+              "CustomAsk": "",
+              "SlotID": "87333347-cb96-462b-9f1d-b5011e9d0f2e"
+            }
+          }
+        ],
+        "Response": [
+          {
+            "ParamID": "3d26a8d1-2a54-9b0f-33b9-2094d1f04712",
+            "ParamName": "invoicing_progress",
+            "ParamTitle": "开票信息进度",
+            "ParamType": "string",
+            "JSONPath": "invoicing_progress"
+          }
+        ],
+        "DoubleCheck": true,
+        "LLMAskPreview": []
+      },
+      "Branches": [
+        {
+          "ConditionInfo": {
+            "Condition": {
+              "SourceType": "API_RESP",
+              "Comparison": "EQ",
+              "InputValues": [
+                "null"
+              ],
+              "APIRespValueData": {
+                "ParamID": "3d26a8d1-2a54-9b0f-33b9-2094d1f04712"
+              }
+            }
+          },
+          "NextNodeID": "node-003"
+        },
+        {
+          "ConditionInfo": {
+            "Condition": {
+              "SourceType": "API_RESP",
+              "Comparison": "NE",
+              "InputValues": [
+                "null"
+              ],
+              "APIRespValueData": {
+                "ParamID": "3d26a8d1-2a54-9b0f-33b9-2094d1f04712"
+              }
+            }
+          },
+          "NextNodeID": "node-004"
+        }
+      ]
+    },
+    {
+      "NodeID": "node-002",
+      "NodeName": "结束回复1",
+      "NodeType": "ANSWER",
+      "AnswerNodeData": {
+        "AnswerType": "LLM",
+        "InputAnswerData": {
+          "Preview": ""
+        },
+        "LLMAnswerData": {
+          "Preview": [
+            "您的同程开发票操作已成功执行，开票方式为\"开票方式\"。"
+          ]
+        },
+        "DocAnswerData": {
+          "Preview": "",
+          "RefInfo": []
+        }
+      },
+      "Branches": []
+    },
+    {
+      "NodeID": "node-003",
+      "NodeName": "结束回复2",
+      "NodeType": "ANSWER",
+      "AnswerNodeData": {
+        "AnswerType": "INPUT",
+        "InputAnswerData": {
+          "Preview": "您存在发票信息，请前往mis售后地图查看详细进度，根据用户实际咨询场景回复不同话术\\\\~  \n\nhttp://nyd.mis.elong.com:8080/aftersale/index?orderId=1954364687&type=1【按钮】"
+        },
+        "LLMAnswerData": {
+          "Preview": [
+            "尊敬的用户，您的开票信息进度已成功更新。"
+          ]
+        },
+        "DocAnswerData": {
+          "Preview": "",
+          "RefInfo": []
+        }
+      },
+      "Branches": []
+    },
+    {
+      "NodeID": "node-004",
+      "NodeName": "会员身份查询",
+      "NodeType": "API",
+      "ApiNodeData": {
+        "API": {
+          "URL": "http://11.141.203.151:8089/get_card_type",
+          "Method": "POST"
+        },
+        "Headers": [],
+        "Request": [
+          {
+            "ParamID": "8c354123-5142-a647-5d45-bc42e58ec131",
+            "ParamName": "card_id",
+            "ParamType": "string",
+            "SourceType": "SLOT",
+            "IsRequired": true,
+            "SlotValueData": {
+              "AskType": "LLM",
+              "CustomAsk": "",
+              "SlotID": "c35b1fd8-0a43-43ef-85a6-eb5d5a7c3cde"
+            }
+          }
+        ],
+        "Response": [
+          {
+            "ParamID": "7d4deee7-cc89-3ec1-2ef2-58e80ccdf5ea",
+            "ParamName": "card_type",
+            "ParamTitle": "卡类型",
+            "ParamType": "string",
+            "JSONPath": "card_type"
+          }
+        ],
+        "DoubleCheck": true,
+        "LLMAskPreview": []
+      },
+      "Branches": [
+        {
+          "ConditionInfo": {
+            "Condition": {
+              "SourceType": "API_RESP",
+              "Comparison": "EQ",
+              "InputValues": [
+                "白金卡"
+              ],
+              "APIRespValueData": {
+                "ParamID": "7d4deee7-cc89-3ec1-2ef2-58e80ccdf5ea"
+              }
+            }
+          },
+          "NextNodeID": "node-005"
+        },
+        {
+          "ConditionInfo": {
+            "Condition": {
+              "SourceType": "API_RESP",
+              "Comparison": "EQ",
+              "InputValues": [
+                "非白金卡"
+              ],
+              "APIRespValueData": {
+                "ParamID": "7d4deee7-cc89-3ec1-2ef2-58e80ccdf5ea"
+              }
+            }
+          },
+          "NextNodeID": "node-006"
+        }
+      ]
+    },
+    {
+      "NodeID": "node-005",
+      "NodeName": "白金卡开票类型澄清",
+      "NodeType": "REQUEST",
+      "Branches": [
+        {
+          "ConditionInfo": {
+            "Condition": {
+              "SourceType": "SLOT",
+              "Comparison": "EQ",
+              "InputValues": [
+                "电子普票"
+              ],
+              "SlotValueData": {
+                "SlotID": "21156b19-c515-425f-9f18-395d9aec9a46"
+              }
+            }
+          },
+          "NextNodeID": "node-007"
+        },
+        {
+          "ConditionInfo": {
+            "Condition": {
+              "SourceType": "SLOT",
+              "Comparison": "EQ",
+              "InputValues": [
+                "纸质普票"
+              ],
+              "SlotValueData": {
+                "SlotID": "21156b19-c515-425f-9f18-395d9aec9a46"
+              }
+            }
+          },
+          "NextNodeID": "node-008"
+        },
+        {
+          "ConditionInfo": {
+            "Condition": {
+              "SourceType": "SLOT",
+              "Comparison": "EQ",
+              "InputValues": [
+                "纸质专票"
+              ],
+              "SlotValueData": {
+                "SlotID": "21156b19-c515-425f-9f18-395d9aec9a46"
+              }
+            }
+          },
+          "NextNodeID": "node-009"
+        }
+      ]
+    },
+    {
+      "NodeID": "node-006",
+      "NodeName": "非白金卡开票类型澄清",
+      "NodeType": "REQUEST",
+      "Branches": [
+        {
+          "ConditionInfo": {
+            "Condition": {
+              "SourceType": "SLOT",
+              "Comparison": "EQ",
+              "InputValues": [
+                "电子普票"
+              ],
+              "SlotValueData": {
+                "SlotID": "21156b19-c515-425f-9f18-395d9aec9a46"
+              }
+            }
+          },
+          "NextNodeID": "node-010"
+        },
+        {
+          "ConditionInfo": {
+            "Condition": {
+              "SourceType": "SLOT",
+              "Comparison": "EQ",
+              "InputValues": [
+                "纸质普票"
+              ],
+              "SlotValueData": {
+                "SlotID": "21156b19-c515-425f-9f18-395d9aec9a46"
+              }
+            }
+          },
+          "NextNodeID": "node-011"
+        },
+        {
+          "ConditionInfo": {
+            "Condition": {
+              "SourceType": "SLOT",
+              "Comparison": "EQ",
+              "InputValues": [
+                "纸质专票"
+              ],
+              "SlotValueData": {
+                "SlotID": "21156b19-c515-425f-9f18-395d9aec9a46"
+              }
+            }
+          },
+          "NextNodeID": "node-012"
+        }
+      ]
+    },
+    {
+      "NodeID": "node-007",
+      "NodeName": "白金电子普票开具",
+      "NodeType": "ANSWER",
+      "AnswerNodeData": {
+        "AnswerType": "INPUT",
+        "InputAnswerData": {
+          "Preview": "电子普票支持的开票内容为代订住宿费或者代订房费。\n\n可 [点击这里](http://nyd.mis.elong.com/invoice/electronic?orderIds=1959238331) 提交开通电子普票的申请，跳转对应订单开发票页面；提交后，离店日24小时内发送至您的邮箱。\n\n【疑问：超链接提示forbidden，是否是人工内网操作帮助客户提交发票，而非客户自行申请？机器人自动操作后预期提供接口还是转工单继续人工开票？】"
+        },
+        "LLMAnswerData": {
+          "Preview": [
+            "尊敬的用户，您好！根据您的需求，如果您的发票类型为电子普票，我们将会为您开具发票。感谢您的支持，如有其他问题，请随时联系我们。"
+          ]
+        },
+        "DocAnswerData": {
+          "Preview": "",
+          "RefInfo": []
+        }
+      },
+      "Branches": []
+    },
+    {
+      "NodeID": "node-008",
+      "NodeName": "白金纸质发票开具",
+      "NodeType": "ANSWER",
+      "AnswerNodeData": {
+        "AnswerType": "INPUT",
+        "InputAnswerData": {
+          "Preview": "纸质普票支持的开票内容为代订住宿费或者代订房费。  \n可[点击这里](https://www.baidu.com/)提交开通纸质普票的申请，跳转对应订单开发票页面；提交后，离店后5个工作日内送达。\n\n【疑问：超链接提示forbidden，是否是人工内网操作帮助客户提交发票，而非客户自行申请？机器人自动操作后预期提供接口还是转工单继续人工开票？】"
+        },
+        "LLMAnswerData": {
+          "Preview": [
+            "尊敬的客户，您好！根据您的需求，如果您的发票类型为纸质普票，我们将会为您开具发票。感谢您的支持，如有其他问题，请随时联系我们。"
+          ]
+        },
+        "DocAnswerData": {
+          "Preview": "",
+          "RefInfo": []
+        }
+      },
+      "Branches": []
+    },
+    {
+      "NodeID": "node-009",
+      "NodeName": "白金纸质专票开具",
+      "NodeType": "ANSWER",
+      "AnswerNodeData": {
+        "AnswerType": "INPUT",
+        "InputAnswerData": {
+          "Preview": "纸质专票开通【疑问：无后续流程，是否人工根据下述对客话术收集的信息直接开具？机器人自动操作后预期提供接口还是转工单继续人工开票】\n\n对客话术：  \n①纸质专票烦您提供：发票抬头、纳税人识别号、注册地址、公司电话、开户银行、银行账号、发票金额  \n②是否需要备注订单信息（酒店名称、入住日期、离店日期）呢？  \n③请您提供下收件人、联系电话、地址（省市区）哦\n\n/"
+        },
+        "LLMAnswerData": {
+          "Preview": [
+            "尊敬的用户，您好！根据您的需求，如果您的发票类型为纸质专票，我们将会为您开具发票。感谢您的支持，如有其他问题，请随时联系我们。"
+          ]
+        },
+        "DocAnswerData": {
+          "Preview": "",
+          "RefInfo": []
+        }
+      },
+      "Branches": []
+    },
+    {
+      "NodeID": "node-010",
+      "NodeName": "非白金电子票开具",
+      "NodeType": "ANSWER",
+      "AnswerNodeData": {
+        "AnswerType": "INPUT",
+        "InputAnswerData": {
+          "Preview": "电子普票支持的开票内容为代订住宿费或者代订房费。  \n\n可[点击这里](https://www.baidu.com/)提交开通电子普票的申请，跳转对应订单开发票页面；提交后，离店日24小时内发送至您的邮箱。\n\n【疑问：超链接提示forbidden，是否是人工内网操作帮助客户提交发票，而非客户自行申请？机器人自动操作后预期提供接口还是转工单继续人工开票？】"
+        },
+        "LLMAnswerData": {
+          "Preview": [
+            "暂无预览话术生成"
+          ]
+        },
+        "DocAnswerData": {
+          "Preview": "",
+          "RefInfo": []
+        }
+      },
+      "Branches": []
+    },
+    {
+      "NodeID": "node-011",
+      "NodeName": "非白金纸质普票",
+      "NodeType": "ANSWER",
+      "AnswerNodeData": {
+        "AnswerType": "INPUT",
+        "InputAnswerData": {
+          "Preview": "纸质普票支持的开票内容为代订住宿费或者代订房费。\n\n可 [点击这里](https://www.baidu.com/) 提交开通纸质普票的申请，跳转对应订单开发票页面；提交后，离店后5个工作日内送达。\n\n根据您的会员等级，您申请纸质发票邮寄需要10元邮费哦，申请成功后会给您订单手机号发送支付短链，您可点开短链支付。"
+        },
+        "LLMAnswerData": {
+          "Preview": [
+            "暂无预览话术生成"
+          ]
+        },
+        "DocAnswerData": {
+          "Preview": "",
+          "RefInfo": []
+        }
+      },
+      "Branches": []
+    },
+    {
+      "NodeID": "node-012",
+      "NodeName": "非白金纸质专票",
+      "NodeType": "ANSWER",
+      "AnswerNodeData": {
+        "AnswerType": "INPUT",
+        "InputAnswerData": {
+          "Preview": "纸质专票支持的开票内容为代订住宿费或者代订房费。\n\n可 [点击这里](https://www.baidu.com/) 提交开通纸质专票的申请，跳转对应订单开发票页面；提交后，离店后5个工作日内送达。\n\n根据您的会员等级，您申请纸质发票邮寄需要10元邮费哦，申请成功后会给您订单手机号发送支付短链，您可点开短链支付。"
+        },
+        "LLMAnswerData": {
+          "Preview": [
+            "尊敬的客户，您好！根据您的需求，如果您的开票类型为纸质专票，我们将会为您开具发票。感谢您的支持，祝您旅途愉快！"
+          ]
+        },
+        "DocAnswerData": {
+          "Preview": "",
+          "RefInfo": []
+        }
+      },
+      "Branches": []
+    }
+  ]
+}
