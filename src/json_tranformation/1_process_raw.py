@@ -6,10 +6,11 @@ doc: https://doc.weixin.qq.com/slide/p3_AcMATAZtAPIVToQc9ODQIeVMJUBMV?scode=AJEA
 3. LLM convert -> standard procedure description
 """
 import os
+from tqdm import tqdm
 from easonsi import utils
 
-DIR_input = "/apdcephfs/private_easonsshi/easonsshi_base/data/tongcheng/huabu"
-DIR_output = "/apdcephfs/private_easonsshi/easonsshi_base/data/tongcheng/huabu_step1"
+DIR_input = "../../data/v240628/huabu_step0"
+DIR_output = "../../data/v240628/huabu_step1"
 os.makedirs(DIR_output, exist_ok=True)
 
 def preprocess_slotmap(data):
@@ -154,11 +155,11 @@ def get_final(data, processed_nodes):
     return ans
 
 
-# _data_name = "标品-开发票画布"
-data_names = ["114挂号", "查询运单", "标品-开发票画布", "礼金礼卡类案件"]
-for _data_name in data_names:
-    data = utils.LoadJson(f"{DIR_input}/{_data_name}.json")
-    print(f"Processing {_data_name}.json")
+# data_names = ["114挂号", "查询运单", "标品-开发票画布", "礼金礼卡类案件"]
+data_names = os.listdir(DIR_input)
+for fn in tqdm(data_names):
+    data = utils.LoadJson(f"{DIR_input}/{fn}")
+    print(f"Processing {fn}")
 
     data = preprocess_slotmap(data)
     data = preprocess_paramid(data)
@@ -166,5 +167,6 @@ for _data_name in data_names:
     node_info, node_remap = build_node_info(data)
     processed_nodes = process_node()
     final = get_final(data, processed_nodes)
-    utils.SaveJson(final, f"{DIR_output}/{_data_name}.json")
-    print(f"Saved to {DIR_output}/{_data_name}.json")
+    _ofn = f"{DIR_output}/{fn}"
+    utils.SaveJson(final, _ofn)
+    print(f"Saved to {_ofn}")

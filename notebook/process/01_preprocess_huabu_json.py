@@ -39,4 +39,24 @@ for i, row in tqdm(df_filtered.iterrows()):
     with open(f"{DIR_output}/{fn}", "w") as f:
         f.write(json.dumps(json.loads(row["json"]), indent=4, ensure_ascii=False))
 
+
+
+
+# %%
+""" ================================================================
+"""
+import os, json
+import pandas as pd
+from tqdm import tqdm
+DIR_data = f"../../data/v240628"
+df_raw = pd.read_csv(f"{DIR_data}/db_llm_robot_task_sql_result_20240628144836.csv")
+df_raw.head()
+# %%
+DIR_output = f"{DIR_data}/huabu_step0"
+os.makedirs(DIR_output, exist_ok=True)
+for i, row in tqdm(df_raw.iterrows()):
+    fn = f"{i:03d}-{str(row['f_intent_name']).replace('/', '_')[:10]}.json"      # 避免文件名过长, 不合法
+    with open(f"{DIR_output}/{fn}", "w") as f:
+        f.write(json.dumps(json.loads(row["f_dialog_json_enable"]), indent=4, ensure_ascii=False))
+
 # %%
