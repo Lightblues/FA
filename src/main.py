@@ -1,7 +1,8 @@
 import os, argparse
 # os.environ["PYTHONPATH"] = f"{os.getcwd()}:/apdcephfs_cq8/share_2992827/shennong_5/easonsshi/easonsi/src/"
-print("PYTHONPATH=", os.getenv("PYTHONPATH"))
-from engine_v1.agent import conversation, init_client
+# print("PYTHONPATH=", os.getenv("PYTHONPATH"))
+from engine_v1.agent import Agent
+from engine_v1.common import init_client
 
 # llm_cfg = {
 #     # "base_url": os.getenv("OPENAI_WIZARD_BASE_URL"),
@@ -31,6 +32,9 @@ def get_args():
     parser.add_argument("--workflow_name", type=str, default="011-银行订单查询")
     args = parser.parse_args()
     return args
-args = get_args()
-init_client(llm_cfg=LLM_CFG[args.model_name])
-conversation(workflow_name=args.workflow_name)
+
+if __name__ == '__main__':
+    args = get_args()
+    client = init_client(llm_cfg=LLM_CFG[args.model_name])
+    agent = Agent(client=client)
+    agent.conversation(workflow_name=args.workflow_name)
