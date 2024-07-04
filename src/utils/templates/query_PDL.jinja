@@ -11,20 +11,21 @@ NOTE that:
 {{PDL}}
 ```
 
-
 Please output your result in the following format:
 ```json
 {
     "action_type": "The predicted action type, e.g. API, ANSWER, REQUEST",
     "action_name": "The name of the action, e.g. 查询开票方式, 白金卡开票类型澄清",
-    "action_parameters": "The input parameters for the action, if needed. e.g. [订单编号], [会员卡ID]",
+    "action_parameters": "The input parameters for the action, if needed. e.g. [_订单编号], [_会员卡ID]",
     "response": "The generated response, if needed. Please remember to always reply to the user with kind and patient words in Chinese."
 }
 ```
 
 Let's begin! 
 1. Remember always keep kind and patient to the user. 
-2. Follow the PDL procedure, but be flexible to conduct a fluent and friendly conversation. 
+2. Dynamically follow the PDL procedure, but be flexible to conduct a fluent and friendly conversation. 
 
 [Here is the conversation]
 {{conversation}}
+
+Output your results here, without any other extra information.

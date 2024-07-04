@@ -9,10 +9,13 @@ class Logger:
         s_day = now.strftime("%Y-%m-%d")
         s_second = now.strftime("%Y-%m-%d_%H-%M-%S")
         s_millisecond = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
+        
         log_dir = f"{DIR_log}/{s_day}"
         os.makedirs(log_dir, exist_ok=True)
         log_fn = f"{log_dir}/{s_second}.log"
         self.log_fn = log_fn
+        log_detail_fn = f"{log_dir}/{s_second}_detail.log"
+        self.log_detail_fn = log_detail_fn
 
     def log(self, message:str, add_line=True, with_print=False):
         with open(self.log_fn, 'a') as f:
@@ -20,6 +23,11 @@ class Logger:
             f.flush()
         if with_print:
             print(message)
+    
+    def debug(self, message:str):
+        with open(self.log_detail_fn, 'a') as f:
+            f.write(f"{message}\n\n")
+            f.flush()
 
 
 class Role(Enum):

@@ -30,8 +30,7 @@ class QueryByOrderIdRequest(BaseModel):
     order_id: str
 
 class QueryByOrderIdResponse(BaseModel):
-    # details: str
-    order_links: List[str]
+    details: str
 
 # API endpoints
 @app.post("/query_by_amount", response_model=QueryByAmountResponse)
@@ -50,10 +49,10 @@ def query_by_time(request: QueryByTimeRequest):
 
 @app.post("/query_by_order_id", response_model=QueryByOrderIdResponse)
 def query_by_order_id(request: QueryByOrderIdRequest):
-    order_links = [f"/orders/{order['order_id']}" for order in mock_orders if order["order_id"] == request.order_id]
-    if not order_links:
+    order = next((order for order in mock_orders if order["order_id"] == request.order_id), None)
+    if not order:
         raise HTTPException(status_code=404, detail="No orders found with the specified order ID")
-    return QueryByOrderIdResponse(order_links=order_links)
+    return QueryByOrderIdResponse(details=order["details"])
 
 # # Test client
 # client = TestClient(app)

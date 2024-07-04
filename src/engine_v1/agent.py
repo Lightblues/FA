@@ -1,10 +1,10 @@
 
 import os, sys, time, datetime
 from typing import List, Dict, Optional, Tuple
-from .common import DIR_data
+from .common import DIR_data, LLM_stop
 from .datamodel import PDL, Logger, Role, Message, Conversation
 from .prompts import get_query_PDL_prompt
-from .apis import ManualAPIHandler, LLMAPIHandler, BaseAPIHandler
+from .apis import BaseAPIHandler, ManualAPIHandler, LLMAPIHandler, VanillaCallingAPIHandler
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
 
@@ -16,7 +16,8 @@ class Agent:
     def __init__(self, client: OpenAIClient=None):
         self.client = client
         # self.api_handler = ManualAPIHandler()
-        self.api_handler = LLMAPIHandler(client)
+        # self.api_handler = LLMAPIHandler(client)
+        self.api_handler = VanillaCallingAPIHandler()
         self.logger = Logger()
 
     def process_response(self, conversation:Conversation, parsed_response) -> Tuple[Tuple, List[Message]]:
@@ -63,7 +64,10 @@ class Agent:
             # call the agent
             prompt = get_query_PDL_prompt(conversation.to_str(), pdl)
             # llm_response = client.query_one(prompt)
-            llm_response = self.client.query_one_stream(prompt)
+            llm_response = self.client.query_one_stream(prompt, stop=LLM_stop)
+            _debug_msg = f"{'='*50}\n<<prompt>>\n{prompt}\n\n<<response>>\n{llm_response}\n"
+            self.logger.debug(_debug_msg)
+            # parse the generated response
             errcode, parsed_response = Formater.parse_llm_output_json(llm_response)
             a_type, msgs = self.process_response(conversation, parsed_response)
             conversation += msgs
