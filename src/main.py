@@ -2,34 +2,16 @@ import os, argparse
 # os.environ["PYTHONPATH"] = f"{os.getcwd()}:/apdcephfs_cq8/share_2992827/shennong_5/easonsshi/easonsi/src/"
 # print("PYTHONPATH=", os.getenv("PYTHONPATH"))
 from engine_v1.agent import Agent
-from engine_v1.common import init_client
-
-# llm_cfg = {
-#     # "base_url": os.getenv("OPENAI_WIZARD_BASE_URL"),
-#     # "api_key": os.getenv("OPENAI_WIZARD_API_KEY"),
-#     "base_url": os.getenv("OPENAI_QWEN2_BASE_URL"),
-#     "api_key": os.getenv("OPENAI_QWEN2_API_KEY"),
-#     # "base_url": os.getenv("OPENAI_PROXY_BASE_URL"),
-#     # "api_key": os.getenv("OPENAI_PROXY_API_KEY"),
-#     "model_name": "gpt-4o"
-# }
-LLM_CFG = {
-    "SN": {
-        "model_name": "神农大模型",
-        "base_url": "http://9.91.12.52:8001",
-        "api_key": "xxx",
-    },
-    "gpt-4o": {
-        "model_name": "gpt-4o",
-        "base_url": os.getenv("OPENAI_PROXY_BASE_URL"),
-        "api_key": os.getenv("OPENAI_PROXY_API_KEY"),
-    }
-}
+from engine_v1.common import init_client, LLM_CFG
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_name", type=str, default="SN")
-    parser.add_argument("--workflow_name", type=str, default="011-银行订单查询")
+    # parser.add_argument("--model_name", type=str, default="SN")
+    # parser.add_argument("--model_name", type=str, default="gpt-4o")
+    parser.add_argument("--model_name", type=str, default="qwen2_72B")
+    # parser.add_argument("--workflow_name", type=str, default="011-银行订单查询")
+    parser.add_argument("--workflow_name", type=str, default="022-挂号")
+    
     args = parser.parse_args()
     return args
 

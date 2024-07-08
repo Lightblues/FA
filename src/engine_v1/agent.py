@@ -28,7 +28,7 @@ class Agent:
         if action_type == "API":
             res = self.api_handler.process_query(conversation, action_name, action_paras)
             messages += (
-                Message(Role.BOT, f"<Call API> {action_name}({action_paras}"),
+                Message(Role.BOT, f"<Call API> {action_name}({action_paras})"),
                 Message(Role.SYSTEM, f"{res}"),
             )
 
@@ -48,6 +48,7 @@ class Agent:
 
         infos_start = f"{'='*50}\n"
         infos_start += f"workflow_name: {workflow_name}\n"
+        infos_start += f"model_name: {self.client.model_name}\n"
         infos_start += f"time: {datetime.datetime.now()}\n"
         infos_start += f" START! ".center(50, "=")
         self.logger.log(infos_start, with_print=True)

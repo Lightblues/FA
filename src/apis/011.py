@@ -1,8 +1,8 @@
+""" JUST example code! see full list of apis' code in [data] """
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict
-# import requests
-# from fastapi.testclient import TestClient
 
 app = FastAPI()
 
@@ -54,24 +54,6 @@ def query_by_order_id(request: QueryByOrderIdRequest):
         raise HTTPException(status_code=404, detail="No orders found with the specified order ID")
     return QueryByOrderIdResponse(details=order["details"])
 
-# # Test client
-# client = TestClient(app)
-
-# # Test cases
-# def test_query_by_amount():
-#     response = client.post("/query_by_amount", json={"amount": 100.50})
-#     assert response.status_code == 200
-#     assert response.json() == {"order_links": ["/orders/ORD123"]}
-
-# def test_query_by_time():
-#     response = client.post("/query_by_time", json={"transaction_time": "2024-07-01T10:00:00"})
-#     assert response.status_code == 200
-#     assert response.json() == {"order_links": ["/orders/ORD123"]}
-
-# def test_query_by_order_id():
-#     response = client.post("/query_by_order_id", json={"order_id": "ORD123"})
-#     assert response.status_code == 200
-#     assert response.json() == {"details": "Order details for ORD123"}
 
 if __name__ == "__main__":
     import uvicorn

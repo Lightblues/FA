@@ -1,7 +1,9 @@
 """ 
 处理 API 请求
 
-`ManualAPIhandler`: Fake the API response by manual input
+- `ManualAPIhandler`: Fake the API response by manual input
+- `LLMAPIHandler`: LLM fake the API response
+- `VanillaCallingAPIHandler`: Call the API directly
 """
 import requests
 from typing import List, Dict, Optional
@@ -25,8 +27,14 @@ def call_py_name_and_paras(api_name: str, api_paras: List[str]):
     if api_name in APIs:
         api_info = APIs[api_name]
         endpoint = api_info["endpoint"]
+        api_type = api_info["type"]
         request_data = dict(zip(api_info["request"], api_paras))
-        response = requests.post(base_url + endpoint, json=request_data)
+        if api_type == "POST":
+            response = requests.post(base_url + endpoint, json=request_data)
+        elif api_type == "GET":
+            response = requests.get(base_url + endpoint, params=request_data)
+        else:
+            return {"error": f"API {api_name} type {api_type} not supported", "status_code": 404}
         if response.status_code == 200:
             return response.json()
         else:
