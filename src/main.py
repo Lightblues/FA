@@ -11,6 +11,7 @@ def get_args():
     parser.add_argument("--model_name", type=str, default="qwen2_72B")
     # parser.add_argument("--workflow_name", type=str, default="011-银行订单查询")
     parser.add_argument("--workflow_name", type=str, default="022-挂号")
+    parser.add_argument("--api_mode", type=str, default="llm")
     
     args = parser.parse_args()
     return args

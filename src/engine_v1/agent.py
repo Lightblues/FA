@@ -13,11 +13,16 @@ class Agent:
     client: OpenAIClient = None
     api_handler: BaseAPIHandler = None
     
-    def __init__(self, client: OpenAIClient=None):
+    def __init__(self, client: OpenAIClient=None, api_mode="llm"):
         self.client = client
-        # self.api_handler = ManualAPIHandler()
-        # self.api_handler = LLMAPIHandler(client)
-        self.api_handler = VanillaCallingAPIHandler()
+        if api_mode == "manual":
+            self.api_handler = ManualAPIHandler()
+        elif api_mode == "llm":
+            self.api_handler = LLMAPIHandler(client)
+        elif api_mode == "vanilla":
+            self.api_handler = VanillaCallingAPIHandler()
+        else:
+            raise ValueError(f"Unknown api_mode: {api_mode}")
         self.logger = Logger()
 
     def process_response(self, conversation:Conversation, parsed_response) -> Tuple[Tuple, List[Message]]:

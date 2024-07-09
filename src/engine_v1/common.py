@@ -2,10 +2,12 @@ import os, sys, time, datetime, json, ast
 from typing import List, Dict, Optional
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
-DIR_data = "../data/v240628/huabu_step3"
-DIR_log = "../data/engine_v1_log"
-# DIR_apis = "./apis"
-DIR_apis = "../data/v240628/apis_v01"
+_file_dir_path = os.path.dirname(os.path.realpath(__file__))
+DIR_data_base = f"{_file_dir_path}/../../data/v240628"
+DIR_data = f"{DIR_data_base}/huabu_step3"
+DIR_log = f"{DIR_data_base}/engine_v1_log"
+DIR_apis = f"{DIR_data_base}/apis_v01"
+DIR_conversation = f"{DIR_data_base}/conversation_v01"
 
 LLM_stop = ["[USER]"]
 
@@ -31,6 +33,16 @@ LLM_CFG = {
         "api_key": os.getenv("OPENAI_PROXY_API_KEY"),
     }
 }
+def add_openai_models():
+    global LLM_CFG
+    import openai
+    model_list = ["gpt-4o", "gpt-4-turbo"]
+    for model in model_list:
+        LLM_CFG[model] = {
+            "model_name": model,
+            "base_url": os.getenv("OPENAI_PROXY_BASE_URL"),
+            "api_key": os.getenv("OPENAI_PROXY_API_KEY"),
+        }
 # add models registered in `/apdcephfs_cq8/share_2992827/shennong_5/ianxxu/chatchat/model_server/_run_multi_urls.py`
 # e.g. WizardLM2-8x22b, qwen2_72B
 def add_local_models():
@@ -52,6 +64,7 @@ def add_local_models():
         # NOTE: api_key 不能为 "" 不然也会报错
         LLM_CFG[model] = {"model_name": model, "base_url": url, "api_key": "xxx"}
 add_local_models()
+add_openai_models()
 
 def init_client(llm_cfg:Dict):
     # global client

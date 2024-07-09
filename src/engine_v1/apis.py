@@ -57,9 +57,9 @@ class LLMAPIHandler(BaseAPIHandler):
     def __init__(self, client: OpenAIClient):
         self.client = client
     def process_query(self, conversation: Conversation, api_name: str, api_params: Dict) -> str:
-        if isinstance(s_conversation, Conversation):
-            s_conversation = s_conversation.to_str()
-        prompt = get_llm_API_prompt(s_conversation, api_name, str(api_params))
+        if isinstance(conversation, Conversation):
+            conversation = conversation.to_str()
+        prompt = get_llm_API_prompt(conversation, api_name, str(api_params))
         llm_response = self.client.query_one_stream(prompt, stop=LLM_stop)
         errcode, parsed_response = Formater.parse_llm_output_json(llm_response)
         # if errcode:

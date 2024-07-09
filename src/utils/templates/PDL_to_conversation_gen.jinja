@@ -1,0 +1,18 @@
+Given a PDL (procedure description language), you shuold mock {{n}} conversations between user and bot, that follows the `PROCEDURE` part of PDL. 
+NOTE that:
+1. In PDL, there are `APIs`, `REQUESTs`, `ANSWERs` parts that define the necesory API or strategy to achieve the goal, and the `PROCEDURE` part define the core logic of the procedure.
+Note that for REQUEST node, if the slot value is provided by user in previous conversation, you shuold skip the request of this slot in the conversation.
+2. You should output the conversation in the following format:
+```json
+[
+    [{"role": "USER", "content": "帮我查一查订单"}, {"role": "BOT", "content": "您好，请问您需要查询哪种类型的订单呢？"}, {"role": "USER", "content": "订单编号"}, {"role": "BOT", "content": "请您提供订单编号，我来帮您查询。"}, {"role": "USER", "content": "ax-8473"}, {"role": "BOT", "content": "<Call API> API-通过订单编号查询([\'ax-8473\'])"}, {"role": "SYSTEM", "content": "订单日期：2023-04-01\\n订单金额：289元\\n订单状态：已发货\\n收货地址：上海市浦东新区陆家嘴环路1000号\\n发货时间：2023-04-02\\n预计送达时间：2023-04-05"}, {"role": "BOT", "content": "订单查询成功，订单详情为: 订单日期：2023-04-01，订单金额：289元，订单状态：已发货，收货地址：上海市浦东新区陆家嘴环路1000号，发货时间：2023-04-02，预计送达时间：2023-04-05"}]
+]
+```
+where `USER` and `BOT` are the user and bot's conversation turns, `SYSTEM` is the system's response to the bot's API calling. 
+
+Here is the target PDL:
+```PDL
+{{PDL}}
+```
+
+Please give your answer below:
