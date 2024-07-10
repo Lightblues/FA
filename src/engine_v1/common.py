@@ -47,7 +47,6 @@ def add_openai_models():
 # e.g. WizardLM2-8x22b, qwen2_72B
 def add_local_models():
     global LLM_CFG
-    
     import importlib.util
     from urllib.parse import urlparse
     _fn = "/apdcephfs_cq8/share_2992827/shennong_5/ianxxu/chatchat/model_server/_run_multi_urls.py"
@@ -65,6 +64,7 @@ def add_local_models():
         LLM_CFG[model] = {"model_name": model, "base_url": url, "api_key": "xxx"}
 add_local_models()
 add_openai_models()
+print(f"[INFO] LLM models: {LLM_CFG.keys()}")
 
 def init_client(llm_cfg:Dict):
     # global client

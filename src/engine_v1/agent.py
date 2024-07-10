@@ -12,6 +12,7 @@ class Agent:
     logger: Logger = None
     client: OpenAIClient = None
     api_handler: BaseAPIHandler = None
+    workflow_id_map: Dict[str, str] = None
     
     def __init__(self, client: OpenAIClient=None, api_mode="llm"):
         self.client = client
@@ -24,12 +25,13 @@ class Agent:
         else:
             raise ValueError(f"Unknown api_mode: {api_mode}")
         self.logger = Logger()
+        self.workflow_id_map = self._load_workflow_list()
 
-    def process_response(self, conversation:Conversation, parsed_response) -> Tuple[Tuple, List[Message]]:
+    def process_response(self, conversation:Conversation, parsed_response:dict) -> Tuple[Tuple, List[Message]]:
         action_type = parsed_response["action_type"]
         
         messages = []
-        action_name, action_paras, response = parsed_response["action_name"], parsed_response["action_parameters"], parsed_response["response"]
+        action_name, action_paras, response = parsed_response.get("action_name", "DEFTAULT_ACTION"), parsed_response.get("action_parameters", "DEFAULT_PARAS"), parsed_response.get("response", "DEFAULT_RESPONSE")
         if action_type == "API":
             res = self.api_handler.process_query(conversation, action_name, action_paras)
             messages += (
@@ -45,19 +47,36 @@ class Agent:
             print(f"[ERROR] Unknown action_type: {parsed_response['action_type']}\n{parsed_response}")
         return action_type, messages
 
-
+    def _load_workflow_list(self, ):
+        workflow_id_map = {}
+        for file in os.listdir(DIR_data):
+            if file.endswith(".txt"):
+                workflow_name = file.rstrip(".txt")
+                id, name = workflow_name.split("-", 1)
+                workflow_id_map[id] = workflow_name
+                workflow_id_map[name] = workflow_name
+                workflow_id_map[workflow_name] = workflow_name
+        return workflow_id_map
 
     def conversation(self, workflow_name="008-寄快递"):
+        # proces and load PDL
+        if workflow_name not in self.workflow_id_map:
+            print(f"Unknown workflow_name: {workflow_name}! Please choose from {self.workflow_id_map}")
+            return
+        workflow_name = self.workflow_id_map[workflow_name]
         pdl = PDL()
         pdl.load_from_file(f"{DIR_data}/{workflow_name}.txt")
 
+        # print the header information
         infos_start = f"{'='*50}\n"
         infos_start += f"workflow_name: {workflow_name}\n"
         infos_start += f"model_name: {self.client.model_name}\n"
+        infos_start += f"log_file: {self.logger.log_fn}\n"
         infos_start += f"time: {datetime.datetime.now()}\n"
         infos_start += f" START! ".center(50, "=")
         self.logger.log(infos_start, with_print=True)
 
+        # the main loop
         conversation = Conversation()
         action_type = "START"
         while action_type != "ANSWER":
@@ -69,7 +88,6 @@ class Agent:
             
             # call the agent
             prompt = get_query_PDL_prompt(conversation.to_str(), pdl)
-            # llm_response = client.query_one(prompt)
             llm_response = self.client.query_one_stream(prompt, stop=LLM_stop)
             _debug_msg = f"{'='*50}\n<<prompt>>\n{prompt}\n\n<<response>>\n{llm_response}\n"
             self.logger.debug(_debug_msg)

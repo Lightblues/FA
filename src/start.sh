@@ -8,8 +8,8 @@ PROJECT_DIR=${ROOT}/huabu
 # workflow_name=006-同程开发票
 workflow_name=010-进口运费查询
 workflow_name=011-银行订单查询
-# model_name="qwen2_72B"
-model_name="gpt-4o"
+model_name="qwen2_72B"
+# model_name="gpt-4o"
 
 cd ${PROJECT_DIR}/data/
 fn_api_log="apis_log/${workflow_name}.log"
