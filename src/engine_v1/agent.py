@@ -13,8 +13,9 @@ class Agent:
     client: OpenAIClient = None
     api_handler: BaseAPIHandler = None
     workflow_id_map: Dict[str, str] = None
+    template_fn: str = None
     
-    def __init__(self, client: OpenAIClient=None, api_mode="llm"):
+    def __init__(self, client: OpenAIClient=None, api_mode="llm", template_fn="query_PDL.jinja"):
         self.client = client
         if api_mode == "manual":
             self.api_handler = ManualAPIHandler()
@@ -26,6 +27,7 @@ class Agent:
             raise ValueError(f"Unknown api_mode: {api_mode}")
         self.logger = Logger()
         self.workflow_id_map = self._load_workflow_list()
+        self.template_fn = template_fn
 
     def process_response(self, conversation:Conversation, parsed_response:dict) -> Tuple[Tuple, List[Message]]:
         action_type = parsed_response["action_type"]
@@ -68,13 +70,14 @@ class Agent:
         pdl.load_from_file(f"{DIR_data}/{workflow_name}.txt")
 
         # print the header information
-        infos_start = f"{'='*50}\n"
-        infos_start += f"workflow_name: {workflow_name}\n"
-        infos_start += f"model_name: {self.client.model_name}\n"
-        infos_start += f"log_file: {self.logger.log_fn}\n"
-        infos_start += f"time: {datetime.datetime.now()}\n"
-        infos_start += f" START! ".center(50, "=")
-        self.logger.log(infos_start, with_print=True)
+        infos_header = f"{'='*50}\n"
+        infos_header += f"workflow_name: {workflow_name}\n"
+        infos_header += f"model_name: {self.client.model_name}\n"
+        infos_header += f"template_fn: {self.template_fn}\n"
+        infos_header += f"log_file: {self.logger.log_fn}\n"
+        infos_header += f"time: {datetime.datetime.now()}\n"
+        infos_header += f" START! ".center(50, "=")
+        self.logger.log(infos_header, with_print=True)
 
         # the main loop
         conversation = Conversation()
@@ -87,7 +90,7 @@ class Agent:
                 self.logger.log(msg.to_str(), with_print=False)
             
             # call the agent
-            prompt = get_query_PDL_prompt(conversation.to_str(), pdl)
+            prompt = get_query_PDL_prompt(conversation.to_str(), pdl, template_fn=self.template_fn)
             llm_response = self.client.query_one_stream(prompt, stop=LLM_stop)
             _debug_msg = f"{'='*50}\n<<prompt>>\n{prompt}\n\n<<response>>\n{llm_response}\n"
             self.logger.debug(_debug_msg)

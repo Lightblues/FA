@@ -15,6 +15,6 @@ PROJECT_PATH=/apdcephfs_cq8/share_2992827/shennong_5/easonsshi/huabu
 cd ${PROJECT_PATH}/src
 
 # 运行交互, 在交互的时候参见 huabu PDL 数据
-python main.py --model_name qwen2_72B --api_mode manual --workflow_name 005  # workflow_name 即画布名称/ID, 见 huabu PDL 路径
+python main.py --model_name qwen2_72B --api_mode manual --template_fn query_PDL_v01.jinja --workflow_name 005  # workflow_name 即画布名称/ID, 见 huabu PDL 路径
 ```
 

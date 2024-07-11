@@ -12,6 +12,7 @@ def get_args():
     # parser.add_argument("--workflow_name", type=str, default="011-银行订单查询")
     parser.add_argument("--workflow_name", type=str, default="022-挂号")
     parser.add_argument("--api_mode", type=str, default="manual", choices=["manual", "llm", "vanilla"])
+    parser.add_argument("--template_fn", type=str, default="query_PDL.jinja")
     
     args = parser.parse_args()
     return args
