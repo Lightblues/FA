@@ -5,13 +5,15 @@ from easonsi.llm.openai_client import OpenAIClient, Formater
 _file_dir_path = os.path.dirname(os.path.realpath(__file__))
 DIR_data_base = f"{_file_dir_path}/../../data/v240628"
 DIR_data = f"{DIR_data_base}/huabu_step3"
+DIR_data_meta = f"{DIR_data_base}/huabu_meta"
 DIR_log = f"{DIR_data_base}/engine_v1_log"
 DIR_apis = f"{DIR_data_base}/apis_v01"
 DIR_conversation = f"{DIR_data_base}/conversation_v01"
+FN_data_meta = f"{DIR_data_base}/data_meta.json"
 
 LLM_stop = ["[USER]"]
 
-API_base_rul = "http://localhost:8000"
+API_base_url = "http://localhost:8000"
 API_infos = []
 # register the APIs: search the json files in DIR_apis
 for fn in os.listdir(DIR_apis):

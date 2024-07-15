@@ -15,7 +15,7 @@ client = init_client(llm_cfg=LLM_CFG["gpt-4o"])
 # workflow_name = "000-114挂号"
 # workflow_name = "002-新闻查询"
 def gen_NL(client: OpenAIClient, workflow_name: str):
-    ofn = f"{DIR_data_base}/meta/{workflow_name}.json"
+    ofn = f"{DIR_data_meta}/{workflow_name}.json"
     if os.path.exists(ofn):
         print(f"[INFO] {workflow_name} exists! return!")
         return
@@ -45,7 +45,7 @@ if __name__ == '__main__':
 # from engine_v1.common import DIR_data, init_client, LLM_CFG, DIR_apis, DIR_data_base, DIR_data_meta
 # import json, os
 # data_meta = []
-# for fn in os.listdir(DIR_data_meta):
+# for fn in sorted(os.listdir(DIR_data_meta)):
 #     if fn.endswith(".json"):
 #         workflow_name = fn.rstrip(".json")
 #         with open(f"{DIR_data_meta}/{fn}", "r") as f:
