@@ -1,6 +1,6 @@
 """ 
 利用LLM自动化地构造数据
-@easonsshi 240709
+@240709
 """
 import os, json
 from tqdm import tqdm
