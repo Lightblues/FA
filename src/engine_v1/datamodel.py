@@ -31,13 +31,13 @@ class Logger(BaseLogger):
         now = datetime.datetime.now()
         s_day = now.strftime("%Y-%m-%d")
         s_second = now.strftime("%Y-%m-%d_%H-%M-%S")
-        # s_millisecond = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
+        s_millisecond = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
         
         self.log_dir = log_dir
         log_subdir = f"{log_dir}/{s_day}"
         os.makedirs(log_subdir, exist_ok=True)
-        self.log_fn = f"{log_subdir}/{s_second}.log"
-        log_detail_fn = f"{log_subdir}/{s_second}_detail.log"
+        self.log_fn = f"{log_subdir}/{s_millisecond}.log"
+        log_detail_fn = f"{log_subdir}/{s_millisecond}_detail.log"
         self.log_detail_fn = log_detail_fn
 
     def log(self, message:str, add_line=True, with_print=False):

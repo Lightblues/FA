@@ -33,4 +33,4 @@ if __name__ == '__main__':
     client = init_client(llm_cfg=LLM_CFG[args.model_name])
     simulator = Simulator(client=client, workflow_dir=DIR_data)
     ref_conversation = load_ref_conversation(args.workflow_name, args.ref_conversation_id)
-    simulator.simulate(workflow_name=args.workflow_name, ref_conversation=ref_conversation)
+    _ = simulator.simulate(workflow_name=args.workflow_name, ref_conversation=ref_conversation)

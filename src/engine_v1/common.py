@@ -7,7 +7,8 @@ DIR_data_base = f"{_file_dir_path}/../../data/v240628"
 DIR_data = f"{DIR_data_base}/huabu_step3"
 DIR_data_meta = f"{DIR_data_base}/huabu_meta"
 DIR_log = f"{DIR_data_base}/engine_v1_log"
-DIR_simulation = f"{DIR_data_base}/simulation_v01"
+DIR_simulation = f"{DIR_data_base}/simulation_v01_log"
+DIR_simulated = f"{DIR_data_base}/simulated"
 DIR_apis = f"{DIR_data_base}/apis_v01"
 DIR_conversation = f"{DIR_data_base}/conversation_v01"
 FN_data_meta = f"{DIR_data_base}/data_meta.json"
@@ -92,3 +93,7 @@ class DataManager:
                 workflow_id_map[name] = workflow_name
                 workflow_id_map[workflow_name] = workflow_name
         return workflow_id_map
+    @staticmethod
+    def get_workflow_name_list(config_dir:str, extension:str=".txt"):
+        fns = [fn.rstrip(extension) for fn in os.listdir(config_dir) if fn.endswith(extension)]
+        return list(sorted(fns))

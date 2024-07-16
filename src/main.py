@@ -8,9 +8,7 @@ from engine_v1.common import init_client, LLM_CFG
 
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    # parser.add_argument("--model_name", type=str, default="SN")
-    # parser.add_argument("--model_name", type=str, default="gpt-4o")
-    parser.add_argument("--model_name", type=str, default="qwen2_72B", choices=list(LLM_CFG.keys()))
+    parser.add_argument("--model_name", type=str, default="qwen2_72B", choices=list(LLM_CFG.keys()))    # SN, gpt-4o
     parser.add_argument("--workflow_dir", type=str, default="huabu_refine01")       # huabu_v3, manual
     parser.add_argument("--workflow_name", type=str, default="000")
     parser.add_argument("--api_mode", type=str, default="manual", choices=["manual", "llm", "vanilla"])
