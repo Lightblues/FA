@@ -1,4 +1,6 @@
 """ 
+@240716 新增 BaseUser, BaseAPIHandler, BaseBot 基类
+
 Logger: utility class for logging
 
 PDL: abstract and parse PDL format
@@ -13,7 +15,15 @@ from enum import Enum, auto
 from typing import List, Dict, Optional
 from .common import DIR_log
 
-class Logger:
+class BaseLogger:
+    def __init__(self):
+        pass
+    def log(self, **kwargs):
+        pass
+    def debug(self, **kwargs):
+        pass
+
+class Logger(BaseLogger):
     log_fn = "tmp.log"
     def __init__(self):
         now = datetime.datetime.now()
@@ -40,6 +50,15 @@ class Logger:
             f.write(f"{message}\n\n")
             f.flush()
 
+class ActionType(Enum):
+    START = auto()
+    API = auto()
+    REQUEST = auto()
+    ANSWER = auto()
+    
+
+    def __str__(self):
+        return f"ActionType.{self.name}"
 
 class Role(Enum):
     SYSTEM = (0, "[SYSTEM] ")
@@ -70,12 +89,27 @@ class Conversation():
     # def add_message(self, role: Role, message: str):
     #     self.msgs.append(Message(role, message))
     def add_message(self, msg: Message):
+        assert isinstance(msg, Message), f"Must be Message!"
         self.msgs.append(msg)
+
+    def load_from_json(self, o:List):
+        if self.msgs:
+            print("Warning: current conversation will be cleared!")
+            self.msgs = []
+        for msg in o:
+            if msg["role"] == "SYSTEM":
+                _role = Role.SYSTEM
+            elif msg["role"] == "USER":
+                _role = Role.USER
+            elif msg["role"] == "BOT":
+                _role = Role.BOT
+            else:
+                raise ValueError(f"Unknown role: {msg['role']}")
+            self.add_message(Message(_role, msg["content"]))
 
     def to_str(self):
         return "\n".join([msg.to_str() for msg in self.msgs])
     
-    # reload the "+" op
     def __add__(self, other):
         if type(other) == list:
             assert isinstance(other[0], Message), f"Must be list of Message!"
@@ -137,3 +171,33 @@ class PDL:
 
     def to_str(self):
         return self.PDL_str
+
+
+
+class BaseUser:
+    def generate(self, conversation:Conversation) -> Message:
+        """ 根据当前的会话进度, 生成下一轮query """
+        raise NotImplementedError
+
+class BaseAPIHandler:
+    def process_query(self, conversation:Conversation, api_name: str, api_params: Dict) -> str:
+        """ 给定上下文和当前的API请求, 返回API的响应 
+        NOTE: API do NOT modify the conversation!!!
+        """
+        raise NotImplementedError
+
+class BaseBot:
+    api_handler: BaseAPIHandler = None      # 用于处理API请求
+    
+    def __init__(self, api_handler: BaseAPIHandler) -> None:
+        self.api_handler = api_handler
+    def process(self, conversation:Conversation) -> str:
+        """ 处理当前轮query """
+        raise NotImplementedError
+
+class InputUser(BaseUser):
+    def generate(self, conversation:Conversation) -> Message:
+        user_input = input("[USER] ")
+        msg = Message(Role.USER, user_input)
+        conversation.add_message(msg)
+        return msg
