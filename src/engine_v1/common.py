@@ -7,6 +7,7 @@ DIR_data_base = f"{_file_dir_path}/../../data/v240628"
 DIR_data = f"{DIR_data_base}/huabu_step3"
 DIR_data_meta = f"{DIR_data_base}/huabu_meta"
 DIR_log = f"{DIR_data_base}/engine_v1_log"
+DIR_simulation = f"{DIR_data_base}/simulation_v01"
 DIR_apis = f"{DIR_data_base}/apis_v01"
 DIR_conversation = f"{DIR_data_base}/conversation_v01"
 FN_data_meta = f"{DIR_data_base}/data_meta.json"
@@ -77,3 +78,17 @@ def init_client(llm_cfg:Dict):
         model_name=model_name, base_url=base_url, api_key=api_key
     )
     return client
+
+
+class DataManager:
+    @staticmethod
+    def build_workflow_id_map(config_dir:str, extension:str=".txt"):
+        workflow_id_map = {}
+        for file in os.listdir(config_dir):
+            if file.endswith(extension):
+                workflow_name = file.rstrip(extension)
+                id, name = workflow_name.split("-", 1)
+                workflow_id_map[id] = workflow_name
+                workflow_id_map[name] = workflow_name
+                workflow_id_map[workflow_name] = workflow_name
+        return workflow_id_map

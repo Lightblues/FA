@@ -1,7 +1,20 @@
 ## TODOs
 
 - [ ] Generate API data automatically
-- [ ] When pass "--api_mode=vanilla", select and start the API server automatically
+- [x] When pass "--api_mode=vanilla", select and start the API server automatically
+- [x] Auto evaluation: `user, api` agent
+- [ ] 
+
+## datamodel
+
+```python
+# see [engine_v1/datamodel]
+class BaseAPIHandler:
+    def process_query(self, conversation:Conversation, api_name: str, api_params: Dict) -> str:
+        """ 给定上下文和当前的API请求, 返回API的响应 """
+
+```
+
 
 ## run
 

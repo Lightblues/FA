@@ -1,7 +1,3 @@
-""" 
-python main.py --workflow_dir huabu_refine01 --workflow_name 000
-"""
-
 import os, argparse
 from engine_v1.interface import CLIInterface
 from engine_v1.common import init_client, LLM_CFG

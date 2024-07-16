@@ -2,19 +2,19 @@
 from typing import List, Dict, Optional, Tuple
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
-from .datamodel import BaseBot, Logger, BaseAPIHandler, Role, Message, Conversation, PDL, ActionType
+from .datamodel import BaseBot, Logger, BaseLogger, BaseAPIHandler, Role, Message, Conversation, PDL, ActionType
 from .prompts import get_query_PDL_prompt
 from .common import LLM_stop
 
 class PDLBot(BaseBot):
-    logger: Logger = None
+    logger: Logger = BaseLogger()
     api_handler: BaseAPIHandler = None
     client: OpenAIClient = None
     # configs
     template_fn: str = None
     pdl: PDL = None
     
-    def __init__(self, client: OpenAIClient, api_handler: BaseAPIHandler, logger: Logger, template_fn="query_PDL.jinja"):
+    def __init__(self, client: OpenAIClient, api_handler: BaseAPIHandler, logger:Logger, template_fn:str="query_PDL.jinja"):
         self.api_handler = api_handler
         self.client = client
         self.logger = logger
@@ -28,7 +28,7 @@ class PDLBot(BaseBot):
     def process(self, conversation: Conversation) -> Tuple[ActionType, List[Message]]:
         prompt = get_query_PDL_prompt(conversation.to_str(), self.pdl, template_fn=self.template_fn)
         llm_response = self.client.query_one_stream(prompt, stop=LLM_stop)
-        _debug_msg = f"{'='*50}\n<<prompt>>\n{prompt}\n\n<<response>>\n{llm_response}\n"
+        _debug_msg = f"{'[BOT]'.center(50, '=')}\n<<prompt>>\n{prompt}\n\n<<response>>\n{llm_response}\n"
         self.logger.debug(_debug_msg)
         
         # parse the generated response

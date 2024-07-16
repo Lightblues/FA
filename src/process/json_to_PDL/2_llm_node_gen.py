@@ -37,9 +37,9 @@ def process_nodes(data, n_nodes_per_prompt=10):
         }
         prompt = process_step2_get_prompt(input_json)
         response = client.query_one(prompt)
-        errcode, res = Formater.parse_llm_output_json(response)
-        if errcode != 0:
-            print(f"[error] errcode={errcode}")
+        res = Formater.parse_llm_output_json(response)
+        if "error" in res:
+            print(f"[error] {res}")
             break
         nodes_processed.extend(res['Nodes'])
     return nodes_processed
@@ -78,9 +78,9 @@ def process_step2_branch(data, n_nodes_per_prompt=50):
         }
         prompt = process_step2_get_prompt(input_json)
         response = client.query_one(prompt)
-        errcode, res = Formater.parse_llm_output_json(response)
-        if errcode != 0:
-            print(f"[error] errcode={errcode}")
+        res = Formater.parse_llm_output_json(response)
+        if "error" in res:
+            print(f"[error] {res}")
             break
         nodes_processed.extend(res['Nodes'])
     return nodes_processed

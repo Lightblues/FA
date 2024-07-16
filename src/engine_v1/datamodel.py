@@ -24,18 +24,20 @@ class BaseLogger:
         pass
 
 class Logger(BaseLogger):
-    log_fn = "tmp.log"
-    def __init__(self):
+    log_dir: str = DIR_log
+    log_fn:str = "tmp.log"
+    
+    def __init__(self, log_dir:str=DIR_log):
         now = datetime.datetime.now()
         s_day = now.strftime("%Y-%m-%d")
         s_second = now.strftime("%Y-%m-%d_%H-%M-%S")
         # s_millisecond = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
         
-        log_dir = f"{DIR_log}/{s_day}"
-        os.makedirs(log_dir, exist_ok=True)
-        log_fn = f"{log_dir}/{s_second}.log"
-        self.log_fn = log_fn
-        log_detail_fn = f"{log_dir}/{s_second}_detail.log"
+        self.log_dir = log_dir
+        log_subdir = f"{log_dir}/{s_day}"
+        os.makedirs(log_subdir, exist_ok=True)
+        self.log_fn = f"{log_subdir}/{s_second}.log"
+        log_detail_fn = f"{log_subdir}/{s_second}_detail.log"
         self.log_detail_fn = log_detail_fn
 
     def log(self, message:str, add_line=True, with_print=False):
@@ -79,23 +81,27 @@ class Message:
     def __init__(self, role: Role, text: str):
         self.role = role
         self.text = text
-
+    
     def to_str(self):
         return f"{self.role.prefix}{self.text}"
+    def __str__(self):
+        return self.to_str()
+    def __repr__(self):
+        return self.to_str()
 
 class Conversation():
     msgs:List[Message] = []
+    
+    def __init__(self):
+        self.msgs = []
 
-    # def add_message(self, role: Role, message: str):
-    #     self.msgs.append(Message(role, message))
     def add_message(self, msg: Message):
         assert isinstance(msg, Message), f"Must be Message!"
         self.msgs.append(msg)
 
-    def load_from_json(self, o:List):
-        if self.msgs:
-            print("Warning: current conversation will be cleared!")
-            self.msgs = []
+    @classmethod
+    def load_from_json(cls, o:List):
+        instance = cls()
         for msg in o:
             if msg["role"] == "SYSTEM":
                 _role = Role.SYSTEM
@@ -105,7 +111,8 @@ class Conversation():
                 _role = Role.BOT
             else:
                 raise ValueError(f"Unknown role: {msg['role']}")
-            self.add_message(Message(_role, msg["content"]))
+            instance.add_message(Message(_role, msg["content"]))
+        return instance
 
     def to_str(self):
         return "\n".join([msg.to_str() for msg in self.msgs])
@@ -119,6 +126,11 @@ class Conversation():
         else:
             raise NotImplementedError
         return self
+    
+    def __str__(self):
+        return self.to_str()
+    def __repr__(self):
+        return self.to_str()
 
 
 class PDL:
