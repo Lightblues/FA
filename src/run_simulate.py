@@ -30,6 +30,7 @@ def run_single_simulate(workflow_name):
         ref_conversation_jsons = json.load(f)
     for ref_conversation_id, ref_conversation_json in enumerate(ref_conversation_jsons):
         ref_conversation = Conversation.load_from_json(ref_conversation_json)
+        simulator = Simulator(client=client, workflow_dir=DIR_data)                 # NOTE: simulator in correlated with ref_conversation!!!
         infos, conversation = simulator.simulate(workflow_name, ref_conversation)
         data.append({
             "workflow_name": workflow_name,
@@ -45,7 +46,7 @@ def run_single_simulate(workflow_name):
 
 model_name = "qwen2_72B"
 client = init_client(llm_cfg=LLM_CFG[model_name])
-simulator = Simulator(client=client, workflow_dir=DIR_data)
+# simulator = Simulator(client=client, workflow_dir=DIR_data)
 
 max_workers = 10
 workflow_names = DataManager.get_workflow_name_list(DIR_conversation, extension=".json")

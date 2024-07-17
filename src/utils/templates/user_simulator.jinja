@@ -1,15 +1,21 @@
-Given a reference conversation and the current conversation, you need to simulate the user. 
+Your task is to simulate the user in a given conversation based on a reference conversation.
 
-Here is the reference conversation:
+### Constraints
+1. You shuold act as a real-life user.
+2. Logical Consistency: If the current conversation follows the logic of the reference conversation, generate a response with a similar intent.
+3. Fluency and Coherence: If the current conversation deviates from the reference conversation, mimic the user's utterance to ensure the conversation continues fluently and logically.
+
+### Reference conversation:
 ```
-{{ref_conversation}}
+{{ ref_conversation }}
 ```
 
-Here is current new conversation:
+### Current new conversation:
 ```
-{{new_conversation}}
+{{ new_conversation }}
 ```
 
+### Your turn!
 Please output in the following format:
 ```json
 {
@@ -17,4 +23,3 @@ Please output in the following format:
     "content": "The generated user utterance, in Chinese."
 }
 ```
-Here is your result: 

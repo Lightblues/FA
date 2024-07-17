@@ -2,9 +2,9 @@
 from typing import List, Dict, Optional, Tuple
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
-from .datamodel import BaseBot, Logger, BaseLogger, BaseAPIHandler, Role, Message, Conversation, PDL, ActionType
-from .prompts import get_query_PDL_prompt
+from .datamodel import BaseBot, Logger, BaseLogger, BaseAPIHandler, Role, Message, Conversation, PDL, ActionType, ConversationInfos
 from .common import LLM_stop
+from utils.jinja_templates import jinja_render
 
 class PDLBot(BaseBot):
     logger: Logger = BaseLogger()
@@ -25,8 +25,15 @@ class PDLBot(BaseBot):
         self.pdl = PDL()
         self.pdl.load_from_file(fn)
         
-    def process(self, conversation: Conversation) -> Tuple[ActionType, List[Message]]:
-        prompt = get_query_PDL_prompt(conversation.to_str(), self.pdl, template_fn=self.template_fn)
+    def process(self, conversation: Conversation, conversation_infos: ConversationInfos = None) -> Tuple[ActionType, List[Message]]:
+        if conversation_infos:
+            s_current_state = f"Previous action type: {conversation_infos.previous_action_type}. The number of user queries: {conversation_infos.num_user_query}."
+        prompt = jinja_render(
+            self.template_fn,       # "query_PDL.jinja"
+            conversation=conversation.to_str(), 
+            PDL=self.pdl.to_str(),
+            current_state=s_current_state if conversation_infos else None
+        )
         llm_response = self.client.query_one_stream(prompt, stop=LLM_stop)
         _debug_msg = f"{'[BOT]'.center(50, '=')}\n<<prompt>>\n{prompt}\n\n<<response>>\n{llm_response}\n"
         self.logger.debug(_debug_msg)

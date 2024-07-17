@@ -8,7 +8,7 @@ from easonsi.llm.openai_client import OpenAIClient, Formater
 
 from .common import DIR_data, DataManager
 from .datamodel import (
-    PDL, Role, Message, Conversation, ActionType, BaseUser, InputUser, 
+    PDL, Role, Message, Conversation, ActionType, ConversationInfos, BaseUser, InputUser, 
     Logger, BaseLogger
 )
 from .apis import BaseAPIHandler, ManualAPIHandler, LLMAPIHandler, VanillaCallingAPIHandler
@@ -41,7 +41,7 @@ class CLIInterface:
 
 
 
-    def conversation(self, workflow_name="008-寄快递"):
+    def conversation(self, workflow_name="000"):
         # process and load PDL
         if workflow_name not in self.workflow_id_map:
             print(f"Unknown workflow_name: {workflow_name}! Please choose from {self.workflow_id_map}")
@@ -51,28 +51,37 @@ class CLIInterface:
         self.bot._load_pdl(pdl_fn)
 
         # print the header information
-        infos_header = f"{'='*50}\n"
-        infos_header += f"workflow_name: {workflow_name}\n"
-        infos_header += f"model_name: {self.client.model_name}\n"
-        infos_header += f"template_fn: {self.bot.template_fn}\n"
-        infos_header += f"workflow_dir: {self.workflow_dir}\n"
-        infos_header += f"log_file: {self.logger.log_fn}\n"
-        infos_header += f"time: {datetime.datetime.now()}\n"
-        infos_header += f" START! ".center(50, "=")
+        t_now = datetime.datetime.now()
+        infos = {
+            "workflow_name": workflow_name,
+            "model_name": self.client.model_name,
+            "template_fn": self.bot.template_fn,
+            "workflow_dir": self.workflow_dir,
+            "log_file": self.logger.log_fn,
+            "time": t_now.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        s_infos = "\n".join([f"{k}: {v}" for k, v in infos.items()]) + "\n"
+        infos_header = f"{'='*50}\n" + s_infos + " START! ".center(50, "=")
         self.logger.log(infos_header, with_print=True)
 
         # the main loop
         conversation = Conversation()
-        current_action_type = ActionType.START
-        while current_action_type != ActionType.ANSWER:
-            if current_action_type != ActionType.API:    # If previous action is API, then call bot again
-                msg = self.user.generate(conversation)
+        conversation_infos = ConversationInfos.from_components(
+            previous_action_type=ActionType.START, num_user_query=0
+        )
+        while conversation_infos.previous_action_type != ActionType.ANSWER:
+            if conversation_infos.previous_action_type != ActionType.API:    # If previous action is API, then call bot again
+                msg = self.user.generate(conversation)              # USRE input!
                 self.logger.log(msg.to_str(), with_print=False)
+                conversation_infos.num_user_query += 1
             
-            action_type, msgs = self.bot.process(conversation)
+            action_type, msgs = self.bot.process(conversation, conversation_infos)
             for msg in msgs:
                 self.logger.log(msg.to_str(), with_print=True)
-            current_action_type = action_type        # update the state 
+            conversation_infos.previous_action_type = action_type        # update the state 
 
         infos_end = f" END! ".center(50, "=")
         self.logger.log(infos_end, with_print=True)
+
+        return infos, conversation
+

@@ -12,6 +12,7 @@ Conversation: list of Messages
 
 import datetime, os, re
 from enum import Enum, auto
+from dataclasses import dataclass, asdict
 from typing import List, Dict, Optional
 from .common import DIR_log
 
@@ -133,6 +134,15 @@ class Conversation():
         return self.to_str()
 
 
+@dataclass
+class ConversationInfos:
+    previous_action_type: ActionType = None
+    num_user_query: int = 0
+    
+    @classmethod
+    def from_components(cls, previous_action_type, num_user_query):
+        return cls(previous_action_type, num_user_query)
+
 class PDL:
     PDL_str: str = None
     
@@ -183,7 +193,10 @@ class PDL:
 
     def to_str(self):
         return self.PDL_str
-
+    def __str__(self):
+        return self.to_str()
+    def __repr__(self):
+        return self.to_str()
 
 
 class BaseUser:

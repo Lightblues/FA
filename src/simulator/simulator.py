@@ -13,7 +13,7 @@ from engine_v1.apis import BaseAPIHandler
 from engine_v1.bots import BaseBot, PDLBot
 from engine_v1.common import DIR_data, DIR_simulation, DataManager
 from engine_v1.datamodel import (
-    Conversation, Logger, BaseLogger, ActionType
+    Conversation, Logger, BaseLogger, ActionType, ConversationInfos
 )
 
 class Simulator(CLIInterface):
@@ -55,15 +55,18 @@ class Simulator(CLIInterface):
         self.logger.log(infos_header, with_print=True)
         
         conversation = Conversation()
-        current_action_type = ActionType.START
-        while current_action_type != ActionType.ANSWER:
-            if current_action_type != ActionType.API:
+        conversation_infos = ConversationInfos.from_components(
+            previous_action_type=ActionType.START, num_user_query=0
+        )
+        while conversation_infos.previous_action_type != ActionType.ANSWER:
+            if conversation_infos.previous_action_type != ActionType.API:
                 msg = self.user.generate(conversation)
                 self.logger.log(msg.to_str(), with_print=True)  # print the 'user' input
-            action_type, msgs = self.bot.process(conversation)
+                conversation_infos.num_user_query += 1
+            action_type, msgs = self.bot.process(conversation, conversation_infos)
             for msg in msgs:
                 self.logger.log(msg.to_str(), with_print=True)
-            current_action_type = action_type        # update the state 
+            conversation_infos.previous_action_type = action_type        # update the state 
 
         infos_end = f" END! ".center(50, "=")
         self.logger.log(infos_end, with_print=True)
