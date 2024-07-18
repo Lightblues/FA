@@ -2,9 +2,10 @@
 > streamlit run run_ui.py
 
 @240718 实现基本交互界面
-- [ ] optimize API output! 
-- [ ] show Huabu meta information in the sidebar
-- [ ] add more detailed logs
+- [ ] [optimize] optimize API output! 
+- [x] [feat] show Huabu meta information in the sidebar
+- [ ] [log] add more detailed logs
+- [ ] [feat] mofigy template/PDL in the web directly! 
 """
 
 import time, os, json, glob, openai, yaml, datetime, pdb
@@ -67,9 +68,12 @@ def main():
                 logger.debug(_debug_msg)
                 parsed_response = Formater.parse_llm_output_json(llm_response)
                 action_type = bot.process_LLM_response(conversation, parsed_response)       # messages added into conversation! 
-                # TODO: show API response to screen
                 conversation_infos.previous_action_type = action_type
-
+                # show API response to screen
+                if action_type == ActionType.API:
+                    with st.chat_message("system", avatar=st.session_state['avatars']['system']):
+                        st.write(f"{conversation.msgs[-2].text}")
+                        st.write(f"{conversation.msgs[-1].text}")
         with st.chat_message("assistant", avatar=st.session_state['avatars']['assistant']):
             st.write(conversation.msgs[-1].text)
 

@@ -111,7 +111,7 @@ class Conversation():
 
     def add_message(self, msg: Message):
         # print(f"[debug] add_message: {type(msg)} {msg}")
-        assert isinstance(msg, Message), f"Must be Message!"
+        # assert isinstance(msg, Message), f"Must be Message!"
         self.msgs.append(msg)
 
     @classmethod
@@ -183,12 +183,15 @@ class PDL:
     answers: list = []
     workflow_str: str = ""      # the core logic of the taskflow
 
+    def load_from_str(self, PDL_str):
+        self.PDL_str = PDL_str
+        # res = self.parse_PDL_str()        # FIXME: parse error! 
+        # if res: print(f"[ERROR] Parsing PDL file {file_path} failed!")
     def load_from_file(self, file_path):
         """ Load and parse the PDL file """
         with open(file_path, 'r') as f:
-            self.PDL_str = f.read().strip()
-        # res = self.parse_PDL_str()        # FIXME: parse error! 
-        # if res: print(f"[ERROR] Parsing PDL file {file_path} failed!")
+            PDL_str = f.read().strip()
+        self.load_from_str(PDL_str)
 
     def parse_PDL_str(self):
         try:

@@ -4,3 +4,6 @@ backgroundColor = "#FFF5E6"  # 非常浅的橙色
 secondaryBackgroundColor = "#FFE5B4"  # 浅橙色
 textColor = "#000000"  # Black
 font = "serif"  # "sans serif"
+
+[browser]
+gatherUsageStats = false

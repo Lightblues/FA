@@ -21,11 +21,10 @@ class PDL_UIBot(BaseBot):
         self.api_handler = api_handler
         self.client = client
         self.logger = logger
-        # configs
         self.template_fn = template_fn
 
-    def _load_pdl(self,fn:str):
-        self.pdl.load_from_file(fn)
+    def set_pdl(self, pdl:PDL):
+        self.pdl = pdl
 
     def process_stream(self, conversation: Conversation, conversation_infos: ConversationInfos = None):
         if conversation_infos:

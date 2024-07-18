@@ -3,7 +3,8 @@
 - [ ] Generate API data automatically
 - [x] When pass "--api_mode=vanilla", select and start the API server automatically
 - [x] Auto evaluation: `user, api` agent
-- [ ] 
+- [x] implement an UI for interaction
+- [ ] PDL controllable execuation #1
 
 ## datamodel
 

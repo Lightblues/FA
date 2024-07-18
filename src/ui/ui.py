@@ -1,6 +1,6 @@
 import time
 import streamlit as st
-from engine_v1.common import LLM_CFG
+from engine_v1.common import LLM_CFG, DIR_templates
 from engine_v1.datamodel import PDL
 from .datamodel import (
     refresh_conversation, refresh_bot, refresh_pdl, 
@@ -79,8 +79,27 @@ def init_sidebar():
             )
 
         st.divider()
-        pdl = PDL()
-        pdl.load_from_file(f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt")
-        with st.expander(f"PDL", expanded=True):
-            # st.session_state.bot.pdl.to_str()}
-            st.text(f"{pdl.to_str()}")
+        st.session_state.pdl = PDL()            # NOTE: init `pdl`
+        st.session_state.pdl.load_from_file(f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt")
+        with open(f"{DIR_templates}/{st.session_state.template_fn}", "r") as f:     # pdl_fn = f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt"
+            template = f.read()
+        
+        with st.expander(f"🔍 PDL", expanded=True):
+            st.text(f"{st.session_state.pdl.to_str()}")
+            # st.text_area(
+            #     label="PDL", label_visibility="collapsed",  # collapse the space of label
+            #     value=f"{st.session_state.pdl.to_str()}",
+            #     key="pdl_manual",
+            #     height=500,
+            # )
+            # FIXME: avoid refreshing when click buttom? 
+            # col1, col2 = st.columns(2, gap="large")
+            # with col1:
+            #     st.button(
+            #         "确认修改",
+            #         # key='comfirm_pdl_edit',
+            #         on_click=lambda: refresh_pdl(PDL_str=st.session_state.pdl_manual),
+            #     )
+                
+        with st.expander(f"🔍 Template", expanded=False):
+            st.text(f"{template}")

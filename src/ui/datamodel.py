@@ -6,7 +6,8 @@ from .bots import PDL_UIBot
 from engine_v1.common import DataManager, init_client, LLM_CFG, DIR_data, DIR_data_base, DIR_ui_log, DIR_templates
 from engine_v1.apis import BaseAPIHandler, ManualAPIHandler, LLMAPIHandler, VanillaCallingAPIHandler
 from engine_v1.datamodel import (
-    ConversationHeaderInfos, BaseLogger, Logger, Conversation, ConversationInfos, ActionType, Message, Role
+    ConversationHeaderInfos, BaseLogger, Logger, Conversation, ConversationInfos, ActionType, Message, Role,
+    PDL
 )
 
 
@@ -49,7 +50,7 @@ def init_resource():
 #         return cls(**data)
 
 
-@st.cache_data
+# @st.cache_data
 def get_template_name_list(template_dir:str=DIR_templates, prefix:str="query_"):
     return DataManager.get_template_name_list(template_dir, prefix=prefix)
 @st.cache_data
@@ -72,7 +73,6 @@ def get_workflow_info_dict():
     return LIST_workflow_dirs, workflow_info_dict
 
 def refresh_conversation():
-    # pdb.set_trace()
     st.session_state.conversation = Conversation()
     st.session_state.conversation_infos = ConversationInfos.from_components(
         previous_action_type=ActionType.START, num_user_query=0
@@ -82,19 +82,26 @@ def refresh_conversation():
     st.session_state.conversation.add_message(msg_hello)
 
 def refresh_bot():
-    print(f">> Refreshing bot: template_fn: {st.session_state.template_fn}")
+    print(f">> Refreshing bot: template_fn: {st.session_state.template_fn} with model {st.session_state.model_name}")
+    st.session_state.client = init_client(LLM_CFG[st.session_state.model_name])
     st.session_state.bot = PDL_UIBot(st.session_state.client, st.session_state.api_handler, logger=BaseLogger(), template_fn=st.session_state.template_fn)
-    pdl_fn = f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt"
-    st.session_state.bot._load_pdl(pdl_fn)
-    refresh_conversation()
+    st.session_state.bot.set_pdl(st.session_state.pdl)
+    refresh_conversation()          # clear the conversation
 
-def refresh_pdl(dir_change=False):
-    if dir_change:      # NOTE: change workflow_name when changing workflow_dir!
-        st.session_state.workflow_name = st.session_state.DICT_workflow_info[st.session_state.workflow_dir][0]
-    print(f">> Refreshing PDL: {st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt")
-    pdl_fn = f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt"
-    st.session_state.bot._load_pdl(pdl_fn)
-    refresh_conversation()
+def refresh_pdl(dir_change=False, PDL_str:str=None):
+    # print(f"PDL_str: {PDL_str[-20:] if PDL_str else 'none'}")
+    if PDL_str:
+        assert (not dir_change), "dir_change must be False when PDL_str is given!"
+        print(f">> Refreshing PDL: with customed PDL_str!")
+        st.session_state.pdl.load_from_str(PDL_str)
+    else:
+        if dir_change:      # NOTE: change workflow_name when changing workflow_dir!
+            st.session_state.workflow_name = st.session_state.DICT_workflow_info[st.session_state.workflow_dir][0]
+        print(f">> Refreshing PDL: {st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt")
+        st.session_state.pdl.load_from_file(f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt")
+    st.session_state.bot.set_pdl(st.session_state.pdl)
+    refresh_conversation()          # clear the conversation
+    # print(f"PDL in session: {st.session_state.pdl.PDL_str[-20:]}")
 
 
 def init_agents():
@@ -103,12 +110,15 @@ def init_agents():
     infos: ConversationHeaderInfos
     client: OpenAIClient
     api_handler: BaseAPIHandler
+    pdl: PDL
     """
     assert "workflow_name" in st.session_state, "workflow_name must be selected! "   # init_sidebar()
     if "infos" not in st.session_state:
         st.session_state.infos = ConversationHeaderInfos.from_components(st.session_state.workflow_name, st.session_state.model_name)
     if "logger" not in st.session_state:
         st.session_state.logger = Logger(log_dir=DIR_ui_log)
+    if "pdl" not in st.session_state:
+        st.session_state.pdl = PDL()
     if "client" not in st.session_state:
         st.session_state.client = init_client(llm_cfg=LLM_CFG[st.session_state.model_name])
         st.session_state.api_handler = LLMAPIHandler(st.session_state.client)
