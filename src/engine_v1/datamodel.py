@@ -110,6 +110,7 @@ class Conversation():
         self.msgs = []
 
     def add_message(self, msg: Message):
+        # print(f"[debug] add_message: {type(msg)} {msg}")
         assert isinstance(msg, Message), f"Must be Message!"
         self.msgs.append(msg)
 

@@ -4,6 +4,7 @@ from easonsi.llm.openai_client import OpenAIClient, Formater
 
 _file_dir_path = os.path.dirname(os.path.realpath(__file__))
 DIR_data_base = f"{_file_dir_path}/../../data/v240628"
+
 DIR_data = f"{DIR_data_base}/huabu_step3"
 DIR_data_meta = f"{DIR_data_base}/huabu_meta"
 DIR_log = f"{DIR_data_base}/engine_v1_log"
@@ -13,6 +14,8 @@ DIR_simulated = f"{DIR_data_base}/simulated"
 DIR_apis = f"{DIR_data_base}/apis_v01"
 DIR_conversation = f"{DIR_data_base}/conversation_v01"
 FN_data_meta = f"{DIR_data_base}/data_meta.json"
+
+DIR_templates = f"{_file_dir_path}/../utils/templates"
 
 LLM_stop = ["[USER]"]
 
@@ -27,16 +30,16 @@ for fn in os.listdir(DIR_apis):
             # print(f"[API] registered {fn}!")
 
 LLM_CFG = {
-    "SN": {
-        "model_name": "神农大模型",
-        "base_url": "http://9.91.12.52:8001",
-        "api_key": "xxx",
-    },
-    "gpt-4o": {
-        "model_name": "gpt-4o",
-        "base_url": os.getenv("OPENAI_PROXY_BASE_URL"),
-        "api_key": os.getenv("OPENAI_PROXY_API_KEY"),
-    }
+    # "SN": {
+    #     "model_name": "神农大模型",
+    #     "base_url": "http://9.91.12.52:8001",
+    #     "api_key": "xxx",
+    # },
+    # "gpt-4o": {
+    #     "model_name": "gpt-4o",
+    #     "base_url": os.getenv("OPENAI_PROXY_BASE_URL"),
+    #     "api_key": os.getenv("OPENAI_PROXY_API_KEY"),
+    # }
 }
 def add_openai_models():
     global LLM_CFG
@@ -67,8 +70,8 @@ def add_local_models():
     for model, url in model_info.items():
         # NOTE: api_key 不能为 "" 不然也会报错
         LLM_CFG[model] = {"model_name": model, "base_url": url, "api_key": "xxx"}
-add_local_models()
 add_openai_models()
+add_local_models()
 # print(f"[INFO] LLM models: {LLM_CFG.keys()}")
 
 def init_client(llm_cfg:Dict):
@@ -97,4 +100,9 @@ class DataManager:
     @staticmethod
     def get_workflow_name_list(config_dir:str, extension:str=".txt"):
         fns = [fn.rstrip(extension) for fn in os.listdir(config_dir) if fn.endswith(extension)]
+        return list(sorted(fns))
+
+    @staticmethod
+    def get_template_name_list(template_dir:str, prefix:str="query_"):
+        fns = [fn for fn in os.listdir(template_dir) if fn.startswith(prefix)]
         return list(sorted(fns))
