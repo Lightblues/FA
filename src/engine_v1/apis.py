@@ -45,7 +45,6 @@ def call_py_name_and_paras(api_name: str, api_paras: List[str]):
 
 class ManualAPIHandler(BaseAPIHandler):
     def process_query(self, conversation: str, api_name: str, api_params: Dict) -> str:
-        # return super().process_query(s_conversation, api_name, api_params)
         res = input(f"<debug> please fake the response of the API call {api_name}({api_params}): ")
         return res
 

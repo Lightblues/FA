@@ -23,5 +23,5 @@ if __name__ == '__main__':
     workflow_dir:str = args.workflow_dir
     if not workflow_dir.startswith("/apdcephfs"):
         workflow_dir = f"/apdcephfs_cq8/share_2992827/shennong_5/easonsshi/huabu/data/v240628/{workflow_dir}"
-    agent = CLIInterface(client=client, api_mode=args.api_mode, workflow_dir=workflow_dir, template_fn=args.template_fn)
-    agent.conversation(workflow_name=args.workflow_name)
+    interface = CLIInterface(client=client, api_mode=args.api_mode, workflow_dir=workflow_dir, template_fn=args.template_fn)
+    interface.conversation(workflow_name=args.workflow_name)

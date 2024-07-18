@@ -7,7 +7,8 @@ DIR_data_base = f"{_file_dir_path}/../../data/v240628"
 DIR_data = f"{DIR_data_base}/huabu_step3"
 DIR_data_meta = f"{DIR_data_base}/huabu_meta"
 DIR_log = f"{DIR_data_base}/engine_v1_log"
-DIR_simulation = f"{DIR_data_base}/simulation_v01_log"
+DIR_simulation_log = f"{DIR_data_base}/simulation_v01_log"
+DIR_ui_log = f"{DIR_data_base}/ui_v01_log"
 DIR_simulated = f"{DIR_data_base}/simulated"
 DIR_apis = f"{DIR_data_base}/apis_v01"
 DIR_conversation = f"{DIR_data_base}/conversation_v01"
@@ -68,7 +69,7 @@ def add_local_models():
         LLM_CFG[model] = {"model_name": model, "base_url": url, "api_key": "xxx"}
 add_local_models()
 add_openai_models()
-print(f"[INFO] LLM models: {LLM_CFG.keys()}")
+# print(f"[INFO] LLM models: {LLM_CFG.keys()}")
 
 def init_client(llm_cfg:Dict):
     # global client

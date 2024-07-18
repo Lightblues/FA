@@ -75,8 +75,9 @@ class CLIInterface:
                 self.logger.log(msg.to_str(), with_print=False)
                 conversation_infos.num_user_query += 1
             
-            action_type, msgs = self.bot.process(conversation, conversation_infos)
-            for msg in msgs:
+            action_type = self.bot.process(conversation, conversation_infos)
+            _num_actions = 2 if action_type==ActionType.API else 1
+            for msg in conversation.msgs[:-_num_actions]:
                 self.logger.log(msg.to_str(), with_print=True)
             conversation_infos.previous_action_type = action_type        # update the state 
 

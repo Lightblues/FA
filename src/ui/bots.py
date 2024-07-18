@@ -1,12 +1,15 @@
+""" 
+@240718 从 engine_v1.bots 进行修改修改
+"""
 
 from typing import List, Dict, Optional, Tuple
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
-from .datamodel import BaseBot, Logger, BaseLogger, BaseAPIHandler, Role, Message, Conversation, PDL, ActionType, ConversationInfos
-from .common import LLM_stop
+from engine_v1.datamodel import BaseBot, Logger, BaseLogger, BaseAPIHandler, Role, Message, Conversation, PDL, ActionType, ConversationInfos
 from utils.jinja_templates import jinja_render
 
-class PDLBot(BaseBot):
+class PDL_UIBot(BaseBot):
+    """ 在的 engine_v1 的版本上分拆 process 函数, 以适应 streamlit 交互 """
     logger: Logger = BaseLogger()
     api_handler: BaseAPIHandler = None
     client: OpenAIClient = None
@@ -23,8 +26,8 @@ class PDLBot(BaseBot):
 
     def _load_pdl(self,fn:str):
         self.pdl.load_from_file(fn)
-        
-    def process(self, conversation: Conversation, conversation_infos: ConversationInfos = None) -> ActionType:
+
+    def process_stream(self, conversation: Conversation, conversation_infos: ConversationInfos = None):
         if conversation_infos:
             s_current_state = f"Previous action type: {conversation_infos.previous_action_type}. The number of user queries: {conversation_infos.num_user_query}."
         prompt = jinja_render(
@@ -33,18 +36,12 @@ class PDLBot(BaseBot):
             PDL=self.pdl.to_str(),
             current_state=s_current_state if conversation_infos else None
         )
-        llm_response = self.client.query_one_stream(prompt, stop=LLM_stop)
-        _debug_msg = f"{'[BOT]'.center(50, '=')}\n<<prompt>>\n{prompt}\n\n<<response>>\n{llm_response}\n"
-        self.logger.debug(_debug_msg)
-        
-        # parse the generated response
-        parsed_response = Formater.parse_llm_output_json(llm_response)
-        a_type = self._process_LLM_response(conversation, parsed_response)
-        return a_type
+        llm_response_stream = self.client.query_one_stream_generator(prompt)
+        return prompt, llm_response_stream
 
-    def _process_LLM_response(self, conversation:Conversation, parsed_response:dict) -> ActionType:
+    def process_LLM_response(self, conversation:Conversation, parsed_response:dict) -> Tuple[Tuple, List[Message]]:
         """ process the LLM response, single round
-        return: (action_type)
+        return: (action_type, msgs)
         """
         s_action_type = parsed_response["action_type"]
         if s_action_type == "REQUEST":

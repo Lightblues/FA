@@ -14,15 +14,27 @@ import datetime, os, re
 from enum import Enum, auto
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Optional
+from colorama import init, Fore, Style
+# 初始化 colorama
+init(autoreset=True)
 from .common import DIR_log
 
 class BaseLogger:
     def __init__(self):
         pass
-    def log(self, **kwargs):
+    def log(self, *args, **kwargs):
         pass
-    def debug(self, **kwargs):
+    def debug(self, *args, **kwargs):
         pass
+
+    def log_to_stdout(self, message:str, color=None):
+        if color == 'gray':
+            colored_message = f"{Fore.LIGHTBLACK_EX}{message}"
+        elif color == 'orange':
+            colored_message = f"{Fore.YELLOW}{Style.BRIGHT}{message}"
+        else:
+            colored_message = message
+        print(colored_message)
 
 class Logger(BaseLogger):
     log_dir: str = DIR_log
@@ -58,22 +70,23 @@ class ActionType(Enum):
     API = auto()
     REQUEST = auto()
     ANSWER = auto()
-    
+    USER = auto()
 
     def __str__(self):
         return f"ActionType.{self.name}"
 
 class Role(Enum):
-    SYSTEM = (0, "[SYSTEM] ")
-    USER = (1, "[USER] ")
-    BOT = (2, "[BOT] ")
+    SYSTEM = (0, "[SYSTEM] ", "system")
+    USER = (1, "[USER] ", "user")
+    BOT = (2, "[BOT] ", "bot")
 
-    def __init__(self, id, prefix):
+    def __init__(self, id, prefix, rolename):
         self.id = id
         self.prefix = prefix
+        self.rolename = rolename
     
     def __str__(self):
-        return f"Role(id={self.id}, prefix={self.prefix})"
+        return f"Role(id={self.id}, prefix={self.prefix}, name={self.rolename})"
 
 class Message:
     role: Role = None
@@ -143,6 +156,22 @@ class ConversationInfos:
     def from_components(cls, previous_action_type, num_user_query):
         return cls(previous_action_type, num_user_query)
 
+@dataclass
+class ConversationHeaderInfos:
+    workflow_name: str = ""
+    model_name: str = ""
+    start_time: str = ""
+    # "template_fn": self.bot.template_fn,
+    # "workflow_dir": self.workflow_dir,
+    # "log_file": self.logger.log_fn,
+
+    @classmethod
+    def from_components(cls, workflow_name, model_name):
+        return cls(
+            workflow_name, model_name, 
+            start_time=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
+
 class PDL:
     PDL_str: str = None
     
@@ -157,8 +186,8 @@ class PDL:
         """ Load and parse the PDL file """
         with open(file_path, 'r') as f:
             self.PDL_str = f.read().strip()
-        res = self.parse_PDL_str()
-        if res: print(f"[ERROR] Parsing PDL file {file_path} failed!")
+        # res = self.parse_PDL_str()        # FIXME: parse error! 
+        # if res: print(f"[ERROR] Parsing PDL file {file_path} failed!")
 
     def parse_PDL_str(self):
         try:

@@ -11,7 +11,7 @@ from .useragent import ConversationSimulatorLLMUser
 from engine_v1.interface import CLIInterface
 from engine_v1.apis import BaseAPIHandler
 from engine_v1.bots import BaseBot, PDLBot
-from engine_v1.common import DIR_data, DIR_simulation, DataManager
+from engine_v1.common import DIR_data, DIR_simulation_log, DataManager
 from engine_v1.datamodel import (
     Conversation, Logger, BaseLogger, ActionType, ConversationInfos
 )
@@ -29,7 +29,7 @@ class Simulator(CLIInterface):
         self.client = client
         self.workflow_dir = workflow_dir
         self.workflow_id_map = DataManager.build_workflow_id_map(self.workflow_dir)
-        self.logger = Logger(log_dir=DIR_simulation)        # specify the log dir!
+        self.logger = Logger(log_dir=DIR_simulation_log)        # specify the log dir!
 
     def simulate(self, workflow_name:str, ref_conversation:Conversation) -> Tuple[Dict, Conversation]:
         """ Given a conversation, run the simulation """
@@ -63,8 +63,9 @@ class Simulator(CLIInterface):
                 msg = self.user.generate(conversation)
                 self.logger.log(msg.to_str(), with_print=True)  # print the 'user' input
                 conversation_infos.num_user_query += 1
-            action_type, msgs = self.bot.process(conversation, conversation_infos)
-            for msg in msgs:
+            action_type = self.bot.process(conversation, conversation_infos)
+            _num_actions = 2 if action_type==ActionType.API else 1
+            for msg in conversation.msgs[:-_num_actions]:
                 self.logger.log(msg.to_str(), with_print=True)
             conversation_infos.previous_action_type = action_type        # update the state 
 
