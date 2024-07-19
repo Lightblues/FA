@@ -1,6 +1,6 @@
 from engine_v1.interface import CLIInterface
 from engine_v1.common import init_client
-from main import LLM_CFG
+from run_cli_v1 import LLM_CFG
 # change workdir to ..
 import os; os.chdir("../../src")
 

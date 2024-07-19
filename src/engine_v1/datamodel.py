@@ -71,6 +71,7 @@ class ActionType(Enum):
     REQUEST = auto()
     ANSWER = auto()
     USER = auto()
+    API_RESPONSE = auto()
 
     def __str__(self):
         return f"ActionType.{self.name}"
@@ -110,8 +111,7 @@ class Conversation():
         self.msgs = []
 
     def add_message(self, msg: Message):
-        # print(f"[debug] add_message: {type(msg)} {msg}")
-        # assert isinstance(msg, Message), f"Must be Message!"
+        assert isinstance(msg, Message), f"Must be Message! But got {type(msg)}"
         self.msgs.append(msg)
 
     @classmethod
@@ -173,6 +173,7 @@ class ConversationHeaderInfos:
             start_time=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
 
+
 class PDL:
     PDL_str: str = None
     
@@ -194,18 +195,21 @@ class PDL:
         self.load_from_str(PDL_str)
 
     def parse_PDL_str(self):
-        try:
-            spliter = "\n\n"
-            apis, requests, answers, meta, workflow = self.PDL_str.split(spliter, 4)    # TODO: parse according to the header of each part
-            self.apis = self._parse_apis(apis)
-            self.requests = self._parse_apis(requests)
-            self.answers = self._parse_apis(answers)
-            self.taskflow_name, self.taskflow_desc = self._parse_meta(meta)
-            self.workflow_str = workflow
-        except Exception as e:
-            print(f"[ERROR] Parsing PDL str Error: {e}")
-            return -1
-        return 0
+        spliter = "\n\n"
+        splited_parts = self.PDL_str.split(spliter, 4)    # NOTE: parse according to the header of each part
+        for p in splited_parts:
+            if p.startswith("APIs"):
+                self.apis = self._parse_apis(p)
+            elif p.startswith("REQUESTs"):
+                self.requests = self._parse_apis(p)
+            elif p.startswith("ANSWERs"):
+                self.answers = self._parse_apis(p)
+            elif p.startswith("==="):
+                self.taskflow_name, self.taskflow_desc = self._parse_meta(p)
+            else:
+                if self.workflow_str:
+                    print(f"[WARNING] {self.workflow_str} v.s. {p}")
+                self.workflow_str = p
     def _parse_apis(self, s:str):
         apis = s.split("\n-")[1:]
         res = []

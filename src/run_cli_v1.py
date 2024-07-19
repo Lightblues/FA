@@ -1,5 +1,5 @@
 """ 
-python main.py --workflow_dir huabu_refine01 --workflow_name 000
+python run_cli_v1.py --workflow_dir huabu_refine01 --workflow_name 000
 """
 
 import os, argparse

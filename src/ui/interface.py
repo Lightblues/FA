@@ -5,7 +5,7 @@
 - [ ] [optimize] optimize API output! 
 - [x] [feat] show Huabu meta information in the sidebar
 - [ ] [log] add more detailed logs
-- [ ] [feat] mofigy template/PDL in the web directly! 
+- [x] [feat] mofigy template/PDL in the web directly!  -- not good
 """
 
 import time, os, json, glob, openai, yaml, datetime, pdb

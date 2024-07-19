@@ -117,8 +117,8 @@ def init_agents():
         st.session_state.infos = ConversationHeaderInfos.from_components(st.session_state.workflow_name, st.session_state.model_name)
     if "logger" not in st.session_state:
         st.session_state.logger = Logger(log_dir=DIR_ui_log)
-    if "pdl" not in st.session_state:
-        st.session_state.pdl = PDL()
+    # if "pdl" not in st.session_state: # done in [init_sidebar()]
+    #     st.session_state.pdl = PDL()
     if "client" not in st.session_state:
         st.session_state.client = init_client(llm_cfg=LLM_CFG[st.session_state.model_name])
         st.session_state.api_handler = LLMAPIHandler(st.session_state.client)

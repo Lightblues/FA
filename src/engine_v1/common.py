@@ -1,4 +1,5 @@
 import os, sys, time, datetime, json, ast
+from functools import lru_cache
 from typing import List, Dict, Optional
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
@@ -16,6 +17,7 @@ DIR_conversation = f"{DIR_data_base}/conversation_v01"
 FN_data_meta = f"{DIR_data_base}/data_meta.json"
 
 DIR_templates = f"{_file_dir_path}/../utils/templates"
+DIR_v2_config = f"{_file_dir_path}/../engine_v2/configs"
 
 LLM_stop = ["[USER]"]
 
@@ -87,9 +89,10 @@ def init_client(llm_cfg:Dict):
 
 class DataManager:
     @staticmethod
-    def build_workflow_id_map(config_dir:str, extension:str=".txt"):
+    @lru_cache(maxsize=None)
+    def build_workflow_id_map(workflow_dir:str, extension:str=".txt"):
         workflow_id_map = {}
-        for file in os.listdir(config_dir):
+        for file in os.listdir(workflow_dir):
             if file.endswith(extension):
                 workflow_name = file.rstrip(extension)
                 id, name = workflow_name.split("-", 1)
@@ -98,11 +101,31 @@ class DataManager:
                 workflow_id_map[workflow_name] = workflow_name
         return workflow_id_map
     @staticmethod
-    def get_workflow_name_list(config_dir:str, extension:str=".txt"):
-        fns = [fn.rstrip(extension) for fn in os.listdir(config_dir) if fn.endswith(extension)]
+    @lru_cache(maxsize=None)
+    def get_workflow_name_list(workflow_dir:str, extension:str=".txt"):
+        fns = [fn.rstrip(extension) for fn in os.listdir(workflow_dir) if fn.endswith(extension)]
         return list(sorted(fns))
 
     @staticmethod
     def get_template_name_list(template_dir:str, prefix:str="query_"):
         fns = [fn for fn in os.listdir(template_dir) if fn.startswith(prefix)]
         return list(sorted(fns))
+
+    @staticmethod
+    def normalize_workflow_dir(workflow_dir:str):
+        if not workflow_dir.startswith("/apdcephfs"):
+            subfolder_name = workflow_dir.split("/")[-1]
+            workflow_dir = f"{DIR_data_base}/{subfolder_name}"
+        return workflow_dir
+    
+    @staticmethod
+    def normalize_workflow_name(workflow_name:str, workflow_dir:str):
+        workflow_dir = DataManager.normalize_workflow_dir(workflow_dir)
+        workflow_name_map = DataManager.build_workflow_id_map(workflow_dir)
+        assert workflow_name in workflow_name_map, f"Unknown workflow_name: {workflow_name}! Please choose from {workflow_name_map.keys()}"
+        return workflow_name_map[workflow_name]
+
+    @staticmethod
+    def normalize_config_name(config_name:str):
+        config_fn = f"{DIR_v2_config}/{config_name}"
+        return config_fn

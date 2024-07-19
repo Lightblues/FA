@@ -1,0 +1,7 @@
+workflow_dir: "data/v240628/huabu_refine01"
+workflow_name: "000-114挂号"
+
+model_name: "gpt-4o" # "qwen2_72B"
+template_fn: "query_PDL.jinja"
+
+
