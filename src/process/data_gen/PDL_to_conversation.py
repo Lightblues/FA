@@ -1,6 +1,7 @@
 """ 
-利用LLM自动化地构造数据
-@240709
+@240709 利用LLM自动化地构造数据
+    input: PDL
+    output: conversation
 """
 import os, json
 from tqdm import tqdm

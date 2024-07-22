@@ -47,9 +47,9 @@ def main():
     bot:PDL_UIBot = st.session_state.bot
 
     for message in conversation.msgs:
-        if message.text.startswith("<"): continue  # NOTE: skip the API calling message
+        if message.content.startswith("<"): continue  # NOTE: skip the API calling message
         with st.chat_message(message.role.rolename, avatar=st.session_state['avatars'][message.role.rolename]):
-            st.write(message.text)
+            st.write(message.content)
 
     # pdb.set_trace()
     if OBJECTIVE := st.chat_input('Input...'):       # NOTE: initial input!
@@ -72,8 +72,8 @@ def main():
                 # show API response to screen
                 if action_type == ActionType.API:
                     with st.chat_message("system", avatar=st.session_state['avatars']['system']):
-                        st.write(f"{conversation.msgs[-2].text}")
-                        st.write(f"{conversation.msgs[-1].text}")
+                        st.write(f"{conversation.msgs[-2].content}")
+                        st.write(f"{conversation.msgs[-1].content}")
         with st.chat_message("assistant", avatar=st.session_state['avatars']['assistant']):
-            st.write(conversation.msgs[-1].text)
+            st.write(conversation.msgs[-1].content)
 

@@ -1,16 +1,15 @@
 
 
-import os, sys, time, datetime
+import os, sys, time, datetime, copy
 
-from engine_v1.datamodel import (
-    Role, Message, Conversation, ActionType, 
-    Logger
-)
 from .datamodel import (
     Config, 
+    Role, Message, Conversation, ActionType, 
     InputUser, ManualAPIHandler, PDLBot, ConversationInfos
 )
 from .pdl import PDL
+from .common import Logger
+from .controller import PDLController, PDLNode
 
 
 
@@ -20,15 +19,17 @@ class ConversationController:
     bot: PDLBot = None
     api: ManualAPIHandler = None
     logger: Logger = None
+    pdl_controller: PDLController = None
     
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
         self.user = InputUser()
         self.bot = PDLBot(cfg=cfg)
         self.api = ManualAPIHandler()
-        self.logger = Logger()      # TODO:
+        self.logger = Logger()
     
     def next_role(self, curr_role:Role, action_type) -> Role:
+        """ Logic for conversation control! """
         if action_type == ActionType.START:
             return Role.USER
 
@@ -50,7 +51,8 @@ class ConversationController:
             conversation/conversation_infos, pdl
         """
         msg_hello = Message(Role.BOT, f"你好，我是{self.cfg.workflow_name}机器人，有什么可以帮您?")
-        self.logger.log(msg_hello.to_str(), with_print=True)
+        self.logger.log(msg_hello.to_str(), with_print=False)
+        self.logger.log_to_stdout(msg_hello.to_str(), color=msg_hello.role.color)
         conversation = Conversation()
         conversation.add_message(msg_hello)
         conversation_infos = ConversationInfos.from_components(             # useful information for bot
@@ -64,21 +66,42 @@ class ConversationController:
                 action_type, action_metas, msg = self.user.process(conversation=conversation, pdl=pdl)
                 conversation_infos.num_user_query += 1
             elif next_role == Role.BOT:
-                action_type, action_metas, msg = self.bot.process(conversation=conversation, pdl=pdl, conversation_infos=conversation_infos)
+                _conversation = copy.deepcopy(conversation)
+                for bot_prediction_steps in range(3):      # cfg.bot_prediction_steps_limit
+                    action_type, action_metas, msg = self.bot.process(
+                        conversation=_conversation, pdl=pdl, conversation_infos=conversation_infos, 
+                        print_stream=False          # cfg.bot_print_stream
+                    )
+                    _debug_msg = f"{'[BOT]'.center(50, '=')}\n<<prompt>>\n{action_metas['prompt']}\n\n<<response>>\n{action_metas['llm_response']}\n"
+                    self.logger.debug(_debug_msg)
+                    
+                    if action_type == ActionType.API:
+                        check_pass, sys_msg_str = self.pdl_controller.check_validation(next_node=action_metas["action_name"])       # next_node
+                        self.logger.log_to_stdout(f"  <controller> {msg.content}", color="gray")
+                        self.logger.log_to_stdout(f"  <controller> {sys_msg_str}", color="gray")
+                        if check_pass: break
+                        else:
+                            _conversation.add_message(msg)
+                            _conversation.add_message(Message(Role.SYSTEM, sys_msg_str))
+                    else: break
+                else:
+                    pass         # TODO: 增加兜底策略
             elif next_role == Role.SYSTEM:
                 action_type, action_metas, msg = self.api.process(conversation=conversation, paras=action_metas)
             else:
                 raise ValueError(f"Unknown role: {next_role}")
             curr_role, curr_action_type = next_role, action_type
             conversation_infos.previous_action_type = curr_action_type
-            conversation.add_message(msg)
-            self.logger.log(msg.to_str(), with_print=True if curr_role!=Role.USER else False)
+            conversation.add_message(msg)           # add msg universally
+            self.logger.log(msg.to_str(), with_print=False)
+            if curr_role not in [Role.USER]: self.logger.log_to_stdout(msg.to_str(), color=curr_role.color)
 
         return conversation
     
     def start_conversation(self):
         # [1] workflow_name -> PDL
         pdl = PDL.load_from_file(f"{self.cfg.workflow_dir}/{self.cfg.workflow_name}.txt")
+        self.pdl_controller = PDLController(pdl=pdl)
         
         # [2] print the header information
         t_now = datetime.datetime.now()

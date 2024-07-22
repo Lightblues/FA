@@ -5,10 +5,12 @@ import datetime, os, re, yaml
 from enum import Enum, auto
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Optional
+from colorama import init, Fore, Style
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
 from engine_v1.datamodel import Role, Message, Conversation, PDL, ActionType
 from engine_v1.common import LLM_stop, DIR_data, init_client, LLM_CFG
+from .common import prompt_user_input
 from utils.jinja_templates import jinja_render
 
 
@@ -57,11 +59,6 @@ class ConversationHeaderInfos:
 
 
 
-class Controller:
-    def __init__(self):
-        pass
-
-
 class BaseRole:
     def process(self, conversation:Conversation, pdl:PDL, **kwargs):
         raise NotImplementedError
@@ -69,7 +66,9 @@ class BaseRole:
 class InputUser(BaseRole):
     def process(self, **kwargs):
         """ User that manually input!  """
-        user_input = input("[USER] ")       # user_input_prefix
+        user_input = prompt_user_input("[USER] ")       # user_input_prefix, user_color
+        while not user_input.strip():
+            user_input = prompt_user_input("[USER] ")
         msg = Message(Role.USER, user_input)
         return ActionType.USER, None, msg
     
@@ -77,7 +76,7 @@ class InputUser(BaseRole):
 class ManualAPIHandler(BaseRole):
     def process(self, conversation:Conversation, paras:Dict, **kwargs):
         api_name, api_params = paras["action_name"], paras["action_parameters"]
-        res = input(f"<manual> please fake the response of the API call {api_name}({api_params}): ")
+        res = prompt_user_input(f"  <manual> please fake the response of the API call {api_name}({api_params}): ")
         msg = Message(Role.SYSTEM, res)
         return ActionType.API_RESPONSE, None, msg
 
@@ -90,12 +89,14 @@ class PDLBot(BaseRole):
         self.cfg = cfg
         self.llm = init_client(llm_cfg=LLM_CFG[cfg.model_name])
     
-    def process(self, conversation:Conversation, pdl:PDL, conversation_infos:ConversationInfos=None):
+    def process(self, conversation:Conversation, pdl:PDL, conversation_infos:ConversationInfos=None, print_stream=True):
         """ 
         return:
             action_type: [ActionType.REQUEST, ActionType.ANSWER, ActionType.API]
             action_metas: Dict, return API parameters if action_type == ActionType.API
         """
+        action_metas = {}
+        
         if conversation_infos is not None:
             s_current_state = f"Previous action type: {conversation_infos.previous_action_type}. The number of user queries: {conversation_infos.num_user_query}."
         else:
@@ -106,7 +107,11 @@ class PDLBot(BaseRole):
             PDL=pdl.to_str(),
             current_state=s_current_state
         )
-        llm_response = self.llm.query_one_stream(prompt)
+        if print_stream:
+            llm_response = self.llm.query_one_stream(prompt)
+        else:
+            llm_response = self.llm.query_one(prompt)
+        action_metas.update(prompt=prompt, llm_response=llm_response)       # for debug
         # _debug_msg = f"{'[BOT]'.center(50, '=')}\n<<prompt>>\n{prompt}\n\n<<response>>\n{llm_response}\n"
         # self.logger.debug(_debug_msg)
         
@@ -119,11 +124,12 @@ class PDLBot(BaseRole):
         except KeyError:
             raise ValueError(f"Unknown action_type: {parsed_response['action_type']}")
         # -> action_metas
-        action_name, action_paras, response = parsed_response.get("action_name", "DEFTAULT_ACTION"), parsed_response.get("action_parameters", "DEFAULT_PARAS"), parsed_response.get("response", "DEFAULT_RESPONSE")
-        action_metas = {"action_name": action_name, "action_parameters": action_paras}
+        action_name, action_parameters, response = parsed_response.get("action_name", "DEFTAULT_ACTION"), parsed_response.get("action_parameters", "DEFAULT_PARAS"), parsed_response.get("response", "DEFAULT_RESPONSE")
+        action_metas.update(action_name=action_name, action_parameters=action_parameters, response=response)
+        
         # -> msg
         if action_type == ActionType.API:
-            msg = Message(Role.BOT, f"<Call API> {action_name}({action_paras})")        # bot_callapi_template
+            msg = Message(Role.BOT, f"<Call API> {action_name}({action_parameters})")        # bot_callapi_template
         else:
             msg = Message(Role.BOT, response)
         return action_type, action_metas, msg

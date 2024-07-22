@@ -64,3 +64,10 @@ class BaseBot:
 #### framework: streamlit
 1. 相较于 engine_v1, 重要的参数均在一开始的时候放到 `session_state` 中! (更准确地说, 是需要操控的参数, 其他的数据应该用cache即可), **这应该也是streamlit框架的使用方式**? —— 前者将重要参数放在主类中封装, 后者放在会话状态中! 
 2. 这样造成的一个重要改动, 在ui中, bot的相关控制逻辑转移到了 `main()` 中, 在代码的控制结构上造成了一定的复杂性... 从面向对象的编程转为面向过程. 
+
+### engine_v2
+
+1. 简化了 v1 的代码结构
+    1. 对于`User, APIHandler, Bot` 三个角色进行统一抽象, 通过 `process(...)` 函数来进行数据交互!
+    2. 增加 `ConversationController` 来对于会话流程进行控制, 通过 `next_role(self, curr_role:Role, action_type)` 函数来获取下一个角色! 
+    3. 从而将log逻辑统一放在外层会话中, 避免了bot内部进行log的调用! 

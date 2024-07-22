@@ -1,5 +1,10 @@
 """ 给定需求之下生成规范PDL
-@240715
+@240714 gen_by_PDL_sample
+    input: geiven sample PDL
+    output: new PDLs
+@240715 gen_by_NL_02: 根据NL再生成PDL
+    input: given NL
+    output: PDL
 
 """
 
@@ -37,13 +42,13 @@ def gen_by_NL_01(client: OpenAIClient):
     res = client.query_one_stream(prompt)
 
 
-def gen_by_NL_02(client: OpenAIClient, NL:str, ofn:str):
+def gen_by_NL_02(client: OpenAIClient, NL:str, ofn:str=None):
     # step 2: Nl -> PDL
     prompt = jinja_render("PDL_autogen_v1_meta2PDL.jinja", NL=NL)
     res = client.query_one_stream(prompt)
     r = Formater.parse_codeblock(res, type="PDL")
-    with open(ofn, "w") as f:
-        f.write(r)
+    if ofn is not None:
+        with open(ofn, "w") as f: f.write(r)
     return r
 
 if __name__ == '__main__':

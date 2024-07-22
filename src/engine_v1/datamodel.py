@@ -77,28 +77,29 @@ class ActionType(Enum):
         return f"ActionType.{self.name}"
 
 class Role(Enum):
-    SYSTEM = (0, "[SYSTEM] ", "system")
-    USER = (1, "[USER] ", "user")
-    BOT = (2, "[BOT] ", "bot")
+    SYSTEM = (0, "[SYSTEM] ", "system", 'green')
+    USER = (1, "[USER] ", "user", "red")
+    BOT = (2, "[BOT] ", "bot", "orange")
 
-    def __init__(self, id, prefix, rolename):
+    def __init__(self, id, prefix, rolename, color):
         self.id = id
         self.prefix = prefix
         self.rolename = rolename
+        self.color = color
     
     def __str__(self):
         return f"Role(id={self.id}, prefix={self.prefix}, name={self.rolename})"
 
 class Message:
     role: Role = None
-    text: str = None
+    content: str = None
 
-    def __init__(self, role: Role, text: str):
+    def __init__(self, role: Role, content: str):
         self.role = role
-        self.text = text
+        self.content = content
     
     def to_str(self):
-        return f"{self.role.prefix}{self.text}"
+        return f"{self.role.prefix}{self.content}"
     def __str__(self):
         return self.to_str()
     def __repr__(self):

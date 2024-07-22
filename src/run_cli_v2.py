@@ -13,7 +13,7 @@ def get_args() -> argparse.Namespace:
     parser.add_argument("--config", type=str, default="default.yaml")
     # -- overwrite config --
     parser.add_argument("--model_name", type=str, default=None, choices=list(LLM_CFG.keys()))
-    parser.add_argument("--workflow_dir", type=str, default=None)         # huabu_v3, manual, huabu_refine01
+    parser.add_argument("--workflow_dir", type=str, default=None)         # huabu_v3, huabu_manual, huabu_refine01
     parser.add_argument("--workflow_name", type=str, default=None)
     parser.add_argument("--template_fn", type=str, default=None)          # "query_PDL.jinja"
     # parser.add_argument("--api_mode", type=str, default="manual", choices=["manual", "llm", "vanilla"])

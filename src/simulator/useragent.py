@@ -31,7 +31,7 @@ class ConversationSimulatorLLMUser(BaseUser):
         try:
             parsed_response = Formater.parse_llm_output_json(llm_response)
             content = parsed_response["content"]
-            msg = Message(role=Role.USER, text=content)
+            msg = Message(role=Role.USER, content=content)
             conversation.add_message(msg)       # NOTE to update the conversation
             return msg
         except Exception as e:
