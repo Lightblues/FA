@@ -94,7 +94,7 @@ def build_node_info(data):
         node_info[node_id] = n
     return node_info, node_remap
 
-def process_node():
+def process_node(node_info:dict, node_remap:dict):
     """ 
 {
     'NodeID': '53c1e31b-1de5-db3a-e1c4-48257f386f4e',
@@ -165,7 +165,7 @@ for fn in tqdm(data_names):
     data = preprocess_paramid(data)
 
     node_info, node_remap = build_node_info(data)
-    processed_nodes = process_node()
+    processed_nodes = process_node(node_info, node_remap)
     final = get_final(data, processed_nodes)
     _ofn = f"{DIR_output}/{fn}"
     utils.SaveJson(final, _ofn)

@@ -1,5 +1,5 @@
 """ 
-@240718 从 engine_v1.bots 进行修改修改
+@240718 从 engine_v1.bots 进行修改
 """
 
 from typing import List, Dict, Optional, Tuple

@@ -1,3 +1,8 @@
+""" Graph structure of PDL & Graph-based Dependency Controller
+
+@240718 节点抽象、PDLController 控制逻辑
+"""
+
 from typing import List, Dict, Optional, Tuple
 
 from .pdl import PDL
@@ -27,6 +32,9 @@ class PDLNode:
 class PDLGraph:
     # nodes: List[PDLNode] = []
     name2node: Dict[str, PDLNode] = {}
+    
+    def __init__(self) -> None:
+        self.name2node = {}     # NOTE: have to add __init__ to clear the dict
     
     def add_node(self, node:PDLNode):
         assert node.name not in self.name2node, f"node {node.name} already exists!"

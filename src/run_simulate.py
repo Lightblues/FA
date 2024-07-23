@@ -1,9 +1,10 @@
 """ 
+TODO: update to engine_v2
 python run_simulate.py --workflow_dir huabu_refine01 --workflow_name 000 --ref_conversation_id 0
 """
 
 import os, argparse, json
-from simulator.simulator import Simulator
+from simulator.simulator_v1 import SimulatorV1
 from engine_v1.datamodel import Conversation
 from engine_v1.common import DIR_conversation, DIR_data, DataManager, LLM_CFG, init_client
 
@@ -35,6 +36,6 @@ if __name__ == '__main__':
     if not workflow_dir.startswith("/apdcephfs"):
         workflow_dir = f"/apdcephfs_cq8/share_2992827/shennong_5/easonsshi/huabu/data/v240628/{workflow_dir}"
     client = init_client(llm_cfg=LLM_CFG[args.model_name])
-    simulator = Simulator(client=client, workflow_dir=workflow_dir)
+    simulator = SimulatorV1(client=client, workflow_dir=workflow_dir)
     ref_conversation = load_ref_conversation(args.workflow_name, args.ref_conversation_id)
     _ = simulator.simulate(workflow_name=args.workflow_name, ref_conversation=ref_conversation)

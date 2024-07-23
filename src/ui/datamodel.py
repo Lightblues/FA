@@ -3,7 +3,7 @@ import streamlit as st
 from dataclasses import dataclass, asdict
 
 from .bots import PDL_UIBot
-from engine_v1.common import DataManager, init_client, LLM_CFG, DIR_data, DIR_data_base, DIR_ui_log, DIR_templates
+from engine_v1.common import DataManager, init_client, LLM_CFG, DIR_data, DIR_data_base, DIR_ui_log, DIR_templates, HUABU_versions
 from engine_v1.apis import BaseAPIHandler, ManualAPIHandler, LLMAPIHandler, VanillaCallingAPIHandler
 from engine_v1.datamodel import (
     ConversationHeaderInfos, BaseLogger, Logger, Conversation, ConversationInfos, ActionType, Message, Role,
@@ -59,7 +59,7 @@ def get_model_name_list():
 
 @st.cache_data
 def get_workflow_dir_list():
-    workflow_versions = ["huabu_step3", "manual", "huabu_refine01"]
+    workflow_versions = HUABU_versions
     return [f"{DIR_data_base}/{v}" for v in workflow_versions]
 @st.cache_data
 def get_workflow_name_list(workflow_dir:str=DIR_data):

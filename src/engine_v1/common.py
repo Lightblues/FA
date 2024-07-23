@@ -21,6 +21,8 @@ DIR_v2_config = f"{_file_dir_path}/../engine_v2/configs"
 
 LLM_stop = ["[USER]"]
 
+HUABU_versions = ["huabu_step3", "huabu_manual", "huabu_refine01"]
+
 API_base_url = "http://localhost:8000"
 API_infos = []
 # register the APIs: search the json files in DIR_apis
@@ -45,8 +47,7 @@ LLM_CFG = {
 }
 def add_openai_models():
     global LLM_CFG
-    import openai
-    model_list = ["gpt-4o", "gpt-4-turbo"]
+    model_list = ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"]
     for model in model_list:
         LLM_CFG[model] = {
             "model_name": model,

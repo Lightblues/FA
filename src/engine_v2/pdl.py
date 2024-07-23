@@ -55,7 +55,11 @@ class PDL:
         reg_taskflow = re.compile(r"TaskFlowName: (.+)")
         reg_taskflow_desc = re.compile(r"TaskFlowDesc: (.+)")
         taskflow = reg_taskflow.search(s).group(1)
-        taskflow_desc = reg_taskflow_desc.search(s).group(1)
+        # if do not have description, set it as the taskflow name
+        if not reg_taskflow_desc.search(s):
+            taskflow_desc = taskflow
+        else:
+            taskflow_desc = reg_taskflow_desc.search(s).group(1)
         return taskflow, taskflow_desc
 
     def to_str(self):

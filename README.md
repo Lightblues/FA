@@ -1,11 +1,19 @@
 ## TODOs
 
-- [ ] Generate API data automatically
-- [x] When pass "--api_mode=vanilla", select and start the API server automatically
+functionalities
 - [x] Auto evaluation: `user, api` agent @240716
 - [x] implement an UI for interaction @240718
-- [ ] PDL controllable execuation #1
+    - [ ] move the engine_v2
+- [x] PDL controllable/dependency execuation #1 @240722 [engine_v2]
+    - [ ] add dependency for ANSWER nodes
 
+APIs
+- [x] When pass "--api_mode=vanilla", select and start the API server automatically @240718
+- [ ] Generate API data automatically? #3 
+- [ ] implement API exec by actual API calling #1
+
+prompting
+- [ ] add summary/memory #2
 
 ## run
 

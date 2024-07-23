@@ -1,5 +1,5 @@
 """ 
-@240716 Simulator
+@240716 SimulatorV1
 
 """
 import datetime
@@ -16,7 +16,7 @@ from engine_v1.datamodel import (
     Conversation, Logger, BaseLogger, ActionType, ConversationInfos
 )
 
-class Simulator(CLIInterface):
+class SimulatorV1(CLIInterface):
     client: OpenAIClient = None
     api_handler: BaseAPIHandler = None
     user: ConversationSimulatorLLMUser = None

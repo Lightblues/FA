@@ -2,12 +2,15 @@ ROOT=/apdcephfs_cq8/share_2992827/shennong_5/easonsshi
 export PYTHONPATH=${ROOT}/huabu/src:${ROOT}/easonsi/src/
 PROJECT_DIR=${ROOT}/huabu
 
+# 
+python run_cli_v2.py \
+    --model_name=gpt-4o --template_fn=query_PDL.jinja --api_mode=v01 \
+    --workflow_dir=huabu_step3 --workflow_name=000 \
+
+
+# ------------------ archived version ------------------
 # workflow_name="006-同程开发票"
-# workflow_name="011-银行订单查询"
-# workflow_name="013-查询工作流程"
-# workflow_name=006-同程开发票
 workflow_name=010-进口运费查询
-workflow_name=011-银行订单查询
 model_name="qwen2_72B"
 # model_name="gpt-4o"
 
