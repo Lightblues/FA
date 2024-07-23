@@ -137,5 +137,6 @@ class V01APIHandler(BaseRole):
 
     def process(self, conversation:Conversation, paras:Dict, **kwargs):
         # Just follow the return structure of Role.process
-        msg = Message(Role.SYSTEM, self.process_api(paras))
+        content = json.dumps(self.process_api(paras), ensure_ascii=False)
+        msg = Message(Role.SYSTEM, content)
         return ActionType.API_RESPONSE, None, msg

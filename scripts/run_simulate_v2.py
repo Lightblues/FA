@@ -6,7 +6,7 @@ from tqdm import tqdm
 import concurrent.futures
 from simulator.simulator_v2 import SimulatorV2
 from engine_v2.datamodel import Conversation, Config
-from engine_v2.common import DIR_conversation, DIR_huabu_step3, DIR_simulated_base, DataManager, LLM_CFG, init_client
+from engine_v2.common import DIR_conversation_v1, DIR_huabu_step3, DIR_simulated_base, DataManager, LLM_CFG, init_client
 
 
 def run_single_simulation(cfg:Config, workflow_name:str, odir:str=DIR_simulated_base/"tmp"):
@@ -26,7 +26,7 @@ def run_single_simulation(cfg:Config, workflow_name:str, odir:str=DIR_simulated_
     assert cfg.workflow_name == workflow_name, f"{cfg.workflow_name} != {workflow_name}"
     simulated_results = []
     # 1] Load the LLM-generated conversation
-    fn = f"{DIR_conversation}/{workflow_name}.json"
+    fn = f"{DIR_conversation_v1}/{workflow_name}.json"
     with open(fn, "r") as f:
         ref_conversation_jsons = json.load(f)
     for ref_conversation_id, ref_conversation_json in enumerate(ref_conversation_jsons):
@@ -48,7 +48,7 @@ def run_single_simulation(cfg:Config, workflow_name:str, odir:str=DIR_simulated_
         print(f"Saved to {ofn}")
     return simulated_results
 
-def run_simulations(base_cfg:Config, conversation_dir=DIR_conversation, output_dir=DIR_simulated_base/"tmp", max_workers=10):
+def run_simulations(base_cfg:Config, conversation_dir=DIR_conversation_v1, output_dir=DIR_simulated_base/"tmp", max_workers=10):
     """ 
     args:
         conversation_dir: str, the directory of the conversation files
@@ -58,8 +58,9 @@ def run_simulations(base_cfg:Config, conversation_dir=DIR_conversation, output_d
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = []
         for workflow_name in workflow_names:
-            base_cfg.workflow_name = workflow_name     # NOTE: update the config.workflow_name
-            future = executor.submit(run_single_simulation, base_cfg, workflow_name, output_dir)
+            cfg = base_cfg.copy()
+            cfg.workflow_name = workflow_name     # NOTE: update the config.workflow_name
+            future = executor.submit(run_single_simulation, cfg, workflow_name, output_dir)
             futures.append(future)
         for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
             try:
@@ -100,6 +101,6 @@ if __name__ == '__main__':
     elif MODE == "all":
         # --- run all ---
         max_workers = 10
-        run_simulations(base_cfg=cfg, conversation_dir=DIR_conversation, output_dir=odir, max_workers=max_workers, )
+        run_simulations(base_cfg=cfg, conversation_dir=DIR_conversation_v1, output_dir=odir, max_workers=max_workers, )
     else:
         raise ValueError(f"Unknown MODE: {MODE}")

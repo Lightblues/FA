@@ -5,9 +5,7 @@ import datetime, copy
 from typing import List, Dict, Optional, Tuple
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
-from engine_v2 import (
-    PDL, 
-)
+from engine_v2 import PDL
 from engine_v2.main import ConversationController
 from engine_v2.role_api import LLMSimulatedAPIHandler, V01APIHandler
 from engine_v2.role_user import LLMSimulatedUserWithRefConversation
@@ -40,6 +38,10 @@ class SimulatorV2(ConversationController):
         self.logger = Logger(DIR_simulation_v2_log)
 
     def simulate(self, pdl:PDL, ref_conversation:Conversation) -> Tuple[Dict, Conversation]:
+        """ 
+        Q] 相较于 ConversationController.conversation 的差异?
+        整体基本没有差异! 只是user从人工输入换成了LLM模拟, 在一些print还有log的地方有细微差异! 
+        """
         msg_hello = Message(Role.BOT, f"你好，我是{self.cfg.workflow_name}机器人，有什么可以帮您?")
         self.logger.log_to_stdout(msg_hello.to_str(), color=msg_hello.role.color)
         conversation = Conversation()
@@ -80,8 +82,6 @@ class SimulatorV2(ConversationController):
                     pass         # TODO: 增加兜底策略
             elif next_role == Role.SYSTEM:
                 action_type, action_metas, msg = self.api.process(conversation=conversation, paras=action_metas)
-                # conversation_infos.num_user_query += 1
-                # _debug_msg = f"{'[SYSTEM]'.center(50, '=')}\n<<prompt>>\n{action_metas['prompt']}\n\n<<response>>\n{action_metas['llm_response']}\n"
             else:
                 raise ValueError(f"Unknown role: {next_role}")
             curr_role, curr_action_type = next_role, action_type

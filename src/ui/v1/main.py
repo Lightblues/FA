@@ -24,6 +24,7 @@ from .bots import PDL_UIBot
 
 
 def main():
+    # 1] init
     init_page()
     init_resource()
     init_sidebar()      # add configs!!!
@@ -35,7 +36,7 @@ def main():
     # infos_header = f"{'='*50}\n" + s_infos + " START! ".center(50, "=")
     # self.logger.log(infos_header, with_print=True)
 
-    # the main loop
+    # 2] prepare for session conversation
     if 'conversation' not in st.session_state:
         st.session_state.conversation = Conversation()
     if 'conversation_infos' not in st.session_state:
@@ -52,14 +53,24 @@ def main():
         with st.chat_message(message.role.rolename, avatar=st.session_state['avatars'][message.role.rolename]):
             st.write(message.content)
 
-    # pdb.set_trace()
+    # 3] the main loop!
+    """ 
+    交互逻辑: 
+        当用户输入query之后, 用一个while循环来执行ANSWER或者API调用:
+            用一个 expander 来展示stream输出
+            若为API调用, 则进一步展示中间结果
+        最后, 统一展示给用户的回复
+        NOTE: 用 container 包裹的部分会在下一轮 query 后被覆盖
+    """
     if OBJECTIVE := st.chat_input('Input...'):       # NOTE: initial input!
+        # 3.1] user input
         conversation.add_message(Message(Role.USER, OBJECTIVE))
         conversation_infos.previous_action_type = ActionType.USER
         with st.chat_message("user", avatar=st.session_state['avatars']['user']):
             st.write(OBJECTIVE)
         logger.log_to_stdout(f"[USER] {OBJECTIVE}")
 
+        # 3.2] loop for bot response!
         with st.container():
             while conversation_infos.previous_action_type in [ActionType.API, ActionType.USER]:    # If previous action is API, then call bot again
                 prompt, llm_response_stream = bot.process_stream(conversation, conversation_infos)

@@ -1,29 +1,27 @@
-from typing import Optional
+""" 
+@240718 从 engine_v1.bots 进行修改
+"""
 
-from .common import init_client, LLM_CFG
-from .datamodel import Conversation, PDL, ConversationInfos, ActionType, Message, Role
-from .datamodel import Config, BaseRole
-from utils.jinja_templates import jinja_render
+from typing import List, Dict, Optional, Tuple
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
+from engine_v2 import (
+    BaseLogger, Logger, PDL, BaseRole, Config, 
+    Role, Message, Conversation, ConversationInfos, ActionType, 
+    init_client, LLM_CFG
+)
+from utils.jinja_templates import jinja_render
 
-class PDLBot(BaseRole):
+class PDL_UIBot(BaseRole):
     llm: OpenAIClient = None
     cfg: Config = None
     
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
         self.llm = init_client(llm_cfg=LLM_CFG[cfg.model_name])
-    
-    def process(self, conversation:Conversation, pdl:PDL, conversation_infos:Optional[ConversationInfos]=None, print_stream=True):
-        """ 
-        return:
-            action_type: [ActionType.REQUEST, ActionType.ANSWER, ActionType.API]
-            action_metas: Dict, return API parameters if action_type == ActionType.API
-        """
-        action_metas = {}
-        
-        if conversation_infos is not None:
+
+    def process_stream(self, conversation: Conversation, pdl: PDL, conversation_infos: Optional[ConversationInfos] = None):
+        if conversation_infos:
             s_current_state = f"Previous action type: {conversation_infos.previous_action_type}. The number of user queries: {conversation_infos.num_user_query}."
         else:
             s_current_state = None
@@ -33,13 +31,14 @@ class PDLBot(BaseRole):
             PDL=pdl.to_str(),
             current_state=s_current_state
         )
-        if print_stream:
-            llm_response = self.llm.query_one_stream(prompt)
-        else:
-            llm_response = self.llm.query_one(prompt)
-        action_metas.update(prompt=prompt, llm_response=llm_response)       # for debug
-        
-        parsed_response = Formater.parse_llm_output_json(llm_response)
+        llm_response_stream = self.llm.query_one_stream_generator(prompt)
+        return prompt, llm_response_stream
+
+    def process_LLM_response(self, parsed_response:dict) -> Tuple[ActionType, Dict, Message]:
+        """ process the LLM response, single round
+        return: (action_type, msgs)
+        """
+        action_metas = {}
         
         # -> ActionType
         assert "action_type" in parsed_response, f"parsed_response: {parsed_response}"

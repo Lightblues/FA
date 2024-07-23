@@ -36,7 +36,8 @@ class ConversationController:
             raise ValueError(f"Unknown api_mode: {cfg.api_mode}")
         self.logger = Logger()
     
-    def next_role(self, curr_role:Role, action_type:ActionType) -> Role:
+    @staticmethod
+    def next_role(curr_role:Role, action_type:ActionType) -> Role:
         """ Logic for conversation control! """
         if action_type == ActionType.START:
             return Role.USER
@@ -94,12 +95,14 @@ class ConversationController:
                         self.logger.log_to_stdout(f"  <controller> {sys_msg_str}", color="gray")
                         if check_pass: break
                         else:
+                            # FIXME: 之类有问题吗? 
                             _conversation.add_message(msg)
                             _conversation.add_message(Message(Role.SYSTEM, sys_msg_str))
                     else: break
                 else:
                     pass         # TODO: 增加兜底策略
             elif next_role == Role.SYSTEM:
+                # TODO: add log for api??
                 action_type, action_metas, msg = self.api.process(conversation=conversation, paras=action_metas)
             else:
                 raise ValueError(f"Unknown role: {next_role}")

@@ -1,6 +1,7 @@
 import os, sys, time, datetime, json, ast
 from functools import lru_cache
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple, Union
+from pathlib import Path
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
 _file_dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -113,7 +114,10 @@ class DataManager:
         return list(sorted(fns))
 
     @staticmethod
-    def normalize_workflow_dir(workflow_dir:str):
+    def normalize_workflow_dir(workflow_dir:Union[str, Path]):
+        # Convert Path to string if necessary
+        if isinstance(workflow_dir, Path):
+            workflow_dir = str(workflow_dir)
         if not workflow_dir.startswith("/apdcephfs"):
             subfolder_name = workflow_dir.split("/")[-1]
             workflow_dir = f"{DIR_data_base}/{subfolder_name}"
