@@ -23,6 +23,7 @@ class DirectoryManager:
         self.DIR_engine_v2_config = _dir_src_base / "engine_v2/configs"
         
         self.DIR_huabu_step3 = _dir_data_base / "huabu_step3"
+        self.DIR_huabu_meta = _dir_data_base / "huabu_meta"
         self.DIR_simulated_base = _dir_data_base / "simulated"
         self.DIR_conversation_v1 = _dir_data_base / "conversation_v01"
         self.FN_api_infos = _dir_data_base / "apis_v0/apis.json"
@@ -34,7 +35,7 @@ class DirectoryManager:
         os.makedirs(self.DIR_simulation_v2_log, exist_ok=True)
         os.makedirs(self.DIR_ui_v2_log, exist_ok=True)
         
-        self.HUABU_versions = ["huabu_step3", "huabu_manual", "huabu_refine01"]
+        self.HUABU_versions = ["huabu_step3_v01", "huabu_step3", "huabu_manual", "huabu_refine01"]
 
 _DIRECTORY_MANAGER = DirectoryManager()
 

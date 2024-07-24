@@ -74,8 +74,14 @@ def add_local_models():
     for model, url in model_info.items():
         # NOTE: api_key 不能为 "" 不然也会报错
         LLM_CFG[model] = {"model_name": model, "base_url": url, "api_key": "xxx"}
+# set model alias!!
 add_openai_models()
 add_local_models()
+_name_map = {
+    "default": "qwen2_72B",
+}
+for k,v in _name_map.items():
+    LLM_CFG[k] = LLM_CFG[v]
 # print(f"[INFO] LLM models: {LLM_CFG.keys()}")
 
 def init_client(llm_cfg:Dict):

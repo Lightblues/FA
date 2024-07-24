@@ -2,12 +2,13 @@ workflow_dir: "huabu_step3"    # huabu_refine01
 workflow_name: "000-114挂号"
 
 available_models: 
+- "default"
 
 api_mode: "v01"
-api_model_name: "qwen2_72B" # used when set api_mode as llm
+api_model_name: "gpt-4o-mini" # used when set api_mode as llm
 
 user_mode: "manual"
-user_model_name: "qwen2_72B" # used when set user_mode as llm
+user_model_name: "gpt-4o-mini" # used when set user_mode as llm
 
 model_name: "qwen2_72B" # "qwen2_72B"
 template_fn: "query_PDL.jinja"

@@ -24,6 +24,14 @@ def init_page():
 def init_sidebar():
     LIST_template_names = get_template_name_list()
     LIST_model_names = get_model_name_list()
+    if st.session_state.config.available_models:
+        _available_models = st.session_state.config.available_models
+        print(f"available_models: {_available_models}")
+        assert all(i in LIST_model_names for i in st.session_state.config.available_models)
+        if type(_available_models) == list:
+            LIST_model_names = st.session_state.config.available_models
+        elif type(_available_models) == dict:
+            LIST_model_names = list(_available_models.values())
     LIST_workflow_dirs, DICT_workflow_info = get_workflow_info_dict()
     if "DICT_workflow_info" not in st.session_state:
         st.session_state.DICT_workflow_info = DICT_workflow_info
@@ -36,7 +44,7 @@ def init_sidebar():
                 options=LIST_model_names,
                 key="model_name",                # NOTE: set -> st.session_state.model_name
                 on_change=refresh_bot,
-                index=LIST_model_names.index("qwen2_72B")
+                index=LIST_model_names.index("default")
             )
         with select_col2:
             st.selectbox(
@@ -79,8 +87,9 @@ def init_sidebar():
 
         st.divider()
         # NOTE: init `pdl`
-        st.session_state.pdl = PDL.load_from_file(f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt")
-        st.session_state.pdl_controller = PDLController(st.session_state.pdl)
+        if "pdl" not in st.session_state:
+            st.session_state.pdl = PDL.load_from_file(f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt")
+            st.session_state.pdl_controller = PDLController(st.session_state.pdl)
         with open(f"{_DIRECTORY_MANAGER.DIR_templates}/{st.session_state.template_fn}", "r") as f:     # pdl_fn = f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt"
             template = f.read()
         

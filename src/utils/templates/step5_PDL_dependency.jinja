@@ -1,0 +1,29 @@
+Procedure Description Language (PDL) is a Pythontic syntax describing the procedure of task-oriented chatbots.
+The main logic of the chatbot is described in the `PROCEDURE` part of PDL. Where includs 3 special action types (nodes):
+- `API`s are functions available for chatbot, it has specific request parameters. 
+- `REQUEST`s are explicit information collection actions the chatbot need to collect from the user. 
+- `ANSWER`s are final responses to the user, meaning the end of the task.
+
+There should be some dependencies between the nodes! For example, the bot must have called the "机票查询" API before the "机票预订" API, and the ANSWER node "回复机票预订情况" should be activated after calling the "机票预订" API!
+However, I have a PDL that miss the dependencies. Please fix it!
+
+Here is the PDL:
+```PDL
+{{ PDL }}
+```
+Plese output in following format:
+```json
+[
+    {
+        "name": "机票预订",
+        "type": "API",
+        "dependencies": ["机票查询"]
+    },
+    {
+        "name": "回复机票预订情况",
+        "type": "ANSWER",
+        "dependencies": ["机票预订"]
+    }
+]
+```
+Now give your answer:

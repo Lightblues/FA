@@ -54,6 +54,7 @@ class SimulatorV2(ConversationController):
         # curr_role, curr_action_type = Role.USER, ActionType.START
         action_metas = None
         self.user.load_ref_conversation(ref_conversation=ref_conversation)
+        # TODO: add constrains! 
         while conversation_infos.curr_action_type != ActionType.ANSWER:
             next_role = self.next_role(conversation_infos.curr_role, conversation_infos.curr_action_type)
             if next_role == Role.USER:

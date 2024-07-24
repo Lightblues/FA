@@ -22,7 +22,7 @@ class PDL_UIBot(BaseRole):
 
     def process_stream(self, conversation: Conversation, pdl: PDL, conversation_infos: Optional[ConversationInfos] = None):
         if conversation_infos:
-            s_current_state = f"Previous action type: {conversation_infos.curr_action_type}. The number of user queries: {conversation_infos.num_user_query}."
+            s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
         else:
             s_current_state = None
         prompt = jinja_render(

@@ -17,21 +17,23 @@ from typing import List, Dict, Optional, Tuple
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
 from .ui import init_page, init_sidebar
-from .data import init_agents, init_resource
+from .data import init, init_resource
 from .bot import PDL_UIBot
 from engine_v2 import (
     Role, Message, Conversation, ConversationInfos, ActionType, Logger, PDL, PDLController, 
-    ConversationController, BaseRole, V01APIHandler, Config
+    ConversationController, BaseRole, V01APIHandler, Config, DataManager
 )
 
 
 
-def main():
+def main(config_version:str="default.yaml"):
     # 1] init
+    if "config" not in st.session_state:
+        st.session_state.config = Config.from_yaml(DataManager.normalize_config_name(config_name=config_version))
     init_page()
     init_resource()
-    init_sidebar()      # add configs!!!
-    init_agents()
+    init_sidebar()      # read UI configs!!!
+    init()
     
     # 2] prepare for session conversation
     config: Config = st.session_state.config
@@ -58,6 +60,7 @@ def main():
     # if conversation_infos.curr_action_type == ActionType.START:   # NOTE: 仍然为导致输出两遍!!
     if logger.num_logs == 0:
         logger.log(f"{'config'.center(50, '=')}\n{config.to_str()}\n{'-'*50}", with_print=_with_print)
+        logger.log(f"available apis: {api.api_infos_map.keys()}\n{'-'*50}", with_print=_with_print)
         logger.log(conversation.msgs[0].to_str(), with_print=_with_print)
 
     # 3] the main loop!

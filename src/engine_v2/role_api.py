@@ -71,7 +71,7 @@ class LLMSimulatedAPIHandler(BaseRole):
 
 
 class V01APIHandler(BaseRole):
-    api_infos: Dict[str, Dict] = {}
+    api_infos_map: Dict[str, Dict] = {}
     
     def __init__(self, fn_api_infos=_DIRECTORY_MANAGER.FN_api_infos):
         """ 
@@ -79,7 +79,7 @@ class V01APIHandler(BaseRole):
             fn_api_infos: str, path of the API infos
         """
         self.fn_api_infos = fn_api_infos
-        self.api_infos = self.load_api_infos()
+        self.api_infos_map = self.load_api_infos()
 
     def load_api_infos(self):
         with open(self.fn_api_infos, 'r') as f:
@@ -93,7 +93,7 @@ class V01APIHandler(BaseRole):
         """
         for api in api_infos:
             api_infos_map[api["name"]] = api
-            api_infos_map[api["name"].rstrip('API-')] = api
+            api_infos_map[api["name"].lstrip('API-')] = api
             api_infos_map[api["description"]] = api
         return api_infos_map
     
@@ -117,8 +117,8 @@ class V01APIHandler(BaseRole):
         """
         # 1] call the api
         api_name, api_params_list = paras["action_name"], paras["action_parameters"]
-        assert api_name in self.api_infos, f"API `{api_name}` not found!"
-        api_info = self.api_infos[api_name]
+        assert api_name in self.api_infos_map, f"API `{api_name}` not found!"
+        api_info = self.api_infos_map[api_name]
         
         expected_parameters = list(api_info["parameters"]["properties"].keys())
         assert len(api_params_list) == len(expected_parameters), f"API {api_name} expects parameters {expected_parameters}!"

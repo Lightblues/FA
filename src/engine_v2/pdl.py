@@ -1,5 +1,21 @@
 import re
 
+pdl_template = \
+"""APIs:
+{apis}
+
+REQUESTs:
+{requests}
+
+ANSWERs:
+{answers}
+
+=== PROCEDURE ===
+TaskFlowName: {taskflow_name}
+TaskFlowDesc: {taskflow_desc}
+
+{workflow_str}"""
+
 class PDL:
     PDL_str: str = None
     
@@ -62,8 +78,26 @@ class PDL:
             taskflow_desc = reg_taskflow_desc.search(s).group(1)
         return taskflow, taskflow_desc
 
-    def to_str(self):
-        return self.PDL_str
+    def to_str(self, use_raw=True):
+        if use_raw:
+            return self.PDL_str
+        apis = ""
+        for api in self.apis:
+            apis += "-\n" + "\n".join([f"    {k}: {v}" for k, v in api.items()]) + "\n"
+        requests = ""
+        for request in self.requests:
+            requests += "-\n" + "\n".join([f"    {k}: {v}" for k, v in request.items()]) + "\n"
+        answers = ""
+        for answer in self.answers:
+            answers += "-\n" + "\n".join([f"    {k}: {v}" for k, v in answer.items()]) + "\n"
+        return pdl_template.format(
+            apis=apis.rstrip(),
+            requests=requests.rstrip(),
+            answers=answers.rstrip(),
+            taskflow_name=self.taskflow_name,
+            taskflow_desc=self.taskflow_desc,
+            workflow_str=self.workflow_str
+        )
     def __str__(self):
         return self.to_str()
     def __repr__(self):

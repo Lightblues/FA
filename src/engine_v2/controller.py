@@ -2,7 +2,7 @@
 
 @240718 节点抽象、PDLController 控制逻辑
 """
-
+import json
 from typing import List, Dict, Optional, Tuple
 
 from .pdl import PDL
@@ -19,9 +19,16 @@ class PDLNode:
             self.precondition = self._parse_preconditions(preconditions)
 
     def _parse_preconditions(self, s:str) -> List[str]:
-        s = s.strip().lstrip("[").rstrip("]")
-        names = s.split(",")
-        return [n.strip() for n in names]
+        try:
+            preconditions = eval(s)
+        except Exception as e:
+            s = s.strip().lstrip("[").rstrip("]")
+            names = s.split(",")
+            preconditions = []
+            for s in names:
+                s = s.strip('\'').strip('\"').strip()
+                if s: preconditions.append(s)
+        return preconditions
 
     def __repr__(self) -> str:
         return f"PDLNode({self.name}, {self.precondition})"
@@ -41,10 +48,11 @@ class PDLGraph:
         self.name2node[node.name] = node
     
     def check_preconditions(self) -> bool:
-        names = self.name2node.keys()
+        names = set(self.name2node.keys())
         for node in self.name2node.values():
             for name in node.precondition:
-                assert name in names, f"precondition {name} not found in nodes: {names}!!"
+                if not name: continue
+                assert name in names, f"precondition `{name}` not found in nodes: {names}!!"
         return True
     
     def __repr__(self) -> str:

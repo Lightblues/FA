@@ -12,15 +12,19 @@ from .common import DataManager, _DIRECTORY_MANAGER
 # from engine_v1.datamodel import Role, Message, ActionType, Conversation
 
 class ActionType(Enum):
-    START = auto()
-    API = auto()        # below 3 actions are for bot!!!
-    REQUEST = auto()
-    ANSWER = auto()
-    USER_INPUT = auto()
-    API_RESPONSE = auto()
+    START = ("START", "start node")
+    API = ("API", "bot call API")        # below 3 actions are for bot!!!
+    REQUEST = ("REQUEST", "bot request for information")
+    ANSWER = ("ANSWER", "bot give answer to user")
+    USER_INPUT = ("USER_INPUT", "user input")
+    API_RESPONSE = ("API_RESPONSE", "API response")
+
+    def __init__(self, actionname, description):
+        self.actionname = actionname
+        self.description = description
 
     def __str__(self):
-        return f"ActionType.{self.name}"
+        return f"ActionType.{self.actionname}"
 
 class Role(Enum):
     SYSTEM = (0, "[SYSTEM] ", "system", 'green')
@@ -107,6 +111,7 @@ class Config:
     api_model_name: str = "gpt-4o-mini"
     user_mode: str = "manual"
     user_model_name: str = "gpt-4o-mini"
+    available_models: List[str] = None
     
     @classmethod
     def from_yaml(cls, yaml_file: str, normalize: bool = True):

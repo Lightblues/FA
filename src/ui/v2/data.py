@@ -1,6 +1,5 @@
 import yaml, os, pdb
 import streamlit as st
-from dataclasses import dataclass, asdict
 
 from .bot import PDL_UIBot
 from engine_v2 import (
@@ -92,7 +91,7 @@ def refresh_pdl(dir_change=False, PDL_str:str=None):
     refresh_conversation()          # clear the conversation
 
 
-def init_agents():
+def init(config_version:str="default.yaml"):
     """ 集中初始化: 替代 CLIInterface.__init__() 
     config: Config
     infos: ConversationHeaderInfos
@@ -100,7 +99,6 @@ def init_agents():
     pdl: PDL
     """
     assert "workflow_name" in st.session_state, "workflow_name must be selected! "   # init_sidebar()
-    if "config" not in st.session_state:
-        st.session_state.config = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
+    if "api_handler" not in st.session_state:
         st.session_state.api_handler = V01APIHandler()
         refresh_bot()

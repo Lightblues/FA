@@ -24,7 +24,7 @@ class PDLBot(BaseRole):
         action_metas = {}
         
         if conversation_infos is not None:
-            s_current_state = f"Previous action type: {conversation_infos.curr_action_type}. The number of user queries: {conversation_infos.num_user_query}."
+            s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
         else:
             s_current_state = None
         prompt = jinja_render(
