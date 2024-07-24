@@ -1,7 +1,7 @@
 import streamlit as st
 
-from engine_v2.common import DIR_templates
-from engine_v2 import PDL, PDLController
+
+from engine_v2 import PDL, PDLController, _DIRECTORY_MANAGER
 from .data import (
     get_template_name_list, get_model_name_list, get_workflow_info_dict, 
     refresh_bot, refresh_pdl, refresh_conversation
@@ -79,11 +79,9 @@ def init_sidebar():
 
         st.divider()
         # NOTE: init `pdl`
-        # st.session_state.pdl = PDL()            
-        # st.session_state.pdl.load_from_file(f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt")
         st.session_state.pdl = PDL.load_from_file(f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt")
         st.session_state.pdl_controller = PDLController(st.session_state.pdl)
-        with open(f"{DIR_templates}/{st.session_state.template_fn}", "r") as f:     # pdl_fn = f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt"
+        with open(f"{_DIRECTORY_MANAGER.DIR_templates}/{st.session_state.template_fn}", "r") as f:     # pdl_fn = f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt"
             template = f.read()
         
         with st.expander(f"🔍 PDL", expanded=True):

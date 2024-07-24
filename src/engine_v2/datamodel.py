@@ -5,19 +5,18 @@ import datetime, os, re, yaml, copy
 from enum import Enum, auto
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Optional, Tuple
-from colorama import init, Fore, Style
 
 from .pdl import PDL
-from .common import DIR_huabu_step3, DataManager
+from .common import DataManager, _DIRECTORY_MANAGER
 
 # from engine_v1.datamodel import Role, Message, ActionType, Conversation
 
 class ActionType(Enum):
     START = auto()
-    API = auto()
+    API = auto()        # below 3 actions are for bot!!!
     REQUEST = auto()
     ANSWER = auto()
-    USER = auto()
+    USER_INPUT = auto()
     API_RESPONSE = auto()
 
     def __str__(self):
@@ -100,7 +99,7 @@ class Conversation():
 
 @dataclass
 class Config:
-    workflow_dir: str = DIR_huabu_step3
+    workflow_dir: str = _DIRECTORY_MANAGER.DIR_huabu_step3
     workflow_name: str = "xxx"
     model_name: str = "qwen2_72B"
     template_fn: str = "query_PDL.jinja"
@@ -127,18 +126,22 @@ class Config:
         return str(asdict(self))
     def to_dict(self):
         return asdict(self)
+    def to_str(self):
+        # to lines of `key: value\n`
+        return "\n".join([f"{k}: {v}" for k, v in self.to_dict().items()])
     def copy(self):
         return Config(**self.to_dict())
 
 
 @dataclass
 class ConversationInfos:
-    previous_action_type: ActionType = None
+    curr_role: Role = None
+    curr_action_type: ActionType = None
     num_user_query: int = 0
     
     @classmethod
-    def from_components(cls, previous_action_type, num_user_query):
-        return cls(previous_action_type, num_user_query)
+    def from_components(cls, curr_role, curr_action_type, num_user_query):
+        return cls(curr_role, curr_action_type, num_user_query)
 
 @dataclass
 class ConversationHeaderInfos:

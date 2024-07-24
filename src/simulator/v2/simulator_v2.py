@@ -5,13 +5,13 @@ import datetime, copy
 from typing import List, Dict, Optional, Tuple
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
-from engine_v2 import PDL
+from engine_v2 import PDL, _DIRECTORY_MANAGER
 from engine_v2.main import ConversationController
 from engine_v2.role_api import LLMSimulatedAPIHandler, V01APIHandler
 from engine_v2.role_user import LLMSimulatedUserWithRefConversation
 from engine_v2.role_bot import PDLBot
 from engine_v2.controller import PDLController
-from engine_v2.common import Logger, DIR_simulation_v2_log
+from engine_v2.common import Logger
 from engine_v2.datamodel import (
     Conversation, Message, Role, ActionType, ConversationInfos, 
     Config, 
@@ -35,25 +35,27 @@ class SimulatorV2(ConversationController):
             self.api = V01APIHandler()  # paras: [fn_api_infos]
         else:
             raise ValueError(f"Unknown api_mode: {cfg.api_mode}")
-        self.logger = Logger(DIR_simulation_v2_log)
+        self.logger = Logger(_DIRECTORY_MANAGER.DIR_simulation_v2_log)
 
     def simulate(self, pdl:PDL, ref_conversation:Conversation) -> Tuple[Dict, Conversation]:
         """ 
         Q] 相较于 ConversationController.conversation 的差异?
         整体基本没有差异! 只是user从人工输入换成了LLM模拟, 在一些print还有log的地方有细微差异! 
+        
+        log 逻辑? 
         """
         msg_hello = Message(Role.BOT, f"你好，我是{self.cfg.workflow_name}机器人，有什么可以帮您?")
         self.logger.log_to_stdout(msg_hello.to_str(), color=msg_hello.role.color)
         conversation = Conversation()
         conversation.add_message(msg_hello)
         conversation_infos = ConversationInfos.from_components(             # useful information for bot
-            previous_action_type=ActionType.START, num_user_query=0
+            curr_role=Role.BOT, curr_action_type=ActionType.START, num_user_query=0
         )
-        curr_role, curr_action_type = Role.USER, ActionType.START
+        # curr_role, curr_action_type = Role.USER, ActionType.START
         action_metas = None
         self.user.load_ref_conversation(ref_conversation=ref_conversation)
-        while curr_action_type != ActionType.ANSWER:
-            next_role = self.next_role(curr_role, curr_action_type)
+        while conversation_infos.curr_action_type != ActionType.ANSWER:
+            next_role = self.next_role(conversation_infos.curr_role, conversation_infos.curr_action_type)
             if next_role == Role.USER:
                 action_type, action_metas, msg = self.user.process(conversation=conversation, pdl=pdl)
                 conversation_infos.num_user_query += 1
@@ -84,12 +86,11 @@ class SimulatorV2(ConversationController):
                 action_type, action_metas, msg = self.api.process(conversation=conversation, paras=action_metas)
             else:
                 raise ValueError(f"Unknown role: {next_role}")
-            curr_role, curr_action_type = next_role, action_type
-            conversation_infos.previous_action_type = curr_action_type
+            conversation_infos.curr_role = next_role
+            conversation_infos.curr_action_type = action_type
             conversation.add_message(msg)           # add msg universally
             self.logger.log(msg.to_str(), with_print=False)
-            # if curr_role not in [Role.USER]: self.logger.log_to_stdout(msg.to_str(), color=curr_role.color)
-            if curr_role not in []: self.logger.log_to_stdout(msg.to_str(), color=curr_role.color)  # also print user query in simulation mode!
+            if conversation_infos.curr_role not in []: self.logger.log_to_stdout(msg.to_str(), color=conversation_infos.curr_role.color)  # also print user query in simulation mode!
 
         return conversation
     

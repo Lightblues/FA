@@ -21,7 +21,7 @@ from .data import init_agents, init_resource
 from .bot import PDL_UIBot
 from engine_v2 import (
     Role, Message, Conversation, ConversationInfos, ActionType, Logger, PDL, PDLController, 
-    ConversationController, BaseRole, V01APIHandler
+    ConversationController, BaseRole, V01APIHandler, Config
 )
 
 
@@ -33,18 +33,8 @@ def main():
     init_sidebar()      # add configs!!!
     init_agents()
     
-    # TODO: print the header information
-    # s_infos = "\n".join([f"{k}: {v}" for k, v in infos.to_dict().items()]) + "\n"
-    # infos_header = f"{'='*50}\n" + s_infos + " START! ".center(50, "=")
-    # self.logger.log(infos_header, with_print=True)
-
     # 2] prepare for session conversation
-    if 'conversation' not in st.session_state:
-        st.session_state.conversation = Conversation()
-    if 'conversation_infos' not in st.session_state:
-        st.session_state.conversation_infos = ConversationInfos.from_components(
-            previous_action_type=ActionType.START, num_user_query=0
-        )
+    config: Config = st.session_state.config
     conversation: Conversation = st.session_state.conversation
     conversation_infos: ConversationInfos = st.session_state.conversation_infos
     logger: Logger = st.session_state.logger
@@ -52,7 +42,8 @@ def main():
     api: V01APIHandler = st.session_state.api_handler
     pdl: PDL = st.session_state.pdl
     pdl_controller: PDLController = st.session_state.pdl_controller
-    curr_role, curr_action_type = Role.USER, ActionType.USER
+    
+    # curr_role, curr_action_type    # init!!! move to conversation_infos
     action_metas = None
 
     for message in conversation.msgs:
@@ -62,6 +53,13 @@ def main():
         with st.chat_message(message.role.rolename, avatar=st.session_state['avatars'][message.role.rolename]):
             st.write(message.content)
 
+    # _with_print = True
+    _with_print = False
+    # if conversation_infos.curr_action_type == ActionType.START:   # NOTE: 仍然为导致输出两遍!!
+    if logger.num_logs == 0:
+        logger.log(f"{'config'.center(50, '=')}\n{config.to_str()}\n{'-'*50}", with_print=_with_print)
+        logger.log(conversation.msgs[0].to_str(), with_print=_with_print)
+
     # 3] the main loop!
     """ 
     交互逻辑: 
@@ -70,25 +68,31 @@ def main():
             若为API调用, 则进一步展示中间结果
         最后, 统一展示给用户的回复
         NOTE: 用 container 包裹的部分会在下一轮 query 后被覆盖
+    日志:
+        summary: 类似conversation交互, 可以增加必要信息
+        detailed: 记录设计到LLM的详细信息
     """
     if OBJECTIVE := st.chat_input('Input...'):       # NOTE: initial input!
         # 3.1] user input
-        conversation.add_message(Message(Role.USER, OBJECTIVE))
-        conversation_infos.previous_action_type = ActionType.USER
+        msg_user = Message(Role.USER, OBJECTIVE)
+        conversation.add_message(msg_user)
+        conversation_infos.curr_role = Role.USER
+        conversation_infos.curr_action_type = ActionType.USER_INPUT
         with st.chat_message("user", avatar=st.session_state['avatars']['user']):
             st.write(OBJECTIVE)
-        # logger.log_to_stdout(f"[USER] {OBJECTIVE}")
+        logger.log(f"{msg_user.to_str()}", with_print=_with_print)
 
         print(f"  <debug> conversation: {json.dumps(str(conversation), ensure_ascii=False)}")
         # 3.2] loop for bot response!
         with st.container():
             while True:
                 # 1) get next role
-                next_role = ConversationController.next_role(curr_role, curr_action_type)
+                # print(f"  <debug> conversation_infos: {json.dumps(str(conversation_infos), ensure_ascii=False)}")
+                next_role = ConversationController.next_role(conversation_infos.curr_role, conversation_infos.curr_action_type)
                 # 2) role processing, responding to the next role
                 if next_role == Role.USER: break
                 elif next_role == Role.BOT:
-                    _conversation = copy.deepcopy(conversation)
+                    _conversation = copy.deepcopy(conversation)     # tmp 变量
                     for bot_prediction_steps in range(3):      # cfg.bot_prediction_steps_limit
                         # [CHANGE01]: 修改为 stream 的方式
                         prompt, llm_response_stream = bot.process_stream(conversation, pdl, conversation_infos)
@@ -96,37 +100,41 @@ def main():
                             llm_response = st.write_stream(llm_response_stream)
                         parsed_response = Formater.parse_llm_output_json(llm_response)
                         action_type, action_metas, msg = bot.process_LLM_response(parsed_response)
-                        # _debug_msg = f"{'[BOT]'.center(50, '=')}\n<<prompt>>\n{action_metas['prompt']}\n\n<<response>>\n{action_metas['llm_response']}\n"
-                        # logger.debug(_debug_msg)
+                        action_metas.update(prompt=prompt, llm_response=llm_response)       # NOTE: update the action_metas!!
+                        _debug_msg = f"{'[BOT]'.center(50, '=')}\n<<lllm prompt>>\n{action_metas['prompt']}\n\n<<llm response>>\n{action_metas['llm_response']}\n"
+                        logger.debug(_debug_msg)
                         
                         if action_type == ActionType.API:
                             check_pass, sys_msg_str = pdl_controller.check_validation(next_node=action_metas["action_name"])       # next_node
-                            logger.log_to_stdout(f"  <controller> {msg.content}", color="gray")
-                            logger.log_to_stdout(f"  <controller> {sys_msg_str}", color="gray")
+                            msg_system = Message(Role.SYSTEM, sys_msg_str)
+                            logger.log(f"  {msg.content}\n  {msg_system.content}", with_print=_with_print)
+                            _debug_msg = f"{'[PDL_controller]'.center(50, '=')}\n<<requested api>>\n{msg.content}\n\n<<controller response>>\n{sys_msg_str}\n"
+                            logger.debug(_debug_msg)
                             if check_pass: break
                             else:
-                                # FIXME: 这里有问题吗? 
+                                # NOTE: 仅在中间过程记录错误调用的尝试! 
                                 _conversation.add_message(msg)
-                                _conversation.add_message(Message(Role.SYSTEM, sys_msg_str))
+                                _conversation.add_message(msg_system)
+                                st.markdown(f'<p style="color: red;">[controller error] <code>{sys_msg_str}</code></p>', unsafe_allow_html=True)
                         else: break
                     else:
                         pass         # TODO: 增加兜底策略
                 elif next_role == Role.SYSTEM:
                     action_type, action_metas, msg = api.process(conversation=conversation, paras=action_metas)
+                    _debug_msg = f"{'[API]'.center(50, '=')}\n<<calling api>>\n{action_metas}\n\n<< api response>>\n{msg.content}\n"
+                    logger.debug(_debug_msg)
                 else:
                     raise ValueError(f"Unknown role: {next_role}")
                 # 3) update
-                curr_role, curr_action_type = next_role, action_type
-                conversation_infos.previous_action_type = curr_action_type
+                # show API response to screen
+                conversation_infos.curr_role, conversation_infos.curr_action_type = next_role, action_type
                 conversation.add_message(msg)           # add msg universally
-                # logger.log(msg.to_str(), with_print=False)
+                logger.log(msg.to_str(), with_print=_with_print)
 
-                # # show API response to screen
-                # if action_type == ActionType.API:
-                #     with st.chat_message("system", avatar=st.session_state['avatars']['system']):
-                #         st.write(f"{conversation.msgs[-2].content}")
-                #         st.write(f"{conversation.msgs[-1].content}")
+                if conversation_infos.curr_action_type == ActionType.API_RESPONSE:     # [show] API response to screen
+                    st.markdown(f'<p style="color: green;">[API call] Got <code>{msg.content}</code> from <code>{conversation.msgs[-2].content}</code></p>', unsafe_allow_html=True)
         
+        # [show] final bot response to screen
         with st.chat_message("assistant", avatar=st.session_state['avatars']['assistant']):
             st.write(conversation.msgs[-1].content)
 

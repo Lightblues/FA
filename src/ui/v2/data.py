@@ -6,9 +6,9 @@ from .bot import PDL_UIBot
 from engine_v2 import (
     BaseLogger, Logger, Conversation, ConversationInfos, ConversationHeaderInfos, ActionType, Message, Role,
     PDLController, Config, V01APIHandler, PDL, 
-    init_client, LLM_CFG, DataManager
+    init_client, LLM_CFG, DataManager, _DIRECTORY_MANAGER
 )
-from engine_v1.common import DIR_data, DIR_data_base, DIR_ui_log, DIR_templates, HUABU_versions
+# from engine_v1.common import DIR_data, DIR_data_base, DIR_ui_log, DIR_templates, HUABU_versions
 
 
 def init_resource():
@@ -35,7 +35,7 @@ def init_resource():
         }
 
 # @st.cache_data
-def get_template_name_list(template_dir:str=DIR_templates, prefix:str="query_"):
+def get_template_name_list(template_dir:str=_DIRECTORY_MANAGER.DIR_templates, prefix:str="query_"):
     return DataManager.get_template_name_list(template_dir, prefix=prefix)
 @st.cache_data
 def get_model_name_list():
@@ -43,10 +43,10 @@ def get_model_name_list():
 
 @st.cache_data
 def get_workflow_dir_list():
-    workflow_versions = HUABU_versions
-    return [f"{DIR_data_base}/{v}" for v in workflow_versions]
+    workflow_versions = _DIRECTORY_MANAGER.HUABU_versions
+    return [f"{_DIRECTORY_MANAGER.DIR_data_base}/{v}" for v in workflow_versions]
 @st.cache_data
-def get_workflow_name_list(workflow_dir:str=DIR_data):
+def get_workflow_name_list(workflow_dir:str=_DIRECTORY_MANAGER.DIR_huabu_step3):
     return DataManager.get_workflow_name_list(workflow_dir)
 @st.cache_data
 def get_workflow_info_dict():
@@ -59,11 +59,13 @@ def get_workflow_info_dict():
 def refresh_conversation():
     st.session_state.conversation = Conversation()
     st.session_state.conversation_infos = ConversationInfos.from_components(
-        previous_action_type=ActionType.USER, num_user_query=0
+        curr_role=Role.BOT, curr_action_type=ActionType.START, num_user_query=0
     )
     workflow_name = st.session_state.workflow_name.split("-")[-1]
     msg_hello = Message(Role.BOT, f"你好，我是{workflow_name}机器人，有什么可以帮您?")
     st.session_state.conversation.add_message(msg_hello)
+    # NOTE: logger is bind to a single session! 
+    st.session_state.logger = Logger(log_dir=_DIRECTORY_MANAGER.DIR_ui_v2_log)  # note to set the log_dir
 
 def refresh_bot():
     print(f">> Refreshing bot: template_fn: {st.session_state.template_fn} with model {st.session_state.model_name}")
@@ -74,7 +76,6 @@ def refresh_bot():
     
     st.session_state.config = _config
     st.session_state.bot = PDL_UIBot(cfg=_config)
-    # st.session_state.bot = PDL_UIBot(st.session_state.client, st.session_state.api_handler, logger=BaseLogger(), template_fn=st.session_state.template_fn)
     refresh_conversation()          # clear the conversation
 
 def refresh_pdl(dir_change=False, PDL_str:str=None):
@@ -101,8 +102,5 @@ def init_agents():
     assert "workflow_name" in st.session_state, "workflow_name must be selected! "   # init_sidebar()
     if "config" not in st.session_state:
         st.session_state.config = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
-    if "logger" not in st.session_state:
-        st.session_state.logger = Logger(log_dir=DIR_ui_log)
-    if "bot" not in st.session_state:
         st.session_state.api_handler = V01APIHandler()
         refresh_bot()

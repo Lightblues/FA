@@ -4,12 +4,13 @@
 import os, argparse, json
 from tqdm import tqdm
 import concurrent.futures
-from simulator.simulator_v2 import SimulatorV2
-from engine_v2.datamodel import Conversation, Config
-from engine_v2.common import DIR_conversation_v1, DIR_huabu_step3, DIR_simulated_base, DataManager, LLM_CFG, init_client
+from simulator.v2.simulator_v2 import SimulatorV2
+from engine_v2 import (
+    Conversation, Config, _DIRECTORY_MANAGER, DataManager
+)
 
 
-def run_single_simulation(cfg:Config, workflow_name:str, odir:str=DIR_simulated_base/"tmp"):
+def run_single_simulation(cfg:Config, workflow_name:str, odir:str=_DIRECTORY_MANAGER.DIR_simulated_base/"tmp"):
     """ Run simulation for a specific workflow
     input:
         workflow_name: str
@@ -26,7 +27,7 @@ def run_single_simulation(cfg:Config, workflow_name:str, odir:str=DIR_simulated_
     assert cfg.workflow_name == workflow_name, f"{cfg.workflow_name} != {workflow_name}"
     simulated_results = []
     # 1] Load the LLM-generated conversation
-    fn = f"{DIR_conversation_v1}/{workflow_name}.json"
+    fn = f"{_DIRECTORY_MANAGER.DIR_conversation_v1}/{workflow_name}.json"
     with open(fn, "r") as f:
         ref_conversation_jsons = json.load(f)
     for ref_conversation_id, ref_conversation_json in enumerate(ref_conversation_jsons):
@@ -48,7 +49,7 @@ def run_single_simulation(cfg:Config, workflow_name:str, odir:str=DIR_simulated_
         print(f"Saved to {ofn}")
     return simulated_results
 
-def run_simulations(base_cfg:Config, conversation_dir=DIR_conversation_v1, output_dir=DIR_simulated_base/"tmp", max_workers=10):
+def run_simulations(base_cfg:Config, conversation_dir=_DIRECTORY_MANAGER.DIR_conversation_v1, output_dir=_DIRECTORY_MANAGER.DIR_simulated_base/"tmp", max_workers=10):
     """ 
     args:
         conversation_dir: str, the directory of the conversation files
@@ -87,7 +88,7 @@ if __name__ == '__main__':
     
     VERSION = f"template={template_fn}_pdl={workflow_dir}_model={cfg.model_name}_api={cfg.api_mode}"
     VERSION = VERSION.replace("/", "_").replace(".", "_")
-    odir = DIR_simulated_base / VERSION
+    odir = _DIRECTORY_MANAGER.DIR_simulated_base / VERSION
     
     MODE = "single"
     MODE = "all"
@@ -101,6 +102,6 @@ if __name__ == '__main__':
     elif MODE == "all":
         # --- run all ---
         max_workers = 10
-        run_simulations(base_cfg=cfg, conversation_dir=DIR_conversation_v1, output_dir=odir, max_workers=max_workers, )
+        run_simulations(base_cfg=cfg, conversation_dir=_DIRECTORY_MANAGER.DIR_conversation_v1, output_dir=odir, max_workers=max_workers, )
     else:
         raise ValueError(f"Unknown MODE: {MODE}")

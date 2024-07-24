@@ -39,9 +39,11 @@ class ConversationController:
     @staticmethod
     def next_role(curr_role:Role, action_type:ActionType) -> Role:
         """ Logic for conversation control! """
+        # 边界情况: START? 
         if action_type == ActionType.START:
             return Role.USER
-
+        
+        # 一般情况下的条件转移
         if curr_role in [Role.USER, Role.SYSTEM]:
             return Role.BOT
         elif curr_role == Role.BOT:
@@ -66,15 +68,15 @@ class ConversationController:
         conversation = Conversation()
         conversation.add_message(msg_hello)
         conversation_infos = ConversationInfos.from_components(             # useful information for bot
-            previous_action_type=ActionType.START, num_user_query=0
+            curr_role=Role.BOT, curr_action_type=ActionType.START, num_user_query=0
         )
-        curr_role, curr_action_type = Role.USER, ActionType.START
+        # curr_role, curr_action_type = Role.USER, ActionType.START
         action_metas = None
         
         # 1] the main loop: until get answer! (finish the PDL task)
-        while curr_action_type != ActionType.ANSWER:
+        while conversation_infos.curr_action_type != ActionType.ANSWER:
             # 1.1] get next role
-            next_role = self.next_role(curr_role, curr_action_type)
+            next_role = self.next_role(conversation_infos.curr_role, conversation_infos.curr_action_type)
             # 1.2] role processing, responding to the next role
             if next_role == Role.USER:
                 action_type, action_metas, msg = self.user.process(conversation=conversation)
@@ -107,11 +109,11 @@ class ConversationController:
             else:
                 raise ValueError(f"Unknown role: {next_role}")
             # 1.3] update
-            curr_role, curr_action_type = next_role, action_type
-            conversation_infos.previous_action_type = curr_action_type
+            conversation_infos.curr_role = next_role
+            conversation_infos.curr_action_type = action_type
             conversation.add_message(msg)           # add msg universally
             self.logger.log(msg.to_str(), with_print=False)
-            if curr_role not in [Role.USER]: self.logger.log_to_stdout(msg.to_str(), color=curr_role.color)
+            if conversation_infos.curr_role not in [Role.USER]: self.logger.log_to_stdout(msg.to_str(), color=conversation_infos.curr_role.color)
 
         return conversation
     

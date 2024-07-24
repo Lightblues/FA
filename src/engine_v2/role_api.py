@@ -10,7 +10,7 @@ import requests, json, traceback
 from typing import List, Dict, Optional
 
 from .datamodel import BaseRole, Config, Role, Message, Conversation, PDL, ActionType
-from .common import prompt_user_input, FN_api_infos, init_client, LLM_CFG
+from .common import prompt_user_input, _DIRECTORY_MANAGER, init_client, LLM_CFG
 from easonsi.llm.openai_client import OpenAIClient, Formater
 from utils.jinja_templates import jinja_render
 
@@ -73,7 +73,7 @@ class LLMSimulatedAPIHandler(BaseRole):
 class V01APIHandler(BaseRole):
     api_infos: Dict[str, Dict] = {}
     
-    def __init__(self, fn_api_infos=FN_api_infos):
+    def __init__(self, fn_api_infos=_DIRECTORY_MANAGER.FN_api_infos):
         """ 
         args:
             fn_api_infos: str, path of the API infos

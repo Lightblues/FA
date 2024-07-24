@@ -33,7 +33,7 @@ class InputUser(BaseRole):
         while not user_input.strip():
             user_input = prompt_user_input("[USER] ")
         msg = Message(Role.USER, user_input)
-        return ActionType.USER, action_metas, msg
+        return ActionType.USER_INPUT, action_metas, msg
     
 class LLMSimulatedUserWithRefConversation(BaseRole):
     llm: OpenAIClient
@@ -66,5 +66,5 @@ class LLMSimulatedUserWithRefConversation(BaseRole):
         action_metas.update(prompt=prompt, llm_response=llm_response)       # for debug
         
         msg = Message(Role.USER, self.process_llm_response(llm_response))
-        return ActionType.USER, action_metas, msg
+        return ActionType.USER_INPUT, action_metas, msg
 

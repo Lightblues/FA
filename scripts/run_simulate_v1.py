@@ -4,7 +4,7 @@
 import os, argparse, json
 from tqdm import tqdm
 import concurrent.futures
-from simulator.simulator_v1 import SimulatorV1
+from simulator.v1.simulator_v1 import SimulatorV1
 from engine_v1.datamodel import Conversation
 from engine_v1.common import DIR_conversation, DIR_data, DIR_simulated, DataManager, LLM_CFG, init_client
 
