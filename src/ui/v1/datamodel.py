@@ -78,7 +78,7 @@ def refresh_conversation():
         previous_action_type=ActionType.START, num_user_query=0
     )
     workflow_name = st.session_state.workflow_name.split("-")[-1]
-    msg_hello = Message(Role.BOT, f"你好，我是{workflow_name}机器人，有什么可以帮您?")
+    msg_hello = Message(Role.BOT, st.session_state.config.greeting_msg.format(name=workflow_name))
     st.session_state.conversation.add_message(msg_hello)
 
 def refresh_bot():

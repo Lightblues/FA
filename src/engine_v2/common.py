@@ -36,6 +36,7 @@ class DirectoryManager:
         os.makedirs(self.DIR_ui_v2_log, exist_ok=True)
         
         self.HUABU_versions = ["huabu_step3_v01", "huabu_step3", "huabu_manual", "huabu_refine01"]
+        self.HUABU_versions_pdl2 = ["huabu_step3", "huabu_manual", "huabu_refine01"]
 
 _DIRECTORY_MANAGER = DirectoryManager()
 
@@ -150,13 +151,14 @@ class DataManager:
             workflow_dir = str(workflow_dir)
         if not workflow_dir.startswith("/apdcephfs"):
             subfolder_name = workflow_dir.split("/")[-1]
-            workflow_dir = f"{_DIRECTORY_MANAGER.DIR_data_base}/{subfolder_name}"
+            workflow_dir = _DIRECTORY_MANAGER.DIR_data_base / subfolder_name
         return workflow_dir
     
     @staticmethod
-    def normalize_workflow_name(workflow_name:str, workflow_dir:str):
+    def normalize_workflow_name(workflow_name:str, workflow_dir:str, extension:str=".txt"):
+        # print(f" calling normalize_workflow_name with {workflow_name}, {workflow_dir}, {extension}")
         workflow_dir = DataManager.normalize_workflow_dir(workflow_dir)
-        workflow_name_map = DataManager.build_workflow_id_map(workflow_dir)
+        workflow_name_map = DataManager.build_workflow_id_map(workflow_dir, extension=extension)
         assert workflow_name in workflow_name_map, f"Unknown workflow_name: {workflow_name}! Please choose from {workflow_name_map.keys()}"
         return workflow_name_map[workflow_name]
 
@@ -164,3 +166,15 @@ class DataManager:
     def normalize_config_name(config_name:str):
         config_fn = f"{_DIRECTORY_MANAGER.DIR_engine_v2_config}/{config_name}"
         return config_fn
+    
+    @staticmethod
+    def normalize_pdl_version(pdl_version:str="", workflow_dir:str=""):
+        if pdl_version: return pdl_version
+        if not workflow_dir: raise ValueError("workflow_dir is required!")
+        subfolder_name = workflow_dir.split("/")[-1]
+        if subfolder_name in _DIRECTORY_MANAGER.HUABU_versions:
+            return "v1"
+        elif subfolder_name in _DIRECTORY_MANAGER.HUABU_versions_pdl2:
+            return "v2"
+        else:
+            raise ValueError(f"Unknown workflow_dir: {workflow_dir}! Please choose from {_DIRECTORY_MANAGER.HUABU_versions} or {_DIRECTORY_MANAGER.HUABU_versions_pdl2}")

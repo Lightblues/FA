@@ -12,11 +12,18 @@ class PDLNode:
     precondition: List[str] = []
     is_activated: bool = False
     # is_end: bool = False
+    version: str = "v1"
     
-    def __init__(self, name:str, preconditions:str=None) -> None:
+    def __init__(self, name:str, preconditions:str=None, version:str=None) -> None:
         self.name = name
+        if version: self.version = version
         if preconditions is not None:
-            self.precondition = self._parse_preconditions(preconditions)
+            if self.version == "v1":
+                self.precondition = self._parse_preconditions(preconditions)
+            elif self.version == "v2":
+                assert isinstance(preconditions, list)
+            else: raise Exception(f"unknown version {self.version}")
+        
 
     def _parse_preconditions(self, s:str) -> List[str]:
         try:
@@ -39,9 +46,11 @@ class PDLNode:
 class PDLGraph:
     # nodes: List[PDLNode] = []
     name2node: Dict[str, PDLNode] = {}
+    version: str = "v1"
     
-    def __init__(self) -> None:
+    def __init__(self, version:str=None) -> None:
         self.name2node = {}     # NOTE: have to add __init__ to clear the dict
+        if version: self.version = version
     
     def add_node(self, node:PDLNode):
         assert node.name not in self.name2node, f"node {node.name} already exists!"
@@ -72,7 +81,7 @@ class PDLController:
         apis = pdl.apis
         g = PDLGraph()
         for api in apis:
-            g.add_node(PDLNode(api["name"], api.get("precondition", None)))
+            g.add_node(PDLNode(api["name"], api.get("precondition", None), pdl.version))
         g.check_preconditions()
         return g
     

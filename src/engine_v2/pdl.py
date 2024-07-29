@@ -1,4 +1,8 @@
-import re
+""" 
+@240724 PDL 解析器
+"""
+
+import re, yaml
 
 pdl_template = \
 """APIs:
@@ -25,6 +29,8 @@ class PDL:
     requests: list = []
     answers: list = []
     workflow_str: str = ""      # the core logic of the taskflow
+    
+    version: str = "v1"
     
     def __init__(self, PDL_str):
         self.PDL_str = PDL_str

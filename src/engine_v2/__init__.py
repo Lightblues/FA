@@ -8,4 +8,5 @@ from .datamodel import (
 )
 from .controller import PDLController
 from .pdl import PDL
+from .pdl_v2 import PDL_v2
 from .common import BaseLogger, Logger, init_client, LLM_CFG, DataManager, _DIRECTORY_MANAGER

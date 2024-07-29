@@ -1,7 +1,7 @@
 import streamlit as st
 
 
-from engine_v2 import PDL, PDLController, _DIRECTORY_MANAGER
+from engine_v2 import PDL, PDL_v2, PDLController, _DIRECTORY_MANAGER, Config
 from .data import (
     get_template_name_list, get_model_name_list, get_workflow_info_dict, 
     refresh_bot, refresh_pdl, refresh_conversation
@@ -22,17 +22,21 @@ def init_page():
     return
 
 def init_sidebar():
+    config: Config = st.session_state.config
+    
     LIST_template_names = get_template_name_list()
     LIST_model_names = get_model_name_list()
-    if st.session_state.config.available_models:
-        _available_models = st.session_state.config.available_models
+    
+    # set the shown model names
+    if config.available_models:
+        _available_models = config.available_models
         print(f"available_models: {_available_models}")
-        assert all(i in LIST_model_names for i in st.session_state.config.available_models)
+        assert all(i in LIST_model_names for i in config.available_models)
         if type(_available_models) == list:
-            LIST_model_names = st.session_state.config.available_models
+            LIST_model_names = config.available_models
         elif type(_available_models) == dict:
             LIST_model_names = list(_available_models.values())
-    LIST_workflow_dirs, DICT_workflow_info = get_workflow_info_dict()
+    LIST_workflow_dirs, DICT_workflow_info = get_workflow_info_dict(config)
     if "DICT_workflow_info" not in st.session_state:
         st.session_state.DICT_workflow_info = DICT_workflow_info
     
@@ -88,7 +92,13 @@ def init_sidebar():
         st.divider()
         # NOTE: init `pdl`
         if "pdl" not in st.session_state:
-            st.session_state.pdl = PDL.load_from_file(f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt")
+            assert hasattr(config, "pdl_version"), "`pdl_version` missing in config!"
+            if config.pdl_version == "v1":
+                _PDL = PDL
+            elif config.pdl_version == "v2":
+                _PDL = PDL_v2
+            else: raise ValueError(f"Unknown PDL version: {config.pdl_version}")
+            st.session_state.pdl = _PDL.load_from_file(f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt")
             st.session_state.pdl_controller = PDLController(st.session_state.pdl)
         with open(f"{_DIRECTORY_MANAGER.DIR_templates}/{st.session_state.template_fn}", "r") as f:     # pdl_fn = f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt"
             template = f.read()

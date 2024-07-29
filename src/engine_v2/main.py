@@ -12,6 +12,7 @@ from .role_bot import PDLBot
 from .role_user import InputUser, LLMSimulatedUserWithRefConversation
 from .role_api import ManualAPIHandler, V01APIHandler
 from .pdl import PDL
+from .pdl_v2 import PDL_v2
 from .common import Logger
 from .controller import PDLController
 
@@ -62,7 +63,7 @@ class ConversationController:
             conversation/conversation_infos, pdl
         """
         # 0] init; add the hello message
-        msg_hello = Message(Role.BOT, f"你好，我是{self.cfg.workflow_name}机器人，有什么可以帮您?")
+        msg_hello = Message(Role.BOT, self.cfg.greeting_msg.format(name=pdl.taskflow_name))
         self.logger.log(msg_hello.to_str(), with_print=False)
         self.logger.log_to_stdout(msg_hello.to_str(), color=msg_hello.role.color)
         conversation = Conversation()
@@ -74,7 +75,8 @@ class ConversationController:
         action_metas = None
         
         # 1] the main loop: until get answer! (finish the PDL task)
-        while conversation_infos.curr_action_type != ActionType.ANSWER:
+        # while conversation_infos.curr_action_type != ActionType.ANSWER:
+        while True:
             # 1.1] get next role
             next_role = self.next_role(conversation_infos.curr_role, conversation_infos.curr_action_type)
             # 1.2] role processing, responding to the next role
@@ -119,7 +121,13 @@ class ConversationController:
     
     def start_conversation(self):
         # [1] workflow_name -> PDL
-        pdl = PDL.load_from_file(f"{self.cfg.workflow_dir}/{self.cfg.workflow_name}.txt")
+        if self.cfg.pdl_version == "v1":
+            _PDL = PDL
+        elif self.cfg.pdl_version == "v2":
+            _PDL = PDL_v2
+        else:
+            raise ValueError(f"Unknown pdl_version: {self.cfg.pdl_version}")
+        pdl = _PDL.load_from_file(f"{self.cfg.workflow_dir}/{self.cfg.workflow_name}{self.cfg.pdl_extension}")
         self.pdl_controller = PDLController(pdl=pdl)
         
         # [2] print the header information

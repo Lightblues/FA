@@ -107,11 +107,14 @@ class Config:
     workflow_name: str = "xxx"
     model_name: str = "qwen2_72B"
     template_fn: str = "query_PDL.jinja"
+    pdl_version: str = ""       # v1 or v2, leave empty by default
+    pdl_extension: str = ""
     api_mode: str = "v01"
     api_model_name: str = "gpt-4o-mini"
     user_mode: str = "manual"
     user_model_name: str = "gpt-4o-mini"
     available_models: List[str] = None
+    greeting_msg: str = "Hi, I'm HuaBu bot. How can I help you?"
     
     @classmethod
     def from_yaml(cls, yaml_file: str, normalize: bool = True):
@@ -124,7 +127,9 @@ class Config:
     
     def normalize_paths(self):
         self.workflow_dir = DataManager.normalize_workflow_dir(self.workflow_dir)
-        self.workflow_name = DataManager.normalize_workflow_name(self.workflow_name, self.workflow_dir)
+        self.pdl_version = DataManager.normalize_pdl_version(self.pdl_version, self.workflow_dir)
+        self.pdl_extension = ".txt" if self.pdl_version == "v1" else ".yaml"
+        self.workflow_name = DataManager.normalize_workflow_name(self.workflow_name, self.workflow_dir, self.pdl_extension)
         return self
     
     def __repr__(self):

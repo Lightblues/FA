@@ -33,7 +33,7 @@ def main(config_version:str="default.yaml"):
     init_page()
     init_resource()
     init_sidebar()      # read UI configs!!!
-    init()
+    init()              # initialize all!
     
     # 2] prepare for session conversation
     config: Config = st.session_state.config

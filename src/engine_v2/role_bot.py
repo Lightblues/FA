@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional
 
 from .common import init_client, LLM_CFG
@@ -27,8 +28,10 @@ class PDLBot(BaseRole):
             s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
         else:
             s_current_state = None
+        head_info = f"Current time: {datetime.datetime.now().strftime('%Y-%m-%d (%A) %H:%M:%S')}"
         prompt = jinja_render(
             self.cfg.template_fn,       # "query_PDL.jinja"
+            head_info=head_info,
             conversation=conversation.to_str(), 
             PDL=pdl.to_str(),
             current_state=s_current_state
@@ -44,7 +47,10 @@ class PDLBot(BaseRole):
         # -> ActionType
         assert "action_type" in parsed_response, f"parsed_response: {parsed_response}"
         try:
-            action_type = ActionType[parsed_response["action_type"]]
+            if parsed_response["action_type"] == "ASKSLOT":
+                action_type = ActionType.REQUEST
+            else:
+                action_type = ActionType[parsed_response["action_type"]]
         except KeyError:
             raise ValueError(f"Unknown action_type: {parsed_response['action_type']}")
         # -> action_metas

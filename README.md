@@ -1,19 +1,28 @@
 ## TODOs
 
+data
+- [x] LLM auto generate node dependencies #2 @0724
+- [x] LLM-based PDL generation @0729
+
 functionalities
 - [x] Auto evaluation: `user, api` agent @240716
 - [x] implement an UI for interaction @240718
-    - [ ] move the engine_v2
+    - [x] move the engine_v2
 - [x] PDL controllable/dependency execuation #1 @240722 [engine_v2]
     - [ ] add dependency for ANSWER nodes
 
 APIs
 - [x] When pass "--api_mode=vanilla", select and start the API server automatically @240718
 - [ ] Generate API data automatically? #3 
-- [ ] implement API exec by actual API calling #1
+- [x] implement API exec by actual API calling #1  @0723
 
 prompting
 - [ ] add summary/memory #2
+- [x] add datetime @0729
+
+paper
+- [ ] auto conversation simulation (user agent) #1
+- [ ] auto conversation evaluation (based on specific PDL) #1
 
 ## run
 

@@ -41,18 +41,23 @@ def get_model_name_list():
     return list(LLM_CFG.keys())
 
 @st.cache_data
-def get_workflow_dir_list():
-    workflow_versions = _DIRECTORY_MANAGER.HUABU_versions
+def get_workflow_dir_list(pdl_version):
+    if pdl_version == "v1":
+        workflow_versions = _DIRECTORY_MANAGER.HUABU_versions
+    elif pdl_version == "v2":
+        workflow_versions = _DIRECTORY_MANAGER.HUABU_versions_pdl2
+    else:
+        raise ValueError(f"Invalid pdl_version: {pdl_version}")
     return [f"{_DIRECTORY_MANAGER.DIR_data_base}/{v}" for v in workflow_versions]
 @st.cache_data
-def get_workflow_name_list(workflow_dir:str=_DIRECTORY_MANAGER.DIR_huabu_step3):
-    return DataManager.get_workflow_name_list(workflow_dir)
+def get_workflow_name_list(workflow_dir:str=_DIRECTORY_MANAGER.DIR_huabu_step3, extension:str=".yaml"):
+    return DataManager.get_workflow_name_list(workflow_dir, extension=extension)
 @st.cache_data
-def get_workflow_info_dict():
+def get_workflow_info_dict(cfg:Config):
     workflow_info_dict = {}
-    LIST_workflow_dirs = get_workflow_dir_list()
+    LIST_workflow_dirs = get_workflow_dir_list(cfg.pdl_version)
     for d in LIST_workflow_dirs:
-        workflow_info_dict[d] = get_workflow_name_list(d)
+        workflow_info_dict[d] = get_workflow_name_list(d, cfg.pdl_extension)
     return LIST_workflow_dirs, workflow_info_dict
 
 def refresh_conversation():
@@ -61,7 +66,7 @@ def refresh_conversation():
         curr_role=Role.BOT, curr_action_type=ActionType.START, num_user_query=0
     )
     workflow_name = st.session_state.workflow_name.split("-")[-1]
-    msg_hello = Message(Role.BOT, f"你好，我是{workflow_name}机器人，有什么可以帮您?")
+    msg_hello = Message(Role.BOT, st.session_state.config.greeting_msg.format(name=workflow_name))
     st.session_state.conversation.add_message(msg_hello)
     # NOTE: logger is bind to a single session! 
     st.session_state.logger = Logger(log_dir=_DIRECTORY_MANAGER.DIR_ui_v2_log)  # note to set the log_dir

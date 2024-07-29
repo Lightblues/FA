@@ -32,7 +32,7 @@ if __name__ == '__main__':
     if args.workflow_name: cfg.workflow_name = args.workflow_name
     if args.api_mode: cfg.api_mode = args.api_mode
     cfg.workflow_dir = DataManager.normalize_workflow_dir(cfg.workflow_dir)
-    cfg.workflow_name = DataManager.normalize_workflow_name(cfg.workflow_name, cfg.workflow_dir)
+    cfg.workflow_name = DataManager.normalize_workflow_name(cfg.workflow_name, cfg.workflow_dir, cfg.pdl_extension)
     print(f"config: {cfg}")
     
     controller = ConversationController(cfg)
