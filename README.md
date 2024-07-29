@@ -10,6 +10,8 @@ functionalities
     - [x] move the engine_v2
 - [x] PDL controllable/dependency execuation #1 @240722 [engine_v2]
     - [ ] add dependency for ANSWER nodes
+- [ ] UI
+    - [ ] add additional user instructions in UI
 
 APIs
 - [x] When pass "--api_mode=vanilla", select and start the API server automatically @240718

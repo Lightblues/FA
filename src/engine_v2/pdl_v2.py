@@ -33,7 +33,7 @@ class PDL_v2:
         ob = yaml.load(self.PDL_str, Loader=yaml.FullLoader)
         self.taskflow_name = ob["Name"]
         self.taskflow_desc = ob["Desc"]
-        self.apis = ob["APIs"]
+        self.apis = ob.get("APIs", [])
         self.slots = ob["SLOTs"]
         self.answers = ob["ANSWERs"]
         self.workflow_str = ob["PDL"]
