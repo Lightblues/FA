@@ -61,9 +61,10 @@ def get_workflow_info_dict(cfg:Config):
     return LIST_workflow_dirs, workflow_info_dict
 
 def refresh_conversation():
+    print(f"  <debug> Refreshing conversation!")
     st.session_state.conversation = Conversation()
     st.session_state.conversation_infos = ConversationInfos.from_components(
-        curr_role=Role.BOT, curr_action_type=ActionType.START, num_user_query=0
+        curr_role=Role.BOT, curr_action_type=ActionType.START, num_user_query=0, user_additional_constraints=st.session_state.user_additional_constraints
     )
     workflow_name = st.session_state.workflow_name.split("-")[-1]
     msg_hello = Message(Role.BOT, st.session_state.config.greeting_msg.format(name=workflow_name))
@@ -83,6 +84,9 @@ def refresh_bot():
     refresh_conversation()          # clear the conversation
 
 def refresh_pdl(dir_change=False, PDL_str:str=None):
+    """ 刷新PDL, 同时重制对话
+    dir_change: check if the dir of PDL has changed
+    """
     if PDL_str:
         assert (not dir_change), "dir_change must be False when PDL_str is given!"
         print(f">> Refreshing PDL: with customed PDL_str!")

@@ -39,6 +39,7 @@ def init_sidebar():
     LIST_workflow_dirs, DICT_workflow_info = get_workflow_info_dict(config)
     if "DICT_workflow_info" not in st.session_state:
         st.session_state.DICT_workflow_info = DICT_workflow_info
+        st.session_state.user_additional_constraints = None
     
     with st.sidebar:
         select_col1, select_col2 = st.columns(2)
@@ -76,6 +77,19 @@ def init_sidebar():
                 on_change=refresh_pdl
             )
         
+        with st.expander(f"⚙️ 自定义配置", expanded=False):
+            st.text_area(
+                "添加你对于PDL流程的额外约束", height=100, 
+                key="user_additional_constraints", 
+                placeholder="e.g. 当切换医院的时候, 默认科室不变. "
+            )
+            if st.button("应用"):
+                if not st.session_state.user_additional_constraints:
+                    st.warning("请填写自定义约束")
+                else:
+                    refresh_conversation()
+                    # print(f"  <debug> user_additional_constraints: {st.session_state.user_additional_constraints}")
+
         st.divider()
         button_col1, button_col2 = st.columns(2)
         with button_col1:

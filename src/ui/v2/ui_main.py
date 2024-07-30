@@ -90,7 +90,7 @@ def main(config_version:str="default.yaml"):
         with st.container():
             while True:
                 # 1) get next role
-                # print(f"  <debug> conversation_infos: {json.dumps(str(conversation_infos), ensure_ascii=False)}")
+                print(f"  <debug> conversation_infos: {json.dumps(str(conversation_infos), ensure_ascii=False)}")
                 next_role = ConversationController.next_role(conversation_infos.curr_role, conversation_infos.curr_action_type)
                 # 2) role processing, responding to the next role
                 if next_role == Role.USER: break

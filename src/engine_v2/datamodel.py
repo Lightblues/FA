@@ -148,10 +148,11 @@ class ConversationInfos:
     curr_role: Role = None
     curr_action_type: ActionType = None
     num_user_query: int = 0
+    user_additional_constraints: str = None
     
     @classmethod
-    def from_components(cls, curr_role, curr_action_type, num_user_query):
-        return cls(curr_role, curr_action_type, num_user_query)
+    def from_components(cls, curr_role, curr_action_type, num_user_query, user_additional_constraints=None):
+        return cls(curr_role, curr_action_type, num_user_query, user_additional_constraints)
 
 @dataclass
 class ConversationHeaderInfos:

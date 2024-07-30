@@ -1,6 +1,7 @@
 """ 
 @240718 从 engine_v1.bots 进行修改
 """
+
 import datetime
 from typing import List, Dict, Optional, Tuple
 from easonsi.llm.openai_client import OpenAIClient, Formater
@@ -21,17 +22,19 @@ class PDL_UIBot(BaseRole):
         self.llm = init_client(llm_cfg=LLM_CFG[cfg.model_name])
 
     def process_stream(self, conversation: Conversation, pdl: PDL, conversation_infos: Optional[ConversationInfos] = None):
+        s_current_state = None
+        user_additional_constraints = None
         if conversation_infos:
             s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
-        else:
-            s_current_state = None
+            user_additional_constraints = conversation_infos.user_additional_constraints
         head_info = f"Current time: {datetime.datetime.now().strftime('%Y-%m-%d (%A) %H:%M:%S')}"
         prompt = jinja_render(
             self.cfg.template_fn,       # "query_PDL.jinja"
             head_info=head_info,
             conversation=conversation.to_str(), 
             PDL=pdl.to_str(),
-            current_state=s_current_state
+            current_state=s_current_state,
+            user_additional_constraints=user_additional_constraints,
         )
         llm_response_stream = self.llm.query_one_stream_generator(prompt)
         return prompt, llm_response_stream

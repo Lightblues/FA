@@ -1,4 +1,4 @@
-workflow_dir: "pdl2_0729"    # huabu_refine01
+workflow_dir: "huabu_step3"    # huabu_refine01
 workflow_name: "000"
 
 available_models: 

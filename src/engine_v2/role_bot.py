@@ -24,17 +24,19 @@ class PDLBot(BaseRole):
         """
         action_metas = {}
         
+        s_current_state = None
+        user_additional_constraints = None
         if conversation_infos is not None:
             s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
-        else:
-            s_current_state = None
+            user_additional_constraints = conversation_infos.user_additional_constraints
         head_info = f"Current time: {datetime.datetime.now().strftime('%Y-%m-%d (%A) %H:%M:%S')}"
         prompt = jinja_render(
             self.cfg.template_fn,       # "query_PDL.jinja"
             head_info=head_info,
             conversation=conversation.to_str(), 
             PDL=pdl.to_str(),
-            current_state=s_current_state
+            current_state=s_current_state,
+            user_additional_constraints=user_additional_constraints,
         )
         if print_stream:
             llm_response = self.llm.query_one_stream(prompt)
