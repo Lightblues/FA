@@ -10,7 +10,7 @@ from engine_v1.common import (
 )
 
 DEBUG = False
-# DEBUG = True      # NOTE: switch it on for debug
+DEBUG = True      # NOTE: switch it on for debug
 
 class DirectoryManager:
     def __init__(self):

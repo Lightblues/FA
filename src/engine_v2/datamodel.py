@@ -114,15 +114,16 @@ class Config:
     template_fn: str = "query_PDL.jinja"
     pdl_version: str = ""       # v1 or v2, leave empty by default
     pdl_extension: str = ""
-    api_mode: str = "v01"
+    api_mode: str = "v01"       # v01, llm, manual
     api_model_name: str = "gpt-4o-mini"
     user_mode: str = "manual"
     user_model_name: str = "gpt-4o-mini"
     available_models: List[str] = None
     greeting_msg: str = "Hi, I'm HuaBu bot. How can I help you?"
-    check_dependency: bool = True
-    check_duplicate: bool = False
+    check_dependency: bool = True       # switcher: if check API dependency
+    check_duplicate: bool = False       # switcher: if check API duplication calls
     max_duplicated_limit: int = 1
+    api_entity_linking: bool = True     # switcher: if use entity link in API calls
     
     @classmethod
     def from_yaml(cls, yaml_file: str, normalize: bool = True):

@@ -61,7 +61,7 @@ def get_workflow_info_dict(cfg:Config):
     return LIST_workflow_dirs, workflow_info_dict
 
 def refresh_conversation():
-    print(f"  <debug> Refreshing conversation!")
+    print(f">> Refreshing conversation!")
     st.session_state.conversation = Conversation()
     st.session_state.conversation_infos = ConversationInfos.from_components(
         curr_role=Role.BOT, curr_action_type=ActionType.START, num_user_query=0, user_additional_constraints=st.session_state.user_additional_constraints
@@ -109,5 +109,5 @@ def init(config_version:str="default.yaml"):
     """
     assert "workflow_name" in st.session_state, "workflow_name must be selected! "   # init_sidebar()
     if "api_handler" not in st.session_state:
-        st.session_state.api_handler = V01APIHandler()
+        st.session_state.api_handler = V01APIHandler(cfg=st.session_state.config)
         refresh_bot()

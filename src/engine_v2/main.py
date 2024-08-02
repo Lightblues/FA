@@ -11,7 +11,7 @@ from .datamodel import (
 )
 from .role_bot import PDLBot
 from .role_user import InputUser, LLMSimulatedUserWithRefConversation
-from .role_api import ManualAPIHandler, V01APIHandler
+from .role_api import ManualAPIHandler, V01APIHandler, LLMSimulatedAPIHandler
 from .pdl import PDL
 from .pdl_v2 import PDL_v2
 from .common import Logger, DEBUG
@@ -33,7 +33,9 @@ class ConversationController:
         if cfg.api_mode == "manual":
             self.api = ManualAPIHandler()
         elif cfg.api_mode == "v01":
-            self.api = V01APIHandler()  # paras: [fn_api_infos]
+            self.api = V01APIHandler(cfg=cfg)  # paras: [fn_api_infos]
+        elif cfg.api_mode == "llm":
+            self.api = LLMSimulatedAPIHandler(cfg=cfg)
         else:
             raise ValueError(f"Unknown api_mode: {cfg.api_mode}")
         self.logger = Logger()
@@ -140,8 +142,14 @@ class ConversationController:
                 else:
                     pass         # TODO: 增加兜底策略
             elif next_role == Role.SYSTEM:
-                # TODO: add log for api??
                 action_type, action_metas, msg = self.api.process(conversation=conversation, paras=action_metas)
+                if self.cfg.api_mode == "llm":
+                    _debug_msg = f"{'[API.llm]'.center(50, '=')}\n<<prompt>>\n{action_metas['prompt']}\n\n<<response>>\n{action_metas['llm_response']}\n"
+                    self.logger.debug(_debug_msg)
+                elif self.cfg.api_mode == "v01":
+                    for m in action_metas["entity_linking"]:
+                        _debug_msg = f"{'[API.EL]'.center(50, '=')}\n<<prompt>>\n{m['prompt']}\n\n<<response>>\n{m['llm_response']}\n"
+                        self.logger.debug(_debug_msg)
             else:
                 raise ValueError(f"Unknown role: {next_role}")
             # 1.3] update

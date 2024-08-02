@@ -32,7 +32,7 @@ class SimulatorV2(ConversationController):
         if cfg.api_mode == "llm":
             self.api = LLMSimulatedAPIHandler(cfg=cfg)
         elif cfg.api_mode == "v01":
-            self.api = V01APIHandler()  # paras: [fn_api_infos]
+            self.api = V01APIHandler(cfg=cfg)  # paras: [fn_api_infos]
         else:
             raise ValueError(f"Unknown api_mode: {cfg.api_mode}")
         self.logger = Logger(_DIRECTORY_MANAGER.DIR_simulation_v2_log)

@@ -5,7 +5,11 @@ available_models:
 - "default"
 
 api_mode: "v01"
-api_model_name: "gpt-4o-mini" # used when set api_mode as llm
+api_model_name: "qwen2_72B" # "gpt-4o-mini"
+check_dependency: true
+check_duplicate: true
+max_duplicated_limit: 2
+api_entity_linking: true
 
 user_mode: "manual"
 user_model_name: "gpt-4o-mini" # used when set user_mode as llm

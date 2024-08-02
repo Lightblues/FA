@@ -30,6 +30,7 @@ def main(config_version:str="default.yaml"):
     # 1] init
     if "config" not in st.session_state:
         st.session_state.config = Config.from_yaml(DataManager.normalize_config_name(config_name=config_version))
+        print(f"[INFO] config: {st.session_state.config}")
     init_page()
     init_resource()
     init_sidebar()      # read UI configs!!!
@@ -85,12 +86,12 @@ def main(config_version:str="default.yaml"):
             st.write(OBJECTIVE)
         logger.log(f"{msg_user.to_str()}", with_print=_with_print)
 
-        print(f"  <debug> conversation: {json.dumps(str(conversation), ensure_ascii=False)}")
+        print(f">> conversation: {json.dumps(str(conversation), ensure_ascii=False)}")
         # 3.2] loop for bot response!
         with st.container():
             while True:
                 # 1) get next role
-                print(f"  <debug> conversation_infos: {json.dumps(str(conversation_infos), ensure_ascii=False)}")
+                # print(f">> conversation_infos: {json.dumps(str(conversation_infos), ensure_ascii=False)}")
                 next_role = ConversationController.next_role(conversation_infos.curr_role, conversation_infos.curr_action_type)
                 # 2) role processing, responding to the next role
                 if next_role == Role.USER: break
@@ -129,12 +130,12 @@ def main(config_version:str="default.yaml"):
                 else:
                     raise ValueError(f"Unknown role: {next_role}")
                 # 3) update
-                # show API response to screen
                 conversation_infos.curr_role, conversation_infos.curr_action_type = next_role, action_type
                 conversation.add_message(msg)           # add msg universally
                 logger.log(msg.to_str(), with_print=_with_print)
 
-                if conversation_infos.curr_action_type == ActionType.API_RESPONSE:     # [show] API response to screen
+                # show API response to screen
+                if conversation_infos.curr_action_type == ActionType.API_RESPONSE:
                     st.markdown(f'<p style="color: green;">[API call] Got <code>{msg.content}</code> from <code>{conversation.msgs[-2].content}</code></p>', unsafe_allow_html=True)
         
         # [show] final bot response to screen

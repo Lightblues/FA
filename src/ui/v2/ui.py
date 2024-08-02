@@ -88,7 +88,7 @@ def init_sidebar():
                     st.warning("请填写自定义约束")
                 else:
                     refresh_conversation()
-                    # print(f"  <debug> user_additional_constraints: {st.session_state.user_additional_constraints}")
+                    # print(f">> user_additional_constraints: {st.session_state.user_additional_constraints}")
 
         st.divider()
         button_col1, button_col2 = st.columns(2)
