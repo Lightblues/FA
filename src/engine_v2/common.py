@@ -9,7 +9,8 @@ from engine_v1.common import (
     init_client, LLM_CFG
 )
 
-
+DEBUG = False
+# DEBUG = True      # NOTE: switch it on for debug
 
 class DirectoryManager:
     def __init__(self):
@@ -127,7 +128,8 @@ class DataManager:
         workflow_id_map = {}
         for file in os.listdir(workflow_dir):
             if file.endswith(extension):
-                workflow_name = file.rstrip(extension)
+                # workflow_name = file.rstrip(extension)    # NOTE: error for __x.txt
+                workflow_name = file[:-len(extension)]
                 id, name = workflow_name.split("-", 1)
                 workflow_id_map[id] = workflow_name
                 workflow_id_map[name] = workflow_name
@@ -156,7 +158,6 @@ class DataManager:
     
     @staticmethod
     def normalize_workflow_name(workflow_name:str, workflow_dir:str, extension:str=".txt"):
-        # print(f" calling normalize_workflow_name with {workflow_name}, {workflow_dir}, {extension}")
         workflow_dir = DataManager.normalize_workflow_dir(workflow_dir)
         workflow_name_map = DataManager.build_workflow_id_map(workflow_dir, extension=extension)
         assert workflow_name in workflow_name_map, f"Unknown workflow_name: {workflow_name}! Please choose from {workflow_name_map.keys()}"

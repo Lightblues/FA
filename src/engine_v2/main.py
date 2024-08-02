@@ -3,7 +3,8 @@
 @240718 抽象整体结构, 完成 ConversationController
 """
 
-import os, sys, time, datetime, copy
+import os, sys, time, datetime, copy, json
+from typing import Tuple, Dict
 
 from .datamodel import (
     Role, Message, Conversation, ActionType, ConversationInfos, Config
@@ -13,7 +14,7 @@ from .role_user import InputUser, LLMSimulatedUserWithRefConversation
 from .role_api import ManualAPIHandler, V01APIHandler
 from .pdl import PDL
 from .pdl_v2 import PDL_v2
-from .common import Logger
+from .common import Logger, DEBUG
 from .controller import PDLController
 
 
@@ -57,6 +58,23 @@ class ConversationController:
         else:
             raise ValueError(f"Unknown role: {curr_role}")
         
+    def check_API_duplicated_call(self, conversation: Conversation, msg: str) -> Tuple[bool, str]:
+        duplicate_cnt = 0
+        for check_idx in range(len(conversation))[::-1]:
+            previous_msg = conversation.get_message_by_idx(check_idx)
+            if previous_msg.role != Role.BOT:
+                continue
+            self.logger.log_to_stdout(f"  <current msg> {msg}", color="gray")
+            self.logger.log_to_stdout(f"  <previous msg> {previous_msg.content}", color="gray")
+            if previous_msg.content != msg:
+                break
+            duplicate_cnt += 1
+            if duplicate_cnt >= self.cfg.max_duplicated_limit:
+                msg = "Too many duplicated API call! try another action instead."
+                return False, msg
+        msg = "Check success!"
+        return True, msg
+    
     def conversation(self, pdl:PDL):
         """ 
         data for 3 roles:
@@ -92,17 +110,33 @@ class ConversationController:
                     )
                     _debug_msg = f"{'[BOT]'.center(50, '=')}\n<<prompt>>\n{action_metas['prompt']}\n\n<<response>>\n{action_metas['llm_response']}\n"
                     self.logger.debug(_debug_msg)
+                    if DEBUG: print(f">> llm_response: {json.dumps(action_metas['llm_response'], ensure_ascii=False)}")
                     
                     if action_type == ActionType.API:
-                        check_pass, sys_msg_str = self.pdl_controller.check_validation(next_node=action_metas["action_name"])       # next_node
-                        self.logger.log_to_stdout(f"  <controller> {msg.content}", color="gray")
-                        self.logger.log_to_stdout(f"  <controller> {sys_msg_str}", color="gray")
-                        if check_pass: break
-                        else:
-                            # FIXME: 之类有问题吗? 
-                            _conversation.add_message(msg)
-                            _conversation.add_message(Message(Role.SYSTEM, sys_msg_str))
-                    else: break
+                        # check if the API calling chain is valid
+                        if self.cfg.check_dependency:
+                            check_pass, sys_msg_str = self.pdl_controller.check_validation(next_node=action_metas["action_name"])       # next_node
+                            self.logger.log_to_stdout(f"  <controller.dependency> {msg.content}", color="gray")
+                            self.logger.log_to_stdout(f"  <controller.dependency> {sys_msg_str}", color="gray")
+                            if not check_pass:
+                                # if check failed, retry until [cfg.bot_prediction_steps_limit]
+                                _conversation.add_message(msg)
+                                _conversation.add_message(Message(Role.SYSTEM, sys_msg_str))
+                                continue
+                        # check if there are duplicated API calls that refer to same API with same parameters continously 
+                        if self.cfg.check_duplicate:
+                            check_duplicated_pass, check_duplicated_info = self.check_API_duplicated_call(conversation=conversation, msg=msg.content)
+                            self.logger.log_to_stdout(f"  <controller.deduplicate> {check_duplicated_info}", color="gray") 
+                            if not check_duplicated_pass:
+                                _conversation.add_message(msg)
+                                _conversation.add_message(Message(Role.SYSTEM, check_duplicated_info))
+                                continue
+                        
+                        # if pass all checks, break! 
+                        break
+                    else:
+                        # for non-API actions, response to the user directly
+                        break
                 else:
                     pass         # TODO: 增加兜底策略
             elif next_role == Role.SYSTEM:

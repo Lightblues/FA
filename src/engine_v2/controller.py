@@ -6,6 +6,7 @@ import json
 from typing import List, Dict, Optional, Tuple
 
 from .pdl import PDL
+from .common import DEBUG
 
 class PDLNode:
     name: str
@@ -22,6 +23,7 @@ class PDLNode:
                 self.precondition = self._parse_preconditions(preconditions)
             elif self.version == "v2":
                 assert isinstance(preconditions, list)
+                self.precondition = preconditions
             else: raise Exception(f"unknown version {self.version}")
         
 
@@ -38,9 +40,9 @@ class PDLNode:
         return preconditions
 
     def __repr__(self) -> str:
-        return f"PDLNode({self.name}, {self.precondition})"
-    def __str__(self) -> str:
-        return f"PDLNode({self.name})"
+        return f"PDLNode({self.name}, with precondition {self.precondition})"
+    # def __str__(self) -> str:
+    #     return f"PDLNode({self.name})"
 
 
 class PDLGraph:
@@ -78,23 +80,27 @@ class PDLController:
         self.graph = self.build_graph(pdl)
     
     def build_graph(self, pdl:PDL):
+        if DEBUG: print(f">> building graph ...")
         apis = pdl.apis
         g = PDLGraph()
         for api in apis:
-            g.add_node(PDLNode(api["name"], api.get("precondition", None), pdl.version))
+            node = PDLNode(name=api["name"], preconditions=api.get("precondition", None), version=pdl.version)
+            g.add_node(node)
+            if DEBUG: print(f"  added node {node}")
         g.check_preconditions()
         return g
     
     def check_validation(self, next_node:str) -> Tuple[bool, str]:
         node = self.graph.name2node[next_node]
+        if DEBUG: print(f">> checking validation for {node}")
         if node.precondition:
             for p in node.precondition:
+                if DEBUG: print(f"  checking precondition `{p}`...")
                 if not self.graph.name2node[p].is_activated:
                     msg = f"Precondition check failed! {p} not activated for {next_node}!"
-                    # print(f"<debug> {msg}")
+                    if DEBUG: print(f"  [WARNING] {msg}")
                     return False, msg
         node.is_activated = True
         msg = f"Check success! {next_node} activated!"
-        # print(f"<debug> {msg}")
         return True, msg
 

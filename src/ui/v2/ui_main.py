@@ -21,7 +21,7 @@ from .data import init, init_resource
 from .bot import PDL_UIBot
 from engine_v2 import (
     Role, Message, Conversation, ConversationInfos, ActionType, Logger, PDL, PDLController, 
-    ConversationController, BaseRole, V01APIHandler, Config, DataManager
+    ConversationController, V01APIHandler, Config, DataManager
 )
 
 

@@ -64,6 +64,9 @@ class Conversation():
     def add_message(self, msg: Message):
         assert isinstance(msg, Message), f"Must be Message! But got {type(msg)}"
         self.msgs.append(msg)
+            
+    def get_message_by_idx(self, idx: int) -> Message:
+        return self.msgs[idx]
 
     @classmethod
     def load_from_json(cls, o:List):
@@ -100,6 +103,8 @@ class Conversation():
         return self.to_str()
     def __repr__(self):
         return self.to_str()
+    def __len__(self):
+        return len(self.msgs)
 
 @dataclass
 class Config:
@@ -115,6 +120,9 @@ class Config:
     user_model_name: str = "gpt-4o-mini"
     available_models: List[str] = None
     greeting_msg: str = "Hi, I'm HuaBu bot. How can I help you?"
+    check_dependency: bool = True
+    check_duplicate: bool = False
+    max_duplicated_limit: int = 1
     
     @classmethod
     def from_yaml(cls, yaml_file: str, normalize: bool = True):
@@ -179,4 +187,3 @@ class BaseRole:
             action_type, action_metas, msg
         """
         raise NotImplementedError
-

@@ -11,12 +11,13 @@ functionalities
 - [x] PDL controllable/dependency execuation #1 @240722 [engine_v2]
     - [ ] add dependency for ANSWER nodes
 - [ ] UI
-    - [ ] add additional user instructions in UI
+    - [x] add additional user instructions in UI
 
 APIs
 - [x] When pass "--api_mode=vanilla", select and start the API server automatically @240718
 - [ ] Generate API data automatically? #3 
 - [x] implement API exec by actual API calling #1  @0723
+- [ ] add entity linking! #2
 
 prompting
 - [ ] add summary/memory #2

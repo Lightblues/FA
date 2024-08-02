@@ -16,6 +16,9 @@ def get_args() -> argparse.Namespace:
     parser.add_argument("--workflow_dir", type=str, default=None)         # huabu_v3, huabu_manual, huabu_refine01
     parser.add_argument("--workflow_name", type=str, default=None)
     parser.add_argument("--api_mode", type=str, default="v01", choices=["manual", "llm", "v01"])
+    parser.add_argument("--check_dependency", type=bool, default=True, help="whether or not to check dependency between nodes.")
+    parser.add_argument("--check_duplicate", type=bool, default=False, help="whether or not to do duplication check for API call.")
+    parser.add_argument("--max_duplicated_limit", type=int, default=1, help="The maximum count limit for a certain api to be called continously")
     
     args = parser.parse_args()
     return args
@@ -31,9 +34,12 @@ if __name__ == '__main__':
     if args.workflow_dir: cfg.workflow_dir = args.workflow_dir
     if args.workflow_name: cfg.workflow_name = args.workflow_name
     if args.api_mode: cfg.api_mode = args.api_mode
+    if args.check_dependency: cfg.check_dependency = args.check_dependency
+    if args.check_duplicate: cfg.check_duplicate = args.check_duplicate
+    if args.max_duplicated_limit: cfg.max_duplicated_limit = args.max_duplicated_limit
     cfg.workflow_dir = DataManager.normalize_workflow_dir(cfg.workflow_dir)
     cfg.workflow_name = DataManager.normalize_workflow_name(cfg.workflow_name, cfg.workflow_dir, cfg.pdl_extension)
-    print(f"config: {cfg}")
+    # print(f">> config: {cfg}")
     
     controller = ConversationController(cfg)
     controller.start_conversation()

@@ -104,7 +104,8 @@ class PDL:
             taskflow_desc=self.taskflow_desc,
             workflow_str=self.workflow_str
         )
-    def __str__(self):
-        return self.to_str()
+    # def __str__(self):
+    #     return self.to_str()
     def __repr__(self):
+        rep = f"PDL_{self.version}({self.taskflow_name}, {self.taskflow_desc})"
         return self.to_str()
