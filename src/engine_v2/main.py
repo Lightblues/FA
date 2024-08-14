@@ -61,6 +61,7 @@ class ConversationController:
             raise ValueError(f"Unknown role: {curr_role}")
         
     def check_API_duplicated_call(self, conversation: Conversation, msg: str) -> Tuple[bool, str]:
+        """ to avoid duplicated API calls! """
         duplicate_cnt = 0
         for check_idx in range(len(conversation))[::-1]:
             previous_msg = conversation.get_message_by_idx(check_idx)

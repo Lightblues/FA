@@ -5,10 +5,10 @@ url: http://agent-pdl.woa.com
 @240718 实现基本交互界面
 - [ ] [optimize] optimize API output! 
 - [x] [feat] show Huabu meta information in the sidebar
-- [ ] [log] add more detailed logs
+- [x] [log] add more detailed logs
 - [x] [feat] mofigy template/PDL in the web directly!  -- not good
 @240723 完成V2版本的UI
-- [ ] [feat] clearily log and print infos
+- [x] [feat] clearily log and print infos
 """
 
 import time, os, json, glob, openai, yaml, datetime, pdb, copy
