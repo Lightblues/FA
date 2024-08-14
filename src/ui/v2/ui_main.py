@@ -100,7 +100,7 @@ def main(config_version:str="default.yaml"):
                     for bot_prediction_steps in range(3):      # cfg.bot_prediction_steps_limit
                         # [CHANGE01]: 修改为 stream 的方式
                         prompt, llm_response_stream = bot.process_stream(conversation, pdl, conversation_infos)
-                        with st.expander(f"Thinking...", expanded=False):
+                        with st.expander(f"Thinking...", expanded=True):
                             llm_response = st.write_stream(llm_response_stream)
                         parsed_response = Formater.parse_llm_output_json(llm_response)
                         action_type, action_metas, msg = bot.process_LLM_response(parsed_response)

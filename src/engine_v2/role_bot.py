@@ -1,7 +1,7 @@
-import datetime
+import datetime, json
 from typing import Optional
 
-from .common import init_client, LLM_CFG
+from .common import init_client, LLM_CFG, DEBUG
 from .datamodel import Conversation, PDL, ConversationInfos, ActionType, Message, Role
 from .datamodel import Config, BaseRole
 from utils.jinja_templates import jinja_render
@@ -15,6 +15,7 @@ class PDLBot(BaseRole):
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
         self.llm = init_client(llm_cfg=LLM_CFG[cfg.model_name])
+        if DEBUG: print(f">> [bot] init PDL model {cfg.model_name} with {json.dumps(LLM_CFG[cfg.model_name], ensure_ascii=False)}")
     
     def process(self, conversation:Conversation, pdl:PDL, conversation_infos:Optional[ConversationInfos]=None, print_stream=True):
         """ 

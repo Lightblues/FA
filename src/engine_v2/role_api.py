@@ -4,6 +4,7 @@ process API calls
 - `ManualAPIHandler`: Fake the API response by manual input
 
 @240723 V01APIHandler 通过 LLM 来进行API格式转换
+@240802 add EntityLinker
 """
 
 import requests, json, traceback
@@ -37,6 +38,7 @@ class EntityLinker:
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
         self.llm = init_client(llm_cfg=LLM_CFG[cfg.api_model_name])
+        if DEBUG: print(f">> [api] init EL model {cfg.api_model_name} with {json.dumps(LLM_CFG[cfg.api_model_name], ensure_ascii=False)}")
 
     def entity_linking(self, query:str, eneity_list: List[str]) -> Dict:
         """ Given a list of candidate entities, use llm to determine which one is most similor to the input
@@ -44,14 +46,16 @@ class EntityLinker:
         """
         meta = {}
         
+        # if DEBUG: print(f">> runing EL for {query} with {json.dumps(eneity_list, ensure_ascii=False)}")
         res = {
             "is_matched": True, 
             "matched_entity": None
         }
         prompt = jinja_render("entity_linking.jinja", query=query, eneity_list=eneity_list)
-        llm_response = self.llm.query_one(prompt)
-        meta.update(prompt=prompt, llm_response=llm_response)
+        # if DEBUG: print(f"  model: {self.llm}\n  prompt: {json.dumps(prompt, ensure_ascii=False)}")
+        llm_response = self.llm.query_one_stream(prompt)
         # if DEBUG: print(f"  llm_response: {json.dumps(llm_response, ensure_ascii=False)}")
+        meta.update(prompt=prompt, llm_response=llm_response)
         
         # todo: error handling
         parsed_response = Formater.parse_llm_output_json(llm_response)
@@ -191,7 +195,9 @@ class V01APIHandler(BaseAPIHandler):
         
         # check the parameters! @240802
         if self.cfg.api_entity_linking:
-            if DEBUG: print(f">> entity linking for `{api_name}` ... with input {json.dumps(api_params_dict, ensure_ascii=False)}")
+            if DEBUG: 
+                print(f">> entity linking for `{api_name}` ... with input {json.dumps(api_params_dict, ensure_ascii=False)}")
+                # print(f"  {json.dumps(api_params, ensure_ascii=False)}\n  {expected_param_names} with {input_params}")
             for param_name, param_input in zip(expected_param_names, input_params):
                 param_info = api_params[param_name]
                 if "entity_list" in param_info and param_info["entity_list"]:
@@ -203,6 +209,7 @@ class V01APIHandler(BaseAPIHandler):
                     else: 
                         if DEBUG: print(f"  {param_input} <-x-> {res['matched_entity']}")
                         # raise ValueError(f"Failed to link entity {param_input} to {param_info['entity_list']}")
+            # if DEBUG: print(f">> api_params_dict: {api_params_dict}")
         return api_info, api_params_dict
 
     @handle_exceptions

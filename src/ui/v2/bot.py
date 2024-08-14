@@ -2,14 +2,14 @@
 @240718 从 engine_v1.bots 进行修改
 """
 
-import datetime
+import datetime, json
 from typing import List, Dict, Optional, Tuple
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
 from engine_v2 import (
     BaseLogger, Logger, PDL, BaseRole, Config, 
     Role, Message, Conversation, ConversationInfos, ActionType, 
-    init_client, LLM_CFG
+    init_client, LLM_CFG, DEBUG
 )
 from utils.jinja_templates import jinja_render
 
