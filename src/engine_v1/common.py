@@ -79,6 +79,7 @@ add_openai_models()
 add_local_models()
 _name_map = {
     "default": "qwen2_72B",
+    "0.9.1": "Qwen1.5-72B-4M-1_0_3-Agent-1_2_KU_woClarify_AllRandom",
 }
 for k,v in _name_map.items():
     LLM_CFG[k] = LLM_CFG[v]
