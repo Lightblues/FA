@@ -3,6 +3,7 @@ workflow_name: "000-114挂号"
 
 available_models: 
 - "default"
+- "0.9.1"
 
 api_mode: "v01"
 api_model_name: "qwen2_72B" # "gpt-4o-mini"
@@ -12,7 +13,7 @@ max_duplicated_limit: 2
 api_entity_linking: true
 
 user_mode: "manual"
-user_model_name: "gpt-4o-mini" # used when set user_mode as llm
+# user_model_name: "gpt-4o-mini" # used when set user_mode as llm
 
 model_name: "qwen2_72B" # "qwen2_72B"
 template_fn: "query_PDL.jinja"
