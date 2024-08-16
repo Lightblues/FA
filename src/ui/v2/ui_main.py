@@ -11,7 +11,7 @@ url: http://agent-pdl.woa.com
 - [x] [feat] clearily log and print infos
 """
 
-import time, os, json, glob, openai, yaml, datetime, pdb, copy
+import time, os, json, glob, openai, yaml, datetime, pdb, copy, sys
 import streamlit as st
 from typing import List, Dict, Optional, Tuple
 from easonsi.llm.openai_client import OpenAIClient, Formater
@@ -24,6 +24,18 @@ from engine_v2 import (
     ConversationController, V01APIHandler, Config, DataManager
 )
 
+def set_global_exception_handler(f):
+    script_runner = sys.modules["streamlit.runtime.scriptrunner.script_runner"]
+    script_runner.handle_uncaught_app_exception.__code__ = f.__code__
+
+def exception_handler(e):
+    import traceback
+    # Custom error handling
+    st.image("https://media1.tenor.com/m/t7_iTN0iYekAAAAd/sad-sad-cat.gif")
+    print(traceback.format_exc())
+    st.error(f"Oops, something funny happened with a {type(e).__name__}", icon="😿")
+
+set_global_exception_handler(exception_handler)
 
 
 def main(config_version:str="default.yaml"):
@@ -32,9 +44,12 @@ def main(config_version:str="default.yaml"):
         st.session_state.config = Config.from_yaml(DataManager.normalize_config_name(config_name=config_version))
         print(f"[INFO] config: {st.session_state.config}")
     init_page()
-    init_resource()
-    init_sidebar()      # read UI configs!!!
-    init()              # initialize all!
+    init_resource()     # data: avatars, tool_emoji
+    init_sidebar()      # data: DICT_workflow_info, user_additional_constraints, model_name, template_fn, workflow_dir, workflow_name
+        # pdl, pdl_controller
+    init()              # data: api_handler, 
+        # refresh: config, bot, (workflow_name, workflow_dir)
+        # refresh_conversation: conversation, conversation_infos, logger
     
     # 2] prepare for session conversation
     config: Config = st.session_state.config

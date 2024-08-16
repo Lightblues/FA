@@ -1,5 +1,9 @@
 import streamlit as st
-
+from .uid import get_identity
+from streamlit.web.server.websocket_headers import _get_websocket_headers
+headers = _get_websocket_headers()
+user_identity = get_identity(headers, app_id="MAWYUI3UXKRDVJBLWMQNGUBDRE5SZOBL")
+# print(f"user_identity: {user_identity}")
 
 from engine_v2 import PDL, PDL_v2, PDLController, _DIRECTORY_MANAGER, Config
 from .data import (

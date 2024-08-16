@@ -77,6 +77,7 @@ class BaseLogger:
 
 class Logger(BaseLogger):
     num_logs = 0
+    logger_id: str = "tmp"
     def __init__(self, log_dir:str=_DIRECTORY_MANAGER.DIR_engine_v2_log):
         """ 
         args:
@@ -87,6 +88,7 @@ class Logger(BaseLogger):
         s_day = now.strftime("%Y-%m-%d")
         s_second = now.strftime("%Y-%m-%d_%H-%M-%S")
         s_millisecond = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
+        self.logger_id = s_millisecond
         
         self.log_dir = log_dir
         log_subdir = f"{log_dir}/{s_day}"
