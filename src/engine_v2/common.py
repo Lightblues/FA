@@ -37,7 +37,7 @@ class DirectoryManager:
         os.makedirs(self.DIR_ui_v2_log, exist_ok=True)
         
         self.HUABU_versions = ["huabu_step3_v01", "huabu_step3", "huabu_manual", "huabu_refine01"]
-        self.HUABU_versions_pdl2 = ["huabu_step3", "huabu_manual", "huabu_refine01"]
+        self.HUABU_versions_pdl2 = ["pdl2_0729"]
 
 _DIRECTORY_MANAGER = DirectoryManager()
 
@@ -78,16 +78,17 @@ class BaseLogger:
 class Logger(BaseLogger):
     num_logs = 0
     logger_id: str = "tmp"
-    def __init__(self, log_dir:str=_DIRECTORY_MANAGER.DIR_engine_v2_log):
+    def __init__(self, log_dir:str=_DIRECTORY_MANAGER.DIR_engine_v2_log, t:datetime.datetime=None):
         """ 
         args:
             log_dir: str, the directory to save the log files
         """
         super().__init__()
-        now = datetime.datetime.now()
-        s_day = now.strftime("%Y-%m-%d")
-        s_second = now.strftime("%Y-%m-%d_%H-%M-%S")
-        s_millisecond = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
+        if not t:
+            t = datetime.datetime.now()
+        s_day = t.strftime("%Y-%m-%d")
+        s_second = t.strftime("%Y-%m-%d_%H-%M-%S")
+        s_millisecond = t.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
         self.logger_id = s_millisecond
         
         self.log_dir = log_dir

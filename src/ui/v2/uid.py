@@ -70,20 +70,22 @@ def check_signature(key, timestamp_seconds, signature, ext_headers):
 def get_identity(headers, app_id="VUUPEEPSVD1RATRVRAJBPFD5WQJQ7S9N", identitySafeMode=True):
     # print(f"headers: {headers}\napp_id: {app_id}")
     
-    ext_headers = [headers['X-Rio-Seq'], '', '', '']
-    if not identitySafeMode:
-        ext_headers = [headers.get('X-Rio-Seq', ''), headers.get('staffid', ''),
-                       headers.get('staffname', ''), headers.get('x-ext-data', '')]
-
+    # ext_headers = [headers['X-Rio-Seq'], '', '', '']
+    # if not identitySafeMode:
+    #     ext_headers = [headers.get('X-Rio-Seq', ''), headers.get('staffid', ''),
+    #                    headers.get('staffname', ''), headers.get('x-ext-data', '')]
     # if not check_signature(key, headers['Timestamp'], headers['signature'], ext_headers):
     #     raise Exception('check smartgate signature failed')
 
+    if 'X-Tai-Identity' not in headers:
+        return {'staffid': '9999', 'staffname': 'Unknown'}
+    
     tai_identity = headers['X-Tai-Identity']
     if tai_identity is not None:
         payload = decode_authorization_header(tai_identity, app_id)
         return {'staffid': payload['StaffId'], 'staffname': payload['LoginName']}
-
-    return {'staffid': headers['staffid'], 'staffname': headers['staffname']}
+    else:
+        return {'staffid': headers['staffid'], 'staffname': headers['staffname']}
 
 if __name__ == '__main__':
     headers = {

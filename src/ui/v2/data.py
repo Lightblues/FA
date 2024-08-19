@@ -1,4 +1,4 @@
-import yaml, os, pdb
+import yaml, os, pdb, datetime
 import streamlit as st
 
 from .bot import PDL_UIBot
@@ -69,8 +69,12 @@ def refresh_conversation():
     workflow_name = st.session_state.workflow_name.split("-")[-1]
     msg_hello = Message(Role.BOT, st.session_state.config.greeting_msg.format(name=workflow_name))
     st.session_state.conversation.add_message(msg_hello)
+    
     # NOTE: logger is bind to a single session! 
-    st.session_state.logger = Logger(log_dir=_DIRECTORY_MANAGER.DIR_ui_v2_log)  # note to set the log_dir
+    now = datetime.datetime.now()
+    st.session_state.t = now
+    st.session_state.session_id = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
+    st.session_state.logger = Logger(log_dir=_DIRECTORY_MANAGER.DIR_ui_v2_log, t=st.session_state.t)  # note to set the log_dir
 
 def refresh_bot():
     print(f">> Refreshing bot: template_fn: {st.session_state.template_fn} with model {st.session_state.model_name}")

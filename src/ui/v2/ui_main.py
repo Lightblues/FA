@@ -31,9 +31,10 @@ def set_global_exception_handler(f):
 def exception_handler(e):
     import traceback
     # Custom error handling
-    st.image("https://media1.tenor.com/m/t7_iTN0iYekAAAAd/sad-sad-cat.gif")
-    print(traceback.format_exc())
+    # st.image("https://media1.tenor.com/m/t7_iTN0iYekAAAAd/sad-sad-cat.gif")
     st.error(f"Oops, something funny happened with a {type(e).__name__}", icon="😿")
+    print(traceback.format_exc())
+    st.warning(traceback.format_exc())
 
 set_global_exception_handler(exception_handler)
 

@@ -12,6 +12,8 @@ functionalities
     - [ ] add dependency for ANSWER nodes
 - [ ] UI
     - [x] add additional user instructions in UI
+    - [ ] add session-ID in UI; add user-ID in log
+- [ ] bot memory  https://github.com/mem0ai/mem0
 
 APIs
 - [x] When pass "--api_mode=vanilla", select and start the API server automatically @240718
@@ -26,6 +28,9 @@ prompting
 paper
 - [ ] auto conversation simulation (user agent) #1
 - [ ] auto conversation evaluation (based on specific PDL) #1
+
+bugs
+- [ ] fix `Current state` info -- action type and # user query
 
 ## run
 

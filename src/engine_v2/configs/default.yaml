@@ -2,8 +2,10 @@ workflow_dir: "huabu_step3"    # huabu_refine01
 workflow_name: "000"
 
 available_models: 
-available_workflows:
-- 
+- "default"
+- "0.9.1"
+# available_workflows:
+# - 
 
 api_mode: "v01"
 api_model_name: "qwen2_72B" # used when set api_mode as llm

@@ -62,7 +62,7 @@ class Conversation():
         self.msgs = []
 
     def add_message(self, msg: Message):
-        assert isinstance(msg, Message), f"Must be Message! But got {type(msg)}"
+        # assert isinstance(msg, Message), f"Must be Message! But got {type(msg)}"
         self.msgs.append(msg)
             
     def get_message_by_idx(self, idx: int) -> Message:

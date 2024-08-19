@@ -1,10 +1,7 @@
+import datetime
 import streamlit as st
-from .uid import get_identity
 from streamlit.web.server.websocket_headers import _get_websocket_headers
-headers = _get_websocket_headers()
-user_identity = get_identity(headers, app_id="MAWYUI3UXKRDVJBLWMQNGUBDRE5SZOBL")
-# print(f"user_identity: {user_identity}")
-
+from .uid import get_identity
 from engine_v2 import PDL, PDL_v2, PDLController, _DIRECTORY_MANAGER, Config
 from .data import (
     get_template_name_list, get_model_name_list, get_workflow_info_dict, 
@@ -27,6 +24,16 @@ def init_page():
 
 def init_sidebar():
     config: Config = st.session_state.config
+    if "headers" not in st.session_state:
+        headers = _get_websocket_headers()
+        user_identity = get_identity(headers, app_id="MAWYUI3UXKRDVJBLWMQNGUBDRE5SZOBL")
+        # print(f"user_identity: {user_identity}")
+        st.session_state.headers = headers
+        st.session_state.user_identity = user_identity
+        
+        now = datetime.datetime.now()
+        st.session_state.t = now
+        st.session_state.session_id = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
     
     LIST_template_names = get_template_name_list()
     LIST_model_names = get_model_name_list()
@@ -34,7 +41,7 @@ def init_sidebar():
     # set the shown model names
     if config.available_models:
         _available_models = config.available_models
-        print(f"available_models: {_available_models}")
+        # print(f"available_models: {_available_models}")
         assert all(i in LIST_model_names for i in config.available_models)
         if type(_available_models) == list:
             LIST_model_names = config.available_models
@@ -121,7 +128,10 @@ def init_sidebar():
         with open(f"{_DIRECTORY_MANAGER.DIR_templates}/{st.session_state.template_fn}", "r") as f:     # pdl_fn = f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt"
             template = f.read()
         
-        with st.expander(f"🔍 PDL", expanded=True):
+        with st.expander(f"🔍 PDL", expanded=False):
             st.text(f"{st.session_state.pdl.to_str()}")
         with st.expander(f"🔍 Template", expanded=False):
             st.text(f"{template}")
+
+        st.divider()
+        st.info(f"- sessionid: {st.session_state.session_id}\n- staffid: {st.session_state.user_identity['staffid']}")
