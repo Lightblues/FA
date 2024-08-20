@@ -7,7 +7,7 @@ import tiktoken, os, sys, yaml, datetime
 from transformers import AutoTokenizer, AutoModelForCausalLM, PreTrainedTokenizer
 import numpy as np
 from utils.jinja_templates import jinja_render
-from engine_v2 import (
+from engine import (
     _DIRECTORY_MANAGER, PDL, PDL_v2
 )
 

@@ -2,8 +2,7 @@
 > streamlit run run_ui.py
 """
 import argparse
-# from ui.v1.main import main
-from ui.v2.ui_main import main
+from ui.ui_main import main
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser()

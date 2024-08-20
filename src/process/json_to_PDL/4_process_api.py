@@ -68,9 +68,10 @@ def collect_node_apis():
         num_apis = 0
         for node in data["Nodes"]:
             if node["NodeType"] != "API": continue
+            name = node["NodeName"].lstrip("API-")      # remove prefix API-
             api = {
                 "from": workflow_name,
-                "NodeName": node["NodeName"],
+                "NodeName": name,
                 "ApiNodeData": node["ApiNodeData"],
             }
             apis.append(api)
@@ -82,6 +83,7 @@ def collect_node_apis():
 
 @functools.lru_cache(None)
 def convert_api(api):
+    # 将此前的API转为标准定义, with LLM
     prompt = jinja_render("step4_API.jinja", input=api)
     llm_response = client.query_one(prompt)
     api_converted = Formater.parse_codeblock(llm_response, type="json")

@@ -1,7 +1,7 @@
 # %%
 import json
-from engine_v2.pdl import PDL
-from engine_v2.controller import PDLController
+from engine.pdl import PDL
+from engine.controller import PDLController
 pdl = PDL.load_from_file("/work/huabu/data/v240628/huabu_refine01/000-114挂号.txt")
 # pdl
 
@@ -35,7 +35,7 @@ for i in range(3):
 else:
     print("else")
 # %%
-from engine_v2.common import BaseLogger
+from engine.common import BaseLogger
 logger = BaseLogger()
 logger.log_to_stdout("hello", color='orange')
 # %%

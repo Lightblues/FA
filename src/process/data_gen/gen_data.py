@@ -26,7 +26,7 @@ import tqdm, os, sys, json, yaml
 from easonsi import utils
 from process.common import _DIRECTORY_MANAGER
 from utils.jinja_templates import jinja_render
-from engine_v2.common import init_client, LLM_CFG
+from engine.common import init_client, LLM_CFG
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
 client = init_client(llm_cfg=LLM_CFG["gpt-4o"])

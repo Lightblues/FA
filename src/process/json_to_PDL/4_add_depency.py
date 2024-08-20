@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 from easonsi import utils
 from easonsi.llm.openai_client import OpenAIClient, Formater
-from engine_v2 import (
+from engine import (
     _DIRECTORY_MANAGER, init_client, LLM_CFG,
     DataManager, PDL
 )

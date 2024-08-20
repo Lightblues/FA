@@ -4,9 +4,14 @@ python run_simulate.py --workflow_dir huabu_refine01 --workflow_name 000 --ref_c
 """
 
 import os, argparse, json
-from simulator.simulator_v1 import SimulatorV1
-from engine_v1.datamodel import Conversation
-from engine_v1.common import DIR_conversation, DIR_data, DataManager, LLM_CFG, init_client
+# from simulator.v1.simulator_v1 import SimulatorV1
+# from engine_v1.datamodel import Conversation
+# from engine_v1.common import DIR_conversation, DIR_data, DataManager, LLM_CFG, init_client
+from simulator.simulator_v2 import SimulatorV2
+from engine import (
+    _DIRECTORY_MANAGER, LLM_CFG, init_client, DataManager, 
+    Conversation, Config
+)
 
 workflow_id_map = DataManager.build_workflow_id_map(DIR_conversation, extension=".json")
 
@@ -31,11 +36,15 @@ def load_ref_conversation(workflow_name:str, ref_conversation_id:int):
     return ref_conversation
 
 if __name__ == '__main__':
-    args = get_args()
-    workflow_dir:str = args.workflow_dir
-    if not workflow_dir.startswith("/apdcephfs"):
-        workflow_dir = f"/apdcephfs_cq8/share_2992827/shennong_5/easonsshi/huabu/data/v240628/{workflow_dir}"
-    client = init_client(llm_cfg=LLM_CFG[args.model_name])
-    simulator = SimulatorV1(client=client, workflow_dir=workflow_dir)
-    ref_conversation = load_ref_conversation(args.workflow_name, args.ref_conversation_id)
+    # args = get_args()
+    # workflow_dir:str = args.workflow_dir
+    # if not workflow_dir.startswith("/apdcephfs"):
+    #     workflow_dir = f"/apdcephfs_cq8/share_2992827/shennong_5/easonsshi/huabu/data/v240628/{workflow_dir}"
+    # client = init_client(llm_cfg=LLM_CFG[args.model_name])
+    # simulator = SimulatorV1(client=client, workflow_dir=workflow_dir)
+    
+    cfg = Config.from_yaml(
+        DataManager.normalize_config_name("default.yaml"),
+    )
+    simulator = SimulatorV2(cfg)
     _ = simulator.simulate(workflow_name=args.workflow_name, ref_conversation=ref_conversation)

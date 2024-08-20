@@ -1,0 +1,32 @@
+{# 模拟API调用 @0820
+#}
+
+## Task
+You need to act as an API backend to process the recieved query and return the response.
+
+```json
+{{ API }}
+```
+
+## Context
+Below is a conversation between user and an assistant:
+```
+{{ conversation }}
+```
+
+The API you recieve now is: `{{api_name}}` with parameters `{{api_params}}`.
+
+
+## Output
+Please generate the API response based on the above information. NOTE: 
+1. You can fake some data if needed! Remember to act like a true API server!
+2. The bot may call API in an uncorrect manner, return error information when you think necessary. 
+3. Output your result in the following format:
+```json
+{
+    "error_code": <0 if success else positive>,
+    "error_message": <not None if error_code>0>,
+    "response": <The generated response when error_code=0, else None. with content preferred Chinese.>
+}
+```
+Here is your output: 
