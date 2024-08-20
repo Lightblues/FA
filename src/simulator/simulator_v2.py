@@ -7,7 +7,7 @@ from easonsi.llm.openai_client import OpenAIClient, Formater
 
 from engine import PDL, _DIRECTORY_MANAGER
 from engine.main import ConversationController
-from engine.role_api import LLMSimulatedAPIHandler, V01APIHandler
+from engine.role_api import BaseAPIHandler, API_NAME2CLASS
 from engine.role_user import LLMSimulatedUserWithRefConversation
 from engine.role_bot import PDLBot
 from engine.controller import PDLController
@@ -20,7 +20,7 @@ from engine.datamodel import (
 class SimulatorV2(ConversationController):
     cfg: Config = None
     client: OpenAIClient = None
-    api: V01APIHandler = None
+    api: BaseAPIHandler = None
     user: LLMSimulatedUserWithRefConversation = None
     bot: PDLBot = None
     logger: Logger = None
@@ -29,12 +29,7 @@ class SimulatorV2(ConversationController):
         self.cfg = cfg
         self.user = LLMSimulatedUserWithRefConversation(cfg=cfg)
         self.bot = PDLBot(cfg=cfg)
-        if cfg.api_mode == "llm":
-            self.api = LLMSimulatedAPIHandler(cfg=cfg)
-        elif cfg.api_mode == "v01":
-            self.api = V01APIHandler(cfg=cfg)  # paras: [fn_api_infos]
-        else:
-            raise ValueError(f"Unknown api_mode: {cfg.api_mode}")
+        self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg)
         self.logger = Logger(_DIRECTORY_MANAGER.DIR_simulation_v2_log)
 
     def simulate(self, pdl:PDL, ref_conversation:Conversation) -> Tuple[Dict, Conversation]:

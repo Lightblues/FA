@@ -31,6 +31,8 @@ paper
 
 bugs
 - [ ] fix `Current state` info -- action type and # user query
+- [ ] fix: entity linking result write back to Message
+- [ ] V2: remove `REQUEST` type
 
 ## run
 

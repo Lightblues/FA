@@ -5,6 +5,6 @@ tmp/
 .env
 # .*
 core.*
-__*
+__*/
 
 __pycache__/

@@ -63,12 +63,7 @@ class EntityLinker:
         else: res["is_matched"] = False
         return res, meta
 
-class ManualAPIHandler(BaseRole):
-    def process(self, conversation:Conversation, paras:Dict, **kwargs):
-        api_name, api_params = paras["action_name"], paras["action_parameters"]
-        res = prompt_user_input(f"  <manual> please fake the response of the API call {api_name}({api_params}): ")
-        msg = Message(Role.SYSTEM, res)
-        return ActionType.API_RESPONSE, None, msg
+
 
 class BaseAPIHandler(BaseRole):
     """ 
@@ -104,54 +99,17 @@ class BaseAPIHandler(BaseRole):
     "Method": "GET"
   },
     """
-    cfg: Config = None
+    cfg: Config = None              # cfg.workflow_name
+    names: List[str] = []                   # for convert name2role
+    fn_api_infos: str = _DIRECTORY_MANAGER.FN_api_infos
+    api_infos_map: Dict[str, Dict] = {}
+    entity_linker: EntityLinker = None
+    conversation: Conversation = None
 
     def __init__(self, cfg:Config, *args, **kwargs) -> None:
         self.cfg = cfg
-
-
-class LLMSimulatedAPIHandler(BaseAPIHandler):
-    llm: OpenAIClient
-    
-    def __init__(self, cfg:Config) -> None:
-        super().__init__(cfg=cfg)
-        self.llm = init_client(llm_cfg=LLM_CFG[cfg.api_model_name])
-    
-    @handle_exceptions
-    def process_llm_response(self, llm_response:str) -> str:
-        parsed_response = Formater.parse_llm_output_json(llm_response)
-        api_results = parsed_response["response"]
-        return api_results
-
-    def process(self, conversation:Conversation, paras:Dict, **kwargs):
-        action_metas = {}       # for debug
-        # TODO: optimize the prompt
-        api_name, api_params_list = paras["action_name"], paras["action_parameters"]
-        prompt = jinja_render(
-            "api_llm.jinja",
-            conversation=conversation.to_str(),
-            api_name=api_name,
-            api_params=str(api_params_list)
-        )
-        llm_response = self.llm.query_one(prompt)
-        action_metas.update(prompt=prompt, llm_response=llm_response)       # for debug
-        
-        msg = Message(Role.SYSTEM, self.process_llm_response(llm_response))
-        return ActionType.API_RESPONSE, action_metas, msg
-
-
-
-class V01APIHandler(BaseAPIHandler):
-    api_infos_map: Dict[str, Dict] = {}
-    entity_linker: EntityLinker = None
-    
-    def __init__(self, cfg:Config, fn_api_infos=_DIRECTORY_MANAGER.FN_api_infos):
-        """ 
-        args:
-            fn_api_infos: str, path of the API infos
-        """
-        super().__init__(cfg=cfg)
-        self.api_infos_map = self.load_api_infos(fn_api_infos)
+        if cfg.fn_api_infos: self.fn_api_infos = cfg.fn_api_infos
+        self.api_infos_map = self.load_api_infos(self.fn_api_infos)
         if cfg.api_entity_linking: self.entity_linker = EntityLinker(cfg=cfg)
 
     def load_api_infos(self, fn_api_infos: str):
@@ -160,26 +118,19 @@ class V01APIHandler(BaseAPIHandler):
             api_infos = json.load(f)
         api_infos_map = {}
         for api in api_infos:
+            # only select apis from current workflow
+            if api["from"] != self.cfg.workflow_name: continue
             api_infos_map[api["name"]] = api
-            api_infos_map[api["name"].lstrip('API-')] = api
-            api_infos_map[api["description"]] = api
         return api_infos_map
     
-    @staticmethod
-    def _call_api(api_info, api_params):
-        assert "Method" in api_info and "URL" in api_info, f"API should provide Method and URL!"
-        if api_info["Method"] == "POST":
-            response = requests.post(api_info["URL"], data=json.dumps(api_params))
-        elif api_info["Method"] == "GET":
-            response = requests.get(api_info["URL"], params=api_params)
-        else:
-            raise ValueError(f"Method {api_info['Method']} not supported.")
-        response = json.loads(response.content)
-        return response
-
     def match_and_check_api(self, paras:Dict, action_metas:Dict, **kwargs):
-        """
-        save return information in `action_metas`
+        """ Maybe ERROR!
+        args:
+            action_metas: hock
+        return:
+            api_info: matched API 
+            api_params_dict: {"param_name": "param_value"}
+            
         """
         api_name, input_params = paras["action_name"], paras["action_parameters"]
         assert api_name in self.api_infos_map, f"API `{api_name}` not found!"
@@ -192,7 +143,7 @@ class V01APIHandler(BaseAPIHandler):
             assert all(k in expected_param_names for k in input_params.keys()), f"API {api_name} expects parameters {expected_param_names}!"
             input_params = [input_params[k] for k in expected_param_names]
         api_params_dict = dict(zip(expected_param_names, input_params))
-        
+    
         # check the parameters! @240802
         if self.cfg.api_entity_linking:
             if DEBUG: 
@@ -202,7 +153,7 @@ class V01APIHandler(BaseAPIHandler):
                 param_info = api_params[param_name]
                 if "entity_list" in param_info and param_info["entity_list"]:
                     res, _meta = self.entity_linker.entity_linking(param_input, param_info["entity_list"])
-                    action_metas["entity_linking"].append(_meta)
+                    action_metas["entity_linking_log"].append(_meta)
                     if res["is_matched"]: 
                         if DEBUG: print(f"  {param_input} -> {res['matched_entity']}")
                         api_params_dict[param_name] = res["matched_entity"]
@@ -212,6 +163,102 @@ class V01APIHandler(BaseAPIHandler):
             # if DEBUG: print(f">> api_params_dict: {api_params_dict}")
         return api_info, api_params_dict
 
+    def update_conversation(self, api_info:Dict, api_params_dict:Dict):
+        # update the matched params to conversation
+        matched_api_params = [api_params_dict[k] for k in list(api_info["parameters"]["properties"].keys())]
+        # conversation.msgs[-1].content = f"<Call API> {api_info['name']}({matched_api_params})"
+        self.conversation.add_message(Message(Role.SYSTEM, f"Entity linked! Actually called API: {api_info['name']}({matched_api_params})"))
+    
+    def update_conversation_back(self, m:str):
+        tmp_msg = self.conversation.msgs.pop()
+        return Message(Role.SYSTEM, f"{tmp_msg.content}\n{m}")
+
+class ManualAPIHandler(BaseAPIHandler):
+    names = ["manual", "ManualAPIHandler"]
+    def process(self, conversation:Conversation, paras:Dict, **kwargs):
+        api_name, api_params = paras["action_name"], paras["action_parameters"]
+        res = prompt_user_input(f"  <manual> please fake the response of the API call {api_name}({api_params}): ")
+        msg = Message(Role.SYSTEM, res)
+        return ActionType.API_RESPONSE, None, msg
+
+
+class LLMSimulatedAPIHandler(BaseAPIHandler):
+    llm: OpenAIClient
+    names = ["llm", "LLMSimulatedAPIHandler"]
+    
+    def __init__(self, cfg:Config) -> None:
+        super().__init__(cfg=cfg)
+        self.llm = init_client(llm_cfg=LLM_CFG[cfg.api_model_name])
+    
+    @handle_exceptions
+    def process_llm_response(self, llm_response:str) -> str:
+        parsed_response = Formater.parse_llm_output_json(llm_response)
+        # api_results = parsed_response["response"]
+        return parsed_response
+
+    def process(self, conversation:Conversation, paras:Dict, **kwargs):
+        self.conversation = conversation
+        action_metas = {
+            "query": {
+                "action_name": paras["action_name"],
+                "action_parameters": paras["action_parameters"]
+            },
+            "matched": {
+                "action_name": "",
+                "action_parameters_dict": {}
+            },
+            "entity_linking_log": []
+        }       # for debug
+        if self.cfg.api_model_entity_linking:
+            api_info, api_params_dict = self.match_and_check_api(paras, action_metas)   # match the standard API
+            api_name = api_info["name"]
+            # NOTE: update the matched params to conversation
+            self.update_conversation(api_info, api_params_dict)
+        else:
+            api_name, api_params_list = paras["action_name"], paras["action_parameters"]
+        prompt = jinja_render(
+            "api_llm.jinja",
+            API=self.api_infos_map[api_name],       # get api info!
+            conversation=conversation.to_str(),
+            api_name=api_name if not self.cfg.api_model_entity_linking else api_info["name"],
+            api_params=str(api_params_list if not self.cfg.api_model_entity_linking else api_params_dict)   # TODO: test dict/list
+        )
+        llm_response = self.llm.query_one(prompt)
+        action_metas.update(prompt=prompt, llm_response=llm_response)       # for debug
+        res = self.process_llm_response(llm_response)
+        res = f"<API response> {res}"
+        if self.cfg.api_model_entity_linking:
+            msg = self.update_conversation_back(res)
+        else:
+            msg = Message(Role.SYSTEM, res)
+        return ActionType.API_RESPONSE, action_metas, msg
+
+
+
+class V01APIHandler(BaseAPIHandler):
+    entity_linker: EntityLinker = None
+    names = ["v01", "V01APIHandler"]
+    
+    def __init__(self, cfg:Config):
+        """ 
+        args:
+            fn_api_infos: str, path of the API infos
+        """
+        super().__init__(cfg=cfg)
+        if cfg.api_entity_linking: self.entity_linker = EntityLinker(cfg=cfg)
+
+    @staticmethod
+    def _call_api(api_info, api_params_dict):
+        assert "Method" in api_info and "URL" in api_info, f"API should provide Method and URL!"
+        if api_info["Method"] == "POST":
+            response = requests.post(api_info["URL"], data=json.dumps(api_params_dict))
+        elif api_info["Method"] == "GET":
+            response = requests.get(api_info["URL"], params=api_params_dict)
+        else:
+            raise ValueError(f"Method {api_info['Method']} not supported.")
+        response = json.loads(response.content)
+        return response
+
     @handle_exceptions
     def process_api(self, paras:Dict, action_metas:Dict, **kwargs):
         """ 返回统一的 API 调用结果
@@ -220,7 +267,12 @@ class V01APIHandler(BaseAPIHandler):
         """
 
         # 1] call the api
-        api_info, api_params_dict = self.match_and_check_api(paras, action_metas)
+        api_info, api_params_dict = self.match_and_check_api(paras, action_metas)   # match the standard API
+        # NOTE: update the matched params to conversation
+        if self.cfg.api_entity_linking:
+            self.update_conversation(api_info, api_params_dict)
+        action_metas["matched"]["action_parameters_dict"] = api_params_dict
+        action_metas["matched"]["action_name"] = api_info["name"]
         response = self._call_api(api_info, api_params_dict)
         
         # 2] parse the response
@@ -237,10 +289,35 @@ class V01APIHandler(BaseAPIHandler):
         )
 
     def process(self, conversation:Conversation, paras:Dict, **kwargs):
+        """ 
+        args:
+            conversation: 
+            paras: {action_name:str, action_parameters:list}
+        """
+        self.conversation = conversation
         action_metas = {
-            "entity_linking": []
+            "query": {
+                "action_name": paras["action_name"],
+                "action_parameters": paras["action_parameters"]
+            },
+            "matched": {
+                "action_name": "",
+                "action_parameters_dict": {}
+            },
+            "entity_linking_log": []
         }       # for debug
         # TODO: log the entity linking
         res = self.process_api(paras, action_metas)
-        msg = Message(Role.SYSTEM, res)
+        res = f"<API response> {res}"
+        if self.cfg.api_entity_linking:
+            msg = self.update_conversation_back(res)
+        else:
+            msg = Message(Role.SYSTEM, res)
         return ActionType.API_RESPONSE, action_metas, msg
+
+
+
+API_NAME2CLASS:Dict[str, BaseAPIHandler] = {}
+for c in [V01APIHandler, ManualAPIHandler, LLMSimulatedAPIHandler]:
+    for n in c.names:
+        API_NAME2CLASS[n] = c

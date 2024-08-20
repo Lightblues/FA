@@ -4,8 +4,8 @@ import streamlit as st
 from .bot import PDL_UIBot
 from engine import (
     BaseLogger, Logger, Conversation, ConversationInfos, ConversationHeaderInfos, ActionType, Message, Role,
-    PDLController, Config, V01APIHandler, PDL, 
-    init_client, LLM_CFG, DataManager, _DIRECTORY_MANAGER
+    PDLController, Config, PDL, 
+    init_client, LLM_CFG, DataManager, _DIRECTORY_MANAGER, API_NAME2CLASS
 )
 # from engine_v1.common import DIR_data, DIR_data_base, DIR_ui_log, DIR_templates, HUABU_versions
 
@@ -99,7 +99,7 @@ def refresh_pdl(dir_change=False, PDL_str:str=None):
     refresh_conversation()          # clear the conversation
 
 
-def init(config_version:str="default.yaml"):
+def init():
     """ 集中初始化: 替代 CLIInterface.__init__() 
     config: Config
     infos: ConversationHeaderInfos
@@ -108,5 +108,7 @@ def init(config_version:str="default.yaml"):
     """
     assert "workflow_name" in st.session_state, "workflow_name must be selected! "   # init_sidebar()
     if "api_handler" not in st.session_state:
-        st.session_state.api_handler = V01APIHandler(cfg=st.session_state.config)
+        _config:Config = st.session_state.config
+        _cls = API_NAME2CLASS[_config.api_mode]
+        st.session_state.api_handler = _cls(_config)
         refresh_bot()

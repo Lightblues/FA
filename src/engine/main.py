@@ -11,7 +11,7 @@ from .datamodel import (
 )
 from .role_bot import PDLBot
 from .role_user import InputUser, LLMSimulatedUserWithRefConversation
-from .role_api import ManualAPIHandler, V01APIHandler, LLMSimulatedAPIHandler
+from .role_api import API_NAME2CLASS, BaseAPIHandler
 from .pdl import PDL
 from .common import Logger, DEBUG
 from .controller import PDLController
@@ -21,7 +21,7 @@ class ConversationController:
     cfg: Config = None
     user: InputUser = None
     bot: PDLBot = None
-    api: V01APIHandler = None
+    api: BaseAPIHandler = None
     logger: Logger = None
     pdl_controller: PDLController = None
     
@@ -29,14 +29,7 @@ class ConversationController:
         self.cfg = cfg
         self.user = InputUser()
         self.bot = PDLBot(cfg=cfg)
-        if cfg.api_mode == "manual":
-            self.api = ManualAPIHandler()
-        elif cfg.api_mode == "v01":
-            self.api = V01APIHandler(cfg=cfg)  # paras: [fn_api_infos]
-        elif cfg.api_mode == "llm":
-            self.api = LLMSimulatedAPIHandler(cfg=cfg)
-        else:
-            raise ValueError(f"Unknown api_mode: {cfg.api_mode}")
+        self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg)
         self.logger = Logger()
     
     @staticmethod

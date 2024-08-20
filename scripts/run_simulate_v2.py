@@ -4,8 +4,8 @@
 import os, argparse, json
 from tqdm import tqdm
 import concurrent.futures
-from simulator.v2.simulator_v2 import SimulatorV2
-from engine_v2 import (
+from simulator.simulator_v2 import SimulatorV2
+from engine import (
     Conversation, Config, _DIRECTORY_MANAGER, DataManager
 )
 

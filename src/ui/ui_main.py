@@ -21,7 +21,7 @@ from .data import init, init_resource
 from .bot import PDL_UIBot
 from engine import (
     Role, Message, Conversation, ConversationInfos, ActionType, Logger, PDL, PDLController, 
-    ConversationController, V01APIHandler, Config, DataManager
+    ConversationController, Config, DataManager, BaseAPIHandler
 )
 
 def set_global_exception_handler(f):
@@ -58,7 +58,7 @@ def main(config_version:str="default.yaml"):
     conversation_infos: ConversationInfos = st.session_state.conversation_infos
     logger: Logger = st.session_state.logger
     bot: PDL_UIBot = st.session_state.bot
-    api: V01APIHandler = st.session_state.api_handler
+    api: BaseAPIHandler = st.session_state.api_handler
     pdl: PDL = st.session_state.pdl
     pdl_controller: PDLController = st.session_state.pdl_controller
     
@@ -141,7 +141,7 @@ def main(config_version:str="default.yaml"):
                         pass         # TODO: 增加兜底策略
                 elif next_role == Role.SYSTEM:
                     action_type, action_metas, msg = api.process(conversation=conversation, paras=action_metas)
-                    _debug_msg = f"{'[API]'.center(50, '=')}\n<<calling api>>\n{action_metas}\n\n<< api response>>\n{msg.content}\n"
+                    _debug_msg = f"{'[API]'.center(50, '=')}\n<<calling api>>\n{action_metas['prompt']}\n\n<< api response>>\n{msg.content}\n"
                     logger.debug(_debug_msg)
                 else:
                     raise ValueError(f"Unknown role: {next_role}")
