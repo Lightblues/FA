@@ -22,7 +22,7 @@ class DirectoryManager:
         self.DIR_templates = _dir_src_base / "utils/templates"
         self.DIR_engine_v2_config = _dir_src_base / "configs"
         
-        self.DIR_huabu_step3 = _dir_data_base / "huabu_step3"
+        self.DIR_huabu_step3 = _dir_data_base / "pdl2_step3"
         self.DIR_huabu_meta = _dir_data_base / "huabu_meta"
         self.DIR_simulated_base = _dir_data_base / "simulated"
         self.DIR_conversation_v1 = _dir_data_base / "conversation_v01"

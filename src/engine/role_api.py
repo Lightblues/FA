@@ -318,6 +318,7 @@ class V01APIHandler(BaseAPIHandler):
 
 
 API_NAME2CLASS:Dict[str, BaseAPIHandler] = {}
-for c in [V01APIHandler, ManualAPIHandler, LLMSimulatedAPIHandler]:
-    for n in c.names:
-        API_NAME2CLASS[n] = c
+# for c in [V01APIHandler, ManualAPIHandler, LLMSimulatedAPIHandler]:
+for cls in BaseAPIHandler.__subclasses__():
+    for name in cls.names:
+        API_NAME2CLASS[name] = cls

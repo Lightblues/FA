@@ -1,0 +1,24 @@
+# ================================= update @240820
+workflow_dir: "pdl2_step3"        # 
+workflow_name: "000"
+
+available_models: 
+# - "default"
+# - "0.9.1"
+# available_workflows:
+# - 
+
+api_mode: "llm"                 # manual, v01, llm
+api_model_name: "gpt-4o"        # used when set api_mode as llm
+check_dependency: true          # 
+check_duplicate: true           # 
+max_duplicated_limit: 2         # 
+api_entity_linking: true        # bool, whether 
+
+user_mode: "llm_profile"
+user_model_name: "gpt-4o"       # used when set user_mode as llm
+
+model_name: "gpt-4o"            # "gpt-4o"
+template_fn: "query_PDL.jinja"
+greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
+
