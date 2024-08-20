@@ -11,6 +11,9 @@ class DirectoryManager:
         self.FN_data_meta = _dir_data_base / "meta/data_meta.json"
         self.FN_data_meta_en = _dir_data_base / "meta/data_meta_en.json"
         self.FN_data_meta_extension = _dir_data_base / "meta/data_meta_extension.jsonl"
+
+        self.DIR_pdl1_step3 = _dir_data_output / "huabu_step3"
+        self.DIR_pdl2_step3 = _dir_data_output / "pdl2_step3"
         
         self.DIR_data_output = _dir_data_output
 

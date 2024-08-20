@@ -4,5 +4,7 @@ data
 tmp/
 .env
 # .*
+core.*
+__*
 
 __pycache__/

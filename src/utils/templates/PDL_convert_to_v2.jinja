@@ -1,0 +1,61 @@
+Procedure Description Language (PDL) is a YAML syntax describing the procedure of task-oriented chatbots.
+Given of a nonstandard content, you shuold generate a well-written PDL.
+
+### main components of PDL
+- meta information: `Name` and `Desc` are meta information about the PDL.
+- useful slots: `SLOT`s define the information collected from user, usually helpful for API calling. 
+- actions
+    - `API` and `ANSWER` nodes are available actions for the bot. APIs are useful functions and ANSWERs are responses to the user. And the `precondition` field defines the dependencies of the API/ANSWER nodes.
+    - besides, there a special `ASKSLOT` action to collect slot value from user, if not provided yet. 
+- pdl: the final `PDL` string is a Pythonic language that defines the core logic of the procedure. 
+
+### sample PDL
+Here is a correct PDL:
+```PDL
+Name: 新闻查询
+Desc: 根据特定需求查询新闻
+
+SLOTs:
+  - name: NewsLocation
+  - name: NewsType
+    available_types: [政治, 经济, 体育, 娱乐]
+  - name: NewsTime
+
+APIs:
+  - name: SupportableLocationQuery
+    request: [NewsLocation]
+    response: [SupportStatus]
+  - name: NewsQuery
+    request: [NewsLocation, NewsType, NewsTime]
+    response: [NewsList]
+    precondition: [SupportableLocationQuery]
+
+ANSWERs:
+  - name: FetchNewsSuccess
+    desc: 查询成功，返回新闻列表
+    precondition: [NewsQuery]
+  - name: FetchNewsFailure
+    desc: 查询失败，切换到广播今天的头条新闻
+    precondition: [NewsQuery]
+
+PDL: |
+  [NewsLocation] = ASKSLOT()
+  while not API_SupportableLocationQuery([NewsLocation])
+      [NewsLocation] = ASKSLOT()
+  [NewsType, NewsTime] = ASKSLOT()
+  [NewsList] = API_NewsQuery([NewsLocation, NewsType, NewsTime])
+  if NewsList is not None:
+      ANSWER_FetchNewsSuccess()
+  else:
+      ANSWER_FetchNewsFailure()
+```
+
+### nonstandard PDL
+Here is a nonstandard PDL:
+```PDL
+{{ PDL_v1}}
+```
+
+You should correct the PDL to the correct format.
+
+### your output

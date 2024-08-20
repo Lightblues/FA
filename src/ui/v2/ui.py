@@ -134,4 +134,4 @@ def init_sidebar():
             st.text(f"{template}")
 
         st.divider()
-        st.info(f"- sessionid: {st.session_state.session_id}\n- staffid: {st.session_state.user_identity['staffid']}")
+        st.info(f"- sessionid: {st.session_state.session_id}\n- name: {st.session_state.user_identity['staffname']}")

@@ -62,12 +62,14 @@ def collect_node_apis():
     
     data_names = sorted(os.listdir(DIR_input))
     for fn in tqdm(data_names):
+        workflow_name, _ = os.path.splitext(fn)
         data = utils.LoadJson(f"{DIR_input}/{fn}")
         print(f"Processing {fn}")
         num_apis = 0
         for node in data["Nodes"]:
             if node["NodeType"] != "API": continue
             api = {
+                "from": workflow_name,
                 "NodeName": node["NodeName"],
                 "ApiNodeData": node["ApiNodeData"],
             }
@@ -93,11 +95,19 @@ if os.path.exists(fn_raw):
 else:
     apis_raw = collect_node_apis()
     utils.SaveJson(apis_raw, fn_raw)
+    print(f"Saved to {fn_raw}")
 
 # step2: convert the APIs
 fn_converted = f"{DIR_output}/apis.json"
 apis_converted = []
 for api in tqdm(apis_raw):
-    # BETTER: save result in single line of .jsonl
     apis_converted.append(convert_api(json.dumps(api, ensure_ascii=False)))
 utils.SaveJson(apis_converted, fn_converted)
+
+# --- hack ---
+# apis_converted = utils.LoadJson(fn_converted)
+# for api_raw, api in zip(apis_raw, apis_converted):
+#     assert api_raw["NodeName"].lstrip("API-") == api["name"].lstrip("API-")
+#     api["from"] = api_raw["from"]
+# utils.SaveJson(apis_converted, fn_converted)
+# print(f"Saved to {fn_converted}")
