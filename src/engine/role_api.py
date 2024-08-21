@@ -53,7 +53,7 @@ class EntityLinker:
         }
         prompt = jinja_render("entity_linking.jinja", query=query, eneity_list=eneity_list)
         # if DEBUG: print(f"  model: {self.llm}\n  prompt: {json.dumps(prompt, ensure_ascii=False)}")
-        llm_response = self.llm.query_one_stream(prompt)
+        llm_response = self.llm.query_one(prompt)
         # if DEBUG: print(f"  llm_response: {json.dumps(llm_response, ensure_ascii=False)}")
         meta.update(prompt=prompt, llm_response=llm_response)
         

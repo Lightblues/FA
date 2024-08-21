@@ -81,6 +81,8 @@ class PDLController:
     
     def build_graph(self, pdl:PDL):
         if DEBUG: print(f">> building graph ...")
+        if (pdl.apis is None) or (not pdl.apis):  # if pdl.apis is None
+            pdl.apis = []
         apis = pdl.apis
         g = PDLGraph()
         for api in apis:
@@ -91,6 +93,8 @@ class PDLController:
         return g
     
     def check_validation(self, next_node:str) -> Tuple[bool, str]:
+        if next_node not in self.graph.name2node:
+            return False, f"ERROR! Node {next_node} not found!"
         node = self.graph.name2node[next_node]
         if DEBUG: print(f">> checking validation for {node}")
         if node.precondition:

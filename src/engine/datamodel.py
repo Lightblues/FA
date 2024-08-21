@@ -1,7 +1,7 @@
 """ 
 @240712
 """
-import datetime, os, re, yaml, copy
+import datetime, os, re, yaml, copy, pathlib
 from enum import Enum, auto
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Optional, Tuple
@@ -13,11 +13,13 @@ from .common import DataManager, _DIRECTORY_MANAGER
 
 class ActionType(Enum):
     START = ("START", "start node")
-    API = ("API", "bot call API")        # below 3 actions are for bot!!!
-    REQUEST = ("REQUEST", "bot request for information")
-    ANSWER = ("ANSWER", "bot give answer to user")
     USER_INPUT = ("USER_INPUT", "user input")
     API_RESPONSE = ("API_RESPONSE", "API response")
+    # actions below are for bot!!!
+    API = ("API", "bot call API")
+    REQUEST = ("REQUEST", "bot request for information")
+    ANSWER = ("ANSWER", "bot give answer to user")
+    ASKSLOT = ("ASKSLOT", "bot ask for slot value")
 
     def __init__(self, actionname, description):
         self.actionname = actionname
@@ -82,6 +84,22 @@ class Conversation():
                 raise ValueError(f"Unknown role: {msg['role']}")
             instance.add_message(Message(_role, msg["content"]))
         return instance
+    
+    @classmethod
+    def load_from_str(cls, s: str):
+        ins = cls()
+        for line in s.split("\n"):
+            if not line.strip(): continue
+            if line.startswith("[BOT]"):
+                ins.add_message(Message(Role.BOT, line[len("[BOT]")+1:]))
+            elif line.startswith("[USER]"):
+                ins.add_message(Message(Role.USER, line[len("[USER]")+1:]))
+            elif line.startswith("[SYSTEM]"):
+                ins.add_message(Message(Role.SYSTEM, line[len("[SYSTEM]")+1:]))
+            else:
+                # append the last message
+                ins.msgs[-1].content += f"\n{line}"
+        return ins
 
     def to_str(self):
         return "\n".join([msg.to_str() for msg in self.msgs])
@@ -120,6 +138,10 @@ class Config:
     user_mode: str = "manual"
     user_model_name: str = "gpt-4o-mini"
     available_models: List[str] = None
+    available_workflows: List[str] = None
+    available_workflow_dirs: List[str] = None
+    available_templates: List[str] = None
+    default_model: str = "default"
     greeting_msg: str = "Hi, I'm HuaBu bot. How can I help you?"
     check_dependency: bool = True       # switcher: if check API dependency
     check_duplicate: bool = False       # switcher: if check API duplication calls
@@ -144,9 +166,13 @@ class Config:
         return self
     
     def __repr__(self):
-        return str(asdict(self))
+        return str(self.to_dict())
     def to_dict(self):
-        return asdict(self)
+        r = asdict(self)
+        for k, v in r.items():
+            if isinstance(v, pathlib.Path):
+                r[k] = str(v)
+        return r
     def to_str(self):
         # to lines of `key: value\n`
         return "\n".join([f"{k}: {v}" for k, v in self.to_dict().items()])

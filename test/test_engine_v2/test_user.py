@@ -17,3 +17,9 @@ conv = Conversation()
 t, action_metas, msg = user.process(conversation=conv, pdl=pdl)
 
 # %%
+from easonsi import utils
+for wf in ['000-114挂号', '001-注册邀约', "002-新闻查询"]: #, '019-礼金礼卡类案件']:
+    fn = f"/work/huabu/data/gen/user_profile/{wf}.json"
+    print(f"{fn}")
+    utils.LoadJson(fn)
+# %%

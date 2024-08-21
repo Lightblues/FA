@@ -9,7 +9,7 @@ from easonsi.llm.openai_client import OpenAIClient, Formater
 from engine import PDL, _DIRECTORY_MANAGER, UserProfile
 from engine.main import ConversationController
 from engine.role_api import BaseAPIHandler, API_NAME2CLASS
-from engine.role_user import LLMSimulatedUserWithRefConversation,  LLMSimulatedUserWithProfile
+from engine.role_user import LLMSimulatedUserWithRefConversation, LLMSimulatedUserWithProfile
 from engine.role_bot import PDLBot
 from engine.controller import PDLController
 from engine.common import Logger
@@ -51,13 +51,16 @@ class SimulatorV2(ConversationController):
         action_metas = None
         self.user.load_user_profile(user_profile=profile)
         # TODO: add constrains! 
-        while conversation_infos.curr_action_type != ActionType.ANSWER:
+        # while conversation_infos.curr_action_type != ActionType.ANSWER:
+        for _ in range(20):
             next_role = self.next_role(conversation_infos.curr_role, conversation_infos.curr_action_type)
             if next_role == Role.USER:
                 action_type, action_metas, msg = self.user.process(conversation=conversation, pdl=pdl)
                 conversation_infos.num_user_query += 1
                 _debug_msg = f"{'[USER]'.center(50, '=')}\n<<prompt>>\n{action_metas['prompt']}\n\n<<response>>\n{action_metas['llm_response']}\n"
                 self.logger.debug(_debug_msg)
+                # quit logic!
+                if 'END' in msg.content: break
             elif next_role == Role.BOT:
                 _conversation = copy.deepcopy(conversation)
                 for bot_prediction_steps in range(3):      # cfg.bot_prediction_steps_limit

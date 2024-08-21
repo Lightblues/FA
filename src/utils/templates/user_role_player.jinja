@@ -12,15 +12,16 @@ Engage in a dialogue where you, as the user, interact with the assistant to achi
 2. Goal-Oriented: Keep the conversation focused on achieving your needs.
 3. Adaptability: Adjust your questions and responses based on the assistant's input.
 4. Engagement: Maintain an engaging and curious tone to facilitate effective dialogue.
+5. Stop: Stop the conversation when your task is completed.
 
 ### History Conversation
 {{ conversation }}
 
 ### Your Turn
-Please output in the following format:
+Please output in the following format. If you want to stop this conversation, input `END` in the `content` field.
 ```json
 {
     "role": "USER",
-    "content": "The generated user utterance, in Chinese."
+    "content": "The generated user utterance, in Chinese. `END` to stop the conversation."
 }
 ```

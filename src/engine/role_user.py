@@ -21,7 +21,6 @@ def handle_exceptions(func=None, default_response="..."):
         try:
             return func(*args, **kwargs)
         except Exception as e:
-            # print(e)
             print(traceback.format_exc())
             return default_response
     return wrapper
@@ -110,7 +109,6 @@ class LLMSimulatedUserWithProfile(BaseUser):
             user_information=self.user_profile.to_str(),
             conversation=conversation.to_str()
         )
-        print(prompt)
         llm_response = self.llm.query_one(prompt)
         action_metas.update(prompt=prompt, llm_response=llm_response)
 

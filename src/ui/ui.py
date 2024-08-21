@@ -35,37 +35,54 @@ def init_sidebar():
         st.session_state.t = now
         st.session_state.session_id = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
     
-    LIST_template_names = get_template_name_list()
-    LIST_model_names = get_model_name_list()
+        st.session_state.user_additional_constraints = None
     
+    _template_names = get_template_name_list()
+    _model_names = get_model_name_list()
+    
+    _workflow_dirs, DICT_workflow_info = get_workflow_info_dict(config)
     # set the shown model names
     if config.available_models:
-        _available_models = config.available_models
-        # print(f"available_models: {_available_models}")
-        assert all(i in LIST_model_names for i in config.available_models)
-        if type(_available_models) == list:
-            LIST_model_names = config.available_models
-        elif type(_available_models) == dict:
-            LIST_model_names = list(_available_models.values())
-    LIST_workflow_dirs, DICT_workflow_info = get_workflow_info_dict(config)
-    if "DICT_workflow_info" not in st.session_state:
-        st.session_state.DICT_workflow_info = DICT_workflow_info
-        st.session_state.user_additional_constraints = None
+        assert all(i in _model_names for i in config.available_models), f"config models: {config.available_models} not in _model_names: {_model_names}"
+        LIST_shown_models = config.available_models
+    else:
+        LIST_shown_models = _model_names
+    # set the shown template names
+    if config.available_templates:
+        assert all(i in _template_names for i in config.available_templates), f"config templates: {config.available_templates} not in _template_names: {_template_names}"
+        LIST_shown_templates = config.available_templates
+    else:
+        LIST_shown_templates = _template_names
+    # set the shown workflow dirs
+    if config.available_workflow_dirs:
+        LIST_shown_dirs = []
+        _config_dirs = [f"{_DIRECTORY_MANAGER.DIR_data_base}/{v}" for v in config.available_workflow_dirs]
+        assert all(i in _workflow_dirs for i in _config_dirs), f"config workflow_dirs: {config.available_workflow_dirs} not in _workflow_dirs: {_workflow_dirs}"
+        LIST_shown_dirs = _config_dirs
+        DICT_workflow_info = {k:v for k,v in DICT_workflow_info.items() if k in LIST_shown_dirs}
+    else:
+        LIST_shown_dirs = _workflow_dirs
+    # set the shown workflow names
+    if config.available_workflows:
+        for d, l in DICT_workflow_info.items():
+            assert all(i in l for i in config.available_workflows), f"config workflows: {config.available_workflows} not in workflow_list: {l}"
+            DICT_workflow_info[d] = config.available_workflows
+    
     
     with st.sidebar:
         select_col1, select_col2 = st.columns(2)
         with select_col1:
             st.selectbox(
                 '选择模型',
-                options=LIST_model_names,
+                options=LIST_shown_models,
                 key="model_name",                # NOTE: set -> st.session_state.model_name
                 on_change=refresh_bot,
-                index=LIST_model_names.index("default")
+                index=LIST_shown_models.index(config.default_model)  # "default"
             )
         with select_col2:
             st.selectbox(
                 '选择模板',
-                options=LIST_template_names,
+                options=LIST_shown_templates,
                 key="template_fn",                # NOTE: set -> st.session_state.template_fn
                 on_change=refresh_bot
             )
@@ -74,7 +91,7 @@ def init_sidebar():
         with select_col3:
             st.selectbox(
                 '选择画布目录',
-                options=LIST_workflow_dirs,
+                options=LIST_shown_dirs,
                 key="workflow_dir",                # NOTE: set -> st.session_state.workflow_dir
                 format_func=lambda x: x.split("/")[-1],     # NOTE: only show the last subdir
                 on_change=lambda: refresh_pdl(dir_change=True)

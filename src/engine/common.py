@@ -26,6 +26,7 @@ class DirectoryManager:
         self.DIR_huabu_meta = _dir_data_base / "huabu_meta"
         self.DIR_simulated_base = _dir_data_base / "simulated"
         self.DIR_conversation_v1 = _dir_data_base / "conversation_v01"
+        self.DIR_user_profile = _dir_data_base / "../gen/user_profile"
         self.FN_api_infos = _dir_data_base / "apis/apis.json"
 
         self.DIR_engine_v2_log = _dir_data_base / "engine_v2_log"
@@ -143,7 +144,7 @@ class DataManager:
     @staticmethod
     @functools.lru_cache(maxsize=None)
     def get_workflow_name_list(workflow_dir:str, extension:str=".yaml"):
-        fns = [fn.rstrip(extension) for fn in os.listdir(workflow_dir) if fn.endswith(extension)]
+        fns = [fn[:-len(extension)] for fn in os.listdir(workflow_dir) if fn.endswith(extension)]
         return list(sorted(fns))
 
     @staticmethod
@@ -177,11 +178,11 @@ class DataManager:
 # ===================================== llm ==================================================
 
 LLM_CFG = {
-    # "SN": {
-    #     "model_name": "神农大模型",
-    #     "base_url": "http://9.91.12.52:8001",
-    #     "api_key": "xxx",
-    # },
+    "custom": {
+        "model_name": "Qwen2-72B-Instruct",
+        "base_url": "http://9.91.12.44:8000/v1/",
+        "api_key": "xxx",
+    },
     # "gpt-4o": {
     #     "model_name": "gpt-4o",
     #     "base_url": os.getenv("OPENAI_PROXY_BASE_URL"),
@@ -214,8 +215,11 @@ def add_local_models():
         model_info[name] = f"{parsed_url.scheme}://{parsed_url.netloc}"
 
     for model, url in model_info.items():
-        # NOTE: api_key 不能为 "" 不然也会报错
-        LLM_CFG[model] = {"model_name": model, "base_url": url, "api_key": "xxx"}
+        LLM_CFG[model] = {
+            "model_name": model, "base_url": url, 
+            "api_key": "xxx",   # NOTE: api_key 不能为 "" 不然也会报错
+            "is_sn": True
+        }
 # set model alias!!
 add_openai_models()
 add_local_models()
@@ -233,7 +237,7 @@ def init_client(llm_cfg:Dict):
     api_key = os.getenv("OPENAI_PROXY_API_KEY") if llm_cfg.get("api_key") is None else llm_cfg["api_key"]
     model_name = llm_cfg.get("model_name", "gpt-4o")
     client = OpenAIClient(
-        model_name=model_name, base_url=base_url, api_key=api_key
+        model_name=model_name, base_url=base_url, api_key=api_key, is_sn=llm_cfg.get("is_sn", False)
     )
     return client
 

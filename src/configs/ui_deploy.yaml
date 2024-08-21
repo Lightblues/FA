@@ -1,10 +1,21 @@
 # ================================= update @240821
-workflow_dir: "pdl2_step3"    # huabu_refine01
+workflow_dir: "pdl2_step3"      # huabu_refine01
 workflow_name: "000-114挂号"
 
 available_models: 
 - "default"
 - "0.9.1"
+available_workflow_dirs:
+- "pdl2_step3"
+available_workflows:
+- '000-114挂号'
+- "002-新闻查询"
+- '019-礼金礼卡类案件'
+- '023-查号源日期'
+- '025-酒店取消订单'
+available_templates:
+- query_PDL.jinja
+default_model: default
 
 api_mode: "v01"
 # api_model_name: "gpt-4o"
@@ -16,7 +27,7 @@ api_entity_linking: true
 user_mode: "manual"
 # user_model_name: "gpt-4o"
 
-model_name: "qwen2_72B" # "qwen2_72B"
+model_name: "qwen2_72B"         # "qwen2_72B"
 template_fn: "query_PDL.jinja"
 greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
 

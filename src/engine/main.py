@@ -43,7 +43,7 @@ class ConversationController:
         if curr_role in [Role.USER, Role.SYSTEM]:
             return Role.BOT
         elif curr_role == Role.BOT:
-            if action_type in [ActionType.REQUEST, ActionType.ANSWER]:
+            if action_type in [ActionType.REQUEST, ActionType.ANSWER, ActionType.ASKSLOT]:
                 return Role.USER
             elif action_type == ActionType.API:
                 return Role.SYSTEM

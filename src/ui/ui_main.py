@@ -141,7 +141,8 @@ def main(config_version:str="default.yaml"):
                         pass         # TODO: 增加兜底策略
                 elif next_role == Role.SYSTEM:
                     action_type, action_metas, msg = api.process(conversation=conversation, paras=action_metas)
-                    _debug_msg = f"{'[API]'.center(50, '=')}\n<<calling api>>\n{action_metas['prompt']}\n\n<< api response>>\n{msg.content}\n"
+                    _debug_info = action_metas['prompt'] if 'prompt' in action_metas else ""
+                    _debug_msg = f"{'[API]'.center(50, '=')}\n<<calling api>>\n{_debug_msg}\n\n<< api response>>\n{msg.content}\n"
                     logger.debug(_debug_msg)
                 else:
                     raise ValueError(f"Unknown role: {next_role}")

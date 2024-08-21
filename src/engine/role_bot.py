@@ -50,10 +50,7 @@ class PDLBot(BaseRole):
         # -> ActionType
         assert "action_type" in parsed_response, f"parsed_response: {parsed_response}"
         try:
-            if parsed_response["action_type"] == "ASKSLOT":
-                action_type = ActionType.REQUEST
-            else:
-                action_type = ActionType[parsed_response["action_type"]]
+            action_type = ActionType[parsed_response["action_type"]]
         except KeyError:
             raise ValueError(f"Unknown action_type: {parsed_response['action_type']}")
         # -> action_metas
