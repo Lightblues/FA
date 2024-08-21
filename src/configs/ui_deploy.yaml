@@ -1,4 +1,5 @@
-workflow_dir: "huabu_step3"    # huabu_refine01
+# ================================= update @240821
+workflow_dir: "pdl2_step3"    # huabu_refine01
 workflow_name: "000-114挂号"
 
 available_models: 
@@ -6,14 +7,14 @@ available_models:
 - "0.9.1"
 
 api_mode: "v01"
-api_model_name: "qwen2_72B" # "gpt-4o-mini"
+# api_model_name: "gpt-4o"
 check_dependency: true
 check_duplicate: true
 max_duplicated_limit: 2
 api_entity_linking: true
 
 user_mode: "manual"
-# user_model_name: "gpt-4o-mini" # used when set user_mode as llm
+# user_model_name: "gpt-4o"
 
 model_name: "qwen2_72B" # "qwen2_72B"
 template_fn: "query_PDL.jinja"
