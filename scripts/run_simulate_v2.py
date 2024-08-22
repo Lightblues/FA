@@ -95,8 +95,9 @@ if __name__ == '__main__':
     if MODE == "single":
         # --- run single ---
         workflow_name = "000-114挂号"
-        # workflow_name = "001-注册邀约"
+        workflow_name = "001-注册邀约"
         # workflow_name = "002-新闻查询"
+        workflow_name = "025-酒店取消订单"
         cfg.workflow_name = workflow_name
         run_single_simulation(cfg, workflow_name, odir)
     elif MODE == "all":

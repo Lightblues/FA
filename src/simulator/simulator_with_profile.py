@@ -52,7 +52,7 @@ class SimulatorV2(ConversationController):
         self.user.load_user_profile(user_profile=profile)
         # TODO: add constrains! 
         # while conversation_infos.curr_action_type != ActionType.ANSWER:
-        for _ in range(20):
+        for _ in range(40):     # NOTE: max rounds!!!
             next_role = self.next_role(conversation_infos.curr_role, conversation_infos.curr_action_type)
             if next_role == Role.USER:
                 action_type, action_metas, msg = self.user.process(conversation=conversation, pdl=pdl)
