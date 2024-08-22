@@ -21,7 +21,7 @@ client.query_one_stream("请问您有特定的时间想要挂号吗？")
 # %%
 import yaml
 s = """available_models: 
-- 
+- null
 sxx: ff
 """
 data = yaml.safe_load(s)

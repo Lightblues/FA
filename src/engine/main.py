@@ -48,6 +48,7 @@ class ConversationController:
             elif action_type == ActionType.API:
                 return Role.SYSTEM
             else:
+                # FIXME: 这里为啥会出现 ActionType.API_RESPONSE? 
                 raise ValueError(f"Unknown action_type: {action_type}")
         else:
             raise ValueError(f"Unknown role: {curr_role}")

@@ -126,14 +126,14 @@ class Conversation():
 
 @dataclass
 class Config:
-    workflow_dir: str = _DIRECTORY_MANAGER.DIR_huabu_step3
+    workflow_dir: str = "pdl2_step3"
     workflow_name: str = "xxx"
     model_name: str = "qwen2_72B"
     template_fn: str = "query_PDL.jinja"
     api_mode: str = "v01"       # v01, llm, manual
     api_entity_linking: bool = True     # switcher: if use entity link in API calls
     api_model_name: str = "gpt-4o-mini"
-    api_model_entity_linking: bool = True
+    # api_model_entity_linking: bool = True
     fn_api_infos: str = None
     user_mode: str = "manual"
     user_model_name: str = "gpt-4o-mini"

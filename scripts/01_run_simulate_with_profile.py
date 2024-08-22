@@ -129,7 +129,7 @@ def run_single_simulation_mp(cfg:Config, workflow_name:str, odir:str=_DIRECTORY_
         generated_profiles = [d['user_profile'] for d in _d]
     
     assert cfg.workflow_name == workflow_name, f"{cfg.workflow_name} != {workflow_name}"
-    simulated_results = []
+    # simulated_results = []
     # 1] Load the LLM-generated conversation
     # fn = f"{_DIRECTORY_MANAGER.DIR_conversation_v1}/{workflow_name}.json"
     fn = _DIRECTORY_MANAGER.DIR_user_profile / f"{workflow_name}.json"

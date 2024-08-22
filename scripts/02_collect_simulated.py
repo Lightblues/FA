@@ -12,7 +12,8 @@ from easonsi import utils
 from easonsi.files.gsheet import GSheet
 gsheet = GSheet()
 
-_ddir = _DIRECTORY_MANAGER.DIR_simulated_base / "template=query_PDL_jinja_pdl=pdl2_step3_model=qwen2_72B_api=llm"
+# _ddir = _DIRECTORY_MANAGER.DIR_simulated_base / "template=query_PDL_jinja_pdl=pdl2_step3_model=qwen2_72B_api=llm"
+_ddir = _DIRECTORY_MANAGER.DIR_simulated_base / "0822_template=query_PDL_jinja_pdl=pdl2_step3_model=custom_api=llm"
 fns = sorted(os.listdir(_ddir))
 fns = [fn for fn in fns if fn.endswith(".jsonl")]
 workflow_names = [fn[:-len(".jsonl")] for fn in fns]
@@ -31,7 +32,7 @@ def sort_file(workflow_name:str):
         else:
             raise ValueError(f"Unknown persona: {s['user_profile']}")
     sorted_data = sorted(sorted_data, key=lambda x: x[0])
-    assert [d[0] for d in sorted_data[:10]] == list(range(10))
+    assert [d[0] for d in sorted_data[:15]] == list(range(15))
     sorted_data = [d[1] for d in sorted_data]
     assert len(sorted_data) == len(simulated)
     utils.SaveJsonl(sorted_data, _ddir / f"{workflow_name}.jsonl")
@@ -88,6 +89,10 @@ df
 
 # %%
 gsheet.to_gsheet(df, sheet_name="simulated_conversations")
+
+
+
+
 
 # %%
 d = df.iloc[:10,:]

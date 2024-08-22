@@ -123,6 +123,7 @@ class BaseAPIHandler(BaseRole):
             api_infos_map[api["name"]] = api
         return api_infos_map
     
+    @handle_exceptions
     def match_and_check_api(self, paras:Dict, action_metas:Dict, **kwargs):
         """ Maybe ERROR!
         args:
@@ -209,28 +210,34 @@ class LLMSimulatedAPIHandler(BaseAPIHandler):
             },
             "entity_linking_log": []
         }       # for debug
-        if self.cfg.api_model_entity_linking:
-            api_info, api_params_dict = self.match_and_check_api(paras, action_metas)   # match the standard API
+        # if self.cfg.api_model_entity_linking:
+        res = self.match_and_check_api(paras, action_metas)   # match the standard API
+        if isinstance(res, dict):
+            msg = Message(Role.SYSTEM, json.dumps(res, ensure_ascii=False))
+        else:
+            api_info, api_params_dict = res
             api_name = api_info["name"]
-            # NOTE: update the matched params to conversation
-            self.update_conversation(api_info, api_params_dict)
-        else:
-            api_name, api_params_list = paras["action_name"], paras["action_parameters"]
-        prompt = jinja_render(
-            "api_llm.jinja",
-            API=self.api_infos_map[api_name],       # get api info!
-            conversation=conversation.to_str(),
-            api_name=api_name if not self.cfg.api_model_entity_linking else api_info["name"],
-            api_params=str(api_params_list if not self.cfg.api_model_entity_linking else api_params_dict)   # TODO: test dict/list
-        )
-        llm_response = self.llm.query_one(prompt)
-        action_metas.update(prompt=prompt, llm_response=llm_response)       # for debug
-        res = self.process_llm_response(llm_response)
-        res = f"<API response> {res}"
-        if self.cfg.api_model_entity_linking:
-            msg = self.update_conversation_back(res)
-        else:
-            msg = Message(Role.SYSTEM, res)
+            if self.cfg.api_entity_linking:
+                # NOTE: update the matched params to conversation
+                self.update_conversation(api_info, api_params_dict)
+            prompt = jinja_render(
+                "api_llm.jinja",
+                API=self.api_infos_map[api_name],       # get api info!
+                conversation=conversation.to_str(),
+                # api_name=api_name if not self.cfg.api_model_entity_linking else api_info["name"],
+                # api_params=str(api_params_list if not self.cfg.api_model_entity_linking else api_params_dict)   # TODO: test dict/list
+                api_name=api_name,
+                api_params=str(api_params_dict)
+            )
+            llm_response = self.llm.query_one(prompt)
+            action_metas.update(prompt=prompt, llm_response=llm_response)       # for debug
+            res = self.process_llm_response(llm_response)
+            res = f"<API response> {res}"
+            # if self.cfg.api_model_entity_linking:
+            if self.cfg.api_entity_linking:
+                msg = self.update_conversation_back(res)
+            else:
+                msg = Message(Role.SYSTEM, res)
         return ActionType.API_RESPONSE, action_metas, msg
 
 
@@ -260,14 +267,13 @@ class V01APIHandler(BaseAPIHandler):
         return response
 
     @handle_exceptions
-    def process_api(self, paras:Dict, action_metas:Dict, **kwargs):
+    def process_api(self, api_info, api_params_dict, action_metas:Dict, **kwargs):
         """ 返回统一的 API 调用结果
         return: {'status': 'success', 'response': '{"医院存在类型": "0"}'}
         ref: /apdcephfs_cq8/share_2992827/shennong_5/ianxxu/chatchat/_TaskPlan/UI/v2.1/utils/tool_executor.py
         """
 
         # 1] call the api
-        api_info, api_params_dict = self.match_and_check_api(paras, action_metas)   # match the standard API
         # NOTE: update the matched params to conversation
         if self.cfg.api_entity_linking:
             self.update_conversation(api_info, api_params_dict)
@@ -306,13 +312,18 @@ class V01APIHandler(BaseAPIHandler):
             },
             "entity_linking_log": []
         }       # for debug
-        # TODO: log the entity linking
-        res = self.process_api(paras, action_metas)
-        res = f"<API response> {res}"
-        if self.cfg.api_entity_linking:
-            msg = self.update_conversation_back(res)
+        res = self.match_and_check_api(paras, action_metas)   # match the standard API
+        if isinstance(res, dict):
+            msg = Message(Role.SYSTEM, json.dumps(res, ensure_ascii=False))
         else:
-            msg = Message(Role.SYSTEM, res)
+            api_info, api_params_dict = res
+            # TODO: log the entity linking
+            res = self.process_api(api_info, api_params_dict, action_metas)
+            res = f"<API response> {res}"
+            if self.cfg.api_entity_linking:
+                msg = self.update_conversation_back(res)
+            else:
+                msg = Message(Role.SYSTEM, res)
         return ActionType.API_RESPONSE, action_metas, msg
 
 

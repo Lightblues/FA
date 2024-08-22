@@ -22,6 +22,7 @@ class PDLBot(BaseRole):
         return:
             action_type: [ActionType.REQUEST, ActionType.ANSWER, ActionType.API]
             action_metas: Dict, return API parameters if action_type == ActionType.API
+        TODO: error process
         """
         action_metas = {}
         

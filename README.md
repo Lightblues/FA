@@ -12,7 +12,8 @@ functionalities
     - [ ] add dependency for ANSWER nodes
 - [ ] UI
     - [x] add additional user instructions in UI
-    - [ ] add session-ID in UI; add user-ID in log
+    - [x] add session-ID in UI; add user-ID in log
+    - [x] add config: set the shown models and PDLs and tempaltes @240821
 - [ ] bot memory  https://github.com/mem0ai/mem0
 
 APIs
@@ -31,8 +32,8 @@ paper
 
 bugs
 - [ ] fix `Current state` info -- action type and # user query
-- [ ] fix: entity linking result write back to Message
-- [ ] V2: remove `REQUEST` type
+- [x] fix: entity linking result write back to Message  #1 @240821
+- [x] V2: remove `REQUEST` type @240821
 
 ## run
 
