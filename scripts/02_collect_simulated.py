@@ -4,8 +4,9 @@ output: https://docs.google.com/spreadsheets/d/1p36xAuhiv9siLo7Lw7bFGk9U33rBBKZO
 """
 
 # %%
-import os, json, tqdm, itertools
+import os, json, tqdm, itertools, pickle
 import pandas as pd
+from tabulate import tabulate
 
 from engine import _DIRECTORY_MANAGER
 from easonsi import utils
@@ -13,7 +14,11 @@ from easonsi.files.gsheet import GSheet
 gsheet = GSheet()
 
 # _ddir = _DIRECTORY_MANAGER.DIR_simulated_base / "template=query_PDL_jinja_pdl=pdl2_step3_model=qwen2_72B_api=llm"
-_ddir = _DIRECTORY_MANAGER.DIR_simulated_base / "0822_template=query_PDL_jinja_pdl=pdl2_step3_model=custom_api=llm"
+_ddir = _DIRECTORY_MANAGER.DIR_simulated_base / "0823_template=query_PDL_jinja_pdl=pdl2_step3_model=custom_api=llm"
+fn_conversations = _ddir / "conversations.pkl"
+fn_conversations_for_labeling = _ddir / "simulated_conversations.csv"
+
+# %%
 fns = sorted(os.listdir(_ddir))
 fns = [fn for fn in fns if fn.endswith(".jsonl")]
 workflow_names = [fn[:-len(".jsonl")] for fn in fns]
@@ -32,7 +37,7 @@ def sort_file(workflow_name:str):
         else:
             raise ValueError(f"Unknown persona: {s['user_profile']}")
     sorted_data = sorted(sorted_data, key=lambda x: x[0])
-    assert [d[0] for d in sorted_data[:15]] == list(range(15))
+    assert [d[0] for d in sorted_data] == list(range(len(sorted_data)))  # check that all data are generated
     sorted_data = [d[1] for d in sorted_data]
     assert len(sorted_data) == len(simulated)
     utils.SaveJsonl(sorted_data, _ddir / f"{workflow_name}.jsonl")
@@ -42,8 +47,11 @@ for workflow_name in tqdm.tqdm(workflow_names):
     sort_file(workflow_name)
 
 # %%
+# ================================================================================
+# 转为便于表格展示的两个形式的数据
+# 对于每一组对话, 第一行为meta信息, 第二行为bot  greeting, 后面的 U/B 之间的会话
 def parse_conv(conversation_s:str):
-    convs = []
+    convs: list[str] = []   # [user1, bot1, user2, bot2, ...]
     role, utterence = None, ""
     for line in conversation_s.split("\n"):
         if not line.strip(): continue
@@ -73,7 +81,7 @@ parsed_data = []
 for fn in fns:
     data = utils.LoadJsonl(_ddir / fn)
     print(f"{fn}: {len(data)}")
-    for i,d in enumerate(data[:10]):            # select first 10!
+    for i,d in enumerate(data):            # select first 10?
         parsed_data.append(
             (f'{d["workflow_name"]}_{i:03d}', d["user_profile"])
         )
@@ -84,7 +92,7 @@ for fn in fns:
             parsed_data.append((f"{role}{j//2+1}", s))
 
 df = pd.DataFrame(parsed_data)
-df.to_csv(_ddir / "simulated_conversations.csv", index=False)
+df.to_csv(fn_conversations_for_labeling, index=False)
 df
 
 # %%
@@ -95,28 +103,11 @@ gsheet.to_gsheet(df, sheet_name="simulated_conversations")
 
 
 # %%
-d = df.iloc[:10,:]
-# print(d.to_string())
-# %%
-from tabulate import tabulate
-table_str = tabulate(
-    d.values, 
-    headers=['round', 'content'], # 'keys'
-    tablefmt='psql', 
-    maxcolwidths=100
-)
-print(table_str)
-
-
-
-# %%
+# ================================================================================
+# 转为规范的数据格式, {workflow_name, workflow_id, user_profile, simulated_conversation}
 df.columns = ["round", "content"]
 mask = df["round"].str.startswith('0')
-# mask
-# get index
 idx = list(df[mask].index)  + [len(df)]
-# %%
-import itertools, pickle
 def parse_conv(df:pd.DataFrame):
     conversations = []
     
@@ -138,8 +129,7 @@ def parse_conv(df:pd.DataFrame):
     return conversations
 
 conversations = parse_conv(df)
-# %%
-with open(_ddir / "conversations.pkl", "wb") as f:
+with open(fn_conversations, "wb") as f:
     pickle.dump(conversations, f)
 
 # %%
