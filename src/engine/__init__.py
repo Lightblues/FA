@@ -1,7 +1,7 @@
 from .main import ConversationController
 from .role_api import V01APIHandler, ManualAPIHandler, LLMSimulatedAPIHandler, API_NAME2CLASS, BaseAPIHandler
-from .role_bot import PDLBot
-from .role_user import InputUser, LLMSimulatedUserWithRefConversation, LLMSimulatedUserWithProfile
+from .role_bot import PDLBot, LKEBot, BOT_ANME2CLASS
+from .role_user import InputUser, LLMSimulatedUserWithRefConversation, LLMSimulatedUserWithProfile, USER_NAME2CLASS
 from .datamodel import (
     Role, Message, Conversation, ActionType, ConversationInfos, ConversationHeaderInfos, 
     Config, BaseRole

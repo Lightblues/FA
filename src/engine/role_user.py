@@ -44,8 +44,8 @@ class BaseUser(BaseRole):
         return content
 
 
-class InputUser(BaseRole):
-    names = ["manumal", "InputUser"]
+class InputUser(BaseUser):
+    names = ["manual", "InputUser"]
     def process(self, **kwargs):
         """ User that manually input!  """
         action_metas = {}

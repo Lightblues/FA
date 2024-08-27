@@ -139,7 +139,8 @@ class BaseAPIHandler(BaseRole):
         
         api_params = api_info["parameters"]["properties"]
         expected_param_names = list(api_params.keys())
-        assert len(input_params) == len(expected_param_names), f"API {api_name} expects parameters {expected_param_names}!"
+        if isinstance(input_params, list):
+            assert len(input_params) == len(expected_param_names), f"API {api_name} expects {len(expected_param_names)} parameters {expected_param_names}, but got {len(input_params)} input parameters!"
         if isinstance(input_params, dict):
             assert all(k in expected_param_names for k in input_params.keys()), f"API {api_name} expects parameters {expected_param_names}!"
             input_params = [input_params[k] for k in expected_param_names]
@@ -167,7 +168,6 @@ class BaseAPIHandler(BaseRole):
     def update_conversation(self, api_info:Dict, api_params_dict:Dict):
         # update the matched params to conversation
         matched_api_params = [api_params_dict[k] for k in list(api_info["parameters"]["properties"].keys())]
-        # conversation.msgs[-1].content = f"<Call API> {api_info['name']}({matched_api_params})"
         self.conversation.add_message(Message(Role.SYSTEM, f"Entity linked! Actually called API: {api_info['name']}({matched_api_params})"))
     
     def update_conversation_back(self, m:str):
@@ -233,7 +233,6 @@ class LLMSimulatedAPIHandler(BaseAPIHandler):
             action_metas.update(prompt=prompt, llm_response=llm_response)       # for debug
             res = self.process_llm_response(llm_response)
             res = f"<API response> {res}"
-            # if self.cfg.api_model_entity_linking:
             if self.cfg.api_entity_linking:
                 msg = self.update_conversation_back(res)
             else:

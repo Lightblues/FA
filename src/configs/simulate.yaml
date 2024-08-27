@@ -1,4 +1,4 @@
-# ================================= update @240820
+# ================================= update @240827
 workflow_dir: "pdl2_step3"        # 
 workflow_name: "000"
 
@@ -18,7 +18,8 @@ api_entity_linking: false        # bool, whether
 user_mode: "llm_profile"
 user_model_name: "gpt-4o"       # used when set user_mode as llm
 
-model_name: "custom"            # "qwen2_72B"
+bot_mode: "lke"                   # pdl, lke
+model_name: "custom"             # custom=qwen2_72B, 0.9.1
 template_fn: "query_PDL.jinja"
-greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
+greeting_msg: "你好，我是 {name} 机器人，有什么可以帮您?"
 

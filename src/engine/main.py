@@ -9,8 +9,8 @@ from typing import Tuple, Dict
 from .datamodel import (
     Role, Message, Conversation, ActionType, ConversationInfos, Config
 )
-from .role_bot import PDLBot
-from .role_user import InputUser, LLMSimulatedUserWithRefConversation
+from .role_bot import BOT_ANME2CLASS, BaseBot
+from .role_user import USER_NAME2CLASS, BaseUser
 from .role_api import API_NAME2CLASS, BaseAPIHandler
 from .pdl import PDL
 from .common import Logger, DEBUG
@@ -19,16 +19,16 @@ from .controller import PDLController
 
 class ConversationController:
     cfg: Config = None
-    user: InputUser = None
-    bot: PDLBot = None
+    user: BaseUser = None
+    bot: BaseBot = None
     api: BaseAPIHandler = None
     logger: Logger = None
     pdl_controller: PDLController = None
     
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
-        self.user = InputUser()
-        self.bot = PDLBot(cfg=cfg)
+        self.user = USER_NAME2CLASS[cfg.user_mode](cfg=cfg)
+        self.bot = BOT_ANME2CLASS[cfg.bot_mode](cfg=cfg)
         self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg)
         self.logger = Logger()
     
@@ -104,9 +104,9 @@ class ConversationController:
                         conversation=_conversation, pdl=pdl, conversation_infos=conversation_infos, 
                         print_stream=False          # cfg.bot_print_stream
                     )
-                    _debug_msg = f"{'[BOT]'.center(50, '=')}\n<<prompt>>\n{action_metas['prompt']}\n\n<<response>>\n{action_metas['llm_response']}\n"
+                    _debug_msg = f"{'[BOT]'.center(50, '=')}\n<<prompt>>\n{action_metas.input_details}\n\n<<response>>\n{action_metas.output_details}\n"
                     self.logger.debug(_debug_msg)
-                    if DEBUG: print(f">> llm_response: {json.dumps(action_metas['llm_response'], ensure_ascii=False)}")
+                    if DEBUG: print(f">> llm_response: {json.dumps(action_metas.output_details, ensure_ascii=False)}")
                     
                     if action_type == ActionType.API:
                         # check if the API calling chain is valid

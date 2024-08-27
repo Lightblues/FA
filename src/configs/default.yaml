@@ -2,8 +2,8 @@ workflow_dir: "pdl2_step3"        #
 workflow_name: "000"
 
 available_models: 
-- "default"
-- "0.9.1"
+# - "default"
+# - "0.9.1"
 # available_workflows:
 # - 
 
@@ -17,6 +17,7 @@ api_entity_linking: true
 user_mode: "manual"
 user_model_name: "qwen2_72B"      # used when set user_mode as llm
 
+bot_mode: "pdl"                   # pdl, lke
 model_name: "qwen2_72B"           # "qwen2_72B"
 template_fn: "query_PDL.jinja"
 greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"

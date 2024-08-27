@@ -135,12 +135,16 @@ class Config:
     api_model_name: str = "gpt-4o-mini"
     # api_model_entity_linking: bool = True
     fn_api_infos: str = None
+    
     user_mode: str = "manual"
     user_model_name: str = "gpt-4o-mini"
+    
     available_models: List[str] = None
     available_workflows: List[str] = None
     available_workflow_dirs: List[str] = None
     available_templates: List[str] = None
+    
+    bot_mode: str = "pdl"
     default_model: str = "default"
     greeting_msg: str = "Hi, I'm HuaBu bot. How can I help you?"
     check_dependency: bool = True       # switcher: if check API dependency

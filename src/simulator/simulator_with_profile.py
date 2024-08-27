@@ -9,8 +9,8 @@ from easonsi.llm.openai_client import OpenAIClient, Formater
 from engine import PDL, _DIRECTORY_MANAGER, UserProfile
 from engine.main import ConversationController
 from engine.role_api import BaseAPIHandler, API_NAME2CLASS
-from engine.role_user import LLMSimulatedUserWithRefConversation, LLMSimulatedUserWithProfile
-from engine.role_bot import PDLBot
+from engine.role_user import LLMSimulatedUserWithProfile
+from engine.role_bot import BaseBot, BOT_ANME2CLASS
 from engine.controller import PDLController
 from engine.common import Logger
 from engine.datamodel import (
@@ -23,13 +23,13 @@ class SimulatorV2(ConversationController):
     client: OpenAIClient = None
     api: BaseAPIHandler = None
     user: LLMSimulatedUserWithProfile = None
-    bot: PDLBot = None
+    bot: BaseBot = None
     logger: Logger = None
     
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
         self.user = LLMSimulatedUserWithProfile(cfg=cfg)
-        self.bot = PDLBot(cfg=cfg)
+        self.bot = BOT_ANME2CLASS[cfg.bot_mode](cfg=cfg)
         self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg)
         self.logger = Logger(_DIRECTORY_MANAGER.DIR_simulation_v2_log)
 
@@ -68,7 +68,7 @@ class SimulatorV2(ConversationController):
                         conversation=_conversation, pdl=pdl, conversation_infos=conversation_infos, 
                         print_stream=False          # cfg.bot_print_stream
                     )
-                    _debug_msg = f"{'[BOT]'.center(50, '=')}\n<<prompt>>\n{action_metas['prompt']}\n\n<<response>>\n{action_metas['llm_response']}\n"
+                    _debug_msg = f"{'[BOT]'.center(50, '=')}\n<<prompt>>\n{action_metas.input_details}\n\n<<response>>\n{action_metas.output_details}\n"
                     self.logger.debug(_debug_msg)
 
                     if action_type == ActionType.API:
