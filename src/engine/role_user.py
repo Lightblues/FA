@@ -3,13 +3,14 @@
 @240723 
 """
 import traceback
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 
 from .datamodel import BaseRole, Config
 from .common import prompt_user_input, init_client, LLM_CFG
 from .datamodel import Message, Conversation, Role, ActionType
 from .pdl import PDL
 from .user_profile import UserProfile
+from .typings import UserActionMetas
 from easonsi.llm.openai_client import OpenAIClient, Formater
 from utils.jinja_templates import jinja_render
 
@@ -43,12 +44,18 @@ class BaseUser(BaseRole):
         content = parsed_response["content"]
         return content
 
+    def process(self, *args, **kwargs) -> Tuple[ActionType, UserActionMetas, Message]:
+        """ 
+        return:
+        """
+        raise NotImplementedError
+
 
 class InputUser(BaseUser):
     names = ["manual", "InputUser"]
-    def process(self, **kwargs):
+    def process(self, **kwargs) -> Tuple[ActionType, UserActionMetas, Message]:
         """ User that manually input!  """
-        action_metas = {}
+        action_metas = UserActionMetas()
         user_input = prompt_user_input("[USER] ")       # user_input_prefix, user_color
         while not user_input.strip():
             user_input = prompt_user_input("[USER] ")
@@ -70,7 +77,7 @@ class LLMSimulatedUserWithRefConversation(BaseUser):
     def process(self, conversation:Conversation, **kwargs):
         """ 根据当前的会话进度, 生成下一轮query """
         assert self.ref_conversation is not None, "ref_conversation is None!"
-        action_metas = {}
+        action_metas = UserActionMetas()
         
         prompt = jinja_render( # TODO: optimize the prompt
             "user_simulator.jinja",
@@ -78,7 +85,8 @@ class LLMSimulatedUserWithRefConversation(BaseUser):
             new_conversation=conversation.to_str(),
         )
         llm_response = self.llm.query_one(prompt)
-        action_metas.update(prompt=prompt, llm_response=llm_response)       # for debug
+        # action_metas.update(prompt=prompt, llm_response=llm_response)       # for debug
+        action_metas.input_details = prompt; action_metas.output_details = llm_response
         
         msg = Message(Role.USER, self.process_llm_response(llm_response))
         return ActionType.USER_INPUT, action_metas, msg
@@ -98,7 +106,7 @@ class LLMSimulatedUserWithProfile(BaseUser):
     def process(self, conversation:Conversation, pdl: PDL, **kwargs):
         """ 根据当前的会话进度, 扮演用户角色, 生成下一轮query """
         assert self.user_profile is not None, "user_profile is None!"
-        action_metas = {}
+        action_metas = UserActionMetas()
         
         # 构造助手描述信息："{{ taskflow_name }}机器人。{{ taskflow_desc }}"
         assistant_desc = f"{pdl.taskflow_name}机器人。{pdl.taskflow_desc}"
@@ -110,7 +118,8 @@ class LLMSimulatedUserWithProfile(BaseUser):
             conversation=conversation.to_str()
         )
         llm_response = self.llm.query_one(prompt)
-        action_metas.update(prompt=prompt, llm_response=llm_response)
+        # action_metas.update(prompt=prompt, llm_response=llm_response)
+        action_metas.input_details = prompt; action_metas.output_details = llm_response
 
         msg = Message(Role.USER, self.process_llm_response(llm_response))
         return ActionType.USER_INPUT, action_metas, msg

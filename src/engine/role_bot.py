@@ -4,7 +4,7 @@ from typing import Optional, Dict, Tuple, List
 from .common import init_client, LLM_CFG, DEBUG
 from .datamodel import Conversation, PDL, ConversationInfos, ActionType, Message, Role
 from .datamodel import Config, BaseRole
-from .typings import BotActionMeta
+from .typings import BotActionMeta, APICalling_Info
 from utils.jinja_templates import jinja_render
 from easonsi.llm.openai_client import OpenAIClient, Formater
 from utils.tcloud.tcloud_utils import get_token, get_request_id, get_session_id
@@ -72,8 +72,7 @@ class PDLBot(BaseBot):
             raise ValueError(f"Unknown action_type: {parsed_response['action_type']}")
         # -> action_metas
         action_name, action_parameters, response = parsed_response.get("action_name", "DEFTAULT_ACTION"), parsed_response.get("action_parameters", "DEFAULT_PARAS"), parsed_response.get("response", "DEFAULT_RESPONSE")
-        # action_metas.update(action_name=action_name, action_parameters=action_parameters, response=response)
-        action_metas.action_infos = {"action_name": action_name, "action_parameters": action_parameters, "response": response}
+        action_metas.apicalling_info = APICalling_Info(name=action_name, kwargs=action_parameters)
         
         # -> msg
         if action_type == ActionType.API:
@@ -103,6 +102,7 @@ class LKEBot(BaseBot):
         scheme = "https",
         req_method = "POST",
     ):
+        if not (secret_id and secret_key and bot_app_key and visitor_biz_id): raise ValueError("Please set TENCENTCLOUD_SECRET_ID, TENCENTCLOUD_SECRET_KEY, TCLOUD_BOT_KEY, and TCLOUD_VISITOR_BIZ_ID")
         secret = {
             "secret_id": secret_id,
             "secret_key": secret_key

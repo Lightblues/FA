@@ -183,6 +183,11 @@ LLM_CFG = {
         "base_url": "http://9.91.12.44:8000/v1/",
         "api_key": "xxx",
     },
+    "v0729-Llama3_1-70B": {
+        "model_name": "Infinity-Instruct-7M-0729-Llama3_1-70B",
+        "base_url": "http://9.91.12.44:8000/v1/",
+        "api_key": "xxx",
+    },
     # "gpt-4o": {
     #     "model_name": "gpt-4o",
     #     "base_url": os.getenv("OPENAI_PROXY_BASE_URL"),

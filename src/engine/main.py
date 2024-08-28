@@ -111,7 +111,7 @@ class ConversationController:
                     if action_type == ActionType.API:
                         # check if the API calling chain is valid
                         if self.cfg.check_dependency:
-                            check_pass, sys_msg_str = self.pdl_controller.check_validation(next_node=action_metas["action_name"])       # next_node
+                            check_pass, sys_msg_str = self.pdl_controller.check_validation(next_node=action_metas.apicalling_info.name)       # next_node
                             self.logger.log_to_stdout(f"  <controller.dependency> {msg.content}", color="gray")
                             self.logger.log_to_stdout(f"  <controller.dependency> {sys_msg_str}", color="gray")
                             if not check_pass:
@@ -136,12 +136,12 @@ class ConversationController:
                 else:
                     pass         # TODO: 增加兜底策略
             elif next_role == Role.SYSTEM:
-                action_type, action_metas, msg = self.api.process(conversation=conversation, paras=action_metas)
+                action_type, action_metas, msg = self.api.process(conversation=conversation, apicalling_info=action_metas.apicalling_info)
                 if self.cfg.api_mode == "llm":
-                    _debug_msg = f"{'[API.llm]'.center(50, '=')}\n<<prompt>>\n{action_metas['prompt']}\n\n<<response>>\n{action_metas['llm_response']}\n"
+                    _debug_msg = f"{'[API.llm]'.center(50, '=')}\n<<prompt>>\n{action_metas.input_details}\n\n<<response>>\n{action_metas.output_details}\n"
                     self.logger.debug(_debug_msg)
                 elif self.cfg.api_mode == "v01":
-                    for m in action_metas["entity_linking"]:
+                    for m in action_metas.entity_linking_log:
                         _debug_msg = f"{'[API.EL]'.center(50, '=')}\n<<prompt>>\n{m['prompt']}\n\n<<response>>\n{m['llm_response']}\n"
                         self.logger.debug(_debug_msg)
             else:

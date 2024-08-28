@@ -18,7 +18,7 @@ api_entity_linking: false        # bool, whether
 user_mode: "llm_profile"
 user_model_name: "gpt-4o"       # used when set user_mode as llm
 
-bot_mode: "lke"                   # pdl, lke
+bot_mode: "pdl"                   # pdl, lke
 model_name: "custom"             # custom=qwen2_72B, 0.9.1
 template_fn: "query_PDL.jinja"
 greeting_msg: "你好，我是 {name} 机器人，有什么可以帮您?"

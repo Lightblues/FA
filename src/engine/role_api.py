@@ -8,10 +8,12 @@ process API calls
 """
 
 import requests, json, traceback
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 
+from .entity_linker import EntityLinker
 from .datamodel import BaseRole, Config, Role, Message, Conversation, PDL, ActionType
 from .common import prompt_user_input, _DIRECTORY_MANAGER, init_client, LLM_CFG, DEBUG
+from .typings import APIActionMetas, APICalling_Info
 from easonsi.llm.openai_client import OpenAIClient, Formater
 from utils.jinja_templates import jinja_render
 
@@ -27,42 +29,6 @@ def handle_exceptions(func):
             print(traceback.format_exc())
             return {'status': 'error', 'message': str(e)}
     return wrapper
-
-
-
-class EntityLinker:
-    """ abstract of entity linking """
-    cfg: Config = None
-    llm: OpenAIClient
-    
-    def __init__(self, cfg:Config) -> None:
-        self.cfg = cfg
-        self.llm = init_client(llm_cfg=LLM_CFG[cfg.api_model_name])
-        if DEBUG: print(f">> [api] init EL model {cfg.api_model_name} with {json.dumps(LLM_CFG[cfg.api_model_name], ensure_ascii=False)}")
-
-    def entity_linking(self, query:str, eneity_list: List[str]) -> Dict:
-        """ Given a list of candidate entities, use llm to determine which one is most similor to the input
-        return : 
-        """
-        meta = {}
-        
-        # if DEBUG: print(f">> runing EL for {query} with {json.dumps(eneity_list, ensure_ascii=False)}")
-        res = {
-            "is_matched": True, 
-            "matched_entity": None
-        }
-        prompt = jinja_render("entity_linking.jinja", query=query, eneity_list=eneity_list)
-        # if DEBUG: print(f"  model: {self.llm}\n  prompt: {json.dumps(prompt, ensure_ascii=False)}")
-        llm_response = self.llm.query_one(prompt)
-        # if DEBUG: print(f"  llm_response: {json.dumps(llm_response, ensure_ascii=False)}")
-        meta.update(prompt=prompt, llm_response=llm_response)
-        
-        # todo: error handling
-        parsed_response = Formater.parse_llm_output_json(llm_response)
-        if parsed_response["is_matched"]: res["matched_entity"] = parsed_response["matched_entity"]
-        else: res["is_matched"] = False
-        return res, meta
-
 
 
 class BaseAPIHandler(BaseRole):
@@ -112,6 +78,12 @@ class BaseAPIHandler(BaseRole):
         self.api_infos_map = self.load_api_infos(self.fn_api_infos)
         if cfg.api_entity_linking: self.entity_linker = EntityLinker(cfg=cfg)
 
+    def process(self, apicalling_info: APICalling_Info, *args, **kwargs) -> Tuple[ActionType, APIActionMetas, Message]:
+        """ 
+        return:
+        """
+        raise NotImplementedError
+
     def load_api_infos(self, fn_api_infos: str):
         if DEBUG: print(f">> Loading API infos from {fn_api_infos}")
         with open(fn_api_infos, 'r') as f:
@@ -124,7 +96,7 @@ class BaseAPIHandler(BaseRole):
         return api_infos_map
     
     @handle_exceptions
-    def match_and_check_api(self, paras:Dict, action_metas:Dict, **kwargs):
+    def match_and_check_api(self, apicalling_info: APICalling_Info, action_metas:APIActionMetas, **kwargs):
         """ Maybe ERROR!
         args:
             action_metas: hock
@@ -133,7 +105,7 @@ class BaseAPIHandler(BaseRole):
             api_params_dict: {"param_name": "param_value"}
             
         """
-        api_name, input_params = paras["action_name"], paras["action_parameters"]
+        api_name, input_params = apicalling_info.name, apicalling_info.kwargs
         assert api_name in self.api_infos_map, f"API `{api_name}` not found!"
         api_info = self.api_infos_map[api_name]
         
@@ -155,7 +127,7 @@ class BaseAPIHandler(BaseRole):
                 param_info = api_params[param_name]
                 if "entity_list" in param_info and param_info["entity_list"]:
                     res, _meta = self.entity_linker.entity_linking(param_input, param_info["entity_list"])
-                    action_metas["entity_linking_log"].append(_meta)
+                    action_metas.entity_linking_log.append(_meta)
                     if res["is_matched"]: 
                         if DEBUG: print(f"  {param_input} -> {res['matched_entity']}")
                         api_params_dict[param_name] = res["matched_entity"]
@@ -176,11 +148,12 @@ class BaseAPIHandler(BaseRole):
 
 class ManualAPIHandler(BaseAPIHandler):
     names = ["manual", "ManualAPIHandler"]
-    def process(self, conversation:Conversation, paras:Dict, **kwargs):
+    def process(self, conversation:Conversation, paras:Dict, **kwargs) -> Tuple[ActionType, APIActionMetas, Message]:
+        action_metas = APIActionMetas()
         api_name, api_params = paras["action_name"], paras["action_parameters"]
         res = prompt_user_input(f"  <manual> please fake the response of the API call {api_name}({api_params}): ")
         msg = Message(Role.SYSTEM, res)
-        return ActionType.API_RESPONSE, None, msg
+        return ActionType.API_RESPONSE, action_metas, msg
 
 
 class LLMSimulatedAPIHandler(BaseAPIHandler):
@@ -197,21 +170,11 @@ class LLMSimulatedAPIHandler(BaseAPIHandler):
         # api_results = parsed_response["response"]
         return parsed_response
 
-    def process(self, conversation:Conversation, paras:Dict, **kwargs):
+    def process(self, conversation:Conversation, apicalling_info: APICalling_Info, **kwargs) -> Tuple[ActionType, APIActionMetas, Message]:
         self.conversation = conversation
-        action_metas = {
-            "query": {
-                "action_name": paras["action_name"],
-                "action_parameters": paras["action_parameters"]
-            },
-            "matched": {
-                "action_name": "",
-                "action_parameters_dict": {}
-            },
-            "entity_linking_log": []
-        }       # for debug
+        action_metas = APIActionMetas(apicalling_info_query = apicalling_info)
         # if self.cfg.api_model_entity_linking:
-        res = self.match_and_check_api(paras, action_metas)   # match the standard API
+        res = self.match_and_check_api(apicalling_info, action_metas)   # match the standard API
         if isinstance(res, dict):
             msg = Message(Role.SYSTEM, json.dumps(res, ensure_ascii=False))
         else:
@@ -230,7 +193,7 @@ class LLMSimulatedAPIHandler(BaseAPIHandler):
                 api_params=str(api_params_dict)
             )
             llm_response = self.llm.query_one(prompt)
-            action_metas.update(prompt=prompt, llm_response=llm_response)       # for debug
+            action_metas.input_details = prompt; action_metas.output_details = llm_response
             res = self.process_llm_response(llm_response)
             res = f"<API response> {res}"
             if self.cfg.api_entity_linking:
@@ -266,7 +229,7 @@ class V01APIHandler(BaseAPIHandler):
         return response
 
     @handle_exceptions
-    def process_api(self, api_info, api_params_dict, action_metas:Dict, **kwargs):
+    def process_api(self, api_info, api_params_dict, action_metas:APIActionMetas, **kwargs):
         """ 返回统一的 API 调用结果
         return: {'status': 'success', 'response': '{"医院存在类型": "0"}'}
         ref: /apdcephfs_cq8/share_2992827/shennong_5/ianxxu/chatchat/_TaskPlan/UI/v2.1/utils/tool_executor.py
@@ -276,8 +239,7 @@ class V01APIHandler(BaseAPIHandler):
         # NOTE: update the matched params to conversation
         if self.cfg.api_entity_linking:
             self.update_conversation(api_info, api_params_dict)
-        action_metas["matched"]["action_parameters_dict"] = api_params_dict
-        action_metas["matched"]["action_name"] = api_info["name"]
+        action_metas.apicalling_info_matched = APICalling_Info(name=api_info["name"], kwargs=api_params_dict)
         response = self._call_api(api_info, api_params_dict)
         
         # 2] parse the response
@@ -293,25 +255,15 @@ class V01APIHandler(BaseAPIHandler):
             ensure_ascii=False
         )
 
-    def process(self, conversation:Conversation, paras:Dict, **kwargs):
+    def process(self, conversation:Conversation, apicalling_info:APICalling_Info, **kwargs) -> Tuple[ActionType, APIActionMetas, Message]:
         """ 
         args:
             conversation: 
             paras: {action_name:str, action_parameters:list}
         """
         self.conversation = conversation
-        action_metas = {
-            "query": {
-                "action_name": paras["action_name"],
-                "action_parameters": paras["action_parameters"]
-            },
-            "matched": {
-                "action_name": "",
-                "action_parameters_dict": {}
-            },
-            "entity_linking_log": []
-        }       # for debug
-        res = self.match_and_check_api(paras, action_metas)   # match the standard API
+        action_metas = APIActionMetas(apicalling_info_query=apicalling_info)
+        res = self.match_and_check_api(apicalling_info, action_metas)   # match the standard API
         if isinstance(res, dict):
             msg = Message(Role.SYSTEM, json.dumps(res, ensure_ascii=False))
         else:

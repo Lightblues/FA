@@ -57,7 +57,7 @@ class SimulatorV2(ConversationController):
             if next_role == Role.USER:
                 action_type, action_metas, msg = self.user.process(conversation=conversation, pdl=pdl)
                 conversation_infos.num_user_query += 1
-                _debug_msg = f"{'[USER]'.center(50, '=')}\n<<prompt>>\n{action_metas['prompt']}\n\n<<response>>\n{action_metas['llm_response']}\n"
+                _debug_msg = f"{'[USER]'.center(50, '=')}\n<<prompt>>\n{action_metas.input_details}\n\n<<response>>\n{action_metas.output_details}\n"
                 self.logger.debug(_debug_msg)
                 # quit logic!
                 if 'END' in msg.content: break
@@ -72,7 +72,7 @@ class SimulatorV2(ConversationController):
                     self.logger.debug(_debug_msg)
 
                     if action_type == ActionType.API:
-                        check_pass, sys_msg_str = self.pdl_controller.check_validation(next_node=action_metas["action_name"])       # next_node
+                        check_pass, sys_msg_str = self.pdl_controller.check_validation(next_node=action_metas.apicalling_info.name)       # next_node
                         self.logger.log_to_stdout(f"  <controller> {msg.content}", color="gray")
                         self.logger.log_to_stdout(f"  <controller> {sys_msg_str}", color="gray")
                         if check_pass: break
@@ -83,7 +83,7 @@ class SimulatorV2(ConversationController):
                 else:
                     pass         # TODO: 增加兜底策略
             elif next_role == Role.SYSTEM:
-                action_type, action_metas, msg = self.api.process(conversation=conversation, paras=action_metas)
+                action_type, action_metas, msg = self.api.process(conversation=conversation, paras=action_metas.apicalling_info)
             else:
                 raise ValueError(f"Unknown role: {next_role}")
             conversation_infos.curr_role = next_role
