@@ -1,3 +1,5 @@
+""" ================= moved to @evaluator.py ==================== """
+
 # %%
 import os, json, tqdm, itertools, pickle, collections
 from typing import List, Dict, Optional, Tuple
@@ -9,10 +11,11 @@ from engine import _DIRECTORY_MANAGER, LLM_CFG, init_client, PDL
 from utils.jinja_templates import jinja_render
 from tabulate import tabulate
 
+from judge_util import VERSION
+
 client = init_client(llm_cfg=LLM_CFG["gpt-4o"])
 
-# _ddir = _DIRECTORY_MANAGER.DIR_simulated_base / "0822_template=query_PDL_jinja_pdl=pdl2_step3_model=qwen2_72B_api=llm"
-_ddir = _DIRECTORY_MANAGER.DIR_simulated_base / "0823_template=query_PDL_jinja_pdl=pdl2_step3_model=custom_api=llm"
+_ddir = _DIRECTORY_MANAGER.DIR_simulated_base / VERSION
 fn_conversations = _ddir / "conversations.pkl"
 fn_llmscored = _ddir / "conversations_eval_gpt.jsonl"
 fn_humanscored = _ddir / "conversations_eval_human.jsonl"
@@ -21,20 +24,36 @@ fn_humanscored = _ddir / "conversations_eval_human.jsonl"
 #   judge_result: {overall: {score}, detailed: [{round-i: {errors: [{}], score}}]}
 #   infos: {prompt, response, user_profile}
 
-# %%
 df_gpt = pd.read_json(fn_llmscored, lines=True)
 # df_human = pd.read_json(fn_humanscored, lines=True)
 
 # %%
-def stat_scores_overall(df: pd.DataFrame):
-    df['overall_score'] = df['judge_result'].apply(lambda x: x["overall"]["score"])
-    df_scores = df['overall_score'].value_counts().sort_index().reset_index()
-    print(df_scores)
+# df = df_human
+df = df_gpt
 
 def stat_num_rounds(df: pd.DataFrame):
     df["num_rounds"] = df["judge_result"].apply(lambda x: len(x["detailed"]))
-    df["num_rounds"].value_counts().sort_index().reset_index()
+    avg_conv_turns = df["num_rounds"].mean()
+    print(f"avg num rounds: {avg_conv_turns:.2f}")
+    
+    vc_num_rounds = df["num_rounds"].value_counts().sort_index().reset_index()
+    return vc_num_rounds
 
+_ = stat_num_rounds(df)
+
+# %%
+def stat_scores_overall(df: pd.DataFrame, th=4):
+    df['overall_score'] = df['judge_result'].apply(lambda x: x["overall"]["score"])
+    mean_score = df["overall_score"].mean()
+    passrate = sum(df["overall_score"] >= th) / len(df)
+    print(f"Mean score: {mean_score:.2f}\nPassrate: {passrate:.2f}")
+    
+    df_scores = df['overall_score'].value_counts().sort_index().reset_index()
+    return df_scores
+_ = stat_scores_overall(df)
+
+
+# %%
 def stat_error_types(df: pd.DataFrame):
     cnt = collections.Counter()
     for idx, row in df.iterrows():
@@ -48,13 +67,8 @@ def stat_error_types(df: pd.DataFrame):
             except Exception as e:
                 print(round_eval["errors"])
     return cnt
-
-# stat_scores_overall(df_gpt)
-df = df_gpt
-# df = df_human
-df['overall_score'] = df['judge_result'].apply(lambda x: x["overall"]["score"])
-df["overall_score"].mean()
-passrate = sum(df["overall_score"] > 3) / len(df)
+cnt = stat_error_types(df_gpt)
+cnt
 
 # %%
 def stat_grouped_passrate(df: pd.DataFrame, th=4):
@@ -72,6 +86,7 @@ stat_grouped_passrate(df_gpt)
 
 # %%
 print(tabulate(df_gpt.iloc[:5,:], showindex=False, headers="keys"))  # , tablefmt='psql'
+
 # %%
 def get_detailed_score_pairs(df_gpt: pd.DataFrame, df_human: pd.DataFrame) -> List[Tuple[float, float]]:
     gpt_scores = df_gpt['judge_result'].apply(lambda x: [v['score'] for k, v in x['detailed'].items()])

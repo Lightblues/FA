@@ -8,7 +8,9 @@ from engine import _DIRECTORY_MANAGER, LLM_CFG, init_client, PDL
 from utils.jinja_templates import jinja_render
 from tabulate import tabulate
 
-_ddir = _DIRECTORY_MANAGER.DIR_simulated_base / "0822_template=query_PDL_jinja_pdl=pdl2_step3_model=qwen2_72B_api=llm"
+from judge_util import VERSION
+
+_ddir = _DIRECTORY_MANAGER.DIR_simulated_base / VERSION
 fn_conversations = _ddir / "conversations.pkl"
 fn_humanscored = _ddir / "【数据标注】【任务型标品PDL】测试数据标注 240822-v240822.csv"
 fn_humanscored_eval = _ddir / "conversations_eval_human.jsonl"

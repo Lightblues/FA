@@ -3,7 +3,7 @@
 """
 import datetime, os, re, yaml, copy, pathlib
 from enum import Enum, auto
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from typing import List, Dict, Optional, Tuple
 
 from .pdl import PDL
@@ -150,6 +150,16 @@ class Config:
     check_dependency: bool = True       # switcher: if check API dependency
     check_duplicate: bool = False       # switcher: if check API duplication calls
     max_duplicated_limit: int = 1
+    
+    simulate_version: str = ""
+    simulate_persons_per_workflow: int = -1
+    simulate_workflow_names: List[str] = field(default_factory=list)
+    simulate_max_workers: int = 10
+    simulate_model_name: str = "qwen2_72B"
+    judge_max_workers: int = 10
+    judge_model_name: str = "gpt-4o"
+    
+    to_gsheet: bool = False
     
     # --- depercated or fixed!!! ---
     # pdl_version: str = "v2"

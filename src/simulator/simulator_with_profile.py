@@ -83,7 +83,7 @@ class SimulatorV2(ConversationController):
                 else:
                     pass         # TODO: 增加兜底策略
             elif next_role == Role.SYSTEM:
-                action_type, action_metas, msg = self.api.process(conversation=conversation, paras=action_metas.apicalling_info)
+                action_type, action_metas, msg = self.api.process(apicalling_info=action_metas.apicalling_info, conversation=conversation)
             else:
                 raise ValueError(f"Unknown role: {next_role}")
             conversation_infos.curr_role = next_role

@@ -1,6 +1,12 @@
-""" Collect simulated conversations. @240821
+""" ================= moved to @evaluator.py ====================
+Collect simulated conversations. @240821
 output: https://docs.google.com/spreadsheets/d/1p36xAuhiv9siLo7Lw7bFGk9U33rBBKZOKUetYcLQQt4/edit?gid=1151625617#gid=1151625617
     https://doc.weixin.qq.com/sheet/e3_Aa8AFwbhAEsNvUX5XUlTXSTGWsT5A?scode=AJEAIQdfAAoPxPP2JyAcMATAZtAPI&tab=s2y66m
+
+0822: qwen2 
+0823: qwen2 
+0824: 0.9.1 
+0827_lke: 线上版本
 """
 
 # %%
@@ -9,12 +15,13 @@ import pandas as pd
 from tabulate import tabulate
 
 from engine import _DIRECTORY_MANAGER
+from judge_util import VERSION
 from easonsi import utils
 from easonsi.files.gsheet import GSheet
 gsheet = GSheet()
 
-# _ddir = _DIRECTORY_MANAGER.DIR_simulated_base / "template=query_PDL_jinja_pdl=pdl2_step3_model=qwen2_72B_api=llm"
-_ddir = _DIRECTORY_MANAGER.DIR_simulated_base / "0823_template=query_PDL_jinja_pdl=pdl2_step3_model=custom_api=llm"
+
+_ddir = _DIRECTORY_MANAGER.DIR_simulated_base / VERSION
 fn_conversations = _ddir / "conversations.pkl"
 fn_conversations_for_labeling = _ddir / "simulated_conversations.csv"
 
@@ -96,7 +103,7 @@ df.to_csv(fn_conversations_for_labeling, index=False)
 df
 
 # %%
-gsheet.to_gsheet(df, sheet_name="simulated_conversations")
+gsheet.to_gsheet(df, sheet_name="sim")
 
 
 

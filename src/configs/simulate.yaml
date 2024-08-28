@@ -1,5 +1,5 @@
 # ================================= update @240827
-workflow_dir: "pdl2_step3"        # 
+workflow_dir: "pdl_v0828"        # 
 workflow_name: "000"
 
 available_models: 
@@ -23,3 +23,19 @@ model_name: "custom"             # custom=qwen2_72B, 0.9.1
 template_fn: "query_PDL.jinja"
 greeting_msg: "你好，我是 {name} 机器人，有什么可以帮您?"
 
+simulate_version: "v240828"
+simulate_persons_per_workflow: 15
+simulate_workflow_names: 
+- 000-114挂号
+- 002-新闻查询
+- 003-物品能否邮寄
+- 004-服务网点查询
+- 006-同程开发票
+- 007-门诊费用报销
+simulate_max_workers: 10
+simulate_model_name: "v0729-Llama3_1-70B"
+
+judge_max_workers: 10
+judge_model_name: "gpt-4o"
+
+to_gsheet: true

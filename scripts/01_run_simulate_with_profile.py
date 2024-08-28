@@ -1,4 +1,4 @@
-""" 
+""" ================= moved to @evaluator.py ====================
 @240821 并发模拟, 保存到 $DATA/simulated 下
 /apdcephfs_cq8/share_2992827/shennong_5/easonsshi/huabu/data/v240820/simulated/template=query_PDL_jinja_pdl=pdl2_step3_model=qwen2_72B_api=llm/000-114挂号.jsonl
 
@@ -11,7 +11,7 @@
 - [ ] 实现LLM评分, 比较一致性
 - [ ] 保存 meta 信息 #P1
 """
-import os, argparse, json, tqdm
+import os, argparse, json, tqdm, traceback
 import concurrent.futures
 from simulator.simulator_with_profile import SimulatorV2
 from engine import (
@@ -90,6 +90,7 @@ def run_simulations_mp(base_cfg:Config, workflow_names, output_dir=_DIRECTORY_MA
             return task(cfg, up, workflow_name, ofn)
         except Exception as e:
             print(f"Task failed for {up}: {e}")
+            traceback.print_exc()
             return None
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -104,18 +105,21 @@ def run_simulations_mp(base_cfg:Config, workflow_names, output_dir=_DIRECTORY_MA
 
 if __name__ == '__main__':
     # --- config overwrite ---
-    max_workers = 20
+    max_workers = 10
+    # max_workers = 1
+    model_name = "v0729-Llama3_1-70B"
     
     cfg = Config.from_yaml(DataManager.normalize_config_name("simulate.yaml"))
+    cfg.model_name = model_name
     cfg.normalize_paths()       # fix the path
     
     _pdl_version = os.path.split(cfg.workflow_dir)[-1]
     # "template=query_PDL_jinja_pdl=pdl2_step3_model=qwen2_72B_api=llm"
-    VERSION = f"0823_template={cfg.template_fn}_pdl={_pdl_version}_model={cfg.model_name}_api={cfg.api_mode}"
+    VERSION = f"0828_template={cfg.template_fn}_pdl={_pdl_version}_bot={cfg.bot_mode}_model={cfg.model_name}_api={cfg.api_mode}"
     VERSION = VERSION.replace("/", "_").replace(".", "_")
     odir = _DIRECTORY_MANAGER.DIR_simulated_base / VERSION
     
-    MODE = "single"
+    # MODE = "single"
     MODE = "all"
     if MODE == "single":
         # --- run single ---
@@ -129,6 +133,7 @@ if __name__ == '__main__':
         # --- run all ---
         # workflow_names = DataManager.get_workflow_name_list(_DIRECTORY_MANAGER.DIR_user_profile, extension=".json")
         workflow_names = ['000-114挂号', "002-新闻查询", '019-礼金礼卡类案件', '023-查号源日期', '025-酒店取消订单']  # '001-注册邀约', 
+        # workflow_names = ['003-物品能否邮寄', '005-课程调整', '006-同程开发票', '007-门诊费用报销', '008-寄快递', '012-就诊预约咨询']
         print(f"workflow_names: {workflow_names}")
         
         run_simulations_mp(base_cfg=cfg, workflow_names=workflow_names, output_dir=odir, max_workers=max_workers)

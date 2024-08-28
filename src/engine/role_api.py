@@ -78,7 +78,7 @@ class BaseAPIHandler(BaseRole):
         self.api_infos_map = self.load_api_infos(self.fn_api_infos)
         if cfg.api_entity_linking: self.entity_linker = EntityLinker(cfg=cfg)
 
-    def process(self, apicalling_info: APICalling_Info, *args, **kwargs) -> Tuple[ActionType, APIActionMetas, Message]:
+    def process(self, apicalling_info: APICalling_Info=None, conversation:Conversation=None, *args, **kwargs) -> Tuple[ActionType, APIActionMetas, Message]:
         """ 
         return:
         """
@@ -148,9 +148,9 @@ class BaseAPIHandler(BaseRole):
 
 class ManualAPIHandler(BaseAPIHandler):
     names = ["manual", "ManualAPIHandler"]
-    def process(self, conversation:Conversation, paras:Dict, **kwargs) -> Tuple[ActionType, APIActionMetas, Message]:
+    def process(self, apicalling_info: APICalling_Info, **kwargs) -> Tuple[ActionType, APIActionMetas, Message]:
         action_metas = APIActionMetas()
-        api_name, api_params = paras["action_name"], paras["action_parameters"]
+        api_name, api_params = apicalling_info.name, apicalling_info.kwargs
         res = prompt_user_input(f"  <manual> please fake the response of the API call {api_name}({api_params}): ")
         msg = Message(Role.SYSTEM, res)
         return ActionType.API_RESPONSE, action_metas, msg
@@ -170,7 +170,7 @@ class LLMSimulatedAPIHandler(BaseAPIHandler):
         # api_results = parsed_response["response"]
         return parsed_response
 
-    def process(self, conversation:Conversation, apicalling_info: APICalling_Info, **kwargs) -> Tuple[ActionType, APIActionMetas, Message]:
+    def process(self, apicalling_info: APICalling_Info, conversation:Conversation, *args, **kwargs) -> Tuple[ActionType, APIActionMetas, Message]:
         self.conversation = conversation
         action_metas = APIActionMetas(apicalling_info_query = apicalling_info)
         # if self.cfg.api_model_entity_linking:
@@ -255,7 +255,7 @@ class V01APIHandler(BaseAPIHandler):
             ensure_ascii=False
         )
 
-    def process(self, conversation:Conversation, apicalling_info:APICalling_Info, **kwargs) -> Tuple[ActionType, APIActionMetas, Message]:
+    def process(self, apicalling_info:APICalling_Info, conversation:Conversation, *args, **kwargs) -> Tuple[ActionType, APIActionMetas, Message]:
         """ 
         args:
             conversation: 
