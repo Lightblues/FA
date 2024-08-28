@@ -74,7 +74,7 @@ class BaseAPIHandler(BaseRole):
 
     def __init__(self, cfg:Config, *args, **kwargs) -> None:
         self.cfg = cfg
-        if cfg.fn_api_infos: self.fn_api_infos = cfg.fn_api_infos
+        if cfg.fn_api_infos: self.fn_api_infos = _DIRECTORY_MANAGER.DIR_data_base / cfg.fn_api_infos
         self.api_infos_map = self.load_api_infos(self.fn_api_infos)
         if cfg.api_entity_linking: self.entity_linker = EntityLinker(cfg=cfg)
 

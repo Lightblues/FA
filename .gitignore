@@ -3,8 +3,11 @@ ref_run/
 data
 tmp/
 .env
-# .*
+*.ipynb
+
 core.*
+
+
 __*/
 
 __pycache__/
