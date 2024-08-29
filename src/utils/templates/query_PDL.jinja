@@ -7,9 +7,8 @@ You should try your best to make a friendly conversation with the user, helping 
     - If the user ask irrelevant questions, generate a response that keeps the conversation fluent and logical.
 2. **PDL**: The PDL includes several components:
     - meta information: `Name` and `Desc` are meta information about the PDL.
-    - useful slots: `SLOT`s define the information you need to collect from user. 
-    - actions: `API` and `ANSWER` nodes are special `action_type`s defining your action. APIs are useful functions available for you and ANSWERs are the responses you should return to the user.
-        - besides, you can use a special `ASKSLOT` action to collect slot value from user, if not provided yet! 
+    - useful slots: `SLOT`s define the information you may need to collect from user, or the API's returned values. 
+    - actions: `API` and `ANSWER` nodes are `action_type`s defining your action. APIs are useful functions available for you and ANSWERs are the responses you should return to the user.
     - pdl: the final `PDL` string is a Pythonic language that defines the core logic of the procedure. 
 
 ### Head Information
@@ -32,11 +31,11 @@ You should try your best to make a friendly conversation with the user, helping 
 {{ current_state | default("No extra constraints") }}
 
 ### Your turn
-For ANSWER and ASKSLOT action, output with format:
+For ANSWER action, output with format:
 ```json
 {
-    "action_type": "The predicted action type, e.g. ANSWER, ASKSLOT",
-    "response": "The generated response, if needed. Always reply kindly and patiently, in Chinese.",
+    "action_type": "ANSWER",
+    "response": "The generated response, if needed. Always reply kindly and patiently, in Chinese."
 }
 ```
 For API action, output with format:
@@ -44,7 +43,7 @@ For API action, output with format:
 {
     "action_type": "API",
     "action_name": "The name of action, e.g. 查询开票方式, 白金卡开票类型澄清",
-    "action_parameters": "The input parameters for the action, if needed. e.g. [_订单编号], [_会员卡ID]",
+    "action_parameters": "The input parameters for API, in the format of JSON"
 }
 ```
 
