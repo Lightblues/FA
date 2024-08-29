@@ -17,16 +17,18 @@ Use the following criteria to score the assistant's performance on a scale of 1 
 - 5: 遵循流程，能够灵活处理用户询问，回复自然、顺畅
 
 ### Common Errors
-- **流程未遵循**：没有遵循PDL所定义的流程
-- **流程重复**：陷入死循环
-- **API选择错误**：调用了错误的API
-- **API参数错误**：调用API的时候传入了不合法的参数
-- **API重复调用**：用相同的参数重复调用同一API
-- **不必要的询问**：当对话里用户已经提供所需信息时，重复向用户询问该信息
-- **回复信息不明确**：没有给用户提供有意义的信息或引导
-- **回复语气问题**：回复语气不好
-- **回复幻觉**：回复某些问题时出现与常识有明显冲突的描述
-- **不必要的询问**：对于用户已经提供的信息(SLOT)重复询问
+- 流程
+  - **流程未遵循**: 没有遵循PDL所定义的流程, 也包括选择了错误的API进行调用
+  - **流程重复**: 重复某一流程, 乃至死循环
+- API
+  - **API参数错误**: 调用API的时候传入了不合法的参数
+  - **API重复调用**: 用相同的参数重复调用同一API
+- SLOT
+  - **不必要的询问**: 对于用户已经提供的信息重复询问, "明知故问"
+- ANSWER
+  - **回复信息不明确**: 没有给用户提醒有意义的信息或引导
+  - **自由回复正确**: 对于非流程中的问题, 给出了合理的回复 (这个不算错误, 但需要标注出来)
+  - **自由回复错误**: 对于非流程中的问题, 给出了错误的 (不符合常识) 或虚构的回复 (也即"幻觉")
 
 
 ### Scoring Instructions
@@ -38,7 +40,7 @@ Based on the evaluation criteria and task description provided, review the conve
             # - error_type: API参数错误: 
             #   error_reason: 在当前轮的调用中传入了错误的参数
 #}
-Output your evaluation with standard YAML format, without any extra information:
+Output your evaluation with **valid YAML format**, without any extra information:
 ```yaml
 detailed: 
     round-1:
