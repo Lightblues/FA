@@ -23,6 +23,8 @@ ANSWERs:
   - name: 城乡居民医保门诊报销政策
     desc: 确认您为城乡居民。您的门诊费用报销申请已成功提交，我们将会尽快处理。
     precondition: [身份查询]
+  - name: 其他自由回复问题
+  - name: 请用户提供必要信息
 
 PDL: |
   [Identity] = API_身份查询([CardID])

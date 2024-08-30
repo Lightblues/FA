@@ -4,9 +4,9 @@ Detailed_desc: 首先获取指定国家支持的物品分类, 然后对于用户
 
 SLOTs:
   - name: country
-    desc: 选择国家
+    desc: 目标国家
   - name: goods
-    desc: 选择物品
+    desc: 邮寄物品
   - name: goods_list
     desc: 某一国家支持的物品分类
   - name: status
@@ -22,22 +22,26 @@ APIs:
     response: [status, isValid]
 
 ANSWERs:
-  - name: 有结果
-    desc: 查询成功，返回物品邮寄信息
-    ref_text: 返回查询结果. 并指出上述信息仅供参考，最终以目的地海关清关要求为准。
+  - name: 回复可以邮寄
+    desc: 告知用户可以邮寄. 并指出上述信息仅供参考，最终以目的地海关清关要求为准。
     precondition: [查询物品能否邮寄]
-  - name: 结束回复2
+  - name: 回复不可以邮寄
+    desc: 告知用户不可以邮寄, 并给出该国家支持的物品类别. 并指出上述信息仅供参考，最终以目的地海关清关要求为准。
+    precondition: [查询物品能否邮寄, 查询物品列表]
+  - name: 查询失败
     desc: 查询失败，未找到目的地运输限制信息
     ref_text: 根据您提供的信息，暂未查询到目的地运输限制，具体可联系当地DHL查询。\n\n*信息仅供参考，最终以目的地海关清关要求为准。
     precondition: [查询物品能否邮寄]
+  - name: 其他自由回复问题
+  - name: 请用户提供必要信息
 
 PDL: |
   [status, isValid] = API_查询物品能否邮寄([country, goods])
   if status == 200:
     if isValid:
-      ANSWER_有结果()
+      ANSWER_回复可以邮寄()
     else:
       [goods_list] = API_查询物品列表([country])
-      ANSWER_有结果()
+      ANSWER_回复不可以邮寄()
   else:
-    ANSWER_结束回复2()
+    ANSWER_查询失败()

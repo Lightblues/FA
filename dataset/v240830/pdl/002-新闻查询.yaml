@@ -22,6 +22,8 @@ ANSWERs:
   - name: 获取新闻失败
     desc: 查询失败：播报当日头条新闻
     precondition: [新闻查询]
+  - name: 其他自由回复问题
+  - name: 请用户提供必要信息
 
 PDL: |
   [查询到的新闻列表] = API_查询新闻([news_location, news_type, news_time])

@@ -4,20 +4,19 @@ Detailed_desc: 根据用户指定的医院, 科室和时间查询号源信息, �
 
 SLOTs:
   - name: hospital_name
-    desc: 医院名称
+    desc: 用户想挂号的医院名称
   - name: department_name
-    desc: 科室名称
+    desc: 用户想挂号的科室名称
   - name: appointment_time
-    desc: 挂号时间
+    desc: 用户想要的挂号时间
   - name: id_number
-    desc: 身份证号
+    desc: 用户的身份证号
   - name: registration_type
     desc: 号类, 挂号类别, 分为专家号和普通号
   - name: doctor_name
-    desc: 医生姓名
-  # 对话槽位
+    desc: 用户想挂号的医生姓名
   - name: 挂号意愿
-    desc: 是否愿意在其他医院进行挂号
+    desc: 用户是否愿意在其他医院进行挂号
   - name: 挂号状态
     desc: API反馈的挂号状态, 0为挂号成功, 1为挂号失败
 
@@ -59,6 +58,8 @@ ANSWERs:
     desc: 好的，已为您成功挂了$其他医院号源推荐-医院名称$其他医院号源推荐-挂号医生$挂号时间号源，稍后也会短信发送到您的来电号码，还有什么可以帮您吗？
   - name: 结束回复2
     desc: 非常抱歉，身份证信息有误这边无法帮您挂号；建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
+  - name: 其他自由回复问题
+  - name: 请用户提供必要信息
 
 PDL: |
   [医院存在类型] = API_校验挂号医院([hospital_name])
