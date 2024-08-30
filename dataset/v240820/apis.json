@@ -1,0 +1,11 @@
+[
+    {
+        "name": "新闻查询",
+        "type": "POST",
+        "endpoint": "/search_news",
+        "request": ["news_location", "news_type", "news_time"],
+        "response": ["news_list"],
+        "request_zh": ["新闻位置", "新闻类型", "新闻时间"],
+        "response_zh": ["查询到的新闻列表"]
+    }
+]
