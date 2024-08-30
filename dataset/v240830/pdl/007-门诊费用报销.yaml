@@ -1,0 +1,34 @@
+Name: 门诊费用报销
+Desc: 根据用户身份信息处理门诊费用报销
+Detailed_desc: 基于用户身份证号查询其身份, 根据不同的身份类别告知用户不同的报销政策
+
+SLOTs:
+  - name: CardID
+    desc: 身份证号
+  - name: Identity
+    available_types: [退休职工, 在职职工, 城乡居民]
+
+APIs:
+  - name: 身份查询
+    request: [CardID]
+    response: [Identity]
+
+ANSWERs:
+  - name: 退休职工医保门诊报销政策
+    desc: 退休职工的门诊费用报销申请已成功提交，请耐心等待处理结果。
+    precondition: [身份查询]
+  - name: 在职职工医保门诊报销政策
+    desc: 根据您提供的信息，您的在职职工门诊费用报销申请已经提交成功，我们将在收到您的申请后进行审核。
+    precondition: [身份查询]
+  - name: 城乡居民医保门诊报销政策
+    desc: 确认您为城乡居民。您的门诊费用报销申请已成功提交，我们将会尽快处理。
+    precondition: [身份查询]
+
+PDL: |
+  [Identity] = API_身份查询([CardID])
+  if Identity == "退休职工":
+      ANSWER_退休职工医保门诊报销政策()
+  elif Identity == "在职职工":
+      ANSWER_在职职工医保门诊报销政策()
+  elif Identity == "城乡居民":
+      ANSWER_城乡居民医保门诊报销政策()

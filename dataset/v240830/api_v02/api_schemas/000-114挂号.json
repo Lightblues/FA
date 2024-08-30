@@ -1,0 +1,304 @@
+[
+  {
+    "name": "check_hospital",
+    "description": "校验挂号医院",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "hospital_name": {
+          "type": "string",
+          "name": "医院名称",
+          "description": "需要校验的医院名称"
+        }
+      },
+      "required": [
+        "hospital_name"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "hospital_exists": {
+          "type": "boolean",
+          "name": "医院存在状态",
+          "description": "医院是否在指定列表中"
+        }
+      }
+    },
+    "URL": "http://example.com/check_hospital",
+    "Method": "POST",
+    "from": "000-114挂号"
+  },
+  {
+    "name": "check_department",
+    "description": "校验科室信息",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "department_name": {
+          "type": "string",
+          "name": "科室名称",
+          "description": "需要校验的科室名称"
+        },
+        "hospital_name": {
+          "type": "string",
+          "name": "医院名称",
+          "description": "需要校验的医院名称"
+        }
+      },
+      "required": [
+        "department_name",
+        "hospital_name"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "department_exists": {
+          "type": "boolean",
+          "name": "科室存在状态",
+          "description": "医院存在, 并且科室在指定列表中"
+        }
+      }
+    },
+    "URL": "http://example.com/check_department",
+    "Method": "POST",
+    "from": "000-114挂号"
+  },
+  {
+    "name": "query_appointment",
+    "description": "指定时间号源查询",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "hospital_name": {
+          "type": "string",
+          "name": "医院名称",
+          "description": "要求医院存在"
+        },
+        "department_name": {
+          "type": "string",
+          "name": "科室名称",
+          "description": "要求科室存在"
+        },
+        "appointment_time": {
+          "type": "string",
+          "name": "预约时间",
+          "description": "预约时间"
+        }
+      },
+      "required": [
+        "hospital_name",
+        "department_name",
+        "appointment_time"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "available_slots": {
+          "type": "integer",
+          "name": "可用号源数量",
+          "description": "可用号源数量"
+        },
+        "available_list": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "hospital_name": {
+                "type": "string"
+              },
+              "department_name": {
+                "type": "string"
+              },
+              "doctor_name": {
+                "type": "string"
+              },
+              "time_period": {
+                "type": "string",
+                "description": "时间段, 例如 '09:00-10:00'"
+              },
+              "is_specialist": {
+                "type": "boolean"
+              }
+            }
+          },
+          "name": "可选列表",
+          "description": "可选列表"
+        },
+        "specialist_count": {
+          "type": "integer",
+          "name": "专家号数量",
+          "description": "专家号数量"
+        },
+        "general_count": {
+          "type": "integer",
+          "name": "普通号数量",
+          "description": "普通号数量"
+        }
+      }
+    },
+    "URL": "http://example.com/query_appointment",
+    "Method": "POST",
+    "from": "000-114挂号"
+  },
+  {
+    "name": "recommend_other_hospitals",
+    "description": "其他医院号源推荐",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "department_name": {
+          "type": "string",
+          "name": "科室名称",
+          "description": "科室名称"
+        },
+        "appointment_time": {
+          "type": "string",
+          "name": "预约时间",
+          "description": "预约时间"
+        }
+      },
+      "required": [
+        "department_name",
+        "appointment_time"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "available_slots": {
+          "type": "integer",
+          "name": "可用号源数量",
+          "description": "可用号源数量"
+        },
+        "available_list": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "hospital_name": {
+                "type": "string"
+              },
+              "department_name": {
+                "type": "string"
+              },
+              "doctor_name": {
+                "type": "string"
+              },
+              "time_period": {
+                "type": "string",
+                "description": "时间段, 例如 '09:00-10:00'"
+              },
+              "is_specialist": {
+                "type": "boolean"
+              }
+            }
+          },
+          "name": "可选列表",
+          "description": "可选列表"
+        }
+      }
+    },
+    "URL": "http://example.com/recommend_other_hospitals",
+    "Method": "POST",
+    "from": "000-114挂号"
+  },
+  {
+    "name": "register_hospital",
+    "description": "本医院挂号执行",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "id_number": {
+          "type": "string",
+          "name": "身份证号",
+          "description": "身份证号"
+        },
+        "registration_type": {
+          "type": "string",
+          "name": "挂号类型",
+          "description": "专家号 或 普通号"
+        },
+        "hospital_name": {
+          "type": "string",
+          "name": "医院名称",
+          "description": "医院名称"
+        },
+        "department_name": {
+          "type": "string",
+          "name": "科室名称",
+          "description": "科室名称"
+        },
+        "appointment_time": {
+          "type": "string",
+          "name": "预约时间",
+          "description": "预约时间"
+        }
+      },
+      "required": [
+        "id_number",
+        "registration_type",
+        "hospital_name",
+        "department_name",
+        "appointment_time"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "registration_status": {
+          "type": "integer",
+          "name": "挂号结果",
+          "description": "挂号结果, 1: 成功; 0: 失败"
+        }
+      }
+    },
+    "URL": "http://example.com/register_hospital",
+    "Method": "POST",
+    "from": "000-114挂号"
+  },
+  {
+    "name": "register_other_hospital",
+    "description": "其他医院挂号执行",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "id_number": {
+          "type": "string",
+          "name": "身份证号",
+          "description": "身份证号"
+        },
+        "hospital_name": {
+          "type": "string",
+          "name": "医院名称",
+          "description": "医院名称"
+        },
+        "doctor_name": {
+          "type": "string",
+          "name": "医生名称",
+          "description": "医生名称"
+        }
+      },
+      "required": [
+        "id_number",
+        "hospital_name",
+        "doctor_name"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "registration_status": {
+          "type": "integer",
+          "name": "挂号结果",
+          "description": "挂号结果, 1: 成功; 0: 失败"
+        }
+      }
+    },
+    "URL": "http://example.com/register_other_hospital",
+    "Method": "POST",
+    "from": "000-114挂号"
+  }
+]

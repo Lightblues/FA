@@ -1,0 +1,43 @@
+Name: 物品能否邮寄
+Desc: 根据用户提供的信息查询物品是否可以邮寄到指定国家
+Detailed_desc: 首先获取指定国家支持的物品分类, 然后对于用户所要邮寄的物品, 调用API检查是否支持邮寄. 
+
+SLOTs:
+  - name: country
+    desc: 选择国家
+  - name: goods
+    desc: 选择物品
+  - name: goods_list
+    desc: 某一国家支持的物品分类
+  - name: status
+    desc: 数据库中是否存在该信息, 200表示存在
+
+APIs:
+  - name: 查询物品列表
+    desc: 返回支持查询的物品类别
+    request: [country]
+    response: [goods_list]
+  - name: 查询物品能否邮寄
+    request: [country, goods]
+    response: [status, isValid]
+
+ANSWERs:
+  - name: 有结果
+    desc: 查询成功，返回物品邮寄信息
+    ref_text: 返回查询结果. 并指出上述信息仅供参考，最终以目的地海关清关要求为准。
+    precondition: [查询物品能否邮寄]
+  - name: 结束回复2
+    desc: 查询失败，未找到目的地运输限制信息
+    ref_text: 根据您提供的信息，暂未查询到目的地运输限制，具体可联系当地DHL查询。\n\n*信息仅供参考，最终以目的地海关清关要求为准。
+    precondition: [查询物品能否邮寄]
+
+PDL: |
+  [status, isValid] = API_查询物品能否邮寄([country, goods])
+  if status == 200:
+    if isValid:
+      ANSWER_有结果()
+    else:
+      [goods_list] = API_查询物品列表([country])
+      ANSWER_有结果()
+  else:
+    ANSWER_结束回复2()

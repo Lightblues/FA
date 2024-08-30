@@ -1,0 +1,76 @@
+[
+  {
+    "name": "query_goods_list",
+    "description": "查询物品列表",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "type": "string",
+          "name": "目标国家",
+          "description": "目标国家"
+        }
+      },
+      "required": [
+        "country"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "goods_list": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "name": "支持邮寄的物品类别列表",
+          "description": "该国家支持邮寄的物品类别列表, e.g. ['书籍', '服饰', '化妆品', ...]"
+        }
+      }
+    },
+    "URL": "http://example.com/query_goods_list",
+    "Method": "POST",
+    "from": "003-物品能否邮寄"
+  },
+  {
+    "name": "query_shipping_status",
+    "description": "查询物品能否邮寄",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "type": "string",
+          "name": "目标国家",
+          "description": "目标国家"
+        },
+        "goods": {
+          "type": "string",
+          "name": "用户要邮寄的物品",
+          "description": "用户要邮寄的物品"
+        }
+      },
+      "required": [
+        "country",
+        "goods"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer",
+          "name": "状态码",
+          "description": "200 表示成功，其他表示错误"
+        },
+        "isValid": {
+          "type": "boolean",
+          "name": "是否支持邮寄",
+          "description": "true 表示支持邮寄，false 表示不支持邮寄"
+        }
+      }
+    },
+    "URL": "http://example.com/query_shipping_status",
+    "Method": "POST",
+    "from": "003-物品能否邮寄"
+  }
+]

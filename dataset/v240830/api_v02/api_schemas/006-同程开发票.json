@@ -1,0 +1,100 @@
+[
+  {
+    "name": "query_invoice_method",
+    "description": "查询开票方式",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "integer",
+          "name": "订单ID",
+          "description": "需要查询的订单ID"
+        }
+      },
+      "required": [
+        "order_id"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "invoice_method": {
+          "type": "string",
+          "name": "开票方式",
+          "description": "开票方式",
+          "enum": [
+            "平台开具",
+            "酒店开具"
+          ]
+        }
+      }
+    },
+    "URL": "http://example.com/query_invoice_method",
+    "Method": "POST",
+    "from": "006-同程开发票"
+  },
+  {
+    "name": "query_invoice_progress",
+    "description": "查询开票进度",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "name": "名称",
+          "description": "需要查询的名称"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "invoice_progress": {
+          "type": "string",
+          "name": "开票进度",
+          "description": "开票进度"
+        }
+      }
+    },
+    "URL": "http://example.com/query_invoice_progress",
+    "Method": "POST",
+    "from": "006-同程开发票"
+  },
+  {
+    "name": "query_member_status",
+    "description": "查询会员状态",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "integer",
+          "name": "卡ID",
+          "description": "需要查询的会员卡ID"
+        }
+      },
+      "required": [
+        "card_id"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "card_type": {
+          "type": "string",
+          "name": "卡类型",
+          "description": "会员卡类型",
+          "enum": [
+            "白金卡",
+            "非白金卡"
+          ]
+        }
+      }
+    },
+    "URL": "http://example.com/query_member_status",
+    "Method": "POST",
+    "from": "006-同程开发票"
+  }
+]

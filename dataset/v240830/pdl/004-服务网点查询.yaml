@@ -1,0 +1,45 @@
+Name: 服务网点查询
+Desc: 查询国内城市的DHL服务网点的相关信息, 包括网点名称、地址、电话号码、营业时间等信息
+Detailed_desc: 首先, 检查用户要查询的城市是否支持, 然后调用API获取服务网点信息的信息并反馈给用户. 
+
+SLOTs:
+  - name: city
+    desc: 选择服务网点所在的城市
+  - name: errcode
+    desc: API返回码, 200为成功
+
+APIs:
+  - name: 获取服务网点城市列表
+    request: []
+    response: [服务网点城市列表]
+  - name: 校验服务网点城市
+    desc: 检查所提供的城市是否在支持列表中
+    request: [city]
+    response: [errcode]
+  - name: 获取服务网点信息
+    desc: 返回所查询城市的服务网点信息, 包括 网点名称、地址、电话号码、营业时间等
+    request: [city]
+    response: [errcode, 网点信息]
+    precondition: [校验服务网点城市]
+
+ANSWERs:
+  - name: 回复选择正确的服务网点城市
+    desc: 请回答选择正确的服务网点城市，或者您也可以直接通过PC端【点击这里](https://www.5idhl.com/#/createExpress/ServiceNetworkStation)】，移动端【点击这里](https://weixin.5idhl.com/serviceLatticePoint)】自助查询。
+  - name: 回复网点信息
+    desc: 返回查询到的网点信息
+    precondition: [获取服务网点信息]
+  - name: 回复未查到城市网点信息
+    desc: 目前暂未查到您咨询的城市网点信息，建议您选择就近城市查询。
+    precondition: [获取服务网点信息]
+
+PDL: |
+  [服务网点城市列表] = API_获取服务网点城市列表()
+  [errcode] = API_校验服务网点城市([city])
+  if errcode == "200":
+      [errcode, 网点信息] = API_获取服务网点信息([city])
+      if errcode == "200":
+          ANSWER_回复网点信息()
+      else:
+          ANSWER_回复未查到城市网点信息()
+  else:
+      ANSWER_回复选择正确的服务网点城市()

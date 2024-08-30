@@ -1,0 +1,685 @@
+[
+  {
+    "name": "check_hospital",
+    "description": "校验挂号医院",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "hospital_name": {
+          "type": "string",
+          "name": "医院名称",
+          "description": "需要校验的医院名称"
+        }
+      },
+      "required": [
+        "hospital_name"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "hospital_exists": {
+          "type": "boolean",
+          "name": "医院存在状态",
+          "description": "医院是否在指定列表中"
+        }
+      }
+    },
+    "URL": "http://www.easonsi.site:9390/check_hospital",
+    "Method": "POST",
+    "from": "000-114挂号"
+  },
+  {
+    "name": "check_department",
+    "description": "科室校验",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "department_name": {
+          "type": "string",
+          "name": "科室名称",
+          "description": "需要校验的科室名称"
+        },
+        "hospital_name": {
+          "type": "string",
+          "name": "医院名称",
+          "description": "需要校验的医院名称"
+        }
+      },
+      "required": [
+        "department_name",
+        "hospital_name"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "department_exists": {
+          "type": "boolean",
+          "name": "科室存在状态",
+          "description": "医院存在, 并且科室在指定列表中"
+        }
+      }
+    },
+    "URL": "http://www.easonsi.site:9390/check_department",
+    "Method": "POST",
+    "from": "000-114挂号"
+  },
+  {
+    "name": "query_appointment",
+    "description": "指定时间号源查询",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "hospital_name": {
+          "type": "string",
+          "name": "医院名称",
+          "description": "要求医院存在"
+        },
+        "department_name": {
+          "type": "string",
+          "name": "科室名称",
+          "description": "要求科室存在"
+        },
+        "appointment_time": {
+          "type": "string",
+          "name": "预约时间",
+          "description": "预约时间"
+        }
+      },
+      "required": [
+        "hospital_name",
+        "department_name",
+        "appointment_time"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "available_slots": {
+          "type": "integer",
+          "name": "可用号源数量",
+          "description": "可用号源数量"
+        },
+        "available_list": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "hospital_name": {
+                "type": "string"
+              },
+              "department_name": {
+                "type": "string"
+              },
+              "doctor_name": {
+                "type": "string"
+              },
+              "time_period": {
+                "type": "string",
+                "description": "时间段, 例如 '09:00-10:00'"
+              },
+              "is_specialist": {
+                "type": "boolean"
+              }
+            }
+          },
+          "name": "可选列表",
+          "description": "可选列表"
+        },
+        "specialist_count": {
+          "type": "integer",
+          "name": "专家号数量",
+          "description": "专家号数量"
+        },
+        "general_count": {
+          "type": "integer",
+          "name": "普通号数量",
+          "description": "普通号数量"
+        }
+      }
+    },
+    "URL": "http://www.easonsi.site:9390/query_appointment",
+    "Method": "POST",
+    "from": "000-114挂号"
+  },
+  {
+    "name": "recommend_other_hospitals",
+    "description": "其他医院号源推荐",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "department_name": {
+          "type": "string",
+          "name": "科室名称",
+          "description": "科室名称"
+        },
+        "appointment_time": {
+          "type": "string",
+          "name": "预约时间",
+          "description": "预约时间"
+        }
+      },
+      "required": [
+        "department_name",
+        "appointment_time"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "available_slots": {
+          "type": "integer",
+          "name": "可用号源数量",
+          "description": "可用号源数量"
+        },
+        "available_list": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "hospital_name": {
+                "type": "string"
+              },
+              "department_name": {
+                "type": "string"
+              },
+              "doctor_name": {
+                "type": "string"
+              },
+              "time_period": {
+                "type": "string",
+                "description": "时间段, 例如 '09:00-10:00'"
+              },
+              "is_specialist": {
+                "type": "boolean"
+              }
+            }
+          },
+          "name": "可选列表",
+          "description": "可选列表"
+        }
+      }
+    },
+    "URL": "http://www.easonsi.site:9390/recommend_other_hospitals",
+    "Method": "POST",
+    "from": "000-114挂号"
+  },
+  {
+    "name": "register_hospital",
+    "description": "本医院挂号执行",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "id_number": {
+          "type": "string",
+          "name": "身份证号",
+          "description": "身份证号"
+        },
+        "registration_type": {
+          "type": "string",
+          "name": "挂号类型",
+          "description": "专家号 或 普通号"
+        },
+        "hospital_name": {
+          "type": "string",
+          "name": "医院名称",
+          "description": "医院名称"
+        },
+        "department_name": {
+          "type": "string",
+          "name": "科室名称",
+          "description": "科室名称"
+        },
+        "appointment_time": {
+          "type": "string",
+          "name": "预约时间",
+          "description": "预约时间"
+        }
+      },
+      "required": [
+        "id_number",
+        "registration_type",
+        "hospital_name",
+        "department_name",
+        "appointment_time"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "registration_status": {
+          "type": "integer",
+          "name": "挂号结果",
+          "description": "挂号结果, 1: 成功; 0: 失败"
+        }
+      }
+    },
+    "URL": "http://www.easonsi.site:9390/register_hospital",
+    "Method": "POST",
+    "from": "000-114挂号"
+  },
+  {
+    "name": "register_other_hospital",
+    "description": "其他医院挂号执行",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "id_number": {
+          "type": "string",
+          "name": "身份证号",
+          "description": "身份证号"
+        },
+        "hospital_name": {
+          "type": "string",
+          "name": "医院名称",
+          "description": "医院名称"
+        },
+        "doctor_name": {
+          "type": "string",
+          "name": "医生名称",
+          "description": "医生名称"
+        }
+      },
+      "required": [
+        "id_number",
+        "hospital_name",
+        "doctor_name"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "registration_status": {
+          "type": "integer",
+          "name": "挂号结果",
+          "description": "挂号结果, 1: 成功; 0: 失败"
+        }
+      }
+    },
+    "URL": "http://www.easonsi.site:9390/register_other_hospital",
+    "Method": "POST",
+    "from": "000-114挂号"
+  },
+  {
+    "name": "query_news",
+    "description": "查询新闻",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "news_location": {
+          "type": "string",
+          "name": "新闻地点",
+          "description": "新闻的地点",
+          "enum": [
+            "北京",
+            "上海",
+            "广州",
+            "深圳",
+            "杭州",
+            "成都",
+            "武汉",
+            "重庆"
+          ]
+        },
+        "news_type": {
+          "type": "string",
+          "name": "新闻类型",
+          "description": "新闻的类型",
+          "enum": [
+            "政治",
+            "经济",
+            "体育",
+            "娱乐",
+            "科技",
+            "教育",
+            "健康",
+            "国际"
+          ]
+        },
+        "news_time": {
+          "type": "string",
+          "name": "新闻时间",
+          "description": "新闻的时间"
+        }
+      },
+      "required": [
+        "news_location",
+        "news_type",
+        "news_time"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "news_list": {
+          "type": "array",
+          "name": "新闻列表",
+          "description": "查询到的新闻列表",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "URL": "http://www.easonsi.site:9390/query_news",
+    "Method": "POST",
+    "from": "002-新闻查询"
+  },
+  {
+    "name": "query_goods_list",
+    "description": "查询物品列表",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "type": "string",
+          "name": "目标国家",
+          "description": "目标国家"
+        }
+      },
+      "required": [
+        "country"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "goods_list": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "name": "支持邮寄的物品类别列表",
+          "description": "该国家支持邮寄的物品类别列表, e.g. ['书籍', '服饰', '化妆品', ...]"
+        }
+      }
+    },
+    "URL": "http://www.easonsi.site:9390/query_goods_list",
+    "Method": "POST",
+    "from": "003-物品能否邮寄"
+  },
+  {
+    "name": "query_shipping_status",
+    "description": "查询物品能否邮寄",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "country": {
+          "type": "string",
+          "name": "目标国家",
+          "description": "目标国家"
+        },
+        "goods": {
+          "type": "string",
+          "name": "用户要邮寄的物品",
+          "description": "用户要邮寄的物品"
+        }
+      },
+      "required": [
+        "country",
+        "goods"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer",
+          "name": "状态码",
+          "description": "200 表示成功，其他表示错误"
+        },
+        "isValid": {
+          "type": "boolean",
+          "name": "是否支持邮寄",
+          "description": "true 表示支持邮寄，false 表示不支持邮寄"
+        }
+      }
+    },
+    "URL": "http://www.easonsi.site:9390/query_shipping_status",
+    "Method": "POST",
+    "from": "003-物品能否邮寄"
+  },
+  {
+    "name": "get_service_point_city_list",
+    "description": "获取服务网点城市列表",
+    "parameters": null,
+    "response": {
+      "type": "object",
+      "properties": {
+        "service_point_cities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "服务网点城市列表"
+        }
+      }
+    },
+    "URL": "http://www.easonsi.site:9390/get_service_point_city_list",
+    "Method": "POST",
+    "from": "004-服务网点查询"
+  },
+  {
+    "name": "validate_service_point_city",
+    "description": "校验服务网点城市",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "city": {
+          "type": "string",
+          "name": "城市名称",
+          "description": "需要校验的城市名称"
+        }
+      },
+      "required": [
+        "city"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "errcode": {
+          "type": "integer",
+          "name": "错误码",
+          "description": "200 表示成功，其他表示错误"
+        }
+      }
+    },
+    "URL": "http://www.easonsi.site:9390/validate_service_point_city",
+    "Method": "POST",
+    "from": "004-服务网点查询"
+  },
+  {
+    "name": "get_service_points",
+    "description": "获取服务网点信息",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "city": {
+          "type": "string",
+          "name": "城市名称",
+          "description": "需要获取服务网点信息的城市名称"
+        }
+      },
+      "required": [
+        "city"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "errcode": {
+          "type": "integer",
+          "name": "错误码",
+          "description": "200 表示成功，其他表示错误"
+        },
+        "service_points": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "name": "网点名称",
+                "description": "服务网点的名称"
+              },
+              "address": {
+                "type": "string",
+                "name": "地址",
+                "description": "服务网点的地址"
+              },
+              "phone_number": {
+                "type": "string",
+                "name": "电话号码",
+                "description": "服务网点的联系电话"
+              },
+              "business_hours": {
+                "type": "string",
+                "name": "营业时间",
+                "description": "服务网点的营业时间"
+              }
+            }
+          },
+          "description": "服务网点信息列表"
+        }
+      }
+    },
+    "URL": "http://www.easonsi.site:9390/get_service_points",
+    "Method": "POST",
+    "from": "004-服务网点查询"
+  },
+  {
+    "name": "query_invoice_method",
+    "description": "查询开票方式",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "integer",
+          "name": "订单ID",
+          "description": "需要查询的订单ID"
+        }
+      },
+      "required": [
+        "order_id"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "invoice_method": {
+          "type": "string",
+          "name": "开票方式",
+          "description": "开票方式",
+          "enum": [
+            "平台开具",
+            "酒店开具"
+          ]
+        }
+      }
+    },
+    "URL": "http://www.easonsi.site:9390/query_invoice_method",
+    "Method": "POST",
+    "from": "006-同程开发票"
+  },
+  {
+    "name": "query_invoice_progress",
+    "description": "查询开票进度",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "name": "名称",
+          "description": "需要查询的名称"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "invoice_progress": {
+          "type": "string",
+          "name": "开票进度",
+          "description": "开票进度"
+        }
+      }
+    },
+    "URL": "http://www.easonsi.site:9390/query_invoice_progress",
+    "Method": "POST",
+    "from": "006-同程开发票"
+  },
+  {
+    "name": "query_member_status",
+    "description": "查询会员状态",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "card_id": {
+          "type": "integer",
+          "name": "卡ID",
+          "description": "需要查询的会员卡ID"
+        }
+      },
+      "required": [
+        "card_id"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "card_type": {
+          "type": "string",
+          "name": "卡类型",
+          "description": "会员卡类型",
+          "enum": [
+            "白金卡",
+            "非白金卡"
+          ]
+        }
+      }
+    },
+    "URL": "http://www.easonsi.site:9390/query_member_status",
+    "Method": "POST",
+    "from": "006-同程开发票"
+  },
+  {
+    "name": "query_identity",
+    "description": "查询身份",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "CardID": {
+          "type": "string",
+          "name": "身份证号",
+          "description": "需要查询的身份证号"
+        }
+      },
+      "required": [
+        "CardID"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "properties": {
+        "Identity": {
+          "type": "string",
+          "name": "身份类型",
+          "description": "查询到的身份类型",
+          "enum": [
+            "退休职工",
+            "在职职工",
+            "城乡居民"
+          ]
+        }
+      }
+    },
+    "URL": "http://www.easonsi.site:9390/query_identity",
+    "Method": "POST",
+    "from": "007-门诊费用报销"
+  }
+]

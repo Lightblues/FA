@@ -1,0 +1,50 @@
+
+[
+    {
+        "name": "query_news",
+        "description": "查询新闻",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "news_location": {
+                    "type": "string",
+                    "name": "新闻地点",
+                    "description": "新闻的地点",
+                    "enum": ["北京", "上海", "广州", "深圳", "杭州", "成都", "武汉", "重庆"]
+                },
+                "news_type": {
+                    "type": "string",
+                    "name": "新闻类型",
+                    "description": "新闻的类型",
+                    "enum": ["政治", "经济", "体育", "娱乐", "科技", "教育", "健康", "国际"]
+                },
+                "news_time": {
+                    "type": "string",
+                    "name": "新闻时间",
+                    "description": "新闻的时间"
+                }
+            },
+            "required": [
+                "news_location",
+                "news_type",
+                "news_time"
+            ]
+        },
+        "response": {
+            "type": "object",
+            "properties": {
+                "news_list": {
+                    "type": "array",
+                    "name": "新闻列表",
+                    "description": "查询到的新闻列表",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "URL": "http://example.com/query_news",
+        "Method": "POST",
+        "from": "002-新闻查询"
+    }
+]

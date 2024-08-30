@@ -1,0 +1,31 @@
+Name: 新闻查询
+Desc: 根据特定需求查询新闻
+Detailed_desc: 首先, 获取用户的新闻查询需求, 调用API之后根据返回结果将信息告诉用户. 
+
+SLOTs:
+  - name: news_location
+    available_types: ["北京", "上海", "广州", "深圳", "杭州", "成都", "武汉", "重庆"]
+  - name: news_type
+    available_types: ["政治", "经济", "体育", "娱乐", "科技", "教育", "健康", "国际"]
+  - name: news_time
+    available_types: ["今天", "昨天", "本周", "本月", ...]
+
+APIs:
+  - name: 查询新闻
+    request: [news_location, news_type, news_time]
+    response: [查询到的新闻列表]
+
+ANSWERs:
+  - name: 获取新闻成功
+    desc: “新闻查询”操作已成功执行，查询到的新闻列表已返回。
+    precondition: [新闻查询]
+  - name: 获取新闻失败
+    desc: 查询失败：播报当日头条新闻
+    precondition: [新闻查询]
+
+PDL: |
+  [查询到的新闻列表] = API_查询新闻([news_location, news_type, news_time])
+  if 查询到的新闻列表 is not None:
+      ANSWER_获取新闻成功()
+  else:
+      ANSWER_获取新闻失败()
