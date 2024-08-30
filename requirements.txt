@@ -1,0 +1,5 @@
+openai
+colorama
+jinja2
+python-engineio
+tencentcloud-sdk-python
