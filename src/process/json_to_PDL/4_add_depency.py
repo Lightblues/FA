@@ -21,7 +21,7 @@ def build_dependency(pdl):
     return res
 
 def convert_dependency(name):
-    fn = _DIRECTORY_MANAGER.DIR_huabu_step3 / f"{name}.txt"
+    fn = _DIRECTORY_MANAGER.DIR_huabu / f"{name}.txt"
     with open(fn, 'r') as f:
         pdl = f.read()
     res = build_dependency(pdl)
@@ -40,7 +40,7 @@ def add_meta(list_dependency):
 
 
 # %%
-names = DataManager.get_workflow_name_list(_DIRECTORY_MANAGER.DIR_huabu_step3)
+names = DataManager.get_workflow_name_list(_DIRECTORY_MANAGER.DIR_huabu)
 
 ofn = _DIRECTORY_MANAGER.DIR_data_base / "huabu_meta/_dependency_v01.json"
 if os.path.exists(ofn):
@@ -58,7 +58,7 @@ else:
 
 # %%
 def add_dependency(name):
-    pdl = PDL.load_from_file(_DIRECTORY_MANAGER.DIR_huabu_step3 / f"{name}.txt")
+    pdl = PDL.load_from_file(_DIRECTORY_MANAGER.DIR_huabu / f"{name}.txt")
     name2node = {}
     api_names = [i['name'] for i in pdl.apis]
     answer_names = [i['name'] for i in pdl.answers]

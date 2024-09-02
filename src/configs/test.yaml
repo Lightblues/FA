@@ -1,5 +1,5 @@
 # ================================= update @240827
-workflow_dir: "pdl_v0828"        # 
+workflow_dir: "pdl"        # 
 workflow_name: "000"
 
 available_models: 
@@ -8,9 +8,9 @@ available_models:
 # available_workflows:
 # - 
 
-api_mode: "llm"                 # manual, v01, llm
+api_mode: "v01"                 # manual, v01, llm
 api_model_name: "gpt-4o"        # used when set api_mode as llm
-fn_api_infos: "apis/apis_testset.json"
+fn_api_infos: "api_v02/api_infos.json"
 check_dependency: true          # 
 check_duplicate: true           # 
 max_duplicated_limit: 2         # 

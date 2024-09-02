@@ -88,13 +88,67 @@ def valid_judge_result(jr: Dict, num_rounds: int):
 def task_judge(conv, ofn, client: OpenAIClient) -> None:
     workflow_name = conv["workflow_name"]
     num_rounds = len(conv["simulated_conversation"]) // 2
-    pdl = PDL.load_from_file(_DIRECTORY_MANAGER.DIR_huabu_step3 / f"{workflow_name}.yaml")
-    s_conv = tabulate.tabulate(conv["simulated_conversation"], headers="keys", showindex=False, maxcolwidths=100, tablefmt='psql')
+    pdl = PDL.load_from_file(_DIRECTORY_MANAGER.DIR_huabu / f"{workflow_name}.yaml")
+    s_conv = tabulate.tabulate(conv["simulated_conversation"], headers=["round", "content"], showindex=False, maxcolwidths=100, tablefmt='psql')
     
     prompt = jinja_render(
         "scorer_detailed.jinja",
         conversation=s_conv,
         PDL=pdl.to_str(),
+    )
+    for retry_ in range(3):
+        try:
+            res = client.query_one(prompt)
+            jr = Formater.parse_llm_output_yaml(res)
+            if "error" in jr:
+                continue
+            # DONE @240828: check the format of res
+            valid_judge_result(jr, num_rounds)
+            out = {
+                "workflow_name": workflow_name,
+                "workflow_id": conv["workflow_id"],
+                "judge_result": jr,
+                "infos": {
+                    "prompt": prompt,
+                    "response": res,
+                    "user_profile": conv["user_profile"]
+                }
+            }
+            with open(ofn, "a") as f:
+                f.write(json.dumps(out, ensure_ascii=False) + "\n")
+            break
+        except Exception as e:
+            traceback.print_exc()
+            continue
+    else:
+        print(f"ERROR!!! conv:\n{conv}")
+        print(f"prompt: {prompt}")
+        raise Exception(f"Judge failed 3 times for {workflow_name}")
+
+def task_judge_2(conv, ofn, client: OpenAIClient) -> None:
+    workflow_name = conv["workflow_name"]
+    num_rounds = len(conv["simulated_conversation"]) // 2
+    
+    pdl = PDL.load_from_file(_DIRECTORY_MANAGER.DIR_huabu / f"{workflow_name}.yaml")
+    s_pdl = str(
+        dict(
+            taskflow_name=pdl.taskflow_name,
+            taskflow_desc=pdl.taskflow_desc,
+            taskflow_desc_detail=pdl.taskflow_desc_detail,
+        )
+    )
+    def process_utterance(s:str, key:str="[BOT]"):
+        if key in s:
+            return key + s.split(key)[-1]
+        return s
+    df_conv = pd.DataFrame(conv["simulated_conversation"], columns=["round", "content"])
+    df_conv["content"] = df_conv["content"].apply(process_utterance)
+    s_conv = tabulate.tabulate(df_conv, headers=["round", "content"], showindex=False, maxcolwidths=100, tablefmt='psql')
+    
+    prompt = jinja_render(
+        "scorer_detailed_2.jinja",
+        conversation=s_conv,
+        PDL=s_pdl,
     )
     for retry_ in range(3):
         try:

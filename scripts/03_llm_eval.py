@@ -14,7 +14,7 @@ from judge_util import VERSION
 
 client = init_client(llm_cfg=LLM_CFG["gpt-4o"])
 
-_ddir = _DIRECTORY_MANAGER.DIR_simulated_base / VERSION
+_ddir = _DIRECTORY_MANAGER.DIR_simulation / VERSION
 fn_conversations = _ddir / "conversations.pkl"
 fn_llmscored = _ddir / "conversations_eval_gpt.jsonl"
 fn_llmscored_raw = _ddir / "conversations_eval_gpt_raw.jsonl"
@@ -26,7 +26,7 @@ fn_llmscored_raw = _ddir / "conversations_eval_gpt_raw.jsonl"
 # %%
 def task(conv, ofn):
     workflow_name = conv["workflow_name"]
-    pdl = PDL.load_from_file(_DIRECTORY_MANAGER.DIR_huabu_step3 / f"{workflow_name}.yaml")
+    pdl = PDL.load_from_file(_DIRECTORY_MANAGER.DIR_huabu / f"{workflow_name}.yaml")
     s_conv = tabulate(conv["simulated_conversation"], headers="keys", showindex=False, tablefmt='psql', maxcolwidths=100)
     prompt = jinja_render(
         "scorer_detailed.jinja",

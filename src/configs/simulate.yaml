@@ -1,29 +1,30 @@
-# ================================= update @240827
-workflow_dir: "pdl_v0828"        # 
+# ================================= update @240830
+workflow_dir: "pdl"        # 
 workflow_name: "000"
 
-available_models: 
+# available_models: 
 # - "default"
 # - "0.9.1"
 # available_workflows:
 # - 
 
-api_mode: "llm"                 # manual, v01, llm
-api_model_name: "gpt-4o"        # used when set api_mode as llm
+api_mode: "v01"                 # manual, v01, llm
+# api_model_name: "gpt-4o"        # used when set api_mode as llm
+fn_api_infos: "api_v02/api_infos.json"
 check_dependency: true          # 
 check_duplicate: true           # 
 max_duplicated_limit: 2         # 
-api_entity_linking: false        # bool, whether 
+api_entity_linking: true        # bool, whether 
 
-user_mode: "llm_profile"
+user_mode: "llm_profile"        # manual, llm_profile
 user_model_name: "gpt-4o"       # used when set user_mode as llm
 
-bot_mode: "pdl"                   # pdl, lke
-model_name: "custom"             # custom=qwen2_72B, 0.9.1
+bot_mode: "lke"                   # pdl, lke
+model_name: null             # custom=qwen2_72B, 0.9.1
 template_fn: "query_PDL.jinja"
 greeting_msg: "你好，我是 {name} 机器人，有什么可以帮您?"
 
-simulate_version: "v240828"
+simulate_version: "v240830"
 simulate_persons_per_workflow: 15
 simulate_workflow_names: 
 - 000-114挂号
@@ -32,10 +33,11 @@ simulate_workflow_names:
 - 004-服务网点查询
 - 006-同程开发票
 - 007-门诊费用报销
-simulate_max_workers: 10
-simulate_model_name: "v0729-Llama3_1-70B"
+simulate_max_workers: 5
+simulate_model_name: null   # overwrite model_name when simulation!
 
-judge_max_workers: 10
+judge_max_workers: 5
 judge_model_name: "gpt-4o"
+judge_passrate_threshold: 3
 
 to_gsheet: true

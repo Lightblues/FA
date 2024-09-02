@@ -6,7 +6,7 @@ import os, argparse, json
 from simulator.simulator_with_profile import SimulatorV2
 from engine import Conversation, _DIRECTORY_MANAGER, DataManager, LLM_CFG, init_client, UserProfile, Config, PDL
 
-workflow_id_map = DataManager.build_workflow_id_map(_DIRECTORY_MANAGER.DIR_huabu_step3, extension=".yaml")
+workflow_id_map = DataManager.build_workflow_id_map(_DIRECTORY_MANAGER.DIR_huabu, extension=".yaml")
 
 def get_args():
     parser = argparse.ArgumentParser()

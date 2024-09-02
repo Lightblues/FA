@@ -10,7 +10,7 @@ from tabulate import tabulate
 
 from judge_util import VERSION
 
-_ddir = _DIRECTORY_MANAGER.DIR_simulated_base / VERSION
+_ddir = _DIRECTORY_MANAGER.DIR_simulation / VERSION
 fn_conversations = _ddir / "conversations.pkl"
 fn_humanscored = _ddir / "【数据标注】【任务型标品PDL】测试数据标注 240822-v240822.csv"
 fn_humanscored_eval = _ddir / "conversations_eval_human.jsonl"

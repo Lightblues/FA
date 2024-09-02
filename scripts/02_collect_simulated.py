@@ -7,6 +7,8 @@ output: https://docs.google.com/spreadsheets/d/1p36xAuhiv9siLo7Lw7bFGk9U33rBBKZO
 0823: qwen2 
 0824: 0.9.1 
 0827_lke: 线上版本
+
+0827: 另外的一组画布
 """
 
 # %%
@@ -21,7 +23,7 @@ from easonsi.files.gsheet import GSheet
 gsheet = GSheet()
 
 
-_ddir = _DIRECTORY_MANAGER.DIR_simulated_base / VERSION
+_ddir = _DIRECTORY_MANAGER.DIR_simulation / VERSION
 fn_conversations = _ddir / "conversations.pkl"
 fn_conversations_for_labeling = _ddir / "simulated_conversations.csv"
 

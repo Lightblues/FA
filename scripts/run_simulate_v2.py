@@ -10,7 +10,7 @@ from engine import (
 )
 
 
-def run_single_simulation(cfg:Config, workflow_name:str, odir:str=_DIRECTORY_MANAGER.DIR_simulated_base/"tmp"):
+def run_single_simulation(cfg:Config, workflow_name:str, odir:str=_DIRECTORY_MANAGER.DIR_simulation/"tmp"):
     """ Run simulation for a specific workflow
     input:
         workflow_name: str
@@ -49,7 +49,7 @@ def run_single_simulation(cfg:Config, workflow_name:str, odir:str=_DIRECTORY_MAN
         print(f"Saved to {ofn}")
     return simulated_results
 
-def run_simulations(base_cfg:Config, conversation_dir=_DIRECTORY_MANAGER.DIR_conversation_v1, output_dir=_DIRECTORY_MANAGER.DIR_simulated_base/"tmp", max_workers=10):
+def run_simulations(base_cfg:Config, conversation_dir=_DIRECTORY_MANAGER.DIR_conversation_v1, output_dir=_DIRECTORY_MANAGER.DIR_simulation/"tmp", max_workers=10):
     """ 
     args:
         conversation_dir: str, the directory of the conversation files
@@ -88,7 +88,7 @@ if __name__ == '__main__':
     
     VERSION = f"template={template_fn}_pdl={workflow_dir}_model={cfg.model_name}_api={cfg.api_mode}"
     VERSION = VERSION.replace("/", "_").replace(".", "_")
-    odir = _DIRECTORY_MANAGER.DIR_simulated_base / VERSION
+    odir = _DIRECTORY_MANAGER.DIR_simulation / VERSION
     
     MODE = "single"
     MODE = "all"

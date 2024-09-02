@@ -127,7 +127,7 @@ class Conversation():
 @dataclass
 class Config:
     workflow_dir: str = "pdl2_step3"
-    workflow_name: str = "xxx"
+    workflow_name: str = "000"
     model_name: str = "qwen2_72B"
     template_fn: str = "query_PDL.jinja"
     api_mode: str = "v01"       # v01, llm, manual
@@ -158,6 +158,7 @@ class Config:
     simulate_model_name: str = "qwen2_72B"
     judge_max_workers: int = 10
     judge_model_name: str = "gpt-4o"
+    judge_passrate_threshold: int = 3
     
     to_gsheet: bool = False
     

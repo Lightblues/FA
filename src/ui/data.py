@@ -34,7 +34,7 @@ def init_resource():
         }
 
 # @st.cache_data
-def get_template_name_list(template_dir:str=_DIRECTORY_MANAGER.DIR_templates, prefix:str="query_"):
+def get_template_name_list(template_dir:str=_DIRECTORY_MANAGER.DIR_engine_templates, prefix:str="query_"):
     return DataManager.get_template_name_list(template_dir, prefix=prefix)
 @st.cache_data
 def get_model_name_list():
@@ -42,10 +42,9 @@ def get_model_name_list():
 
 @st.cache_data
 def get_workflow_dir_list():
-    workflow_versions = _DIRECTORY_MANAGER.HUABU_versions_pdl2
-    return [f"{_DIRECTORY_MANAGER.DIR_data_base}/{v}" for v in workflow_versions]
+    return [f"{_DIRECTORY_MANAGER.DIR_data_base}/{v}" for v in _DIRECTORY_MANAGER.HUABU_versions_pdl2]
 @st.cache_data
-def get_workflow_name_list(workflow_dir:str=_DIRECTORY_MANAGER.DIR_huabu_step3, extension:str=".yaml"):
+def get_workflow_name_list(workflow_dir:str=_DIRECTORY_MANAGER.DIR_huabu, extension:str=".yaml"):
     return DataManager.get_workflow_name_list(workflow_dir, extension=extension)
 @st.cache_data
 def get_workflow_info_dict(cfg:Config):
@@ -69,7 +68,7 @@ def refresh_conversation():
     now = datetime.datetime.now()
     st.session_state.t = now
     st.session_state.session_id = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
-    st.session_state.logger = Logger(log_dir=_DIRECTORY_MANAGER.DIR_ui_v2_log, t=st.session_state.t)  # note to set the log_dir
+    st.session_state.logger = Logger(log_dir=_DIRECTORY_MANAGER.DIR_ui_log, t=st.session_state.t)  # note to set the log_dir
 
 def refresh_bot():
     print(f">> Refreshing bot: template_fn: {st.session_state.template_fn} with model {st.session_state.model_name}")

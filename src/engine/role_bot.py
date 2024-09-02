@@ -71,7 +71,13 @@ class PDLBot(BaseBot):
         except KeyError:
             raise ValueError(f"Unknown action_type: {parsed_response['action_type']}")
         # -> action_metas
-        action_name, action_parameters, response = parsed_response.get("action_name", "DEFTAULT_ACTION"), parsed_response.get("action_parameters", "DEFAULT_PARAS"), parsed_response.get("response", "DEFAULT_RESPONSE")
+        action_name, action_parameters, response = parsed_response.get("action_name", "DEFTAULT_ACTION"), parsed_response.get("action_parameters", {}), parsed_response.get("response", "DEFAULT_RESPONSE")
+        if type(action_parameters)==str: 
+            try:
+                action_parameters = eval(action_parameters)      # FIXME: parse error | json.loads
+            except Exception as e:
+                print(f"Error in action_parameters: {action_parameters}")
+        assert type(action_parameters)==dict, f"action_metas should be dict instead of: {type(action_parameters)} {action_parameters}"
         action_metas.apicalling_info = APICalling_Info(name=action_name, kwargs=action_parameters)
         
         # -> msg
@@ -133,7 +139,7 @@ class LKEBot(BaseBot):
         req_data = {"request_id": request_id, "content": content, "session_id": self.session_id}
         self.sio.emit("send", {"payload": req_data})
         while True:
-            event, data = self.sio.receive(timeout=10)
+            event, data = self.sio.receive(timeout=50)  # NOTE: a small timeout maybe lead TLE!
             if event=="reply":
                 if data["payload"]["is_from_self"]:
                     action_meta.input_details = data["payload"] # add input details

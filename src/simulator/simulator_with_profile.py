@@ -31,7 +31,7 @@ class SimulatorV2(ConversationController):
         self.user = LLMSimulatedUserWithProfile(cfg=cfg)
         self.bot = BOT_ANME2CLASS[cfg.bot_mode](cfg=cfg)
         self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg)
-        self.logger = Logger(_DIRECTORY_MANAGER.DIR_simulation_v2_log)
+        self.logger = Logger(_DIRECTORY_MANAGER.DIR_simulation_log)
 
     def simulate(self, pdl:PDL, profile:UserProfile) -> Tuple[Dict, Conversation]:
         """ 

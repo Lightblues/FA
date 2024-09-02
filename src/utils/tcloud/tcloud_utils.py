@@ -1,3 +1,7 @@
+""" 
+from 对话接口 https://cloud.tencent.com/document/product/1759/105561
+"""
+
 from tencentcloud.common.common_client import CommonClient
 from tencentcloud.common import credential
 from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
@@ -33,11 +37,11 @@ def get_token(secret, profile, region, params):  # region是字符串，其他�
         common_client = CommonClient(_service, _api_version, cred, region, profile=client_profile)
         # 接口参数作为json字典传入，得到的输出也是json字典，请求失败将抛出异常，headers为可选参数
         resp = common_client.call_json("GetWsToken", params)
-        print("resp", resp)
+        # print("resp", resp)
         token = ""
         if ("Response" in resp) and ("Token" in resp["Response"]):
             token = resp["Response"]["Token"]
-        print("token", token)
+        # print("token", token)
         return token
     except TencentCloudSDKException as err:
         print(err)

@@ -8,29 +8,29 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, PreTrainedTokenize
 import numpy as np
 from utils.jinja_templates import jinja_render
 from engine import (
-    _DIRECTORY_MANAGER, PDL, PDL_v2
+    _DIRECTORY_MANAGER, PDL
 )
 
 # %%
 def stat_prompt_len(tokenizer):
     token_lengths = []
-    for fn in sorted(os.listdir(_DIRECTORY_MANAGER.DIR_huabu_step3)):
-        pdl = PDL.load_from_file(_DIRECTORY_MANAGER.DIR_huabu_step3 / fn)
+    for fn in sorted(os.listdir(_DIRECTORY_MANAGER.DIR_huabu)):
+        pdl = PDL.load_from_file(_DIRECTORY_MANAGER.DIR_huabu / fn)
         token_length = len(tokenizer.encode(pdl.PDL_str))
         token_lengths.append(token_length)
     print(f"Avg token length of PDL_v1: {np.mean(token_lengths)}")
 
     token_lengths = []
     for fn in sorted(os.listdir(_DIRECTORY_MANAGER.DIR_data_base / "pdl2_0729")):
-        pdl = PDL_v2.load_from_file(_DIRECTORY_MANAGER.DIR_data_base / "pdl2_0729" / fn)
+        pdl = PDL.load_from_file(_DIRECTORY_MANAGER.DIR_data_base / "pdl2_0729" / fn)
         token_length = len(tokenizer.encode(pdl.PDL_str))
         token_lengths.append(token_length)
     print(f"Avg token length of PDL_v2: {np.mean(token_lengths)}")
 
     token_lengths_full = []
     head_info = f"Current time: {datetime.datetime.now().strftime('%Y-%m-%d (%A) %H:%M:%S')}"
-    for fn in sorted(os.listdir(_DIRECTORY_MANAGER.DIR_huabu_step3)):
-        pdl = PDL.load_from_file(_DIRECTORY_MANAGER.DIR_huabu_step3 / fn)
+    for fn in sorted(os.listdir(_DIRECTORY_MANAGER.DIR_huabu)):
+        pdl = PDL.load_from_file(_DIRECTORY_MANAGER.DIR_huabu / fn)
         prompt = jinja_render(
             "query_PDL.jinja",
             head_info=head_info,

@@ -15,7 +15,7 @@ from judge_util import VERSION
 
 client = init_client(llm_cfg=LLM_CFG["gpt-4o"])
 
-_ddir = _DIRECTORY_MANAGER.DIR_simulated_base / VERSION
+_ddir = _DIRECTORY_MANAGER.DIR_simulation / VERSION
 fn_conversations = _ddir / "conversations.pkl"
 fn_llmscored = _ddir / "conversations_eval_gpt.jsonl"
 fn_humanscored = _ddir / "conversations_eval_human.jsonl"

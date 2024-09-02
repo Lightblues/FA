@@ -41,6 +41,7 @@ def init_sidebar():
     _model_names = get_model_name_list()
     
     _workflow_dirs, DICT_workflow_info = get_workflow_info_dict(config)
+    st.session_state.DICT_workflow_info = DICT_workflow_info
     # set the shown model names
     if config.available_models:
         assert all(i in _model_names for i in config.available_models), f"config models: {config.available_models} not in _model_names: {_model_names}"
@@ -136,7 +137,7 @@ def init_sidebar():
         if "pdl" not in st.session_state:
             st.session_state.pdl = PDL.load_from_file(f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.yaml")    # fix extension to .yaml
             st.session_state.pdl_controller = PDLController(st.session_state.pdl)
-        with open(f"{_DIRECTORY_MANAGER.DIR_templates}/{st.session_state.template_fn}", "r") as f:     # pdl_fn = f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt"
+        with open(f"{_DIRECTORY_MANAGER.DIR_engine_templates}/{st.session_state.template_fn}", "r") as f:     # pdl_fn = f"{st.session_state.workflow_dir}/{st.session_state.workflow_name}.txt"
             template = f.read()
         
         with st.expander(f"🔍 PDL", expanded=False):

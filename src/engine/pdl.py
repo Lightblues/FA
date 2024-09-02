@@ -8,6 +8,7 @@ class PDL:
     
     taskflow_name: str = ""
     taskflow_desc: str = ""
+    taskflow_desc_detail: str = ""
     apis: list = []
     slots: list = []
     answers: list = []
@@ -33,6 +34,7 @@ class PDL:
         ob = yaml.load(self.PDL_str, Loader=yaml.FullLoader)
         self.taskflow_name = ob["Name"]
         self.taskflow_desc = ob["Desc"]
+        self.taskflow_desc_detail = ob.get("Detailed_desc", "")
         self.apis = ob.get("APIs", [])
         self.slots = ob["SLOTs"]
         self.answers = ob["ANSWERs"]

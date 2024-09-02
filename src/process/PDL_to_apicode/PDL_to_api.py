@@ -1,32 +1,27 @@
 """ 
 基于PDL中的文字版本 API 来生成后端代码, fake 数据
-@240709
+- [x] 实现基本功能 @240709
+- [ ] 将结果合并入 git
+- [ ] 修改代码结构: 将多个文件中写成 router 形式, 然后用一个 main.py 提供各类API的调用
 """
 
-import os
-from tqdm import tqdm
-from engine_v1.datamodel import PDL
-from engine_v1.common import DIR_data, init_client, LLM_CFG, DIR_apis
+import os, tqdm, argparse
+from engine import PDL, init_client, LLM_CFG, DataManager, _DIRECTORY_MANAGER
 from utils.jinja_templates import jinja_render
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
-def prepare_client(model_name="gpt-4o"):
-    llm_cfg = LLM_CFG[model_name]
-    client = init_client(llm_cfg=llm_cfg)
-    return client
+# DIR_apis = _DIRECTORY_MANAGER.DIR_data_base / "apis"
 
-def query_PDL_to_api(client:OpenAIClient, workflow_name:str):
-    ofn_code = f"{DIR_apis}/{workflow_name}.py"
-    ofn_apiinfo = f"{DIR_apis}/{workflow_name}.json"
+def query_PDL_to_api(client:OpenAIClient, worflow_dir:str, workflow_name:str):
+    ofn_code = f"{_DIRECTORY_MANAGER.DIR_api}/{workflow_name}.py"
+    ofn_apiinfo = f"{_DIRECTORY_MANAGER.DIR_api}/{workflow_name}.json"
     if os.path.exists(ofn_code):
         print(f"[INFO] {workflow_name} exists!")
         return
     
-    pdl = PDL()
-    pdl.load_from_file(f"{DIR_data}/{workflow_name}.txt")
-    apis, requests, answers, meta, workflow = pdl.PDL_str.split("\n\n", 4)
-    _s_pdl = f"TaskFlowName: {pdl.taskflow_name}\nTaskFlowDesc: {pdl.taskflow_desc}\n\n{apis}"
-    prompt = jinja_render("PDL_to_API.jinja", PDL=_s_pdl)
+    pdl = PDL.load_from_file(DataManager.get_workflow_full_path(workflow_name=workflow_name, workflow_dir=worflow_dir))
+    pdl_str_for_gen = f"TaskFlowName: {pdl.taskflow_name}\nTaskFlowDesc: {pdl.taskflow_desc}\n\nAPIs: {pdl.apis}\n\nwith paramters: {pdl.slots}"
+    prompt = jinja_render("process/pdl/PDL_to_API.jinja", PDL=pdl_str_for_gen)
     response = client.query_one_stream(prompt)
     res_code = Formater.parse_codeblock(response, type="python")
     res_apiinfo = Formater.parse_codeblock(response, type="json")
@@ -40,12 +35,9 @@ def query_PDL_to_api(client:OpenAIClient, workflow_name:str):
 
 
 if __name__ == '__main__':
-    workflow_names = []
-    for fn in os.listdir(DIR_data):
-        if fn.endswith(".txt"):
-            workflow_names.append(fn.rstrip(".txt"))
-    workflow_names.sort()
-    for workflow_name in tqdm(workflow_names):
-        client = prepare_client()
-        query_PDL_to_api(client, workflow_name)
+    worflow_dir = "pdl_v0828"
+    workflow_names = DataManager.get_workflow_name_list(worflow_dir)
+    client = init_client(llm_cfg=LLM_CFG["gpt-4o"])
+    for workflow_name in tqdm.tqdm(workflow_names):
+        query_PDL_to_api(client, worflow_dir, workflow_name)
         print(f"[INFO] {workflow_name} done!")

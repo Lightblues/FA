@@ -14,7 +14,7 @@
     有待评估效果
 - [x] 实现LLM评分, 比较一致性
 - [ ] 保存 meta 信息 #P1
-- [ ] BUG: LLM evaluation 可视化结果和turns没有对上 #P1
+- [x] BUG: LLM evaluation 可视化结果和turns没有对上 #P1
 
 output: 
     https://doc.weixin.qq.com/sheet/e3_Aa8AFwbhAEsNvUX5XUlTXSTGWsT5A?scode=AJEAIQdfAAok83fN9fAcMATAZtAPI&tab=d88els
@@ -26,7 +26,7 @@ import pandas as pd
 import concurrent.futures
 from easonsi import utils
 from engine import _DIRECTORY_MANAGER, LLM_CFG, init_client, PDL, Config
-from .eval_utils import task_simulate, task_judge, parse_conv, convert_conv
+from .eval_utils import task_simulate, task_judge, task_judge_2, parse_conv, convert_conv
 from.analyzer import Analyzer
 
 
@@ -44,11 +44,13 @@ class Evaluator:
             cfg.simulate_version = f"v{default_version}"
         self.cfg = cfg
         self.version = cfg.simulate_version
-        self.output_dir = _DIRECTORY_MANAGER.DIR_simulated_base / cfg.simulate_version
+        self.output_dir = _DIRECTORY_MANAGER.DIR_simulation / cfg.simulate_version
         self.fn_conversations_for_excel = self.output_dir / "simulated_conversations.csv"
         self.fn_conversations = self.output_dir / "simulated_conversations.jsonl"
         self.fn_llmscored_raw = self.output_dir / "eval_gpt_detailed.jsonl"
         self.fn_llmscored = self.output_dir / "eval_gpt.jsonl"      # simplified
+        self.fn_llmscored_2_raw = self.output_dir / "eval_gpt_2_detailed.jsonl"
+        self.fn_llmscored_2 = self.output_dir / "eval_gpt_2.jsonl"      # simplified
         if cfg.to_gsheet: 
             from easonsi.files.gsheet import GSheet
             self.gsheet = GSheet()
@@ -63,7 +65,12 @@ class Evaluator:
         self.print_header_info(step_name="STEP 2.1: Evaluating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("judge")})
         self.run_evaluations()
         self.print_header_info(step_name="STEP 2.2: Collecting evaluation results")
-        self.collect_evaluation_results()
+        self.collect_evaluation_results(version="01")
+        
+        self.print_header_info(step_name="STEP 2.3: Evaluating V2", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("judge")})
+        self.run_evaluations_v2()
+        self.print_header_info(step_name="STEP 2.4: Collecting evaluation results")
+        self.collect_evaluation_results(version="02")
 
     def print_header_info(self, step_name: str, infos: Union[None, Dict, pd.DataFrame]=None):
         s_print = step_name.center(150, "=") + "\n"
@@ -95,7 +102,7 @@ class Evaluator:
                     print(f"Task failed for {up}: {e}")
                     traceback.print_exc()
             else:
-                print(f"ERROR!!! Task failed after 3 retrys for {up}: {e}")
+                print(f"ERROR!!! Task failed after 3 retrys for {up}")
                 return None
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.cfg.simulate_max_workers) as executor:
@@ -177,7 +184,7 @@ class Evaluator:
 
         # 2) convert to U/I utterance format (two columns)
         # 对于每一组对话, 第一行为meta信息, 第二行为bot  greeting, 后面的 U/B 之间的会话
-        if not os.path.exists(self.fn_conversations_for_excel):
+        def fn_collect():
             parsed_data = []
             for fn in fns:
                 data = utils.LoadJsonl(self.output_dir / fn)
@@ -190,13 +197,24 @@ class Evaluator:
                     parsed_data.append(("START", conv[0]))
                     for j,ssample_str in enumerate(conv[1:]):
                         role = "USER" if j % 2 == 0 else "BOT"
-                        parsed_data.append((f"{role}{j//2+1}", ssample_str))
+                        parsed_data.append((f"{role}-{j//2+1}", ssample_str))
                     # check len(simulated_conversation) is odd? DONE in `parse_conv`
 
             df = pd.DataFrame(parsed_data, columns=["round", "content"])
             df.to_csv(self.fn_conversations_for_excel, index=False)
             if self.cfg.to_gsheet:
                 self.gsheet.to_gsheet(df, sheet_name=f"{self.version}_sim")
+            return df
+        def check_exist():  # ugly code for acceleration
+            if not os.path.exists(self.fn_conversations_for_excel): return False
+            num_conversations = sum(
+                len(utils.LoadJsonl(self.output_dir / fn)) for fn in fns
+            )
+            df = pd.read_csv(self.fn_conversations_for_excel)
+            num_existed = len(df)
+            return num_conversations == num_existed
+        if not check_exist():
+            df = fn_collect()
         else:
             df = pd.read_csv(self.fn_conversations_for_excel)
     
@@ -243,11 +261,22 @@ class Evaluator:
         df_gpt = df[["workflow_name", "workflow_id", "judge_result"]]
         df_gpt.to_json(self.fn_llmscored, orient="records", lines=True, force_ascii=False)
 
-    def collect_evaluation_results(self):
+    def collect_evaluation_results(self, version="01"):
         """ 
         FIXED: the eval format checked in `task_judge`
         """
-        df_labelled_raw = pd.read_json(self.fn_llmscored, lines=True)
+        df_conversation_for_excel = pd.read_csv(self.fn_conversations_for_excel)
+        if version == "01":
+            df_labelled_raw = pd.read_json(self.fn_llmscored, lines=True)
+            _out_sheeet_name = f"{self.version}_eval"
+            _ofn_stat_error = "stat_error_types.png"
+            _ofn_stat_score = "stat_scores_overall.png"
+        else:
+            df_labelled_raw = pd.read_json(self.fn_llmscored_2, lines=True)
+            _out_sheeet_name = f"{self.version}_eval_2"
+            _ofn_stat_error = "stat_error_types_2.png"
+            _ofn_stat_score = "stat_scores_overall_2.png"
+        
         # 1) convert to format of doc
         #   cols: [error_types, score, misc]
         converted = []
@@ -263,18 +292,55 @@ class Evaluator:
                 converted.append((error_types_str, round_eval["score"], str(errors)))
         df_labelled_for_excel = pd.DataFrame(converted, columns=["error_types", "score", "misc"])
         # DONE: concate with formated conversations in `self.fn_conversations_for_labeling`
-        df_conversation_for_excel = pd.read_csv(self.fn_conversations_for_excel)
-        assert len(df_conversation_for_excel) == len(df_labelled_for_excel)
+        
+        assert len(df_conversation_for_excel) == len(df_labelled_for_excel), f"{len(df_conversation_for_excel)} != {len(df_labelled_for_excel)}"
         _df_out = pd.concat([df_conversation_for_excel, df_labelled_for_excel], axis=1)
         if self.cfg.to_gsheet:  # you can also save to csv
-            self.gsheet.to_gsheet(_df_out, sheet_name=f"{self.version}_eval")
+            self.gsheet.to_gsheet(_df_out, sheet_name=_out_sheeet_name)
         
         # 2) analyze
         analyzer = Analyzer(df_labelled_raw, output_dir=self.output_dir)
         _ = analyzer.stat_num_rounds()
-        _ = analyzer.stat_scores_overall()
-        _ = analyzer.stat_error_types()
-        grouped_passrate = analyzer.stat_grouped_passrate()
+        _ = analyzer.stat_scores_overall(th=self.cfg.judge_passrate_threshold, ofn=_ofn_stat_score)
+        _ = analyzer.stat_error_types(ofn=_ofn_stat_error)
+        grouped_passrate = analyzer.stat_grouped_passrate(th=self.cfg.judge_passrate_threshold)
         # useful to copy and paste into Excel
+        grouped_passrate = grouped_passrate.round(3)
         tabbed_str = "\t".join(grouped_passrate.columns) + "\n" + "\n".join(["\t".join(map(str, row)) for row in grouped_passrate.values])
         print(tabbed_str)
+        
+    def run_evaluations_v2(self):
+        _ofn_detailed = self.fn_llmscored_2_raw
+        _ofn = self.fn_llmscored_2
+        
+        conversations = utils.LoadJsonl(self.fn_conversations)
+        skipped = set()
+        if os.path.exists(_ofn_detailed):
+            existed = utils.LoadJsonl(_ofn_detailed)
+            for d in existed:
+                skipped.add((
+                    d["workflow_name"], d["workflow_id"]
+                ))
+        conversations_filtered = [c for c in conversations if (c["workflow_name"], c["workflow_id"]) not in skipped]
+        print(f"# of conversations to be judged: {len(conversations_filtered)}")
+        
+        client = init_client(llm_cfg=LLM_CFG[self.cfg.judge_model_name])
+        with concurrent.futures.ThreadPoolExecutor(max_workers=self.cfg.judge_max_workers) as executor:
+            futures = []
+            for conv in conversations_filtered:
+                future = executor.submit(task_judge_2, conv, _ofn_detailed, client)
+                futures.append(future)
+            print(f"Executing {len(futures)} tasks")
+            num_errors = 0
+            for future in tqdm.tqdm(concurrent.futures.as_completed(futures), total=len(futures), desc="Executing tasks"):
+                r = future.result()  # 获取结果以捕获异常并打印错误信息
+                if r: num_errors += 1
+            print(f"# of errors: {num_errors}")
+        if num_errors > 0:
+            raise Exception(f"# of errors when evaluation: {num_errors}")
+
+        # Simplify the jsonl format
+        df = pd.read_json(_ofn_detailed, lines=True)
+        df.sort_values(["workflow_name", "workflow_id"], inplace=True)
+        df_gpt = df[["workflow_name", "workflow_id", "judge_result"]]
+        df_gpt.to_json(_ofn, orient="records", lines=True, force_ascii=False)

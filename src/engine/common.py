@@ -7,39 +7,102 @@ init(autoreset=True)        # Reset color to default (autoreset=True handles thi
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
 
-DEBUG = False
 DEBUG = True      # NOTE: switch it on for debug
+DEBUG = False
 
 # ===================================== dir manager ==================================================
 class DirectoryManager:
     def __init__(self):
-        _file_dir_path = Path(__file__).resolve().parent
-        _dir_data_base = (_file_dir_path / "../../data/v240820").resolve()
-        _dir_src_base = (_file_dir_path / "../../src").resolve()
-        self.DIR_data_base = _dir_data_base
-        self.DIR_src_base = _dir_src_base
-        
-        self.DIR_templates = _dir_src_base / "utils/templates"
-        self.DIR_engine_v2_config = _dir_src_base / "configs"
-        
-        self.DIR_huabu_step3 = _dir_data_base / "pdl2_step3"
-        self.DIR_huabu_meta = _dir_data_base / "huabu_meta"
-        self.DIR_simulated_base = _dir_data_base / "simulated"
-        self.DIR_conversation_v1 = _dir_data_base / "conversation_v01"
-        self.DIR_user_profile = _dir_data_base / "../gen/user_profile"
-        self.FN_api_infos = _dir_data_base / "apis/apis.json"
+        # 0) base path
+        self.DIR_root = Path(__file__).resolve().parent.parent.parent
+        self.DIR_data_base = (self.DIR_root / "dataset/v240830").resolve()
+        self.DIR_src_base = (self.DIR_root / "src").resolve()
 
-        self.DIR_engine_v2_log = _dir_data_base / "engine_v2_log"
-        self.DIR_simulation_v2_log = _dir_data_base / "simulation_v2_log"
-        self.DIR_ui_v2_log = _dir_data_base / "ui_v2_log"
-        os.makedirs(self.DIR_engine_v2_log, exist_ok=True)
-        os.makedirs(self.DIR_simulation_v2_log, exist_ok=True)
-        os.makedirs(self.DIR_ui_v2_log, exist_ok=True)
+        # 1) data paths
+        self.DIR_huabu = self.DIR_data_base / "pdl"
+        # self.DIR_huabu_meta = self.DIR_data_base / "huabu_meta"
+        # self.DIR_conversation_v1 = self.DIR_data_base / "conversation_v01"
+        self.DIR_user_profile = self.DIR_data_base / "../../data/gen/user_profile"
+        # 1.1) apis
+        self.DIR_api = self.DIR_data_base / "api_v02"
+        self.FN_api_infos = self.DIR_data_base / "api_v02/api_infos.json"
+        
+        # 2) engine paths
+        self.DIR_engine_templates = self.DIR_src_base / "utils/templates"
+        self.DIR_engine_config = self.DIR_src_base / "configs"
+        self.DIR_engine_log = self.DIR_data_base / "_engine_log"
+        # 2.1) ui
+        self.DIR_ui_log = self.DIR_data_base / "_ui_log"
+        # 2.2) simulation
+        self.DIR_simulation = self.DIR_data_base / "simulated"
+        self.DIR_simulation_log = self.DIR_data_base / "_simulation_log"
+        
+        os.makedirs(self.DIR_engine_log, exist_ok=True)
+        os.makedirs(self.DIR_simulation_log, exist_ok=True)
+        os.makedirs(self.DIR_ui_log, exist_ok=True)
         
         # self.HUABU_versions = ["huabu_step3_v01", "huabu_step3", "huabu_manual", "huabu_refine01"]
-        self.HUABU_versions_pdl2 = ["pdl2_step3"]
+        self.HUABU_versions_pdl2 = ["pdl"]
 
 _DIRECTORY_MANAGER = DirectoryManager()
+
+
+class DataManager:
+    @staticmethod
+    @functools.lru_cache(maxsize=None)
+    def build_workflow_id_map(workflow_dir:str, extension:str=".yaml"):
+        workflow_id_map = {}
+        for file in os.listdir(workflow_dir):
+            if file.endswith(extension):
+                # workflow_name = file.rstrip(extension)    # NOTE: error for __x.txt
+                workflow_name = file[:-len(extension)]
+                id, name = workflow_name.split("-", 1)
+                workflow_id_map[id] = workflow_name
+                workflow_id_map[name] = workflow_name
+                workflow_id_map[workflow_name] = workflow_name
+        return workflow_id_map
+    @staticmethod
+    @functools.lru_cache(maxsize=None)
+    def get_workflow_name_list(workflow_dir:str, extension:str=".yaml"):
+        workflow_dir = DataManager.normalize_workflow_dir(workflow_dir)
+        fns = [fn[:-len(extension)] for fn in os.listdir(workflow_dir) if fn.endswith(extension)]
+        return list(sorted(fns))
+    
+    @staticmethod
+    def get_workflow_full_path(workflow_name:str, workflow_dir:str, extension:str=".yaml"):
+        if not workflow_name.endswith(extension): workflow_name += extension
+        if not workflow_name.startswith("/apdcephfs"): 
+            workflow_dir = DataManager.normalize_workflow_dir(workflow_dir)
+            workflow_name = f"{workflow_dir}/{workflow_name}"
+        assert os.path.exists(workflow_name), f"File not found: {workflow_name}"
+        return workflow_name
+
+    @staticmethod
+    def get_template_name_list(template_dir:str, prefix:str="query_"):
+        fns = [fn for fn in os.listdir(template_dir) if fn.startswith(prefix)]
+        return list(sorted(fns))
+
+    @staticmethod
+    def normalize_workflow_dir(workflow_dir:Union[str, Path]):
+        # Convert Path to string if necessary
+        if isinstance(workflow_dir, Path):
+            workflow_dir = str(workflow_dir)
+        if not workflow_dir.startswith("/apdcephfs"):
+            subfolder_name = workflow_dir.split("/")[-1]
+            workflow_dir = _DIRECTORY_MANAGER.DIR_data_base / subfolder_name
+        return workflow_dir
+    
+    @staticmethod
+    def normalize_workflow_name(workflow_name:str, workflow_dir:str, extension:str=".yaml"):
+        workflow_dir = DataManager.normalize_workflow_dir(workflow_dir)
+        workflow_name_map = DataManager.build_workflow_id_map(workflow_dir, extension=extension)
+        assert workflow_name in workflow_name_map, f"Unknown workflow_name: {workflow_name}! Please choose from {workflow_name_map.keys()}"
+        return workflow_name_map[workflow_name]
+
+    @staticmethod
+    def normalize_config_name(config_name:str):
+        config_fn = f"{_DIRECTORY_MANAGER.DIR_engine_config}/{config_name}"
+        return config_fn
 
 
 # ===================================== log ==================================================
@@ -65,7 +128,7 @@ def prompt_user_input(prompt_text, prompt_color='blue', input_color='bold_blue')
 
 
 class BaseLogger:
-    log_dir: str = _DIRECTORY_MANAGER.DIR_engine_v2_log
+    log_dir: str = _DIRECTORY_MANAGER.DIR_engine_log
     log_fn:str = "tmp.log"
     def __init__(self):
         pass
@@ -81,7 +144,7 @@ class BaseLogger:
 class Logger(BaseLogger):
     num_logs = 0
     logger_id: str = "tmp"
-    def __init__(self, log_dir:str=_DIRECTORY_MANAGER.DIR_engine_v2_log, t:datetime.datetime=None):
+    def __init__(self, log_dir:str=_DIRECTORY_MANAGER.DIR_engine_log, t:datetime.datetime=None):
         """ 
         args:
             log_dir: str, the directory to save the log files
@@ -126,53 +189,6 @@ class Logger(BaseLogger):
 #             print(traceback.format_exc())
 #             return {'status': 'error', 'message': str(e)}
 #     return wrapper
-
-class DataManager:
-    @staticmethod
-    @functools.lru_cache(maxsize=None)
-    def build_workflow_id_map(workflow_dir:str, extension:str=".yaml"):
-        workflow_id_map = {}
-        for file in os.listdir(workflow_dir):
-            if file.endswith(extension):
-                # workflow_name = file.rstrip(extension)    # NOTE: error for __x.txt
-                workflow_name = file[:-len(extension)]
-                id, name = workflow_name.split("-", 1)
-                workflow_id_map[id] = workflow_name
-                workflow_id_map[name] = workflow_name
-                workflow_id_map[workflow_name] = workflow_name
-        return workflow_id_map
-    @staticmethod
-    @functools.lru_cache(maxsize=None)
-    def get_workflow_name_list(workflow_dir:str, extension:str=".yaml"):
-        fns = [fn[:-len(extension)] for fn in os.listdir(workflow_dir) if fn.endswith(extension)]
-        return list(sorted(fns))
-
-    @staticmethod
-    def get_template_name_list(template_dir:str, prefix:str="query_"):
-        fns = [fn for fn in os.listdir(template_dir) if fn.startswith(prefix)]
-        return list(sorted(fns))
-
-    @staticmethod
-    def normalize_workflow_dir(workflow_dir:Union[str, Path]):
-        # Convert Path to string if necessary
-        if isinstance(workflow_dir, Path):
-            workflow_dir = str(workflow_dir)
-        if not workflow_dir.startswith("/apdcephfs"):
-            subfolder_name = workflow_dir.split("/")[-1]
-            workflow_dir = _DIRECTORY_MANAGER.DIR_data_base / subfolder_name
-        return workflow_dir
-    
-    @staticmethod
-    def normalize_workflow_name(workflow_name:str, workflow_dir:str, extension:str=".yaml"):
-        workflow_dir = DataManager.normalize_workflow_dir(workflow_dir)
-        workflow_name_map = DataManager.build_workflow_id_map(workflow_dir, extension=extension)
-        assert workflow_name in workflow_name_map, f"Unknown workflow_name: {workflow_name}! Please choose from {workflow_name_map.keys()}"
-        return workflow_name_map[workflow_name]
-
-    @staticmethod
-    def normalize_config_name(config_name:str):
-        config_fn = f"{_DIRECTORY_MANAGER.DIR_engine_v2_config}/{config_name}"
-        return config_fn
 
 
 # ===================================== llm ==================================================

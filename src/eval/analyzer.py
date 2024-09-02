@@ -27,7 +27,7 @@ class Analyzer:
         print(f"Saved to {self.output_dir}/stat_num_rounds.png")
         return vc_num_rounds
 
-    def stat_scores_overall(self, th=4):
+    def stat_scores_overall(self, th=4, ofn="stat_scores_overall.png"):
         mean_score = self.df["overall_score"].mean()
         passrate = sum(self.df["overall_score"] >= th) / len(self.df)
         print(f"Mean score: {mean_score:.2f}\nPassrate: {passrate:.2f}")
@@ -45,11 +45,11 @@ class Analyzer:
         plt.title('Comparison of Scores between GPT and Human')
         plt.xticks(rotation=0)
         plt.tight_layout()
-        plt.savefig(f"{self.output_dir}/stat_scores_overall.png")
-        print(f"Saved to {self.output_dir}/stat_scores_overall.png")
+        plt.savefig(f"{self.output_dir}/{ofn}")
+        print(f"Saved to {self.output_dir}/{ofn}")
         return df_scores
 
-    def stat_error_types(self):
+    def stat_error_types(self, ofn="stat_error_types.png"):
         cnt = collections.Counter()
         for idx, row in self.df.iterrows():
             # print(f"{row['workflow_name']} - {row['workflow_id']}")
@@ -71,8 +71,8 @@ class Analyzer:
         plt.title('Comparison of Error Types between GPT and Human')
         plt.xticks(rotation=45, ha="right")
         plt.tight_layout()
-        plt.savefig(f"{self.output_dir}/stat_error_types.png")
-        print(f"Saved to {self.output_dir}/stat_error_types.png")
+        plt.savefig(f"{self.output_dir}/{ofn}")
+        print(f"Saved to {self.output_dir}/{ofn}")
         return cnt
 
     def stat_grouped_passrate(self, th=4):

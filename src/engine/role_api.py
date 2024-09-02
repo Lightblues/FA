@@ -34,36 +34,6 @@ def handle_exceptions(func):
 class BaseAPIHandler(BaseRole):
     """ 
     API structure: (see apis_v0/apis.json)
-  {
-    "name": "API-校验挂号医院",
-    "description": "校验挂号医院",
-    "parameters": {
-      "type": "object",
-      "properties": {
-        "hos_name": {
-          "type": "string",
-          "name": "医院名称",
-          "description": "医院名称",
-          "entity_list": ["北京301医院", "北京安贞医院", "北京朝阳医院", "北京大学第一医院", "北京大学人民医院", "北京儿童医院", "北京积水潭医院", "北京世纪坛医院", "北京天坛医院", "北京协和医学院附属肿瘤医院", "北京协和医院", "北京宣武医院", "北京友谊医院", "北京中日友好医院", "北京中医药大学东方医院", "北京中医药大学东直门医院"]
-        }
-      },
-      "required": [
-        "hos_name"
-      ]
-    },
-    "response": {
-      "type": "object",
-      "properties": {
-        "type": {
-          "type": "string",
-          "name": "医院存在类型",
-          "description": "医院存在类型"
-        }
-      }
-    },
-    "URL": "http://11.141.203.151:8089/jiaoyanyiyuan",
-    "Method": "GET"
-  },
     """
     cfg: Config = None              # cfg.workflow_name
     names: List[str] = []                   # for convert name2role
@@ -93,6 +63,7 @@ class BaseAPIHandler(BaseRole):
             # only select apis from current workflow
             if api["from"] != self.cfg.workflow_name: continue
             api_infos_map[api["name"]] = api
+            api_infos_map[api["description"]] = api
         return api_infos_map
     
     @handle_exceptions
@@ -111,6 +82,7 @@ class BaseAPIHandler(BaseRole):
         
         api_params = api_info["parameters"]["properties"]
         expected_param_names = list(api_params.keys())
+        # if isinstance(input_params, list): input_params = input_params[0]
         if isinstance(input_params, list):
             assert len(input_params) == len(expected_param_names), f"API {api_name} expects {len(expected_param_names)} parameters {expected_param_names}, but got {len(input_params)} input parameters!"
         if isinstance(input_params, dict):
@@ -220,6 +192,7 @@ class V01APIHandler(BaseAPIHandler):
     def _call_api(api_info, api_params_dict):
         assert "Method" in api_info and "URL" in api_info, f"API should provide Method and URL!"
         if api_info["Method"] == "POST":
+            if DEBUG: print(f">> calling [{api_info['name']}] -- {api_info['URL']} with params {api_params_dict}")
             response = requests.post(api_info["URL"], data=json.dumps(api_params_dict))
         elif api_info["Method"] == "GET":
             response = requests.get(api_info["URL"], params=api_params_dict)
@@ -234,7 +207,6 @@ class V01APIHandler(BaseAPIHandler):
         return: {'status': 'success', 'response': '{"医院存在类型": "0"}'}
         ref: /apdcephfs_cq8/share_2992827/shennong_5/ianxxu/chatchat/_TaskPlan/UI/v2.1/utils/tool_executor.py
         """
-
         # 1] call the api
         # NOTE: update the matched params to conversation
         if self.cfg.api_entity_linking:
@@ -242,18 +214,19 @@ class V01APIHandler(BaseAPIHandler):
         action_metas.apicalling_info_matched = APICalling_Info(name=api_info["name"], kwargs=api_params_dict)
         response = self._call_api(api_info, api_params_dict)
         
-        # 2] parse the response
-        expected_response_properties = api_info["response"]["properties"]
-        ret = {}
-        for param in expected_response_properties:
-            if param in response:
-                ret[expected_response_properties[param]['name']] = response[param]
-        if len(ret) == 0:    # 如果返回结果中没有有效的参数，则返回原始response
-            ret = response
-        return json.dumps(
-            {"status": "success", "response": ret}, 
-            ensure_ascii=False
-        )
+        # # 2] parse the response
+        # expected_response_properties = api_info["response"]["properties"]
+        # ret = {}
+        # for param in expected_response_properties:
+        #     if param in response:
+        #         ret[expected_response_properties[param]['name']] = response[param]
+        # if len(ret) == 0:    # 如果返回结果中没有有效的参数，则返回原始response
+        #     ret = response
+        # return json.dumps(
+        #     {"status": "success", "response": ret}, 
+        #     ensure_ascii=False
+        # )
+        return json.dumps(response, ensure_ascii=False)
 
     def process(self, apicalling_info:APICalling_Info, conversation:Conversation, *args, **kwargs) -> Tuple[ActionType, APIActionMetas, Message]:
         """ 
@@ -261,6 +234,7 @@ class V01APIHandler(BaseAPIHandler):
             conversation: 
             paras: {action_name:str, action_parameters:list}
         """
+        if DEBUG: print(f">> process API with apicalling_info {apicalling_info}")
         self.conversation = conversation
         action_metas = APIActionMetas(apicalling_info_query=apicalling_info)
         res = self.match_and_check_api(apicalling_info, action_metas)   # match the standard API

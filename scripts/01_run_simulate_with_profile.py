@@ -1,4 +1,4 @@
-""" ================= moved to @evaluator.py ====================
+""" WARNING: moved to @evaluator.py
 @240821 并发模拟, 保存到 $DATA/simulated 下
 /apdcephfs_cq8/share_2992827/shennong_5/easonsshi/huabu/data/v240820/simulated/template=query_PDL_jinja_pdl=pdl2_step3_model=qwen2_72B_api=llm/000-114挂号.jsonl
 
@@ -78,7 +78,7 @@ def run_single_simulation_mp(cfg:Config, workflow_name:str, odir:str, num_person
             tasks.append((cfg, up, workflow_name, ofn))
         return tasks
 
-def run_simulations_mp(base_cfg:Config, workflow_names, output_dir=_DIRECTORY_MANAGER.DIR_simulated_base/"tmp", max_workers=10):
+def run_simulations_mp(base_cfg:Config, workflow_names, output_dir=_DIRECTORY_MANAGER.DIR_simulation/"tmp", max_workers=10):
     tasks = []
     for workflow_name in workflow_names:
         cfg = base_cfg.copy()
@@ -117,7 +117,7 @@ if __name__ == '__main__':
     # "template=query_PDL_jinja_pdl=pdl2_step3_model=qwen2_72B_api=llm"
     VERSION = f"0828_template={cfg.template_fn}_pdl={_pdl_version}_bot={cfg.bot_mode}_model={cfg.model_name}_api={cfg.api_mode}"
     VERSION = VERSION.replace("/", "_").replace(".", "_")
-    odir = _DIRECTORY_MANAGER.DIR_simulated_base / VERSION
+    odir = _DIRECTORY_MANAGER.DIR_simulation / VERSION
     
     # MODE = "single"
     MODE = "all"
