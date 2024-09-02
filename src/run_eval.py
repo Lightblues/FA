@@ -13,8 +13,6 @@ import os, argparse, json
 from eval.evaluator import Evaluator
 from engine import Conversation, _DIRECTORY_MANAGER, DataManager, LLM_CFG, init_client, UserProfile, Config, PDL, BOT_ANME2CLASS
 
-workflow_id_map = DataManager.build_workflow_id_map(_DIRECTORY_MANAGER.DIR_huabu, extension=".yaml")
-
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default="simulate.yaml")

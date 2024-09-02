@@ -27,7 +27,7 @@ import concurrent.futures
 from easonsi import utils
 from engine import _DIRECTORY_MANAGER, LLM_CFG, init_client, PDL, Config
 from .eval_utils import task_simulate, task_judge, task_judge_2, parse_conv, convert_conv
-from.analyzer import Analyzer
+from .analyzer import Analyzer
 
 
 
