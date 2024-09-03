@@ -1,9 +1,12 @@
 ## TODOs
 
+see detailed in [feishu](https://v0r8x11vrv.feishu.cn/docx/WaMfdTbqaoH1WTx9ZDicVAB7nM9)
+
 data
 
 - [x] LLM auto generate node dependencies #2 @0724
 - [x] LLM-based PDL generation @0729
+    - [ ] other datasets 
 
 functionalities
 
@@ -35,6 +38,9 @@ paper
 
 - [ ] auto conversation simulation (user agent) #1
 - [ ] auto conversation evaluation (based on specific PDL) #1
+- [ ] auto PDL generation (with user query) [data source: wikihow] #P0
+- [ ] baselines
+    - [ ] FlowBench 
 
 bugs
 

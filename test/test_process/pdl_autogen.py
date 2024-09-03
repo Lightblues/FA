@@ -3,7 +3,7 @@ import os, json
 from tqdm import tqdm
 from utils.jinja_templates import jinja_render
 from easonsi.llm.openai_client import OpenAIClient, Formater
-from engine_v1.common import LLM_CFG, init_client, FN_data_meta, DIR_data_base
+from engine.common import LLM_CFG, init_client
 
 client = init_client(llm_cfg=LLM_CFG["gpt-4o"])
 
