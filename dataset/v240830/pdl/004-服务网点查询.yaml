@@ -24,7 +24,7 @@ APIs:
 
 ANSWERs:
   - name: 回复选择正确的服务网点城市
-    desc: 请回答选择正确的服务网点城市，或者您也可以直接通过PC端【点击这里](https://www.5idhl.com/#/createExpress/ServiceNetworkStation)】，移动端【点击这里](https://weixin.5idhl.com/serviceLatticePoint)】自助查询。
+    desc: 您选择的城市不在支持列表中 (服务网点城市列表). 或者您也可以直接通过PC端【点击这里](https://www.5idhl.com/#/createExpress/ServiceNetworkStation)】，移动端【点击这里](https://weixin.5idhl.com/serviceLatticePoint)】自助查询。
   - name: 回复网点信息
     desc: 返回查询到的网点信息
     precondition: [获取服务网点信息]

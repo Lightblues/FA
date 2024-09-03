@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Literal
+from typing import Literal, Union
 
 from api_registry import register_api
 
@@ -18,7 +18,7 @@ class QueryInvoiceProgressResponse(BaseModel):
     invoice_progress: str
 
 class QueryMemberStatusRequest(BaseModel):
-    card_id: int
+    card_id: Union[str, int]
 
 class QueryMemberStatusResponse(BaseModel):
     card_type: Literal["白金卡", "非白金卡"]

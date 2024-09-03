@@ -6,7 +6,7 @@ SLOTs:
   - name: CardID
     desc: 身份证号
   - name: Identity
-    available_types: [退休职工, 在职职工, 城乡居民]
+    desc: 用户身份, 包括 [退休职工, 在职职工, 城乡居民]
 
 APIs:
   - name: 身份查询

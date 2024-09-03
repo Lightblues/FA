@@ -12,13 +12,13 @@ SLOTs:
   - name: id_number
     desc: 用户的身份证号
   - name: registration_type
-    desc: 号类, 挂号类别, 分为专家号和普通号
+    desc: 挂号类别 (号类), 分为专家号和普通号
   - name: doctor_name
     desc: 用户想挂号的医生姓名
   - name: 挂号意愿
     desc: 用户是否愿意在其他医院进行挂号
   - name: 挂号状态
-    desc: API反馈的挂号状态, 0为挂号成功, 1为挂号失败
+    desc: API反馈的挂号结果, 1表示挂号成功, 0表示挂号失败
 
 APIs:
   - name: 校验挂号医院
@@ -44,7 +44,7 @@ APIs:
 ANSWERs:
   - name: 医院不存在
     desc: 您好，目前无法提供该医院的挂号服务，建议您直接联系该医院或者考虑下其他医院。
-  - name: 科室不存在转人工
+  - name: 科室不存在
     desc: $医院名称没有找到您要挂号的科室，我这边为您转接人工客服咨询一下，请稍等。
   - name: 无号回复
     desc: 非常抱歉，最近您想挂的科室，平台已出号的医院近期均无号源，建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
@@ -52,40 +52,41 @@ ANSWERs:
     desc: 那建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
   - name: 本医院挂号成功
     desc: 好的，已为您成功挂了$医院名称$科室名称$挂号时间号源，稍后也会短信发送到您的来电号码，还有什么可以帮您吗？
-  - name: 结束回复11
+  - name: 本医院挂号失败
     desc: 非常抱歉，暂时没有$医院名称$科室名称$挂号时间的$号类；建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
   - name: 其他医院挂号成功
     desc: 好的，已为您成功挂了$其他医院号源推荐-医院名称$其他医院号源推荐-挂号医生$挂号时间号源，稍后也会短信发送到您的来电号码，还有什么可以帮您吗？
-  - name: 结束回复2
+  - name: 其他医院挂号失败
     desc: 非常抱歉，身份证信息有误这边无法帮您挂号；建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
   - name: 其他自由回复问题
   - name: 请用户提供必要信息
 
 PDL: |
   [医院存在类型] = API_校验挂号医院([hospital_name])
-  if 医院存在类型 == "0":
+  if 医院存在类型 == false:
       ANSWER_医院不存在()
-  elif 医院存在类型 == "1":
+  elif 医院存在类型 == true:
       [科室存在状态] = API_科室校验([department_name, hospital_name])
-      if 科室存在状态 == "0":
-          ANSWER_科室不存在转人工()
-      elif 科室存在状态 == "1":
+      if 科室存在状态 == false:
+          ANSWER_科室不存在()
+      elif 科室存在状态 == true:
           [可挂号数量, 可挂号列表, 专家号数量, 普通号数量] = API_指定时间号源查询([hospital_name, department_name, appointment_time])
           if 可挂号数量 > 0:
               [挂号状态] = API_本医院挂号执行([id_number, registration_type, hospital_name, department_name, appointment_time])
               if 挂号状态 == "1":
                   ANSWER_本医院挂号成功()
               elif 挂号状态 == "0":
-                  ANSWER_结束回复11()
+                  ANSWER_本医院挂号失败()
           elif 可挂号数量 == 0:
               [号源数量, 可挂号列表] = API_其他医院号源推荐([department_name, appointment_time])
               if 号源数量 > 0:
+                  # 挂号意愿 TODO: 
                   if 挂号意愿 == "true":
                       [挂号状态] = API_其他医院挂号执行([id_number, hospital_name, doctor_name])
                       if 挂号状态 == "1":
                           ANSWER_其他医院挂号成功()
                       elif 挂号状态 == "0":
-                          ANSWER_结束回复2()
+                          ANSWER_其他医院挂号失败()
                   elif 挂号意愿 == "false":
                       ANSWER_拒绝挂号回复()
               elif 号源数量 == 0:

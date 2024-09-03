@@ -1,5 +1,9 @@
 """ 
 - 基于 API code 生成标准化的API信息
+
+input: api_definitions/*.py
+output: api_schemas/*.json
+    ./api_infos.json
 """
 
 # %%
@@ -30,7 +34,7 @@ for m in modules:
 
 # %%
 import re, json
-def replate_domain(url:str, new_domain:str) -> str:
+def replace_domain(url:str, new_domain:str) -> str:
     pattern = r"(http://|https://)([^/]+)"
     match = re.match(pattern, url)
     if match:
@@ -46,7 +50,7 @@ for fn in sorted(os.listdir("api_schemas")):
     with open(f"api_schemas/{fn}", "r") as f:
         apis = json.load(f)
     for api in apis:
-        api["URL"] = replate_domain(api["URL"], "www.easonsi.site:9390")
+        api["URL"] = replace_domain(api["URL"], "www.easonsi.site:9390")
         api_infos.append(api)
     print(f"  # apis of {fn}: {len(apis)}")
 ofn = "api_infos.json"
