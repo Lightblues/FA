@@ -207,7 +207,7 @@ LLM_CFG = {
     },
     "v0729-Llama3_1-70B": {
         "model_name": "Infinity-Instruct-7M-0729-Llama3_1-70B",
-        "base_url": f"http://{_IP_01}/v1/",
+        "base_url": f"http://{_IP_02}/v1/",
         "api_key": "xxx",
     },
     "v0729-Qwen2-7B": {
@@ -225,6 +225,7 @@ def add_openai_models():
     global LLM_CFG
     model_list = ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"]
     for model in model_list:
+        assert model not in LLM_CFG, f"{model} already in LLM_CFG"
         LLM_CFG[model] = {
             "model_name": model,
             "base_url": os.getenv("OPENAI_PROXY_BASE_URL"),
@@ -247,6 +248,7 @@ def add_local_models():
         model_info[name] = f"{parsed_url.scheme}://{parsed_url.netloc}"
 
     for model, url in model_info.items():
+        assert model not in LLM_CFG, f"{model} already in LLM_CFG"
         LLM_CFG[model] = {
             "model_name": model, "base_url": url, 
             "api_key": "xxx",   # NOTE: api_key 不能为 "" 不然也会报错

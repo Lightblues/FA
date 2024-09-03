@@ -40,7 +40,7 @@ class PDL_UIBot(BaseRole):
         return prompt, llm_response_stream
 
     def process_LLM_response(self, parsed_response:dict) -> Tuple[ActionType, Dict, Message]:
-        """ process the LLM response, single round
+        """ process the LLM response, single turn
         return: (action_type, msgs)
         """
         action_metas = {}

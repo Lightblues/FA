@@ -34,7 +34,7 @@ from .analyzer import Analyzer
 class Evaluator:
     cfg: Config = None
     version: str = None
-    output_dir: str = None
+    simulation_output_dir: str = None
     def __init__(self, cfg: Config):
         cfg.model_name = cfg.simulate_model_name # fix the model name?
         cfg.normalize_paths()       # fix the path
@@ -44,13 +44,16 @@ class Evaluator:
             cfg.simulate_version = f"v{default_version}"
         self.cfg = cfg
         self.version = cfg.simulate_version
-        self.output_dir = _DIRECTORY_MANAGER.DIR_simulation / cfg.simulate_version
-        self.fn_conversations_for_excel = self.output_dir / "simulated_conversations.csv"
-        self.fn_conversations = self.output_dir / "simulated_conversations.jsonl"
-        self.fn_llmscored_raw = self.output_dir / "eval_gpt_detailed.jsonl"
-        self.fn_llmscored = self.output_dir / "eval_gpt.jsonl"      # simplified
-        self.fn_llmscored_2_raw = self.output_dir / "eval_gpt_2_detailed.jsonl"
-        self.fn_llmscored_2 = self.output_dir / "eval_gpt_2.jsonl"      # simplified
+        self.simulation_output_dir = _DIRECTORY_MANAGER.DIR_simulation / cfg.simulate_version
+        self.fn_conversations_for_excel = self.simulation_output_dir / "simulated_conversations.csv"
+        self.fn_conversations = self.simulation_output_dir / "simulated_conversations.jsonl"
+        
+        self.judger_output_dir = self.simulation_output_dir / self.cfg.judge_model_name
+        os.makedirs(self.judger_output_dir, exist_ok=True)
+        self.fn_llmscored_raw = self.judger_output_dir / "eval_gpt_detailed.jsonl"
+        self.fn_llmscored = self.judger_output_dir / "eval_gpt.jsonl"      # simplified
+        self.fn_llmscored_2_raw = self.judger_output_dir / "eval_gpt_2_detailed.jsonl"
+        self.fn_llmscored_2 = self.judger_output_dir / "eval_gpt_2.jsonl"      # simplified
         if cfg.to_gsheet: 
             from easonsi.files.gsheet import GSheet
             self.gsheet = GSheet()
@@ -92,7 +95,7 @@ class Evaluator:
         for workflow_name in self.cfg.simulate_workflow_names:
             cfg = self.cfg.copy()
             cfg.workflow_name = workflow_name     # NOTE: update the config.workflow_name
-            tasks.extend(self.run_single_simulation_mp(cfg, workflow_name, self.output_dir, num_persona=self.cfg.simulate_persons_per_workflow, exec=False))
+            tasks.extend(self.run_single_simulation_mp(cfg, workflow_name, self.simulation_output_dir, num_persona=self.cfg.simulate_persons_per_workflow, exec=False))
 
         def f_exec(cfg, up, workflow_name, ofn):
             for retry_ in range(3):
@@ -176,18 +179,18 @@ class Evaluator:
 
     def collect_simulated_results(self):
         # 1) sort the simulated results
-        fns = sorted(os.listdir(self.output_dir))
+        fns = sorted(os.listdir(self.simulation_output_dir))
         fns = [fn for fn in fns if fn.endswith(".jsonl") and fn.startswith("0")]
         workflow_names = [fn[:-len(".jsonl")] for fn in fns]
         for workflow_name in tqdm.tqdm(workflow_names, desc="Collecting simulated results"):
-            self.sort_file(workflow_name, self.output_dir)
+            self.sort_file(workflow_name, self.simulation_output_dir)
 
         # 2) convert to U/I utterance format (two columns)
         # 对于每一组对话, 第一行为meta信息, 第二行为bot  greeting, 后面的 U/B 之间的会话
         def fn_collect():
             parsed_data = []
             for fn in fns:
-                data = utils.LoadJsonl(self.output_dir / fn)
+                data = utils.LoadJsonl(self.simulation_output_dir / fn)
                 print(f"{fn}: {len(data)}")
                 for i,sample_d in enumerate(data):
                     parsed_data.append(
@@ -208,7 +211,7 @@ class Evaluator:
         def check_exist():  # ugly code for acceleration
             if not os.path.exists(self.fn_conversations_for_excel): return False
             num_conversations = sum(
-                len(utils.LoadJsonl(self.output_dir / fn)) for fn in fns
+                len(utils.LoadJsonl(self.simulation_output_dir / fn)) for fn in fns
             )
             df = pd.read_csv(self.fn_conversations_for_excel)
             num_existed = len(df)
@@ -299,7 +302,7 @@ class Evaluator:
             self.gsheet.to_gsheet(_df_out, sheet_name=_out_sheeet_name)
         
         # 2) analyze
-        analyzer = Analyzer(df_labelled_raw, output_dir=self.output_dir)
+        analyzer = Analyzer(df_labelled_raw, output_dir=self.judger_output_dir)
         _num_workflows = len(df_labelled_raw["workflow_name"].unique())
         stat_dict = {
             "num_workflows": _num_workflows,

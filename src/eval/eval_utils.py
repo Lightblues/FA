@@ -98,7 +98,7 @@ def task_judge(conv, ofn, client: OpenAIClient) -> None:
     )
     for retry_ in range(3):
         try:
-            res = client.query_one(prompt)
+            res, _model_name, _usage = client.query_one(prompt, return_usage=True)
             jr = Formater.parse_llm_output_yaml(res)
             if "error" in jr:
                 continue
@@ -107,6 +107,8 @@ def task_judge(conv, ofn, client: OpenAIClient) -> None:
             out = {
                 "workflow_name": workflow_name,
                 "workflow_id": conv["workflow_id"],
+                "judge_model": _model_name,
+                "Judge_usage": _usage,
                 "judge_result": jr,
                 "infos": {
                     "prompt": prompt,
@@ -152,7 +154,7 @@ def task_judge_2(conv, ofn, client: OpenAIClient) -> None:
     )
     for retry_ in range(3):
         try:
-            res = client.query_one(prompt)
+            res, _model_name, _usage = client.query_one(prompt, return_usage=True)
             jr = Formater.parse_llm_output_yaml(res)
             if "error" in jr:
                 continue
@@ -161,6 +163,8 @@ def task_judge_2(conv, ofn, client: OpenAIClient) -> None:
             out = {
                 "workflow_name": workflow_name,
                 "workflow_id": conv["workflow_id"],
+                "judge_model": _model_name,
+                "Judge_usage": _usage,
                 "judge_result": jr,
                 "infos": {
                     "prompt": prompt,
