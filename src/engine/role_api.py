@@ -77,42 +77,36 @@ class BaseAPIHandler(BaseRole):
             
         """
         api_name, input_params = apicalling_info.name, apicalling_info.kwargs
+        # 1. check the API name
         assert api_name in self.api_infos_map, f"API `{api_name}` not found!"
         api_info = self.api_infos_map[api_name]
         
+        # 2. check the parameters all match the API
+        assert isinstance(input_params, dict), f"API `{api_name}` expects parameters as dict!"
+        if not ("parameters" in api_info and isinstance(api_info["parameters"], dict) and "properties" in api_info["parameters"]):
+            return api_info, input_params
         api_params = api_info["parameters"]["properties"]
-        expected_param_names = list(api_params.keys())
-        # if isinstance(input_params, list): input_params = input_params[0]
-        if isinstance(input_params, list):
-            assert len(input_params) == len(expected_param_names), f"API {api_name} expects {len(expected_param_names)} parameters {expected_param_names}, but got {len(input_params)} input parameters!"
-        if isinstance(input_params, dict):
-            assert all(k in expected_param_names for k in input_params.keys()), f"API {api_name} expects parameters {expected_param_names}!"
-            input_params = [input_params[k] for k in expected_param_names]
-        api_params_dict = dict(zip(expected_param_names, input_params))
+        assert all(k in api_params for k in input_params.keys()), f"API {api_name} expects parameters {api_params.keys()}!"
     
-        # check the parameters! @240802
+        # 3. entity linking @240802
         if self.cfg.api_entity_linking:
-            if DEBUG: 
-                print(f">> entity linking for `{api_name}` ... with input {json.dumps(api_params_dict, ensure_ascii=False)}")
-                # print(f"  {json.dumps(api_params, ensure_ascii=False)}\n  {expected_param_names} with {input_params}")
-            for param_name, param_input in zip(expected_param_names, input_params):
+            if DEBUG: print(f">> entity linking for `{api_name}` ... with input {input_params}")
+            for param_name, param_input in input_params.items():
                 param_info = api_params[param_name]
                 if "entity_list" in param_info and param_info["entity_list"]:
                     res, _meta = self.entity_linker.entity_linking(param_input, param_info["entity_list"])
                     action_metas.entity_linking_log.append(_meta)
                     if res["is_matched"]: 
                         if DEBUG: print(f"  {param_input} -> {res['matched_entity']}")
-                        api_params_dict[param_name] = res["matched_entity"]
+                        input_params[param_name] = res["matched_entity"]
                     else: 
                         if DEBUG: print(f"  {param_input} <-x-> {res['matched_entity']}")
-                        # raise ValueError(f"Failed to link entity {param_input} to {param_info['entity_list']}")
-            # if DEBUG: print(f">> api_params_dict: {api_params_dict}")
-        return api_info, api_params_dict
+        return api_info, input_params
 
     def update_conversation(self, api_info:Dict, api_params_dict:Dict):
         # update the matched params to conversation
-        matched_api_params = [api_params_dict[k] for k in list(api_info["parameters"]["properties"].keys())]
-        self.conversation.add_message(Message(Role.SYSTEM, f"Entity linked! Actually called API: {api_info['name']}({matched_api_params})"))
+        # matched_api_params = [api_params_dict[k] for k in list(api_info["parameters"]["properties"].keys())]
+        self.conversation.add_message(Message(Role.SYSTEM, f"Entity linked! Actually called API: {api_info['name']}({api_params_dict})"))
     
     def update_conversation_back(self, m:str):
         tmp_msg = self.conversation.msgs.pop()
