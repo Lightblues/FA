@@ -200,7 +200,7 @@ class Evaluator:
                         parsed_data.append((f"{role}-{j//2+1}", ssample_str))
                     # check len(simulated_conversation) is odd? DONE in `parse_conv`
 
-            df = pd.DataFrame(parsed_data, columns=["round", "content"])
+            df = pd.DataFrame(parsed_data, columns=["turn", "content"])
             df.to_csv(self.fn_conversations_for_excel, index=False)
             if self.cfg.to_gsheet:
                 self.gsheet.to_gsheet(df, sheet_name=f"{self.version}_sim")
@@ -224,7 +224,7 @@ class Evaluator:
         utils.SaveJsonl(conversations, self.fn_conversations)
     
         ssample_str = tabulate.tabulate(
-            conversations[0]["simulated_conversation"],  headers=["round", "content"],
+            conversations[0]["simulated_conversation"],  headers=["turn", "content"],
             showindex=False, maxcolwidths=150, tablefmt="psql") # headers="keys", simple_outline/psql
         print(f"sample conversation from {conversations[0]['workflow_name']}:\n{ssample_str}")
 
@@ -265,7 +265,6 @@ class Evaluator:
         """ 
         FIXED: the eval format checked in `task_judge`
         """
-        df_conversation_for_excel = pd.read_csv(self.fn_conversations_for_excel)
         if version == "01":
             df_labelled_raw = pd.read_json(self.fn_llmscored, lines=True)
             _out_sheeet_name = f"{self.version}_eval"
@@ -285,14 +284,15 @@ class Evaluator:
             jr = row["judge_result"]
             converted.append((None, jr["overall"]["score"], id_))
             converted.append((None, None, None))
-            for round_id, round_eval in sorted(jr["detailed"].items(), key=lambda x: int(x[0].split("-")[-1])):
-                errors = round_eval["errors"]
+            for turn_id, turn_eval in sorted(jr["detailed"].items(), key=lambda x: int(x[0].split("-")[-1])):
+                errors = turn_eval["errors"]
                 error_types_str = ",".join(errors.keys() if errors else [])
-                converted.append((None, None, round_id))
-                converted.append((error_types_str, round_eval["score"], str(errors)))
+                converted.append((None, None, turn_id))
+                converted.append((error_types_str, turn_eval["score"], str(errors)))
         df_labelled_for_excel = pd.DataFrame(converted, columns=["error_types", "score", "misc"])
         # DONE: concate with formated conversations in `self.fn_conversations_for_labeling`
         
+        df_conversation_for_excel = pd.read_csv(self.fn_conversations_for_excel)
         assert len(df_conversation_for_excel) == len(df_labelled_for_excel), f"{len(df_conversation_for_excel)} != {len(df_labelled_for_excel)}"
         _df_out = pd.concat([df_conversation_for_excel, df_labelled_for_excel], axis=1)
         if self.cfg.to_gsheet:  # you can also save to csv
@@ -300,14 +300,24 @@ class Evaluator:
         
         # 2) analyze
         analyzer = Analyzer(df_labelled_raw, output_dir=self.output_dir)
-        _ = analyzer.stat_num_rounds()
-        _ = analyzer.stat_scores_overall(th=self.cfg.judge_passrate_threshold, ofn=_ofn_stat_score)
+        _num_workflows = len(df_labelled_raw["workflow_name"].unique())
+        stat_dict = {
+            "num_workflows": _num_workflows,
+            "support": len(df_labelled_raw) // _num_workflows
+        }
+        _ = analyzer.stat_num_turns(stat_dict=stat_dict)
+        _ = analyzer.stat_scores_overall(th=self.cfg.judge_passrate_threshold, ofn=_ofn_stat_score, stat_dict=stat_dict)
         _ = analyzer.stat_error_types(ofn=_ofn_stat_error)
-        grouped_passrate = analyzer.stat_grouped_passrate(th=self.cfg.judge_passrate_threshold)
-        # useful to copy and paste into Excel
-        grouped_passrate = grouped_passrate.round(3)
-        tabbed_str = "\t".join(grouped_passrate.columns) + "\n" + "\n".join(["\t".join(map(str, row)) for row in grouped_passrate.values])
-        print(tabbed_str)
+        df_grouped_passrate = analyzer.stat_grouped_passrate(th=self.cfg.judge_passrate_threshold).round(3)
+        df_stats = pd.DataFrame([stat_dict]).T.round(3) \
+            .reset_index().rename(columns={"index": "key", 0: "value"})
+        print(f"--- stats ---\n" + tabulate.tabulate(df_stats, tablefmt='psql'))
+        print(f"--- grouped passrate ---\n" + tabulate.tabulate(df_grouped_passrate, tablefmt='psql'))
+        
+        # useful to copy and paste into Excel??
+        # grouped_passrate = grouped_passrate.round(3)
+        # tabbed_str = "\t".join(grouped_passrate.columns) + "\n" + "\n".join(["\t".join(map(str, row)) for row in grouped_passrate.values])
+        # print(tabbed_str)
         
     def run_evaluations_v2(self):
         _ofn_detailed = self.fn_llmscored_2_raw

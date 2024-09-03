@@ -38,8 +38,8 @@ def parse_conv(conversation_s:str):
 def convert_conv(df:pd.DataFrame):
     conversations = []
     
-    df.columns = ["round", "content"]
-    mask = df["round"].str.startswith('0')
+    df.columns = ["turn", "content"]
+    mask = df["turn"].str.startswith('0')
     idx = list(df[mask].index)  + [len(df)]
     for s,e in itertools.pairwise(idx):
         id_, user_profile = df.iloc[s,0], df.iloc[s,1]
@@ -74,26 +74,26 @@ def task_simulate(cfg: Config, user_profile_json: Dict, workflow_name, ofn) -> N
     fp.flush()
     fp.close()
 
-def valid_judge_result(jr: Dict, num_rounds: int):
+def valid_judge_result(jr: Dict, num_turns: int):
     assert "overall" in jr and "detailed" in jr, f"Invalid judge result: {jr}"
     assert "score" in jr["overall"] and isinstance(jr["overall"]["score"], (int, float)), f"Invalid judge result: {jr}"
-    assert len(jr["detailed"]) == num_rounds, f">> {len(jr['detailed'])}!={num_rounds}\nInvalid judge result: {jr}"
-    for _, round_eval in jr["detailed"].items():
-        assert "score" in round_eval and isinstance(round_eval["score"], (int, float)), f"Invalid judge result: {jr}"
-        errors = round_eval["errors"]
+    assert len(jr["detailed"]) == num_turns, f">> judger generated {len(jr['detailed'])}!={num_turns}\nInvalid judge result: {jr}"
+    for _, turn_eval in jr["detailed"].items():
+        assert "score" in turn_eval and isinstance(turn_eval["score"], (int, float)), f"Invalid judge result: {jr}"
+        errors = turn_eval["errors"]
         if errors:
             assert isinstance(errors, dict), f"Invalid judge result: {jr}"
         
 
 def task_judge(conv, ofn, client: OpenAIClient) -> None:
     workflow_name = conv["workflow_name"]
-    num_rounds = len(conv["simulated_conversation"]) // 2
+    num_turns = len(conv["simulated_conversation"]) // 2
     pdl = PDL.load_from_file(_DIRECTORY_MANAGER.DIR_huabu / f"{workflow_name}.yaml")
-    s_conv = tabulate.tabulate(conv["simulated_conversation"], headers=["round", "content"], showindex=False, maxcolwidths=100, tablefmt='psql')
+    s_conv = tabulate.tabulate(conv["simulated_conversation"], headers=["turn", "content"], showindex=False, maxcolwidths=100, tablefmt='psql')
     
     prompt = jinja_render(
         "scorer_detailed.jinja",
-        conversation=s_conv,
+        conversation=s_conv, num_turns=num_turns,
         PDL=pdl.to_str(),
     )
     for retry_ in range(3):
@@ -103,7 +103,7 @@ def task_judge(conv, ofn, client: OpenAIClient) -> None:
             if "error" in jr:
                 continue
             # DONE @240828: check the format of res
-            valid_judge_result(jr, num_rounds)
+            valid_judge_result(jr, num_turns)
             out = {
                 "workflow_name": workflow_name,
                 "workflow_id": conv["workflow_id"],
@@ -127,7 +127,7 @@ def task_judge(conv, ofn, client: OpenAIClient) -> None:
 
 def task_judge_2(conv, ofn, client: OpenAIClient) -> None:
     workflow_name = conv["workflow_name"]
-    num_rounds = len(conv["simulated_conversation"]) // 2
+    num_turns = len(conv["simulated_conversation"]) // 2
     
     pdl = PDL.load_from_file(_DIRECTORY_MANAGER.DIR_huabu / f"{workflow_name}.yaml")
     s_pdl = str(
@@ -141,13 +141,13 @@ def task_judge_2(conv, ofn, client: OpenAIClient) -> None:
         if key in s:
             return key + s.split(key)[-1]
         return s
-    df_conv = pd.DataFrame(conv["simulated_conversation"], columns=["round", "content"])
+    df_conv = pd.DataFrame(conv["simulated_conversation"], columns=["turn", "content"])
     df_conv["content"] = df_conv["content"].apply(process_utterance)
-    s_conv = tabulate.tabulate(df_conv, headers=["round", "content"], showindex=False, maxcolwidths=100, tablefmt='psql')
+    s_conv = tabulate.tabulate(df_conv, headers=["turn", "content"], showindex=False, maxcolwidths=100, tablefmt='psql')
     
     prompt = jinja_render(
         "scorer_detailed_2.jinja",
-        conversation=s_conv,
+        conversation=s_conv, num_turns=num_turns,
         PDL=s_pdl,
     )
     for retry_ in range(3):
@@ -157,7 +157,7 @@ def task_judge_2(conv, ofn, client: OpenAIClient) -> None:
             if "error" in jr:
                 continue
             # DONE @240828: check the format of res
-            valid_judge_result(jr, num_rounds)
+            valid_judge_result(jr, num_turns)
             out = {
                 "workflow_name": workflow_name,
                 "workflow_id": conv["workflow_id"],

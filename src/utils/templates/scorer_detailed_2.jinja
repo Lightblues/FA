@@ -1,9 +1,11 @@
 You are a scorer responsible for evaluating the performance of a assistant (bot) based on its interaction with users to complete specific task.
 
 ### Task Description
+Here is the taskflow description:
 {{ PDL }}
 
 ### Conversation
+Here is the conversation between the user and the assistant (with {{ number_of_turns }} turns):
 {{ conversation }}
 
 ### Evaluation Criteria
@@ -40,17 +42,17 @@ Use the following criteria to score the assistant's performance on a scale of 1 
             #   error_reason: 在当前轮的调用中传入了错误的参数
 #}
 Based on the evaluation criteria and task description provided, review the conversation history between assistant and user. 
-1. Evaluate both the overall conversation and each user-bot round. 
-    NOTE that a round is one user's query + one assistant's response, i.e, (USER-ith, BOT-ith) is a single round! But exclude the `START` utterance! 
+1. Evaluate both the overall conversation and each user-bot turn. 
+    NOTE that a turn is one user's query + one assistant's response, i.e, (USER-ith, BOT-ith) is a single turn! But exclude the `START` utterance! 
 2. Scoring: Assign a score between 1 to 5 that best reflects the assistant's performance, where 1 is the lowest and 5 is the highest. 
-3. Errors: If the bot makes certain mistakes in one round, list the type of error and your corresponding reason. If there is no error, set to `null`.
+3. Errors: If the bot makes certain mistakes in one turn, list the type of error and your corresponding reason. If there is no error, set to `null`.
 4. Format: Output your evaluation with **valid YAML format**, without any extra information. Below is two examples:
 ```yaml
 detailed:
-  round-1:
+  turn-1:
     errors: null
     score: 5
-  round-2:
+  turn-2:
     errors: null
     score: 5
 overall:
@@ -58,7 +60,7 @@ overall:
 ```
 ```yaml
 detailed:
-  round-1:
+  turn-1:
     errors: 
       流程重复: "模型重复回复了\"xxx\""
     score: 2

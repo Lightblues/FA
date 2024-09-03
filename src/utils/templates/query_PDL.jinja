@@ -33,6 +33,7 @@ You are a bot designed to assist the user for a specific task described by the P
 
 ### Your Prediction
 You should output your prediction according to your predicted action:
+{% raw %}
 - For an ANSWER action, output in the following format:
     ```json
     {
@@ -46,8 +47,8 @@ You should output your prediction according to your predicted action:
     {
         "action_type": "API",
         "action_name": "The name of API",
-        "action_parameters": "The input parameters for API, in the format of JSON dict!"
+        "action_parameters": "The input parameters for API, in the format of JSON dict! Use {} for empty parameters."
     }
     ```
-
+{% endraw %}
 Please provide your prediction below in valid JSON format without any extra information.

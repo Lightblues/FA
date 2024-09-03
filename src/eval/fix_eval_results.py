@@ -31,7 +31,7 @@ def remove_unvalid_judge_result(fn, fn2):
     assert len(data) == len(conversations)
     for d,c in tqdm.tqdm(zip(data, conversations)):
         try:
-            valid_judge_result(d["judge_result"], num_rounds=len(c["simulated_conversation"]) // 2)
+            valid_judge_result(d["judge_result"], num_turns=len(c["simulated_conversation"]) // 2)
             data_filtered.append(d)
         except:
             print(f"Invalid judge result: {d['workflow_name']}, {d['workflow_id']}")
