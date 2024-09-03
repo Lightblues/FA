@@ -18,7 +18,7 @@ from engine.datamodel import (
     Config, 
 )
 
-class SimulatorV2(ConversationController):
+class Simulator(ConversationController):
     cfg: Config = None
     client: OpenAIClient = None
     api: BaseAPIHandler = None

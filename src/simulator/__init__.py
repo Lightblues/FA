@@ -1,1 +1,1 @@
-from .simulator_with_profile import SimulatorV2
+from .simulator_with_profile import Simulator

@@ -4,7 +4,7 @@ USAGE:
 """
 
 import os, argparse, json
-from simulator.simulator_with_profile import SimulatorV2
+from simulator.simulator_with_profile import Simulator
 from engine import Conversation, _DIRECTORY_MANAGER, DataManager, LLM_CFG, init_client, UserProfile, Config, PDL
 
 def get_args():
@@ -28,5 +28,5 @@ if __name__ == '__main__':
     with open(fn, "r") as f:
         user_profile_jsons = json.load(f)
     profile = UserProfile.load_from_dict(user_profile_jsons[args.profile_id])
-    simulator = SimulatorV2(cfg)
+    simulator = Simulator(cfg)
     _ = simulator.start_simulation(profile=profile)

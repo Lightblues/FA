@@ -85,7 +85,6 @@ class ConversationController:
         conversation_infos = ConversationInfos.from_components(             # useful information for bot
             curr_role=Role.BOT, curr_action_type=ActionType.START, num_user_query=0, user_additional_constraints=None
         )
-        # curr_role, curr_action_type = Role.USER, ActionType.START
         action_metas = None
         
         # 1] the main loop: until get answer! (finish the PDL task)

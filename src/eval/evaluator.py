@@ -205,8 +205,8 @@ class Evaluator:
 
             df = pd.DataFrame(parsed_data, columns=["turn", "content"])
             df.to_csv(self.fn_conversations_for_excel, index=False)
-            if self.cfg.to_gsheet:
-                self.gsheet.to_gsheet(df, sheet_name=f"{self.version}_sim")
+            # if self.cfg.to_gsheet: # 将这部分的数据和下面eval的结果放到一起再上传
+            #     self.gsheet.to_gsheet(df, sheet_name=f"{self.version}_sim")
             return df
         def check_exist():  # ugly code for acceleration
             if not os.path.exists(self.fn_conversations_for_excel): return False

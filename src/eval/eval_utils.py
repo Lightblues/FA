@@ -5,7 +5,7 @@ import concurrent.futures
 from easonsi import utils
 from easonsi.llm.openai_client import OpenAIClient, Formater
 from engine import _DIRECTORY_MANAGER, LLM_CFG, init_client, PDL, Config, UserProfile
-from simulator import SimulatorV2
+from simulator import Simulator
 from utils.jinja_templates import jinja_render
 
 # 转为便于表格展示的两个形式的数据
@@ -62,7 +62,7 @@ def task_simulate(cfg: Config, user_profile_json: Dict, workflow_name, ofn) -> N
     fp = open(ofn, "a+", encoding="utf-8")
     user_profile = UserProfile.load_from_dict(user_profile_json)
     
-    simulator = SimulatorV2(cfg)
+    simulator = Simulator(cfg)
     infos, conversation = simulator.start_simulation(user_profile)
     simulated_res = {
         "workflow_name": workflow_name,
