@@ -19,7 +19,8 @@ class ActionType(Enum):
     API = ("API", "bot call API")
     REQUEST = ("REQUEST", "bot request for information")
     ANSWER = ("ANSWER", "bot give answer to user")
-    ASKSLOT = ("ASKSLOT", "bot ask for slot value")
+    ASKSLOT = ("ASKSLOT", "bot ask for slot value")     # remove? 
+    INSTRUCT = ("INSTRUCT", "bot instruct user")
 
     def __init__(self, actionname, description):
         self.actionname = actionname

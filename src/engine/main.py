@@ -43,13 +43,15 @@ class ConversationController:
         if curr_role in [Role.USER, Role.SYSTEM]:
             return Role.BOT
         elif curr_role == Role.BOT:
-            if action_type in [ActionType.REQUEST, ActionType.ANSWER, ActionType.ASKSLOT]:
-                return Role.USER
-            elif action_type == ActionType.API:
+            # if action_type in [ActionType.REQUEST, ActionType.ANSWER, ActionType.ASKSLOT]:
+            #     return Role.USER
+            if action_type == ActionType.API:
                 return Role.SYSTEM
             else:
-                # FIXME: 这里为啥会出现 ActionType.API_RESPONSE? 
-                raise ValueError(f"Unknown action_type: {action_type}")
+                return Role.USER
+            # else:
+            #     # FIXME: 这里为啥会出现 ActionType.API_RESPONSE? 
+            #     raise ValueError(f"Unknown action_type: {action_type}")
         else:
             raise ValueError(f"Unknown role: {curr_role}")
         
