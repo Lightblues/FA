@@ -1,27 +1,40 @@
 """ updated @240904
 - basic implementations
-    - [ ] BaselineController logic
-    - [ ] data: Workflow abstraction
+    - [x] BaselineController logic @240905
+    - [ ] logging and metrics
+    - [ ] data: Workflow abstraction | align with FlowBench 
     - [ ] user: add user profiling? aware of workflow?
     - [ ] bot implementation
     - [ ] api: mimic by LLM? 
 - data
     - [ ] convert from v240820
-    - [ ] dataset orginization (Datamanager)
+    - [x] dataset orginization (Datamanager)
 
 ------------------------------ abstraction ------------------------------
 Conversation:
     .add_message(msg)
     .to_str()
-    .last_message()
+    .get_last_message()
+
+BaseRole:
+    name; cfg; llm; conv; workflow; 
+    .process() -> UserOutput, BotOutput, APIOutput
+BotOutput: 
+    action_type; action; action_input; thought;
+    
+Workflow:
+    name; 
 """
 import time, datetime, os, sys, tabulate
 import pandas as pd
 from .common import (
-    Config, Workflow,
-    BotOutput, UserOutput, BotOutputType, APIOutput
+    Config, BotOutput, UserOutput, BotOutputType, APIOutput, Timer
 )
-from .roles import BaseRole, BaseBot, BaseUser, BaseAPIHandler, USER_NAME2CLASS, BOT_NAME2CLASS, API_NAME2CLASS
+from .roles import (
+    BaseRole, BaseBot, BaseUser, BaseAPIHandler, InputUser,
+    USER_NAME2CLASS, BOT_NAME2CLASS, API_NAME2CLASS
+)
+from .data import Workflow
 from engine import (
     Role, Message, Conversation, ActionType, ConversationInfos, Logger, BaseLogger
 )
@@ -33,6 +46,7 @@ class BaselineController:
     api: BaseAPIHandler = None
     logger: Logger = None
     conv: Conversation = None       # global variable for conversation
+    workflow: Workflow = None
     
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
@@ -42,7 +56,7 @@ class BaselineController:
         self.bot = BOT_NAME2CLASS[cfg.bot_mode](cfg=cfg, conv=self.conv)
         self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=self.conv)
     
-    def conversation(self, workflow: Workflow=None):
+    def conversation(self):
         """ 
         1. initiation: initialize the variables, logger, etc.
         2. main loop
@@ -57,30 +71,36 @@ class BaselineController:
         # cnt_utterance:int = 0       # cnt of u/b/s utterance (conversation length)
         while True:
             if role == Role.USER:
-                user_output: UserOutput = self.user.process()
+                with Timer("user process"):
+                    user_output: UserOutput = self.user.process()
                 # ...infos, log
                 self.log_msg(self.conv.get_last_message())
                 role = Role.BOT
             elif role == Role.BOT:
                 num_bot_actions = 0
                 while True:         # limit the bot prediction steps
-                    bot_output: BotOutput = self.bot.process()
+                    with Timer("bot process"):
+                        bot_output: BotOutput = self.bot.process()
                     self.log_msg(self.conv.get_last_message())
                     if bot_output.action_type == BotOutputType.RESPONSE:
                         break
                     elif bot_output.action_type == BotOutputType.ACTION:
                         # ... call the API, append results to conversation
-                        api_output: APIOutput = self.api.process(bot_output.action, bot_output.action_input)
+                        with Timer("api process"):
+                            api_output: APIOutput = self.api.process(bot_output.action, bot_output.action_input)
                         self.log_msg(self.conv.get_last_message())
                     else: raise TypeError(f"Unexpected BotOutputType: {bot_output.action_type}")
                     
                     num_bot_actions += 1
                     if num_bot_actions > self.cfg.bot_action_limit: 
                         # ... the default response
+                        print(f"  <main> bot retried actions reach limit!")
                         break
                 role = Role.USER
             num_turns += 1
-            if num_turns > self.cfg.conversation_turn_limit: break
+            if num_turns > self.cfg.conversation_turn_limit: 
+                print("  <main> end due to conversation turn limit!")
+                break
         
         return self.conversation
 
@@ -89,7 +109,7 @@ class BaselineController:
         role = msg.role
         self.logger.log(content, with_print=False)
         if not (
-            (self.cfg.user_mode == "manual") and (role == Role.USER)
+            isinstance(self.user, InputUser) and (role == Role.USER)
         ): 
             self.logger.log_to_stdout(content, color=role.color)
             

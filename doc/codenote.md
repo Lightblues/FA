@@ -39,6 +39,7 @@ class BaseBot:
 
 ## baselines (FlowBench)
 
+### 框架: controller
 1. 原本的engine逻辑还算清晰 (虽然是不够完善的) 后面越来越冗杂; 这里抽象出最核心的会话逻辑
 2. Bot 输出: 正如 FlowBench 里面参考 ReAct 格式定义了两类输出, 只处理 BotOutputType.RESPONSE/ACTION 两种类别! 
 3. 终止逻辑: 只允许用户终止, bot负责响应即可. 
@@ -98,7 +99,7 @@ class BaselineController:
         return self.conversation
 ```
 
-交互逻辑
+### 交互逻辑
 
 1. 命令行显示头尾信息; 
 2. 中间是 u/b/s 的消息, 通过不同的颜色来区分; 
@@ -117,6 +118,13 @@ class BaselineController:
 [BOT] bot response...
 ====================== END! ======================
 ```
+
+### 角色逻辑
+
+User
+
+1. InputUser
+2. 
 
 
 

@@ -3,16 +3,20 @@ from typing import List, Dict, Optional, Tuple, Union
 from easonsi.llm.openai_client import OpenAIClient
 from engine import Conversation, Message, Role
 from ..common import Config, UserOutput, BotOutput, APIOutput, BotOutputType
+from ..data import Tool, Workflow
+
 
 class BaseRole:
     names: List[str] = ["base_role"]           # for convert name2role
     cfg: Config = None              # unified config
     llm: OpenAIClient = None        # for simulation
     conv: Conversation = None       # global variable for conversation
+    workflow:Workflow = None
     
-    def __init__(self, cfg:Config, conv:Conversation, *args, **kwargs) -> None:
+    def __init__(self, cfg:Config, conv:Conversation=None, workflow:Workflow=None, *args, **kwargs) -> None:
         self.cfg = cfg
         self.conv = conv
+        self.workflow = workflow
 
     @abstractmethod
     def process(self, *args, **kwargs) -> Union[UserOutput, BotOutput, APIOutput]:

@@ -1,7 +1,5 @@
 """
-@240820 profile信息
 """
-import json
 from typing import List
 
 class UserProfile:

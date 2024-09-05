@@ -1,7 +1,7 @@
 from typing import Dict
 from .base import BaseRole, BaseAPIHandler, BaseBot, BaseUser
 from .api import DummyAPIHandler
-from .user import DummyUser
+from .user import DummyUser, InputUser
 from .bot import DummyBot
 
 
