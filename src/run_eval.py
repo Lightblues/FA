@@ -8,13 +8,13 @@ USAGE:
 
 import os, argparse, json
 from eval.evaluator import Evaluator
-from engine import Conversation, _DIRECTORY_MANAGER, DataManager, LLM_CFG, init_client, UserProfile, Config, PDL, BOT_ANME2CLASS
+from engine import Conversation, _DIRECTORY_MANAGER, DataManager, LLM_CFG, init_client, UserProfile, Config, PDL, BOT_NAME2CLASS
 
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default="simulate.yaml")
     parser.add_argument("--version", type=str, default=None)
-    parser.add_argument("--bot_mode", type=str, default=None, choices=list(BOT_ANME2CLASS.keys()))
+    parser.add_argument("--bot_mode", type=str, default=None, choices=list(BOT_NAME2CLASS.keys()))
     parser.add_argument("--simulate_model_name", type=str, default=None, choices=list(LLM_CFG.keys())) # "qwen2_72B"
     parser.add_argument("--judge_model_name", type=str, default=None, choices=list(LLM_CFG.keys())) # gpt-4o
     parser.add_argument("--judge_passrate_threshold", type=float, default=3)

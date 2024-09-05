@@ -9,7 +9,7 @@ from typing import Tuple, Dict
 from .datamodel import (
     Role, Message, Conversation, ActionType, ConversationInfos, Config
 )
-from .role_bot import BOT_ANME2CLASS, BaseBot
+from .role_bot import BOT_NAME2CLASS, BaseBot
 from .role_user import USER_NAME2CLASS, BaseUser
 from .role_api import API_NAME2CLASS, BaseAPIHandler
 from .pdl import PDL
@@ -28,7 +28,7 @@ class ConversationController:
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
         self.user = USER_NAME2CLASS[cfg.user_mode](cfg=cfg)
-        self.bot = BOT_ANME2CLASS[cfg.bot_mode](cfg=cfg)
+        self.bot = BOT_NAME2CLASS[cfg.bot_mode](cfg=cfg)
         self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg)
         self.logger = Logger()
     

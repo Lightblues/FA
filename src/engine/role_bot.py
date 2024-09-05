@@ -164,7 +164,7 @@ class LKEBot(BaseBot):
         return action_type, action_metas, msg
 
 
-BOT_ANME2CLASS: Dict[str, BaseBot] = {}
+BOT_NAME2CLASS: Dict[str, BaseBot] = {}
 for cls in BaseBot.__subclasses__():
     for name in cls.names:
-        BOT_ANME2CLASS[name] = cls
+        BOT_NAME2CLASS[name] = cls

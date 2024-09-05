@@ -1,0 +1,8 @@
+conversation_turn_limit: 10
+
+user_mode: "dummy_user"
+
+bot_mode: "dummy_bot"
+bot_action_limit: 5
+
+api_mode: "dummy_api"

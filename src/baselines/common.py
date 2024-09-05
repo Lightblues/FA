@@ -1,14 +1,29 @@
 import datetime, os, re, yaml, copy, pathlib
 from enum import Enum, auto
 from dataclasses import dataclass, asdict, field
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Union
 
 
 @dataclass
 class Config:
     conversation_turn_limit: int = 20
+    
+    user_mode: str = "base_user"
+    
+    bot_mode: str = "base_bot"
     bot_action_limit: int = 5
+    
+    api_mode: str = "base_api"
 
+    def to_dict(self):
+        return asdict(self)
+
+    @classmethod
+    def from_yaml(cls, yaml_file: str, normalize: bool = True):
+        with open(yaml_file, 'r') as file:
+            data = yaml.safe_load(file)
+        obj = cls(**data)
+        return obj
 
 @dataclass
 class Workflow:
@@ -44,4 +59,4 @@ class BotOutput:
 
 @dataclass
 class APIOutput:
-    pass
+    is_success: bool = None

@@ -70,6 +70,9 @@ class Conversation():
             
     def get_message_by_idx(self, idx: int) -> Message:
         return self.msgs[idx]
+    
+    def get_last_message(self) -> Message:
+        return self.msgs[-1]
 
     @classmethod
     def load_from_json(cls, o:List):
@@ -169,7 +172,6 @@ class Config:
     
     @classmethod
     def from_yaml(cls, yaml_file: str, normalize: bool = True):
-        # DONE: read config file
         with open(yaml_file, 'r') as file:
             data = yaml.safe_load(file)
         obj = cls(**data)
