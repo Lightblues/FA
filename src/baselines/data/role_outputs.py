@@ -21,7 +21,7 @@ class UserOutput:
 class BotOutput:
     thought: str = None
     action: str = None
-    action_input: str = None
+    action_input: Union[str, Dict] = None
     response: str = None
     
     thought_str = "Thought"
@@ -39,4 +39,10 @@ class BotOutput:
 
 @dataclass
 class APIOutput:
-    is_success: bool = None
+    name: str = None
+    request: Union[str, Dict] = None
+    response_status_code: bool = None
+    response_data: Union[str, Dict] = None
+    
+    response_status_str = "status_code"
+    response_data_str = "data"

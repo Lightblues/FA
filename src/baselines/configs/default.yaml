@@ -10,4 +10,7 @@ bot_template_fn: "baselines/flowbench.jinja"
 bot_llm_name: "gpt-4o"
 bot_action_limit: 5
 
-api_mode: "dummy_api"
+api_mode: "llm"
+api_template_fn: "baselines/api_llm.jinja"
+api_llm_name: "gpt-4o"
+

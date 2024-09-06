@@ -89,7 +89,7 @@ class BaselineController:
                     elif bot_output.action_type == BotOutputType.ACTION:
                         # ... call the API, append results to conversation
                         with Timer("api process"):
-                            api_output: APIOutput = self.api.process(bot_output.action, bot_output.action_input)
+                            api_output: APIOutput = self.api.process(bot_output)
                         self.log_msg(self.conv.get_last_message())
                     else: raise TypeError(f"Unexpected BotOutputType: {bot_output.action_type}")
                     

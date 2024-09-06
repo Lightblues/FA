@@ -1,3 +1,4 @@
+import collections
 from abc import abstractmethod
 from typing import List, Dict, Optional, Tuple, Union
 from easonsi.llm.openai_client import OpenAIClient
@@ -11,7 +12,7 @@ class BaseRole:
     cfg: Config = None              # unified config
     llm: OpenAIClient = None        # for simulation
     conv: Conversation = None       # global variable for conversation
-    workflow:Workflow = None
+    workflow: Workflow = None
     
     def __init__(self, cfg:Config, conv:Conversation=None, workflow:Workflow=None, *args, **kwargs) -> None:
         self.cfg = cfg
@@ -31,11 +32,14 @@ class BaseAPIHandler(BaseRole):
     """ 
     API structure: (see apis_v0/apis.json)
     """
-    names: List[str] = ["base_api"]
+    names: List[str] = None
+    api_infos: Dict[str, Dict] = None
+    cnt_api_callings: Dict[str, int] = None
     
     def __init__(self, **args) -> None:
         super().__init__(**args)
-        self.cnt_api_callings: int = 0
+        self.api_infos = self.workflow.toolbox
+        self.cnt_api_callings = collections.defaultdict(int)
         
     def process(self, *args, **kwargs) -> APIOutput:
         """ 
@@ -54,7 +58,8 @@ class BaseAPIHandler(BaseRole):
 
 
 class BaseBot(BaseRole):
-    names: List[str] = ["base_bot"]
+    names: List[str] = None
+    cnt_bot_actions: int = 0
     
     def __init__(self, **args) -> None:
         super().__init__(**args)
@@ -69,7 +74,7 @@ class BaseBot(BaseRole):
 
 
 class BaseUser(BaseRole):
-    names: List[str] = ["base_user"]
+    names: List[str] = None
     
     def __init__(self, **args) -> None:
         super().__init__(**args)

@@ -14,7 +14,9 @@ class Config:
     bot_llm_name: str = "gpt-4o"
     bot_action_limit: int = 5
     
-    api_mode: str = "base_api"
+    api_mode: str = "llm"
+    api_template_fn: str = "baselines/api_llm.jinja"
+    api_llm_name: str = "gpt-4o"
     
     workflow_id: str = "000"
     workflow_type: str = "text"
