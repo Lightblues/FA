@@ -2,7 +2,7 @@
 usage:
     python run_baseline.py --config=default.yaml \
         --workflow-type=text --workflow-id=000 \
-        --user-mode=llm_profile --user-llm-name=gpt-4o \
+        --user-mode=llm_profile --user-llm-name=gpt-4o --user-profile-id=0 \
         --bot-mode=react_bot --bot-llm-name=gpt-4o \
         --api-mode=llm --api-llm-name=gpt-4o \
         --user-template-fn=baselines/user_llm.jinja --bot-template-fn=baselines/flowbench.jinja \
@@ -23,6 +23,7 @@ def run_baseline(
     user_mode: UserMode = typer.Option(None, help="User mode", case_sensitive=False), # type: ignore
     user_llm_name: str = typer.Option(None, help="User LLM name"),
     user_template_fn: str = typer.Option(None, help="User template filename"),
+    user_profile_id: int = typer.Option(None, help="User profile ID"),
     bot_mode: BotMode = typer.Option(None, help="Bot mode", case_sensitive=False), # type: ignore
     bot_template_fn: str = typer.Option(None, help="Bot template filename"),
     bot_llm_name: str = typer.Option(None, help="Bot LLM name"),
@@ -38,6 +39,7 @@ def run_baseline(
     if user_mode is not None: cfg.user_mode = user_mode.value
     if user_llm_name is not None: cfg.user_llm_name = user_llm_name
     if user_template_fn is not None: cfg.user_template_fn = user_template_fn
+    if user_profile_id is not None: cfg.user_profile_id = user_profile_id
     if bot_mode is not None: cfg.bot_mode = bot_mode.value
     if bot_template_fn is not None: cfg.bot_template_fn = bot_template_fn
     if bot_llm_name is not None: cfg.bot_llm_name = bot_llm_name

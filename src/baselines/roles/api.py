@@ -58,7 +58,10 @@ class LLMSimulatedAPIHandler(BaseAPIHandler):
             msg_content = f"<API response> {prediction.response_data}"
         else:
             msg_content = f"<API response> {prediction.response_status_code} {prediction.response_data}"
-        msg = Message(Role.SYSTEM, msg_content, prompt=prompt, llm_response=llm_response)
+        msg = Message(
+            Role.SYSTEM, msg_content, prompt=prompt, llm_response=llm_response, 
+            conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
+        )
         self.conv.add_message(msg)
         self.cnt_api_callings[prediction.name] += 1 # stat
         return prediction

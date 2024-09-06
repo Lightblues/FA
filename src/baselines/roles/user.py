@@ -60,7 +60,10 @@ class LLMSimulatedUserWithProfile(BaseUser):
         llm_response = self.llm.query_one(prompt)
         # ...parse the response! -> UserOutput, conv
         prediction = self.parse_user_output(llm_response)
-        msg = Message(Role.USER, prediction.response_content, prompt=prompt, llm_response=llm_response)
+        msg = Message(
+            Role.USER, prediction.response_content, prompt=prompt, llm_response=llm_response,
+            conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
+        )
         self.conv.add_message(msg)
         self.cnt_user_queries += 1  # stat
         return prediction

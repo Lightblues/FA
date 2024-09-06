@@ -96,7 +96,7 @@ class Workflow:  # rename -> Data
     @classmethod
     def load_by_id(cls, id:str, type:str, **kwargs):
         workflow_infos: dict = json.load(open(DataManager.FN_data_flowbench_infos, 'r'))
-        assert id in workflow_infos, f"[ERROR] {id} not found in {DataManager.FN_data_flowbench_infos.keys()}"
+        assert id in workflow_infos, f"[ERROR] {id} not found in {workflow_infos.keys()}"
         infos = workflow_infos[id]
         assert all([k in infos for k in ['name', 'task_background']]), f"[ERROR] missing key in {infos}"
         return cls(type, id, **infos, **kwargs)

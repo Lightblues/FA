@@ -1,7 +1,7 @@
 """ 
 @240712
 """
-import datetime, os, re, yaml, copy, pathlib
+import datetime, os, re, yaml, copy, pathlib, time
 from enum import Enum, auto
 from dataclasses import dataclass, asdict, field
 from typing import List, Dict, Optional, Tuple
@@ -49,12 +49,16 @@ class Message:
     content: str = None
     prompt: str = None
     llm_response: str = None
+    conversation_id: str = None
+    utterance_id: int = None
 
-    def __init__(self, role: Role, content: str, prompt: str=None, llm_response: str=None):
+    def __init__(self, role: Role, content: str, prompt: str=None, llm_response: str=None, conversation_id: str=None, utterance_id: int=None):
         self.role = role
         self.content = content
-        self.prompt = prompt
-        self.llm_response = llm_response
+        if prompt: self.prompt = prompt
+        if llm_response: self.llm_response = llm_response
+        if conversation_id: self.conversation_id = conversation_id
+        if utterance_id: self.utterance_id = utterance_id
     
     def to_str(self):
         return f"{self.role.prefix}{self.content}"
@@ -69,9 +73,13 @@ class Message:
 
 class Conversation():
     msgs: List[Message] = []
+    conversation_id: str = None
     
-    def __init__(self):
+    def __init__(self, conversation_id: str = None):
         self.msgs = []
+        if not conversation_id:
+            conversation_id = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        self.conversation_id = conversation_id
 
     def add_message(self, msg: Message):
         # assert isinstance(msg, Message), f"Must be Message! But got {type(msg)}"
@@ -79,6 +87,12 @@ class Conversation():
             
     def get_message_by_idx(self, idx: int) -> Message:
         return self.msgs[idx]
+    
+    def get_messages_num(self) -> int:
+        return len(self.msgs)
+    @property
+    def current_utterance_id(self) -> int:
+        return len(self.msgs)
     
     def get_last_message(self) -> Message:
         return self.msgs[-1]
