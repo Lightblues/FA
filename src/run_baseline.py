@@ -1,44 +1,54 @@
 """ updated 240906
 usage:
     python run_baseline.py --config=default.yaml \
-        --workflow_type=text --workflow_id=000 \
-        --user_template_fn=baselines/user_llm.jinja --bot_template_fn=baselines/flowbench.jinja \
-        --conversation_turn_limit=20 --log_utterence_time=True
+        --workflow-type=text --workflow-id=000 \
+        --user-mode=llm_profile --user-llm-name=gpt-4o \
+        --bot-mode=react_bot --bot-llm-name=gpt-4o \
+        --api-mode=llm --api-llm-name=gpt-4o \
+        --user-template-fn=baselines/user_llm.jinja --bot-template-fn=baselines/flowbench.jinja \
+        --conversation-turn-limit=20 --log-utterence-time
 """
-
-import os, argparse
+import typer
 from baselines import Config, BaselineController, DataManager
+from baselines.data import WorkflowType, WorkflowTypeStr
+from baselines.roles import UserMode, BotMode, ApiMode
 
-def get_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, default="default.yaml")
-    # -- overwrite config --
-    parser.add_argument("--workflow_type", type=str, default=None)
-    parser.add_argument("--workflow_id", type=str, default=None)
-    parser.add_argument("--user_mode", type=str, default=None)
-    parser.add_argument("--user_template_fn", type=str, default=None)
-    parser.add_argument("--bot_template_fn", type=str, default=None)
-    # parser.add_argument("--model_name", type=str, default=None, choices=list(LLM_CFG.keys()))
-    # parser.add_argument("--api_mode", type=str, default=None, choices=["manual", "llm", "v01"])
-    parser.add_argument("--conversation_turn_limit", type=int, default=None)
-    parser.add_argument("--log_utterence_time", type=bool, default=None)
-    
-    args = parser.parse_args()
-    return args
+app = typer.Typer()
 
-if __name__ == '__main__':
-    args = get_args()
-
+@app.command()
+def run_baseline(
+    config: str = typer.Option("default.yaml", help="Configuration file"),
+    workflow_type: WorkflowTypeStr = typer.Option(None, help="Workflow type", case_sensitive=False),
+    workflow_id: str = typer.Option(None, help="Workflow ID"),
+    user_mode: UserMode = typer.Option(None, help="User mode", case_sensitive=False), # type: ignore
+    user_llm_name: str = typer.Option(None, help="User LLM name"),
+    user_template_fn: str = typer.Option(None, help="User template filename"),
+    bot_mode: BotMode = typer.Option(None, help="Bot mode", case_sensitive=False), # type: ignore
+    bot_template_fn: str = typer.Option(None, help="Bot template filename"),
+    bot_llm_name: str = typer.Option(None, help="Bot LLM name"),
+    api_mode: ApiMode = typer.Option(None, help="API mode", case_sensitive=False), # type: ignore
+    api_llm_name: str = typer.Option(None, help="API LLM name"),
+    conversation_turn_limit: int = typer.Option(None, help="Conversation turn limit"),
+    log_utterence_time: bool = typer.Option(None, help="Log utterance time")
+):
     data_manager = DataManager()
-    cfg = Config.from_yaml(data_manager.normalize_config_name(args.config))
-    if args.workflow_type is not None: cfg.workflow_type = args.workflow_type
-    if args.workflow_id is not None: cfg.workflow_id = args.workflow_id
-    if args.user_mode is not None: cfg.user_mode = args.user_mode
-    if args.user_template_fn is not None: cfg.user_template_fn = args.user_template_fn
-    if args.bot_template_fn is not None: cfg.bot_template_fn = args.bot_template_fn
-    if args.conversation_turn_limit is not None: cfg.conversation_turn_limit = args.conversation_turn_limit
-    if args.log_utterence_time is not None: cfg.log_utterence_time = args.log_utterence_time
+    cfg = Config.from_yaml(data_manager.normalize_config_name(config))
+    if workflow_type is not None: cfg.workflow_type = workflow_type.value
+    if workflow_id is not None: cfg.workflow_id = workflow_id
+    if user_mode is not None: cfg.user_mode = user_mode.value
+    if user_llm_name is not None: cfg.user_llm_name = user_llm_name
+    if user_template_fn is not None: cfg.user_template_fn = user_template_fn
+    if bot_mode is not None: cfg.bot_mode = bot_mode.value
+    if bot_template_fn is not None: cfg.bot_template_fn = bot_template_fn
+    if bot_llm_name is not None: cfg.bot_llm_name = bot_llm_name
+    if api_mode is not None: cfg.api_mode = api_mode.value
+    if api_llm_name is not None: cfg.api_llm_name = api_llm_name
+    if conversation_turn_limit is not None: cfg.conversation_turn_limit = conversation_turn_limit
+    if log_utterence_time is not None: cfg.log_utterence_time = log_utterence_time
     # print(f">> config: {cfg}")
-    
+
     controller = BaselineController(cfg)
     controller.start_conversation()
+
+if __name__ == "__main__":
+    app()

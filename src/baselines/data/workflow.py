@@ -45,6 +45,20 @@ class WorkflowType(Enum):
         self.description: str = description
         self.suffix: str = suffix
         self.subdir: str = subdir
+    
+    @property
+    def types(self):
+        types_upper = list(map(lambda x: x.value[0], WorkflowType))
+        types_lower = list(map(lambda x: x.value[0].lower(), WorkflowType))
+        return types_upper + types_lower
+
+    def __str__(self):
+        return self.workflow_type
+
+class WorkflowTypeStr(str, Enum):
+    TEXT = "TEXT"
+    CODE = "CODE"
+    FLOWCHART = "FLOWCHART"
 
 @dataclass
 class Tool:
