@@ -2,12 +2,12 @@ from abc import abstractmethod
 from typing import List, Dict, Optional, Tuple, Union
 from easonsi.llm.openai_client import OpenAIClient
 from engine import Conversation, Message, Role
-from ..common import Config, UserOutput, BotOutput, APIOutput, BotOutputType
+from ..data import Config, UserOutput, BotOutput, APIOutput, BotOutputType
 from ..data import Tool, Workflow
 
 
 class BaseRole:
-    names: List[str] = ["base_role"]           # for convert name2role
+    names: List[str] = None         # for convert name2role
     cfg: Config = None              # unified config
     llm: OpenAIClient = None        # for simulation
     conv: Conversation = None       # global variable for conversation
@@ -58,6 +58,7 @@ class BaseBot(BaseRole):
     
     def __init__(self, **args) -> None:
         super().__init__(**args)
+        self.cnt_bot_actions: int = 0
         
     def process(self, *args, **kwargs) -> BotOutput:
         """ 

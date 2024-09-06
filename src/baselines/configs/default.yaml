@@ -1,8 +1,13 @@
 conversation_turn_limit: 10
 
-user_mode: "input_user"
+workflow_id: "000"
+workflow_type: "text"
 
-bot_mode: "dummy_bot"
+user_mode: "input_user"   # dummy_user
+
+bot_mode: "react_bot"     # dummy_bot
+bot_template_fn: "baselines/flowbench.jinja"
+bot_llm_name: "gpt-4o"
 bot_action_limit: 5
 
 api_mode: "dummy_api"

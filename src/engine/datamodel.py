@@ -43,13 +43,18 @@ class Role(Enum):
     def __str__(self):
         return f"Role(id={self.id}, prefix={self.prefix}, name={self.rolename})"
 
+@dataclass
 class Message:
     role: Role = None
     content: str = None
+    prompt: str = None
+    llm_response: str = None
 
-    def __init__(self, role: Role, content: str):
+    def __init__(self, role: Role, content: str, prompt: str=None, llm_response: str=None):
         self.role = role
         self.content = content
+        self.prompt = prompt
+        self.llm_response = llm_response
     
     def to_str(self):
         return f"{self.role.prefix}{self.content}"

@@ -6,7 +6,7 @@ LLMSimulatedUserWithProfile
 from typing import List
 from .base import BaseUser
 from .user_profile import UserProfile
-from ..common import UserOutput
+from ..data import UserOutput
 from engine import Role, Message, prompt_user_input
 from utils.jinja_templates import jinja_render
 

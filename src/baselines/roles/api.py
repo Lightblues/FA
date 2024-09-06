@@ -1,7 +1,7 @@
 from typing import List
 from engine import Role, Message
 from .base import BaseAPIHandler
-from ..common import APIOutput
+from ..data import APIOutput
 
 
 class DummyAPIHandler(BaseAPIHandler):

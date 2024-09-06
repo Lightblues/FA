@@ -1,6 +1,6 @@
 ref/
 ref_run/
-data
+/data/
 tmp/
 .env
 *.ipynb

@@ -1,7 +1,7 @@
 """ updated @240904
 - basic implementations
     - [x] BaselineController logic @240905
-    - [ ] logging and metrics
+    - [ ] logging and metrics -> append prompts to Message
     - [ ] data: Workflow abstraction | align with FlowBench 
     - [ ] user: add user profiling? aware of workflow?
     - [ ] bot implementation
@@ -27,8 +27,8 @@ Workflow:
 """
 import time, datetime, os, sys, tabulate
 import pandas as pd
-from .common import (
-    Config, BotOutput, UserOutput, BotOutputType, APIOutput, Timer
+from .data import (
+    Config, BotOutput, UserOutput, BotOutputType, APIOutput
 )
 from .roles import (
     BaseRole, BaseBot, BaseUser, BaseAPIHandler, InputUser,
@@ -38,6 +38,7 @@ from .data import Workflow
 from engine import (
     Role, Message, Conversation, ActionType, ConversationInfos, Logger, BaseLogger
 )
+from utils.wrappers import Timer
 
 class BaselineController:
     cfg: Config = None
@@ -50,11 +51,12 @@ class BaselineController:
     
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
+        self.workflow = Workflow.load_by_id(id=cfg.workflow_id, type=cfg.workflow_type)
         self.conv = Conversation()
         self.logger = BaseLogger()
-        self.user = USER_NAME2CLASS[cfg.user_mode](cfg=cfg, conv=self.conv)
-        self.bot = BOT_NAME2CLASS[cfg.bot_mode](cfg=cfg, conv=self.conv)
-        self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=self.conv)
+        self.user = USER_NAME2CLASS[cfg.user_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
+        self.bot = BOT_NAME2CLASS[cfg.bot_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
+        self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
     
     def conversation(self):
         """ 
@@ -126,10 +128,10 @@ class BaselineController:
         }
         # s_infos = "\n".join([f"{k}: {v}" for k, v in infos.items()]) + "\n"
         # infos_header = f"{'='*50}\n" + s_infos + " START! ".center(50, "=")
-        infos_header = tabulate.tabulate(pd.DataFrame([infos]).T, tablefmt='psql')
+        infos_header = tabulate.tabulate(pd.DataFrame([infos]).T, tablefmt='psql', maxcolwidths=100)
         self.logger.log(infos_header, with_print=True)
 
-        conversation = self.conversation()
+        conversation = self.conversation()      # main loop!
 
         infos_end = f" END! ".center(50, "=")
         self.logger.log(infos_end, with_print=True)
