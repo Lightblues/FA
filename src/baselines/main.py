@@ -10,7 +10,7 @@
     - [ ] convert from v240820
     - [x] dataset orginization (Datamanager)
     - [ ] whole generation | simulation
-    - [ ] store the generated conversation data in a database! (with a session_id)
+    - [x] store the generated conversation data in a database! (with a session_id)
 
 ------------------------------ abstraction ------------------------------
 Conversation:
@@ -30,13 +30,13 @@ Workflow:
 import time, datetime, os, sys, tabulate
 import pandas as pd
 from .data import (
-    Config, BotOutput, UserOutput, BotOutputType, APIOutput
+    Config, BotOutput, UserOutput, BotOutputType, APIOutput,
+    Workflow, DBManager
 )
 from .roles import (
     BaseRole, BaseBot, BaseUser, BaseAPIHandler, InputUser, 
     USER_NAME2CLASS, BOT_NAME2CLASS, API_NAME2CLASS, 
 )
-from .data import Workflow
 from engine import (
     Role, Message, Conversation, ActionType, ConversationInfos, Logger, BaseLogger
 )
@@ -142,7 +142,10 @@ class BaselineController:
 
         conversation = self.conversation()      # main loop!
         
-        # if self.cfg.
+        if self.cfg.log_to_db:
+            db = DBManager(self.cfg.db_uri, self.cfg.db_name, self.cfg.db_message_collection_name)
+            res = db.insert_conversation(conversation)
+            print(f"  <db> Inserted conversation with {len(res.inserted_ids)} messages")
 
         conversation_df = pd.DataFrame(conversation.to_list())[['role', 'content']].set_index('role')
         infos_end = tabulate.tabulate(conversation_df, tablefmt='psql', maxcolwidths=100)

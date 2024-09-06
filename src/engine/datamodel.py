@@ -43,6 +43,14 @@ class Role(Enum):
     def __str__(self):
         return f"Role(id={self.id}, prefix={self.prefix}, name={self.rolename})"
 
+    @classmethod
+    def get_by_rolename(cls, rolename: str):
+        for member in cls:
+            if member.rolename == rolename.lower():
+                return member
+        raise KeyError(f"{rolename} is not a valid key for {cls.__name__}")
+
+
 @dataclass
 class Message:
     role: Role = None
@@ -52,7 +60,10 @@ class Message:
     conversation_id: str = None
     utterance_id: int = None
 
-    def __init__(self, role: Role, content: str, prompt: str=None, llm_response: str=None, conversation_id: str=None, utterance_id: int=None):
+    def __init__(
+        self, role: Role, content: str, prompt: str=None, llm_response: str=None, 
+        conversation_id: str=None, utterance_id: int=None, **kwargs
+    ):
         self.role = role
         self.content = content
         if prompt: self.prompt = prompt

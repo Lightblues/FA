@@ -25,7 +25,11 @@ class Config:
 
     conversation_turn_limit: int = 20
     log_utterence_time: bool = True
+    log_to_db: bool = True
 
+    db_uri: str = 'mongodb://localhost:27017/'
+    db_name: str = "pdl"
+    db_message_collection_name: str = "messages"
 
     def to_dict(self):
         return asdict(self)
