@@ -1,14 +1,15 @@
 """ updated @240904
 - basic implementations
     - [x] BaselineController logic @240905
-    - [ ] logging and metrics -> append prompts to Message
-    - [ ] data: Workflow abstraction | align with FlowBench 
-    - [ ] user: add user profiling? aware of workflow?
-    - [ ] bot implementation
-    - [ ] api: mimic by LLM? 
+    - [x] logging and metrics -> append prompts to Message
+    - [x] data: Workflow abstraction | align with FlowBench 
+    - [x] user: add user profiling? aware of workflow?
+    - [x] bot implementation
+    - [x] api: mimic by LLM? 
 - data
     - [ ] convert from v240820
     - [x] dataset orginization (Datamanager)
+    - [ ] whole generation | simulation
 
 ------------------------------ abstraction ------------------------------
 Conversation:
@@ -61,7 +62,7 @@ class BaselineController:
         self.bot = BOT_NAME2CLASS[cfg.bot_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
         self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
     
-    def conversation(self):
+    def conversation(self) -> Conversation:
         """ 
         1. initiation: initialize the variables, logger, etc.
         2. main loop
@@ -76,22 +77,25 @@ class BaselineController:
         # cnt_utterance:int = 0       # cnt of u/b/s utterance (conversation length)
         while True:
             if role == Role.USER:
-                with Timer("user process"):
+                with Timer("user process", print=self.cfg.log_utterence_time):
                     user_output: UserOutput = self.user.process()
                 # ...infos, log
                 self.log_msg(self.conv.get_last_message())
                 role = Role.BOT
+                if user_output.is_end:
+                    print(f"  <main> ended by user!")
+                    break
             elif role == Role.BOT:
                 num_bot_actions = 0
                 while True:         # limit the bot prediction steps
-                    with Timer("bot process"):
+                    with Timer("bot process", print=self.cfg.log_utterence_time):
                         bot_output: BotOutput = self.bot.process()
                     self.log_msg(self.conv.get_last_message())
                     if bot_output.action_type == BotOutputType.RESPONSE:
                         break
                     elif bot_output.action_type == BotOutputType.ACTION:
                         # ... call the API, append results to conversation
-                        with Timer("api process"):
+                        with Timer("api process", print=self.cfg.log_utterence_time):
                             api_output: APIOutput = self.api.process(bot_output)
                         self.log_msg(self.conv.get_last_message())
                     else: raise TypeError(f"Unexpected BotOutputType: {bot_output.action_type}")
@@ -107,7 +111,7 @@ class BaselineController:
                 print("  <main> end due to conversation turn limit!")
                 break
         
-        return self.conversation
+        return self.conv
 
     def log_msg(self, msg:Message):
         content = msg.to_str()      # or msg is str?
@@ -117,7 +121,7 @@ class BaselineController:
             isinstance(self.user, InputUser) and (role == Role.USER)
         ): 
             self.logger.log_to_stdout(content, color=role.color)
-            
+    
     def start_conversation(self):
         t_now = datetime.datetime.now()
         infos = {
@@ -136,7 +140,8 @@ class BaselineController:
 
         conversation = self.conversation()      # main loop!
 
-        infos_end = f" END! ".center(50, "=")
+        conversation_df = pd.DataFrame(conversation.to_list())[['role', 'content']].set_index('role')
+        infos_end = tabulate.tabulate(conversation_df, tablefmt='psql', maxcolwidths=100)
         self.logger.log(infos_end, with_print=True)
         return infos, conversation
         

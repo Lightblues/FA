@@ -5,7 +5,8 @@ from dataclasses import dataclass, asdict, field
 
 @dataclass
 class Config:
-    conversation_turn_limit: int = 20
+    workflow_type: str = "text"     # text, code, flowchart
+    workflow_id: str = "000"
     
     user_mode: str = "llm_profile"
     user_llm_name: str = "gpt-4o"
@@ -21,9 +22,10 @@ class Config:
     api_mode: str = "llm"
     api_template_fn: str = "baselines/api_llm.jinja"
     api_llm_name: str = "gpt-4o"
-    
-    workflow_id: str = "000"
-    workflow_type: str = "text"
+
+    conversation_turn_limit: int = 20
+    log_utterence_time: bool = True
+
 
     def to_dict(self):
         return asdict(self)

@@ -1,7 +1,5 @@
-conversation_turn_limit: 10
-
-workflow_id: "000"
 workflow_type: "text"
+workflow_id: "000"
 
 user_mode: "llm_profile"   # dummy_user, input_user, llm_profile
 user_llm_name: "gpt-4o"
@@ -18,3 +16,5 @@ api_mode: "llm"           # dummy_api, llm
 api_template_fn: "baselines/api_llm.jinja"
 api_llm_name: "gpt-4o"
 
+conversation_turn_limit: 20
+log_utterence_time: false

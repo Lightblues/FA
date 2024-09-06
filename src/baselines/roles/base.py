@@ -80,7 +80,7 @@ class BaseUser(BaseRole):
     def __init__(self, **args) -> None:
         super().__init__(**args)
         self.cnt_user_queries: int = 0
-        
+    
     def process(self, *args, **kwargs) -> UserOutput:
         """ 
         1. generate user query (free style?)

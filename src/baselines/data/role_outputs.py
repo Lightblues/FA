@@ -18,6 +18,11 @@ class UserOutput:
     response_content: str = None
     
     response_str = "Response"
+    end_flag = "[END]"
+    
+    @property
+    def is_end(self) -> bool:
+        return self.end_flag in self.response_content
 
 @dataclass
 class BotOutput:

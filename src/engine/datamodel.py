@@ -58,13 +58,17 @@ class Message:
     
     def to_str(self):
         return f"{self.role.prefix}{self.content}"
+    def to_dict(self):
+        res = asdict(self)
+        res["role"] = self.role.rolename
+        return res
     def __str__(self):
         return self.to_str()
     def __repr__(self):
         return self.to_str()
 
 class Conversation():
-    msgs:List[Message] = []
+    msgs: List[Message] = []
     
     def __init__(self):
         self.msgs = []
@@ -112,6 +116,8 @@ class Conversation():
 
     def to_str(self):
         return "\n".join([msg.to_str() for msg in self.msgs])
+    def to_list(self):
+        return [msg.to_dict() for msg in self.msgs]
     
     def copy(self):
         return copy.deepcopy(self)
