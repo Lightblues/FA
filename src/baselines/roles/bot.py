@@ -60,7 +60,7 @@ class ReactBot(BaseBot):
             msg_content = f"<Call API> {prediction.action}({prediction.action_input})"
         msg = Message(Role.BOT, msg_content, prompt=prompt, llm_response=llm_response)
         self.conv.add_message(msg)
-        self.cnt_bot_actions += 1
+        self.cnt_bot_actions += 1  # stat
         return prediction
         
     @staticmethod

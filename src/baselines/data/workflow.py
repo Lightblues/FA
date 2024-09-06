@@ -7,6 +7,7 @@ from dataclasses import dataclass, asdict, field
 from enum import Enum, auto
 from pathlib import Path
 from typing import List, Dict, Optional, Union
+from .user_profile import UserProfile
 
 @dataclass
 class DataManager:
@@ -53,16 +54,17 @@ class Tool:
     output_paras: Dict = None
 
 @dataclass
-class Workflow:
+class Workflow:  # rename -> Data
     type: WorkflowType = None
     id: str = None              # 000
     name: str = None
     task_background: str = None
     workflow: str = None
     toolbox: List[Tool] = field(default_factory=list)   # apis
+    user_profiles: List[UserProfile] = field(default_factory=list) # user profiles
     
-    def __init__(self, type:str, id:str, name:str, task_background:str, **kwargs):
-        _type:WorkflowType = WorkflowType[type.upper()]
+    def __init__(self, type:str, id:str, name:str, task_background:str, load_user_profiles=False, **kwargs):
+        _type: WorkflowType = WorkflowType[type.upper()]
         self.type = _type
         self.id = id
         self.name = name
@@ -72,15 +74,20 @@ class Workflow:
             self.toolbox = yaml.safe_load(f)
         with open(DataManager.DIR_data_flowbench / f"{_type.subdir}/{id}{_type.suffix}", 'r') as f:
             self.workflow = f.read().strip()
+        if load_user_profiles:
+            with open(DataManager.DIR_data_flowbench / f"user_profiles/{id}.json", 'r') as f:
+                user_profiles = json.load(f)
+            self.user_profiles = [UserProfile.load_from_dict(profile) for profile in user_profiles]
     
     @classmethod
-    def load_by_id(cls, id:str, type:str):
+    def load_by_id(cls, id:str, type:str, **kwargs):
         workflow_infos: dict = json.load(open(DataManager.FN_data_flowbench_infos, 'r'))
         assert id in workflow_infos, f"[ERROR] {id} not found in {DataManager.FN_data_flowbench_infos.keys()}"
         infos = workflow_infos[id]
         assert all([k in infos for k in ['name', 'task_background']]), f"[ERROR] missing key in {infos}"
-        return cls(type, id, **infos)
-        
+        return cls(type, id, **infos, **kwargs)
+
+
 if __name__ == '__main__':
     workflow = Workflow(
         _type='text',

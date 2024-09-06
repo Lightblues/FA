@@ -1,3 +1,6 @@
+""" updated @240906
+- [ ] generate api response with given history calling infos
+"""
 from typing import List
 from engine import Role, Message, init_client, LLM_CFG
 from .base import BaseAPIHandler
@@ -55,14 +58,17 @@ class LLMSimulatedAPIHandler(BaseAPIHandler):
             msg_content = f"<API response> {prediction.response_data}"
         else:
             msg_content = f"<API response> {prediction.response_status_code} {prediction.response_data}"
-        msg = Message(Role.BOT, msg_content, prompt=prompt, llm_response=llm_response)
+        msg = Message(Role.SYSTEM, msg_content, prompt=prompt, llm_response=llm_response)
         self.conv.add_message(msg)
         self.cnt_api_callings[prediction.name] += 1 # stat
         return prediction
 
     @staticmethod
     def parse_api_output(s:str, apicalling_info:BotOutput) -> APIOutput:
-        # parse the output: status_code, data
+        """ 
+        parse the output: status_code, data
+        NOTE: can also output in the format of ReAct
+        """
         if "```" in s:
             s = Formater.parse_codeblock(s, type="json")
         response = eval(s)

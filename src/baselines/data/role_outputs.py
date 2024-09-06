@@ -15,7 +15,9 @@ class BotOutputType(Enum):
 
 @dataclass
 class UserOutput:
-    pass
+    response_content: str = None
+    
+    response_str = "Response"
 
 @dataclass
 class BotOutput:

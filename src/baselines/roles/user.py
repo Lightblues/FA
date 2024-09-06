@@ -1,14 +1,14 @@
-""" updated @240905
+""" updated @240906
 InputUser: interact manually
 LLMSimulatedUserWithProfile
 """
-
+import re
 from typing import List
 from .base import BaseUser
-from .user_profile import UserProfile
-from ..data import UserOutput
-from engine import Role, Message, prompt_user_input
+from ..data import UserOutput, UserProfile
+from engine import Role, Message, prompt_user_input, init_client, LLM_CFG
 from utils.jinja_templates import jinja_render
+from easonsi.llm.openai_client import OpenAIClient, Formater
 
 
 class DummyUser(BaseUser):
@@ -41,31 +41,36 @@ class InputUser(BaseUser):
 
 
 class LLMSimulatedUserWithProfile(BaseUser):
-    user_profile: UserProfile
+    user_profile: UserProfile = None
     names = ["llm_profile", "LLMSimulatedUserWithProfile"]
     
-    def __init__(self, user_profile:UserProfile=None, **args) -> None:
+    def __init__(self, **args) -> None:
         super().__init__(**args)
-        self.user_profile = user_profile
-    
-    def load_user_profile(self, user_profile:UserProfile):
-        self.user_profile = user_profile
+        self.llm = init_client(llm_cfg=LLM_CFG[self.cfg.bot_llm_name])
+        assert self.cfg.user_profile is not None and self.cfg.user_profile_id is not None, "cfg.user_profile or cfg.user_profile_id is None!"
+        self.user_profile = self.workflow.user_profiles[self.cfg.user_profile_id]
 
     def process(self, *args, **kwargs) -> UserOutput:
-        """ 根据当前的会话进度, 扮演用户角色, 生成下一轮query 
-        TODO: prompting!
-        """
-        assert self.user_profile is not None, "user_profile is None!"
-        # user_output = UserOutput()
-        
         prompt = jinja_render(
-            "user_role_player.jinja",
-            # assistant_description=assistant_desc,
-            # user_information=self.user_profile.to_str(),
-            # conversation=conversation.to_str()
+            self.cfg.user_template_fn,  # "baselines/user_llm.jinja": assistant_description, user_profile, history_conversation
+            assistant_description=self.workflow.task_background,
+            user_profile=self.user_profile.to_str(),
+            history_conversation=self.conv.to_str()
         )
         llm_response = self.llm.query_one(prompt)
-        self.conv.add_message(
-            Message(role=Role.USER, content=llm_response),
-        )
-        return UserOutput()
+        # ...parse the response! -> UserOutput, conv
+        prediction = self.parse_user_output(llm_response)
+        msg = Message(Role.USER, prediction.response_content, prompt=prompt, llm_response=llm_response)
+        self.conv.add_message(msg)
+        self.cnt_user_queries += 1  # stat
+        return prediction
+    
+    @staticmethod
+    def parse_user_output(s: str) -> UserOutput:
+        if "```" in s:
+            s = Formater.parse_codeblock(s, type="").strip()
+        pattern = r"(Response):\s*(.*?)(?=\n\w+:|\Z)"
+        matches = re.findall(pattern, s, re.DOTALL)
+        result = {key: value.strip() for key, value in matches}
+        assert UserOutput.response_str in result, f"Response not in prediction: {s}"
+        return UserOutput(response_content=result[UserOutput.response_str])

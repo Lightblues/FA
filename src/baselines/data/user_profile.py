@@ -2,12 +2,21 @@
 """
 from typing import List
 
+# used for Chinese
+COMPONENTS_ZH = {
+    'persona': '角色设定',
+    'user_details': '用户信息',
+    'user_needs': '用户需求',
+    'dialogue_style': '对话风格',
+    'interactive_pattern': '交互模式'
+}
+
 class UserProfile:
     persona: str = ""
     user_details: str = ""
     user_needs: str = ""
     dialogue_style: str = ""
-    interation_patterns: str = ""
+    interaction_patterns: str = ""
     profile: dict = None
     
     def __init__(self, persona:str, user_details:str, user_needs:str, dialogue_style:str, interaction_patterns:str):
@@ -15,13 +24,13 @@ class UserProfile:
         self.user_details = user_details
         self.user_needs = user_needs
         self.dialogue_style = dialogue_style
-        self.interation_patterns = interaction_patterns
+        self.interaction_patterns = interaction_patterns
         self.profile = {
-            '角色设定': self.persona,
-            '用户信息': self.user_details,
-            '用户需求': self.user_needs,
-            '对话风格': self.dialogue_style,
-            '交互模式': self.interation_patterns
+            'persona': self.persona,
+            'user_details': self.user_details,
+            'user_needs': self.user_needs,
+            'dialogue_style': self.dialogue_style,
+            'interaction_patterns': self.interaction_patterns
         }
     
     @classmethod
@@ -32,7 +41,7 @@ class UserProfile:
         details_key: str = 'user_details', 
         needs_key: str = 'user_needs', 
         style_key: str = 'dialogue_style', 
-        pattern_key: str = 'interative_pattern'
+        pattern_key: str = 'interactive_pattern'
     ):
         instance = cls(profile_dict[persona_key], profile_dict[details_key], profile_dict[needs_key], profile_dict[style_key], profile_dict[pattern_key])
         return instance

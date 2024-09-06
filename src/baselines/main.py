@@ -31,8 +31,8 @@ from .data import (
     Config, BotOutput, UserOutput, BotOutputType, APIOutput
 )
 from .roles import (
-    BaseRole, BaseBot, BaseUser, BaseAPIHandler, InputUser,
-    USER_NAME2CLASS, BOT_NAME2CLASS, API_NAME2CLASS
+    BaseRole, BaseBot, BaseUser, BaseAPIHandler, InputUser, 
+    USER_NAME2CLASS, BOT_NAME2CLASS, API_NAME2CLASS, 
 )
 from .data import Workflow
 from engine import (
@@ -51,7 +51,10 @@ class BaselineController:
     
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
-        self.workflow = Workflow.load_by_id(id=cfg.workflow_id, type=cfg.workflow_type)
+        self.workflow = Workflow.load_by_id(
+            id=cfg.workflow_id, type=cfg.workflow_type,
+            load_user_profiles=cfg.user_profile
+        )
         self.conv = Conversation()
         self.logger = BaseLogger()
         self.user = USER_NAME2CLASS[cfg.user_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)

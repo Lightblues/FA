@@ -3,14 +3,18 @@ conversation_turn_limit: 10
 workflow_id: "000"
 workflow_type: "text"
 
-user_mode: "input_user"   # dummy_user
+user_mode: "llm_profile"   # dummy_user, input_user, llm_profile
+user_llm_name: "gpt-4o"
+user_template_fn: "baselines/user_llm.jinja"
+user_profile: true
+user_profile_id: 0
 
-bot_mode: "react_bot"     # dummy_bot
+bot_mode: "react_bot"     # dummy_bot, react_bot
 bot_template_fn: "baselines/flowbench.jinja"
 bot_llm_name: "gpt-4o"
 bot_action_limit: 5
 
-api_mode: "llm"
+api_mode: "llm"           # dummy_api, llm
 api_template_fn: "baselines/api_llm.jinja"
 api_llm_name: "gpt-4o"
 

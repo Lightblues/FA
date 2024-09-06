@@ -7,7 +7,11 @@ from dataclasses import dataclass, asdict, field
 class Config:
     conversation_turn_limit: int = 20
     
-    user_mode: str = "input_user"
+    user_mode: str = "llm_profile"
+    user_llm_name: str = "gpt-4o"
+    user_template_fn: str = "baselines/user_llm.jinja"
+    user_profile: bool = True
+    user_profile_id: int = 0
     
     bot_mode: str = "react_bot"
     bot_template_fn: str = "baselines/flowbench.jinja"

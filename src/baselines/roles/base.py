@@ -59,7 +59,7 @@ class BaseAPIHandler(BaseRole):
 
 class BaseBot(BaseRole):
     names: List[str] = None
-    cnt_bot_actions: int = 0
+    cnt_bot_actions: int = None
     
     def __init__(self, **args) -> None:
         super().__init__(**args)
@@ -75,9 +75,11 @@ class BaseBot(BaseRole):
 
 class BaseUser(BaseRole):
     names: List[str] = None
+    cnt_user_queries: int = None
     
     def __init__(self, **args) -> None:
         super().__init__(**args)
+        self.cnt_user_queries: int = 0
         
     def process(self, *args, **kwargs) -> UserOutput:
         """ 
