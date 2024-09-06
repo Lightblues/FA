@@ -80,7 +80,6 @@ PDL: |
           elif 可挂号数量 == 0:
               [号源数量, 可挂号列表] = API_其他医院号源推荐([department_name, appointment_time])
               if 号源数量 > 0:
-                  # 挂号意愿 TODO: 
                   if 挂号意愿 == "true":
                       [挂号状态] = API_其他医院挂号执行([id_number, hospital_name, doctor_name])
                       if 挂号状态 == "1":

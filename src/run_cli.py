@@ -1,6 +1,8 @@
 """ 
-python run_cli.py --config=default.yaml --workflow_dir=pdl2_step3 --workflow_name=000
-python run_cli.py --config=test.yaml --workflow_dir=pdl2_step3 --workflow_name=000
+python run_cli.py --config=default.yaml --workflow_dir=pdl --workflow_name=000
+python run_cli.py --config=cli_dev.yaml --workflow_dir=pdl --workflow_name=000
+
+python run_cli.py --config=cli_dev.yaml --workflow_dir=manual --workflow_name=000 --template_fn=query_PDL_wikihow.jinja
 """
 
 import os, argparse

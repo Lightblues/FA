@@ -132,10 +132,11 @@ class BaseLogger:
     log_fn:str = "tmp.log"
     def __init__(self):
         pass
-    def log(self, *args, **kwargs):
-        pass
-    def debug(self, *args, **kwargs):
-        pass
+    def log(self, message:str, with_print=False, *args, **kwargs):
+        if with_print:
+            print(message)
+    def debug(self, message:str, *args, **kwargs):
+        print(message)
 
     def log_to_stdout(self, message:str, color=None):
         colored_message = color_dict[color] + message + Style.RESET_ALL

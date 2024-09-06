@@ -1,8 +1,8 @@
-# ================================= update @240827
+# ================================= update @240904
 workflow_dir: "pdl"        # 
 workflow_name: "000"
 
-available_models: 
+# available_models: 
 # - "default"
 # - "0.9.1"
 # available_workflows:
@@ -20,7 +20,7 @@ user_mode: "manual"
 user_model_name: "gpt-4o"       # used when set user_mode as llm
 
 bot_mode: "pdl"                   # pdl, lke
-model_name: "gpt-4o"            # "gpt-4o"
+model_name: "gpt-4o"              # "gpt-4o"
 template_fn: "query_PDL.jinja"
 greeting_msg: "你好，我是 {name} 机器人，有什么可以帮您?"
 

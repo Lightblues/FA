@@ -9,7 +9,7 @@ from typing import Tuple, Dict
 from .datamodel import (
     Role, Message, Conversation, ActionType, ConversationInfos, Config
 )
-from .role_bot import BOT_ANME2CLASS, BaseBot
+from .role_bot import BOT_NAME2CLASS, BaseBot
 from .role_user import USER_NAME2CLASS, BaseUser
 from .role_api import API_NAME2CLASS, BaseAPIHandler
 from .pdl import PDL
@@ -28,7 +28,7 @@ class ConversationController:
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
         self.user = USER_NAME2CLASS[cfg.user_mode](cfg=cfg)
-        self.bot = BOT_ANME2CLASS[cfg.bot_mode](cfg=cfg)
+        self.bot = BOT_NAME2CLASS[cfg.bot_mode](cfg=cfg)
         self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg)
         self.logger = Logger()
     
@@ -43,13 +43,15 @@ class ConversationController:
         if curr_role in [Role.USER, Role.SYSTEM]:
             return Role.BOT
         elif curr_role == Role.BOT:
-            if action_type in [ActionType.REQUEST, ActionType.ANSWER, ActionType.ASKSLOT]:
-                return Role.USER
-            elif action_type == ActionType.API:
+            # if action_type in [ActionType.REQUEST, ActionType.ANSWER, ActionType.ASKSLOT]:
+            #     return Role.USER
+            if action_type == ActionType.API:
                 return Role.SYSTEM
             else:
-                # FIXME: 这里为啥会出现 ActionType.API_RESPONSE? 
-                raise ValueError(f"Unknown action_type: {action_type}")
+                return Role.USER
+            # else:
+            #     # FIXME: 这里为啥会出现 ActionType.API_RESPONSE? 
+            #     raise ValueError(f"Unknown action_type: {action_type}")
         else:
             raise ValueError(f"Unknown role: {curr_role}")
         

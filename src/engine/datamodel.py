@@ -1,7 +1,7 @@
 """ 
 @240712
 """
-import datetime, os, re, yaml, copy, pathlib
+import datetime, os, re, yaml, copy, pathlib, time
 from enum import Enum, auto
 from dataclasses import dataclass, asdict, field
 from typing import List, Dict, Optional, Tuple
@@ -19,7 +19,8 @@ class ActionType(Enum):
     API = ("API", "bot call API")
     REQUEST = ("REQUEST", "bot request for information")
     ANSWER = ("ANSWER", "bot give answer to user")
-    ASKSLOT = ("ASKSLOT", "bot ask for slot value")
+    ASKSLOT = ("ASKSLOT", "bot ask for slot value")     # remove? 
+    INSTRUCT = ("INSTRUCT", "bot instruct user")
 
     def __init__(self, actionname, description):
         self.actionname = actionname
@@ -42,26 +43,43 @@ class Role(Enum):
     def __str__(self):
         return f"Role(id={self.id}, prefix={self.prefix}, name={self.rolename})"
 
+@dataclass
 class Message:
     role: Role = None
     content: str = None
+    prompt: str = None
+    llm_response: str = None
+    conversation_id: str = None
+    utterance_id: int = None
 
-    def __init__(self, role: Role, content: str):
+    def __init__(self, role: Role, content: str, prompt: str=None, llm_response: str=None, conversation_id: str=None, utterance_id: int=None):
         self.role = role
         self.content = content
+        if prompt: self.prompt = prompt
+        if llm_response: self.llm_response = llm_response
+        if conversation_id: self.conversation_id = conversation_id
+        if utterance_id: self.utterance_id = utterance_id
     
     def to_str(self):
         return f"{self.role.prefix}{self.content}"
+    def to_dict(self):
+        res = asdict(self)
+        res["role"] = self.role.rolename
+        return res
     def __str__(self):
         return self.to_str()
     def __repr__(self):
         return self.to_str()
 
 class Conversation():
-    msgs:List[Message] = []
+    msgs: List[Message] = []
+    conversation_id: str = None
     
-    def __init__(self):
+    def __init__(self, conversation_id: str = None):
         self.msgs = []
+        if not conversation_id:
+            conversation_id = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        self.conversation_id = conversation_id
 
     def add_message(self, msg: Message):
         # assert isinstance(msg, Message), f"Must be Message! But got {type(msg)}"
@@ -69,6 +87,15 @@ class Conversation():
             
     def get_message_by_idx(self, idx: int) -> Message:
         return self.msgs[idx]
+    
+    def get_messages_num(self) -> int:
+        return len(self.msgs)
+    @property
+    def current_utterance_id(self) -> int:
+        return len(self.msgs)
+    
+    def get_last_message(self) -> Message:
+        return self.msgs[-1]
 
     @classmethod
     def load_from_json(cls, o:List):
@@ -103,6 +130,8 @@ class Conversation():
 
     def to_str(self):
         return "\n".join([msg.to_str() for msg in self.msgs])
+    def to_list(self):
+        return [msg.to_dict() for msg in self.msgs]
     
     def copy(self):
         return copy.deepcopy(self)
@@ -168,7 +197,6 @@ class Config:
     
     @classmethod
     def from_yaml(cls, yaml_file: str, normalize: bool = True):
-        # DONE: read config file
         with open(yaml_file, 'r') as file:
             data = yaml.safe_load(file)
         obj = cls(**data)

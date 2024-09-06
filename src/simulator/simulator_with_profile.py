@@ -10,7 +10,7 @@ from engine import PDL, _DIRECTORY_MANAGER, UserProfile
 from engine.main import ConversationController
 from engine.role_api import BaseAPIHandler, API_NAME2CLASS
 from engine.role_user import LLMSimulatedUserWithProfile
-from engine.role_bot import BaseBot, BOT_ANME2CLASS
+from engine.role_bot import BaseBot, BOT_NAME2CLASS
 from engine.controller import PDLController
 from engine.common import Logger
 from engine.datamodel import (
@@ -29,7 +29,7 @@ class Simulator(ConversationController):
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
         self.user = LLMSimulatedUserWithProfile(cfg=cfg)
-        self.bot = BOT_ANME2CLASS[cfg.bot_mode](cfg=cfg)
+        self.bot = BOT_NAME2CLASS[cfg.bot_mode](cfg=cfg)
         self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg)
         self.logger = Logger(_DIRECTORY_MANAGER.DIR_simulation_log)
 
