@@ -1,6 +1,9 @@
 {
-    "000":{
-        "name": "flight booking",
-        "task_background": "flight booking"
+    "version": "v240908",
+    "task_infos": {
+        "000":{
+            "name": "flight booking",
+            "task_background": "flight booking"
+        }
     }
 }

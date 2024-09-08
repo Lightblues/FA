@@ -5,6 +5,7 @@ from dataclasses import dataclass, asdict, field
 
 @dataclass
 class Config:
+    workflow_dataset: str = "STAR"
     workflow_type: str = "text"     # text, code, flowchart
     workflow_id: str = "000"
     

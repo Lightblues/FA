@@ -53,3 +53,6 @@ class APIOutput:
     
     response_status_str = "status_code"
     response_data_str = "data"
+    
+    response_status_str_react = "Status Code"
+    response_data_str_react = "Data"

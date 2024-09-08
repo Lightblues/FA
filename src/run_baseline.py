@@ -18,6 +18,7 @@ app = typer.Typer()
 @app.command()
 def run_baseline(
     config: str = typer.Option("default.yaml", help="Configuration file"),
+    workflow_dataset: str = typer.Option(None, help="Workflow dataset", case_sensitive=False),
     workflow_type: WorkflowTypeStr = typer.Option(None, help="Workflow type", case_sensitive=False),
     workflow_id: str = typer.Option(None, help="Workflow ID"),
     user_mode: UserMode = typer.Option(None, help="User mode", case_sensitive=False), # type: ignore
@@ -32,8 +33,8 @@ def run_baseline(
     conversation_turn_limit: int = typer.Option(None, help="Conversation turn limit"),
     log_utterence_time: bool = typer.Option(None, help="Log utterance time")
 ):
-    data_manager = DataManager()
-    cfg = Config.from_yaml(data_manager.normalize_config_name(config))
+    cfg = Config.from_yaml(DataManager.normalize_config_name(config))
+    if workflow_dataset is not None: cfg.workflow_dataset = workflow_dataset
     if workflow_type is not None: cfg.workflow_type = workflow_type.value
     if workflow_id is not None: cfg.workflow_id = workflow_id
     if user_mode is not None: cfg.user_mode = user_mode.value

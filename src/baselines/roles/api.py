@@ -1,6 +1,7 @@
 """ updated @240906
 - [ ] generate api response with given history calling infos
 """
+import json, re
 from typing import List
 from engine import Role, Message, init_client, LLM_CFG
 from .base import BaseAPIHandler
@@ -53,7 +54,8 @@ class LLMSimulatedAPIHandler(BaseAPIHandler):
         )
         llm_response = self.llm.query_one(prompt)
         # ...parse the response! -> APIOutput, conv
-        prediction = self.parse_api_output(llm_response, apicalling_info)
+        # prediction = self.parse_json_output(llm_response, apicalling_info)
+        prediction = self.parse_react_output(llm_response, apicalling_info)
         if prediction.response_status_code==200:
             msg_content = f"<API response> {prediction.response_data}"
         else:
@@ -67,14 +69,14 @@ class LLMSimulatedAPIHandler(BaseAPIHandler):
         return prediction
 
     @staticmethod
-    def parse_api_output(s:str, apicalling_info:BotOutput) -> APIOutput:
+    def parse_json_output(s:str, apicalling_info:BotOutput) -> APIOutput:
         """ 
         parse the output: status_code, data
         NOTE: can also output in the format of ReAct
         """
         if "```" in s:
             s = Formater.parse_codeblock(s, type="json")
-        response = eval(s)
+        response = json.loads(s) # eval | NameError: name 'null' is not defined
         assert all(key in response for key in [APIOutput.response_status_str, APIOutput.response_data_str]), f"Response not in prediction: {s}"
         # parse the "data"?
         return APIOutput(
@@ -82,4 +84,21 @@ class LLMSimulatedAPIHandler(BaseAPIHandler):
             request=apicalling_info.action_input,
             response_data=response[APIOutput.response_data_str],
             response_status_code=int(response[APIOutput.response_status_str]),
+        )
+    
+    @staticmethod
+    def parse_react_output(s: str, apicalling_info:BotOutput) -> APIOutput:
+        if "```" in s:
+            s = Formater.parse_codeblock(s, type="").strip()
+        pattern = r"(?P<field>Status Code|Data):\s*(?P<value>.*?)(?=\n(Status Code|Data):|\Z)"
+        matches = re.finditer(pattern, s, re.DOTALL)
+        result = {match.group('field'): match.group('value').strip() for match in matches}
+        
+        # validate result
+        assert all(key in result for key in [APIOutput.response_status_str_react, APIOutput.response_data_str_react]), f"Data/Status Code not in prediction: {s}"
+        return APIOutput(
+            name=apicalling_info.action,
+            request=apicalling_info.action_input,
+            response_data=result[APIOutput.response_data_str_react],
+            response_status_code=int(result[APIOutput.response_status_str_react]),
         )

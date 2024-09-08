@@ -74,6 +74,10 @@ class LLMSimulatedUserWithProfile(BaseUser):
             s = Formater.parse_codeblock(s, type="").strip()
         pattern = r"(Response):\s*(.*?)(?=\n\w+:|\Z)"
         matches = re.findall(pattern, s, re.DOTALL)
-        result = {key: value.strip() for key, value in matches}
-        assert UserOutput.response_str in result, f"Response not in prediction: {s}"
-        return UserOutput(response_content=result[UserOutput.response_str])
+        if not matches:
+            response = s
+        else:
+            result = {key: value.strip() for key, value in matches}
+            assert UserOutput.response_str in result, f"Response not in prediction: {s}"
+            response = result[UserOutput.response_str]
+        return UserOutput(response_content=response)

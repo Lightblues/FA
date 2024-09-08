@@ -31,7 +31,7 @@ import time, datetime, os, sys, tabulate
 import pandas as pd
 from .data import (
     Config, BotOutput, UserOutput, BotOutputType, APIOutput,
-    Workflow, DBManager
+    Workflow, DBManager, DataManager
 )
 from .roles import (
     BaseRole, BaseBot, BaseUser, BaseAPIHandler, InputUser, 
@@ -49,12 +49,15 @@ class BaselineController:
     api: BaseAPIHandler = None
     logger: Logger = None
     conv: Conversation = None       # global variable for conversation
+    data_namager: DataManager = None
     workflow: Workflow = None
     conversation_id: str = None
     
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
+        self.data_namager = DataManager(cfg)
         self.workflow = Workflow.load_by_id(
+            data_manager=self.data_namager,
             id=cfg.workflow_id, type=cfg.workflow_type,
             load_user_profiles=cfg.user_profile
         )
