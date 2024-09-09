@@ -12,6 +12,8 @@ from .config import Config
 
 @dataclass
 class DataManager:
+    cfg: Config = None
+    
     DIR_root = Path(__file__).resolve().parent.parent.parent.parent
     DIR_src_base = (DIR_root / "src")
     
@@ -21,12 +23,15 @@ class DataManager:
     # DIR_data_flowbench = None
     # FN_data_flowbench_infos = None
     
-    cfg: Config = None
-    
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
         self.DIR_data_flowbench = self.DIR_data_root / cfg.workflow_dataset
         self.FN_data_flowbench_infos = self.DIR_data_flowbench / "task_infos.json"
+        
+        infos: dict = json.load(open(self.FN_data_flowbench_infos, 'r'))
+        self.data_version = infos['version']
+        self.workflow_infos = infos['task_infos']
+
 
     @staticmethod
     def normalize_config_name(config_name:str):
@@ -99,9 +104,8 @@ class Workflow:  # rename -> Data
     
     @classmethod
     def load_by_id(cls, data_manager:DataManager, id:str, type:str, **kwargs):
-        workflow_infos: dict = json.load(open(data_manager.FN_data_flowbench_infos, 'r'))["task_infos"]
-        assert id in workflow_infos, f"[ERROR] {id} not found in {workflow_infos.keys()}"
-        infos = workflow_infos[id]
+        assert id in data_manager.workflow_infos, f"[ERROR] {id} not found in {data_manager.workflow_infos.keys()}"
+        infos = data_manager.workflow_infos[id]
         assert all([k in infos for k in ['name', 'task_background']]), f"[ERROR] missing key in {infos}"
         return cls(data_manager, type, id, **infos, **kwargs)
 

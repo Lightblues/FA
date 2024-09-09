@@ -42,20 +42,30 @@ class DBManager:
         res = self.collection_meta.find_one(query)
         return res
     
-    def get_most_recent_unique_conversation_ids(self, num: int = 10) -> List[str]:
-        pipeline = [
-            {"$match": {"conversation_id": {"$ne": None}}},
-            {"$group": {
-                "_id": "$conversation_id",
-                "latest_doc": {"$first": "$$ROOT"}
-            }},
-            {"$replaceRoot": {"newRoot": "$latest_doc"}},
-            {"$sort": {"conversation_id": -1}}, # _id
-            {"$limit": num}
-        ]
-        results = self.collection.aggregate(pipeline)
+    # def get_most_recent_unique_conversation_ids(self, num: int = 10) -> List[str]:
+    #     pipeline = [
+    #         {"$match": {"conversation_id": {"$ne": None}}},
+    #         {"$group": {
+    #             "_id": "$conversation_id",
+    #             "latest_doc": {"$first": "$$ROOT"}
+    #         }},
+    #         {"$replaceRoot": {"newRoot": "$latest_doc"}},
+    #         {"$sort": {"conversation_id": -1}}, # _id
+    #         {"$limit": num}
+    #     ]
+    #     results = self.collection.aggregate(pipeline)
+    #     return [res["conversation_id"] for res in results]
+    def get_most_recent_unique_conversation_ids(
+        self, query: dict = {}, num: int = 10
+    ) -> List[str]:
+        sort_order = [('conversation_id', -1)]
+        results = self.collection_meta.find(query).sort(sort_order).limit(num)
         return [res["conversation_id"] for res in results]
-        
+    
+    def query_run_experiments(self, query: dict = {}, limit: int = 10) -> List[dict]:
+        sort_order = [('conversation_id', -1)]
+        results = self.collection_meta.find(query).sort(sort_order).limit(limit)
+        return [res for res in results]
 
 
 if __name__ == "__main__":
