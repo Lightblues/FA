@@ -11,6 +11,11 @@
     - [x] dataset orginization (Datamanager)
     - [ ] whole generation | simulation
     - [x] store the generated conversation data in a database! (with a session_id)
+- evaluation
+    - [ ] start simulations. 
+- robustness
+    - [ ] add retry for API or bot? -> how to evaluate?
+    - [ ] user simulation: make simulated user to be more realistic (shorter utterance, ...)
 
 ------------------------------ abstraction ------------------------------
 Conversation:

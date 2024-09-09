@@ -6,7 +6,7 @@ usage:
         --bot-mode=react_bot --bot-llm-name=gpt-4o \
         --api-mode=llm --api-llm-name=gpt-4o \
         --user-template-fn=baselines/user_llm.jinja --bot-template-fn=baselines/flowbench.jinja \
-        --conversation-turn-limit=20 --log-utterence-time
+        --conversation-turn-limit=20 --log-utterence-time --log-to-db
 """
 import typer
 from baselines import Config, BaselineController, DataManager
@@ -31,7 +31,8 @@ def run_baseline(
     api_mode: ApiMode = typer.Option(None, help="API mode", case_sensitive=False), # type: ignore
     api_llm_name: str = typer.Option(None, help="API LLM name"),
     conversation_turn_limit: int = typer.Option(None, help="Conversation turn limit"),
-    log_utterence_time: bool = typer.Option(None, help="Log utterance time")
+    log_utterence_time: bool = typer.Option(None, help="Log utterance time"),
+    log_to_db: bool = typer.Option(None, help="Log to DB"),
 ):
     cfg = Config.from_yaml(DataManager.normalize_config_name(config))
     if workflow_dataset is not None: cfg.workflow_dataset = workflow_dataset
@@ -48,6 +49,7 @@ def run_baseline(
     if api_llm_name is not None: cfg.api_llm_name = api_llm_name
     if conversation_turn_limit is not None: cfg.conversation_turn_limit = conversation_turn_limit
     if log_utterence_time is not None: cfg.log_utterence_time = log_utterence_time
+    if log_to_db is not None: cfg.log_to_db = log_to_db
     # print(f">> config: {cfg}")
 
     controller = BaselineController(cfg)

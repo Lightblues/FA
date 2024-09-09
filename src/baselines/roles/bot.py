@@ -51,9 +51,16 @@ class ReactBot(BaseBot):
             current_time=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             history_conversation=self.conv.to_str(),
         )
-        llm_response = self.llm.query_one(prompt)
-        # ...parse the response! -> BotOutput, conv
-        prediction = self.parse_react_output(llm_response)
+        for i in range(3):
+            try:
+                llm_response = self.llm.query_one(prompt)
+                # ...parse the response! -> BotOutput, conv
+                prediction = self.parse_react_output(llm_response)
+                break
+            except Exception as e:
+                print(f"  <bot> Error when trying {i}th time: {e}")
+        else:
+            raise RuntimeError(f"  <bot> Error when trying 3 times: {e}")
         if prediction.action_type==BotOutputType.RESPONSE:
             msg_content = prediction.response
         else:

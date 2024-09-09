@@ -1,7 +1,7 @@
 """ updated @240906
 
 """
-
+from typing import List
 import pymongo, pymongo.results
 from engine import Message, Conversation, Role
 
@@ -22,11 +22,26 @@ class DBManager:
         # print(f"  <db> Inserted conversation with {len(res.inserted_ids)} messages")
         return res
 
-    def query_messages_by_conversation_id(self, conversation_id: str):
+    def query_messages_by_conversation_id(self, conversation_id: str) -> Conversation:
         query = {"conversation_id": conversation_id}
         results = self.collection.find(query)
         messages = [Message(**{**res, "role": Role.get_by_rolename(res["role"])}) for res in results]
-        return messages
+        return Conversation.from_messages(messages)
+    
+    def get_most_recent_unique_conversation_ids(self, num: int = 10) -> List[str]:
+        pipeline = [
+            {"$match": {"conversation_id": {"$ne": None}}},
+            {"$group": {
+                "_id": "$conversation_id",
+                "latest_doc": {"$first": "$$ROOT"}
+            }},
+            {"$replaceRoot": {"newRoot": "$latest_doc"}},
+            {"$sort": {"conversation_id": -1}}, # _id
+            {"$limit": num}
+        ]
+        results = self.collection.aggregate(pipeline)
+        return [res["conversation_id"] for res in results]
+        
 
 
 if __name__ == "__main__":

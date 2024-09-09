@@ -5,6 +5,7 @@ import datetime, os, re, yaml, copy, pathlib, time
 from enum import Enum, auto
 from dataclasses import dataclass, asdict, field
 from typing import List, Dict, Optional, Tuple
+import pandas as pd
 
 from .pdl import PDL
 from .common import DataManager, _DIRECTORY_MANAGER
@@ -66,10 +67,10 @@ class Message:
     ):
         self.role = role
         self.content = content
-        if prompt: self.prompt = prompt
-        if llm_response: self.llm_response = llm_response
-        if conversation_id: self.conversation_id = conversation_id
-        if utterance_id: self.utterance_id = utterance_id
+        if prompt is not None: self.prompt = prompt
+        if llm_response is not None: self.llm_response = llm_response
+        if conversation_id is not None: self.conversation_id = conversation_id
+        if utterance_id is not None: self.utterance_id = utterance_id
     
     def to_str(self):
         return f"{self.role.prefix}{self.content}"
@@ -107,6 +108,17 @@ class Conversation():
     
     def get_last_message(self) -> Message:
         return self.msgs[-1]
+
+    @classmethod
+    def from_messages(cls, msgs: List[Message]):
+        assert len(msgs) > 0, f"Must have at least one message!"
+        conv_id = msgs[0].conversation_id
+        instance = cls(conv_id)
+        instance.msgs = msgs
+        return instance
+    
+    def to_dataframe(self) -> pd.DataFrame:
+        return pd.DataFrame([m.to_dict() for m in self.msgs])
 
     @classmethod
     def load_from_json(cls, o:List):
