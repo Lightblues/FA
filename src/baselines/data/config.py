@@ -31,6 +31,7 @@ class Config:
     db_uri: str = 'mongodb://localhost:27017/'
     db_name: str = "pdl"
     db_message_collection_name: str = "messages"
+    db_meta_collection_name: str = "config"
 
     def to_dict(self):
         return asdict(self)

@@ -6,10 +6,15 @@ import pymongo, pymongo.results
 from engine import Message, Conversation, Role
 
 class DBManager:
-    def __init__(self, uri='mongodb://localhost:27017/', db_name='message_database', collection_name='messages', **kwargs) -> None:
+    def __init__(
+        self, uri='mongodb://localhost:27017/', db_name='message_database', 
+        collection_name='messages', meta_collection_name='config',
+        **kwargs
+    ) -> None:
         self.client = pymongo.MongoClient(uri)
         self.db = self.client[db_name]
         self.collection = self.db[collection_name]
+        self.collection_meta = self.db[meta_collection_name]
 
     def insert_message(self, message: Message) -> pymongo.results.InsertOneResult:
         message_dict = message.to_dict()
@@ -27,6 +32,15 @@ class DBManager:
         results = self.collection.find(query)
         messages = [Message(**{**res, "role": Role.get_by_rolename(res["role"])}) for res in results]
         return Conversation.from_messages(messages)
+    
+    def insert_config(self, infos: dict) -> pymongo.results.InsertOneResult:
+        res = self.collection_meta.insert_one(infos)
+        return res
+    
+    def query_config_by_conversation_id(self, conversation_id: str) -> dict:
+        query = {"conversation_id": conversation_id}
+        res = self.collection_meta.find_one(query)
+        return res
     
     def get_most_recent_unique_conversation_ids(self, num: int = 10) -> List[str]:
         pipeline = [

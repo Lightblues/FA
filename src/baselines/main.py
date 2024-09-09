@@ -135,10 +135,6 @@ class BaselineController:
     
     def start_conversation(self):
         infos = {
-            # "workflow_name": self.cfg.workflow_name,
-            # "model_name": self.cfg.model_name,
-            # "template_fn": self.cfg.template_fn,
-            # "workflow_dir": self.cfg.workflow_dir,
             "log_file": self.logger.log_fn,
             "conversation_id": self.conversation_id,
             "config": self.cfg.to_dict(),
@@ -152,8 +148,16 @@ class BaselineController:
         
         if self.cfg.log_to_db:
             db = DBManager(self.cfg.db_uri, self.cfg.db_name, self.cfg.db_message_collection_name)
+            # 1. insert conversation
             res = db.insert_conversation(conversation)
             print(f"  <db> Inserted conversation with {len(res.inserted_ids)} messages")
+            # 2. insert configuration
+            infos_dict = {
+                "conversation_id": self.conversation_id, "log_file": self.logger.log_fn,
+                **self.cfg.to_dict()
+            }
+            res = db.insert_config(infos_dict)
+            print(f"  <db> Inserted config")
 
         conversation_df = pd.DataFrame(conversation.to_list())[['role', 'content']].set_index('role')
         infos_end = tabulate.tabulate(conversation_df, tablefmt='psql', maxcolwidths=100)
