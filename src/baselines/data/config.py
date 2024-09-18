@@ -1,6 +1,6 @@
 """ updated @240906 
 """
-import yaml
+import yaml, copy
 from dataclasses import dataclass, asdict, field
 
 @dataclass
@@ -33,6 +33,9 @@ class Config:
     db_name: str = "pdl"
     db_message_collection_name: str = "messages"
     db_meta_collection_name: str = "config"
+    
+    simulate_num_persona: int = -1
+    simulate_max_workers: int = 10
 
     def to_dict(self):
         return asdict(self)
@@ -43,3 +46,6 @@ class Config:
             data = yaml.safe_load(file)
         obj = cls(**data)
         return obj
+    
+    def copy(self):
+        return copy.deepcopy(self)

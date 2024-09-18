@@ -32,12 +32,14 @@ class DataManager:
         self.data_version = infos['version']
         self.workflow_infos = infos['task_infos']
 
-
     @staticmethod
     def normalize_config_name(config_name:str):
         config_fn = DataManager.DIR_engine_config / config_name
         return config_fn
 
+    @property
+    def num_workflows(self):
+        return len(self.workflow_infos)
 
 
 class WorkflowType(Enum):

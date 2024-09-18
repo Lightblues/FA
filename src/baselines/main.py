@@ -73,7 +73,7 @@ class BaselineController:
         self.bot = BOT_NAME2CLASS[cfg.bot_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
         self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
     
-    def conversation(self) -> Conversation:
+    def conversation(self, verbose:bool=True) -> Conversation:
         """ 
         1. initiation: initialize the variables, logger, etc.
         2. main loop
@@ -91,7 +91,7 @@ class BaselineController:
                 with Timer("user process", print=self.cfg.log_utterence_time):
                     user_output: UserOutput = self.user.process()
                 # ...infos, log
-                self.log_msg(self.conv.get_last_message())
+                self.log_msg(self.conv.get_last_message(), verbose=verbose)
                 role = Role.BOT
                 if user_output.is_end:
                     print(f"  <main> ended by user!")
@@ -101,66 +101,65 @@ class BaselineController:
                 while True:         # limit the bot prediction steps
                     with Timer("bot process", print=self.cfg.log_utterence_time):
                         bot_output: BotOutput = self.bot.process()
-                    self.log_msg(self.conv.get_last_message())
+                    self.log_msg(self.conv.get_last_message(), verbose=verbose)
                     if bot_output.action_type == BotOutputType.RESPONSE:
                         break
                     elif bot_output.action_type == BotOutputType.ACTION:
                         # ... call the API, append results to conversation
                         with Timer("api process", print=self.cfg.log_utterence_time):
                             api_output: APIOutput = self.api.process(bot_output)
-                        self.log_msg(self.conv.get_last_message())
+                        self.log_msg(self.conv.get_last_message(), verbose=verbose)
                     else: raise TypeError(f"Unexpected BotOutputType: {bot_output.action_type}")
                     
                     num_bot_actions += 1
                     if num_bot_actions > self.cfg.bot_action_limit: 
                         # ... the default response
-                        print(f"  <main> bot retried actions reach limit!")
+                        self.logger.log(f"  <main> bot retried actions reach limit!", with_print=verbose)
                         break
                 role = Role.USER
             num_turns += 1
             if num_turns > self.cfg.conversation_turn_limit: 
-                print("  <main> end due to conversation turn limit!")
+                self.logger.log("  <main> end due to conversation turn limit!", with_print=verbose)
                 break
         
         return self.conv
 
-    def log_msg(self, msg:Message):
+    def log_msg(self, msg:Message, verbose=True):
         content = msg.to_str()      # or msg is str?
         role = msg.role
         self.logger.log(content, with_print=False)
-        if not (
+        if verbose and not (
             isinstance(self.user, InputUser) and (role == Role.USER)
         ): 
             self.logger.log_to_stdout(content, color=role.color)
     
-    def start_conversation(self):
+    def start_conversation(self, verbose=True):
         infos = {
-            "log_file": self.logger.log_fn,
             "conversation_id": self.conversation_id,
+            "exp_version": self.cfg.exp_version,
+            "log_file": self.logger.log_fn,
             "config": self.cfg.to_dict(),
         }
-        # s_infos = "\n".join([f"{k}: {v}" for k, v in infos.items()]) + "\n"
-        # infos_header = f"{'='*50}\n" + s_infos + " START! ".center(50, "=")
         infos_header = tabulate.tabulate(pd.DataFrame([infos]).T, tablefmt='psql', maxcolwidths=100)
-        self.logger.log(infos_header, with_print=True)
+        self.logger.log(infos_header, with_print=verbose)
 
-        conversation = self.conversation()      # main loop!
+        conversation = self.conversation(verbose=verbose)      # main loop!
         
         if self.cfg.log_to_db:
             db = DBManager(self.cfg.db_uri, self.cfg.db_name, self.cfg.db_message_collection_name)
             # 1. insert conversation
             res = db.insert_conversation(conversation)
-            print(f"  <db> Inserted conversation with {len(res.inserted_ids)} messages")
+            self.logger.log(f"  <db> Inserted conversation with {len(res.inserted_ids)} messages", with_print=verbose)
             # 2. insert configuration
             infos_dict = {
-                "conversation_id": self.conversation_id, "log_file": self.logger.log_fn,
+                "conversation_id": self.conversation_id, "exp_version": self.cfg.exp_version, "log_file": self.logger.log_fn, 
                 **self.cfg.to_dict()
             }
             res = db.insert_config(infos_dict)
-            print(f"  <db> Inserted config")
+            self.logger.log(f"  <db> Inserted config", with_print=verbose)
 
         conversation_df = pd.DataFrame(conversation.to_list())[['role', 'content']].set_index('role')
         infos_end = tabulate.tabulate(conversation_df, tablefmt='psql', maxcolwidths=100)
-        self.logger.log(infos_end, with_print=True)
+        self.logger.log(infos_end, with_print=verbose)
         return infos, conversation
     

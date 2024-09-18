@@ -42,12 +42,15 @@ def show_data_page():
         list(range(len(user_profiles))),
     )
     
-    # st.sidebar.markdown("---")
     ava_workflow_types = ["ALL"] + [wt.workflow_type for wt in WorkflowType]
-    selected_workflow_type = st.sidebar.selectbox(
-        "3️⃣ Select Workflow Type",
-        ava_workflow_types
-    )
+    col1, col2 = st.sidebar.columns([3, 1])
+    with col1:
+        selected_workflow_type = st.selectbox(
+            "3️⃣ Select Workflow Type",
+            ava_workflow_types
+        )
+    with col2:
+        refresh = st.button("Refresh") # utilize the feature of streamlit to refresh
     col21, col22 = st.sidebar.columns(2)
     with col21:
         use_current_workflow = st.checkbox("Use Correct Workflow")

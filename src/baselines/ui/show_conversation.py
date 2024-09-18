@@ -52,7 +52,6 @@ def show_conversation_page():
     # ------------------ main --------------------
     if conversation_id:
         # 1. query conversation from db ; show the conversation
-        
         conv = db.query_messages_by_conversation_id(conversation_id)
         df = conv.to_dataframe()
         selected_columns = ['role', 'content', 'utterance_id']
