@@ -6,22 +6,22 @@ from typing import List, Dict, Optional, Tuple, Union
 import pandas as pd
 import concurrent.futures
 from easonsi import utils
-# from engine import _DIRECTORY_MANAGER, LLM_CFG, init_client, PDL, Config
-# from .eval_utils import task_simulate, task_judge, task_judge_2, parse_conv, convert_conv
-# from .analyzer import Analyzer
-from .eval_utils import task_simulate
+
+from .eval_utils import task_simulate, task_judge
 from ..main import BaselineController
-from ..data import Config, DataManager
+from ..data import Config, DataManager, DBManager
 
 
 
 class Evaluator:
     cfg: Config = None
+    data_namager: DataManager = None
     # version: str = None
     # simulation_output_dir: str = None
     
     def __init__(self, cfg: Config):
         self.cfg = cfg
+        self.data_namager = DataManager(cfg)
         # self.version = cfg.simulate_version
         # if cfg.to_gsheet: 
         #     from easonsi.files.gsheet import GSheet
@@ -29,11 +29,14 @@ class Evaluator:
         
     def main(self):
         """ 
+        0. set configs. log the configs by `exp_version`
         1. run simulations, use `BaselineController(cfg).start_conversation()` to start a single exp with specific config
             output to db with `exp_version` (clean if exist)
         2. run evaluations (query db to find run exps)
         """
-        self.print_header_info(step_name="STEP 1.1: Simulating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("simulate")})
+        self.process_configs()
+        
+        self.print_header_info(step_name="STEP 1: Simulating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("simulate")})
         self.run_simulations()
 
         self.print_header_info(step_name="STEP 2.1: Evaluating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("judge")})
@@ -45,9 +48,22 @@ class Evaluator:
         # self.run_evaluations_v2()
         # self.print_header_info(step_name="STEP 2.4: Collecting evaluation results")
         # self.collect_evaluation_results(version="02")
+    
+    def process_configs(self):
+        """ Log the config. If existed, reload it! """
+        cfn_fn = self.data_namager.DIR_engine_config / f"exps/{self.cfg.exp_version}.yaml"
+        os.makedirs(cfn_fn.parent, exist_ok=True)
+        if os.path.exists(cfn_fn):
+            print(f"EXP {self.cfg.exp_version} config existed! Loading from {cfn_fn}")
+            self.cfg = Config.from_yaml(cfn_fn)     # NOTE: reload the config!
+        else:
+            self.cfg.to_yaml(cfn_fn)
+            print(f"EXP {self.cfg.exp_version} config saved to {cfn_fn}")
 
     @staticmethod
     def print_header_info(step_name: str, infos: Union[None, Dict, pd.DataFrame]=None):
+        """ Formatted header info """
+        step_name = f" {step_name.strip()} "
         s_print = step_name.center(150, "=") + "\n"
         if infos is not None:
             if isinstance(infos, dict):
@@ -67,9 +83,7 @@ class Evaluator:
         2. run simulations in parallel
         """
         def f_exec(cfg):
-            # 1. check if executated (query db)
-            # TODO: check if exist
-            
+            # 1. check if run (query db) -- DONE in `BaselineController.start_conversation`
             # 2. run with retry (3 times) NOTE: can be a decorator? 
             for retry_ in range(3):
                 try:
@@ -87,6 +101,7 @@ class Evaluator:
             for cfg in tasks:
                 future = executor.submit(f_exec, cfg)
                 futures.append(future)
+            print(f"Running {len(futures)} tasks...")
             for future in tqdm.tqdm(concurrent.futures.as_completed(futures), total=len(futures), desc="Executing tasks"):
                 future.result()  # 获取结果以捕获异常并打印错误信息
     
@@ -130,24 +145,13 @@ class Evaluator:
         1. get the experiments to be evaluated
         2. run evaluations in parallel
         """
-        conversations = utils.LoadJsonl(self.fn_conversations)
-        skipped = set()
-        if os.path.exists(self.fn_llmscored_raw):
-            existed = utils.LoadJsonl(self.fn_llmscored_raw)
-            for d in existed:
-                skipped.add((
-                    d["workflow_name"], d["workflow_id"]
-                ))
-        conversations_filtered = [c for c in conversations if (c["workflow_name"], c["workflow_id"]) not in skipped]
-        print(f"# of conversations to be judged: {len(conversations_filtered)}")
-        
-        client = init_client(llm_cfg=LLM_CFG[self.cfg.judge_model_name])
+        tasks = self.get_evaluation_configs(self.cfg)
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.cfg.judge_max_workers) as executor:
             futures = []
-            for conv in conversations_filtered:
-                future = executor.submit(task_judge, conv, self.fn_llmscored_raw, client)
+            for cfg in tasks:
+                future = executor.submit(task_judge, cfg)
                 futures.append(future)
-            print(f"Executing {len(futures)} tasks")
+            print(f"Executing {len(futures)} judge tasks...")
             num_errors = 0
             for future in tqdm.tqdm(concurrent.futures.as_completed(futures), total=len(futures), desc="Executing tasks"):
                 r = future.result()  # 获取结果以捕获异常并打印错误信息
@@ -156,49 +160,34 @@ class Evaluator:
         if num_errors > 0:
             raise Exception(f"# of errors when evaluation: {num_errors}")
 
-        # Simplify the jsonl format
-        df = pd.read_json(self.fn_llmscored_raw, lines=True)
-        df.sort_values(["workflow_name", "workflow_id"], inplace=True)
-        df_gpt = df[["workflow_name", "workflow_id", "judge_result"]]
-        df_gpt.to_json(self.fn_llmscored, orient="records", lines=True, force_ascii=False)
+    @staticmethod
+    def get_evaluation_configs(cfg:Config):
+        """filter the experiments by `exp_version`
+        """
+        # 1. find all run experiments
+        db = DBManager(cfg.db_uri, cfg.db_name, cfg.db_message_collection_name)
+        query = {
+            "exp_version": cfg.exp_version
+        }
+        run_exps = db.query_run_experiments(query, limit=0)
+        
+        # 2. write all exp configs to a new cfg
+        tasks = []
+        for exp in run_exps:
+            cfg_new = cfg.copy()
+            cfg_new.judge_conversation_id = exp["conversation_id"]
+            # TODO: check the configs
+            tasks.append(cfg_new)
+        return tasks
 
-    def collect_evaluation_results(self, version="01"):
+    def collect_evaluation_results(self):
         """ 
         FIXED: the eval format checked in `task_judge`
         """
-        if version == "01":
-            df_labelled_raw = pd.read_json(self.fn_llmscored, lines=True)
-            _out_sheeet_name = f"{self.version}_eval"
-            _ofn_stat_error = "stat_error_types.png"
-            _ofn_stat_score = "stat_scores_overall.png"
-        else:
-            df_labelled_raw = pd.read_json(self.fn_llmscored_2, lines=True)
-            _out_sheeet_name = f"{self.version}_eval_2"
-            _ofn_stat_error = "stat_error_types_2.png"
-            _ofn_stat_score = "stat_scores_overall_2.png"
         
         # 1) convert to format of doc
         #   cols: [error_types, score, misc]
-        converted = []
-        for idx, row in df_labelled_raw.iterrows():
-            id_ = f"{row['workflow_name']}_{row['workflow_id']:03d}"
-            jr = row["judge_result"]
-            converted.append((None, jr["overall"]["score"], id_))
-            converted.append((None, None, None))
-            for turn_id, turn_eval in sorted(jr["detailed"].items(), key=lambda x: int(x[0].split("-")[-1])):
-                errors = turn_eval["errors"]
-                error_types_str = ",".join(errors.keys() if errors else [])
-                converted.append((None, None, turn_id))
-                converted.append((error_types_str, turn_eval["score"], str(errors)))
-        df_labelled_for_excel = pd.DataFrame(converted, columns=["error_types", "score", "misc"])
-        # DONE: concate with formated conversations in `self.fn_conversations_for_labeling`
-        
-        df_conversation_for_excel = pd.read_csv(self.fn_conversations_for_excel)
-        assert len(df_conversation_for_excel) == len(df_labelled_for_excel), f"{len(df_conversation_for_excel)} != {len(df_labelled_for_excel)}"
-        _df_out = pd.concat([df_conversation_for_excel, df_labelled_for_excel], axis=1)
-        if self.cfg.to_gsheet:  # you can also save to csv
-            self.gsheet.to_gsheet(_df_out, sheet_name=_out_sheeet_name)
-        
+
         # 2) analyze
         analyzer = Analyzer(df_labelled_raw, output_dir=self.judger_output_dir)
         _num_workflows = len(df_labelled_raw["workflow_name"].unique())
@@ -219,39 +208,3 @@ class Evaluator:
         # grouped_passrate = grouped_passrate.round(3)
         # tabbed_str = "\t".join(grouped_passrate.columns) + "\n" + "\n".join(["\t".join(map(str, row)) for row in grouped_passrate.values])
         # print(tabbed_str)
-        
-    def run_evaluations_v2(self):
-        _ofn_detailed = self.fn_llmscored_2_raw
-        _ofn = self.fn_llmscored_2
-        
-        conversations = utils.LoadJsonl(self.fn_conversations)
-        skipped = set()
-        if os.path.exists(_ofn_detailed):
-            existed = utils.LoadJsonl(_ofn_detailed)
-            for d in existed:
-                skipped.add((
-                    d["workflow_name"], d["workflow_id"]
-                ))
-        conversations_filtered = [c for c in conversations if (c["workflow_name"], c["workflow_id"]) not in skipped]
-        print(f"# of conversations to be judged: {len(conversations_filtered)}")
-        
-        client = init_client(llm_cfg=LLM_CFG[self.cfg.judge_model_name])
-        with concurrent.futures.ThreadPoolExecutor(max_workers=self.cfg.judge_max_workers) as executor:
-            futures = []
-            for conv in conversations_filtered:
-                future = executor.submit(task_judge_2, conv, _ofn_detailed, client)
-                futures.append(future)
-            print(f"Executing {len(futures)} tasks")
-            num_errors = 0
-            for future in tqdm.tqdm(concurrent.futures.as_completed(futures), total=len(futures), desc="Executing tasks"):
-                r = future.result()  # 获取结果以捕获异常并打印错误信息
-                if r: num_errors += 1
-            print(f"# of errors: {num_errors}")
-        if num_errors > 0:
-            raise Exception(f"# of errors when evaluation: {num_errors}")
-
-        # Simplify the jsonl format
-        df = pd.read_json(_ofn_detailed, lines=True)
-        df.sort_values(["workflow_name", "workflow_id"], inplace=True)
-        df_gpt = df[["workflow_name", "workflow_id", "judge_result"]]
-        df_gpt.to_json(_ofn, orient="records", lines=True, force_ascii=False)

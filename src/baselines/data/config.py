@@ -36,16 +36,25 @@ class Config:
     
     simulate_num_persona: int = -1
     simulate_max_workers: int = 10
+    
+    judge_max_workers: int = 10
+    judge_model_name: str = "gpt-4o"
+    judge_conversation_id: str = None
+    # judge_passrate_threshold: int = 3
 
     def to_dict(self):
         return asdict(self)
 
     @classmethod
-    def from_yaml(cls, yaml_file: str, normalize: bool = True):
+    def from_yaml(cls, yaml_file: str):
         with open(yaml_file, 'r') as file:
             data = yaml.safe_load(file)
         obj = cls(**data)
         return obj
+    
+    def to_yaml(self, yaml_file: str):
+        with open(yaml_file, 'w') as file:
+            yaml.dump(asdict(self), file)
     
     def copy(self):
         return copy.deepcopy(self)

@@ -1,3 +1,4 @@
+# NOTE: the following 4 fields identify one experiment!!!
 workflow_dataset: "STAR"
 workflow_type: "text"
 workflow_id: "000"
@@ -29,4 +30,8 @@ db_meta_collection_name: "config"
 
 simulate_num_persona: 3
 simulate_max_workers: 10
+
+judge_max_workers: 10
+judge_model_name: "gpt-4o"
+judge_conversation_id: "2024-09-18 16:50:26.198651"
 

@@ -1,4 +1,15 @@
-## code notes
+# code notes
+
+## 数据存储 (mongo)
+
+```sh
+# config. PK: conversation_id
+(exp_version, conversation_id), log_file, <config> (workflow_dataset, workflow_type, workflow_id), ...
+# messages. PK: (conversation_id, utterance_id), FK: (conversation_id)
+(conversation_id, utterance_id), (role, content), (prompt, llm_response)
+# eval FK: (conversation_id)
+(conversation_id), <eval results>
+```
 
 
 ## engine of PDL
@@ -119,12 +130,6 @@ class BaselineController:
 ====================== END! ======================
 ```
 
-### 角色逻辑
-
-User
-
-1. InputUser
-2. 
 
 
 

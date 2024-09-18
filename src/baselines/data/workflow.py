@@ -110,6 +110,9 @@ class Workflow:  # rename -> Data
         infos = data_manager.workflow_infos[id]
         assert all([k in infos for k in ['name', 'task_background']]), f"[ERROR] missing key in {infos}"
         return cls(data_manager, type, id, **infos, **kwargs)
+    
+    def to_str(self):
+        return f"{self.type} {self.id}: {self.name}\nTask: {self.task_background}\n{self.workflow}"
 
 
 if __name__ == '__main__':
