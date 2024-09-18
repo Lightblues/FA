@@ -1,0 +1,35 @@
+Below is a json object describing a API call, which mainly contains the followng fields:
+-**input**: input parameters of the API
+-**output**: output parameters of the API
+-**required**: All the required parameters of this API.
+-**function**: API name 
+
+### original API
+```json
+{{ API }}
+```
+
+please output in the following format:
+```json
+[
+    {
+        "API": "API name",
+        "API description": "a brief description of the task, e.g. Check the ticket availability for a flight given by the user",
+        "Input parameters": {
+                "parameter_name": {
+                    "type": "type of the parameter, e.g. string, float, categorical",
+                    "description": "brief description of the parameter",
+                    "categories": list of all possible values for this parameter, if the values of the parameter are categorical.
+                    "required": "Whether this parameter is required when making the call. [true, false]"
+                },...
+        },
+        "Output parameters": {
+                "parameter_name": {
+                    "type": 
+                    "description": 
+                },...
+        }
+    },...
+]
+```
+Now give your answer:
