@@ -1,4 +1,6 @@
 # NOTE: the following 4 fields identify one experiment!!!
+# specifically, workflow_dataset & workflow_type should be all same for one exp_version
+# i.e. one `exp_version + workflow_id` identify one experiment
 workflow_dataset: "STAR"
 workflow_type: "text"
 workflow_id: "000"
