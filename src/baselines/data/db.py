@@ -8,13 +8,14 @@ from engine import Message, Conversation, Role
 class DBManager:
     def __init__(
         self, uri='mongodb://localhost:27017/', db_name='message_database', 
-        collection_name='messages', meta_collection_name='config',
+        collection_name='messages', meta_collection_name='config', eval_collection_name='evaluations',
         **kwargs
     ) -> None:
         self.client = pymongo.MongoClient(uri)
         self.db = self.client[db_name]
         self.collection = self.db[collection_name]
         self.collection_meta = self.db[meta_collection_name]
+        self.collection_eval = self.db[eval_collection_name]
 
     def insert_message(self, message: Message) -> pymongo.results.InsertOneResult:
         message_dict = message.to_dict()
@@ -33,6 +34,7 @@ class DBManager:
         return Conversation.from_messages(messages)
     
     def insert_config(self, infos: dict) -> pymongo.results.InsertOneResult:
+        """ record one experiment """
         res = self.collection_meta.insert_one(infos)
         return res
     
@@ -41,30 +43,26 @@ class DBManager:
         res = self.collection_meta.find_one(query)
         return res
     
-    # def get_most_recent_unique_conversation_ids(self, num: int = 10) -> List[str]:
-    #     pipeline = [
-    #         {"$match": {"conversation_id": {"$ne": None}}},
-    #         {"$group": {
-    #             "_id": "$conversation_id",
-    #             "latest_doc": {"$first": "$$ROOT"}
-    #         }},
-    #         {"$replaceRoot": {"newRoot": "$latest_doc"}},
-    #         {"$sort": {"conversation_id": -1}}, # _id
-    #         {"$limit": num}
-    #     ]
-    #     results = self.collection.aggregate(pipeline)
-    #     return [res["conversation_id"] for res in results]
     def get_most_recent_unique_conversation_ids(
         self, query: dict = {}, num: int = 10
     ) -> List[str]:
+        """ query collection_meta, sort by conversation_id """
         sort_order = [('conversation_id', -1)]
         results = self.collection_meta.find(query).sort(sort_order).limit(num)
         return [res["conversation_id"] for res in results]
     
-    def query_run_experiments(self, query: dict = {}, limit: int = 10) -> List[dict]:
+    def query_run_experiments(self, query: dict = {}, limit: int = 0) -> List[dict]:
         sort_order = [('conversation_id', -1)]
         results = self.collection_meta.find(query).sort(sort_order).limit(limit)
         return [res for res in results]
+
+    def query_evaluations(self, query: dict = {}, limit: int = 0) -> List[dict]:
+        results = self.collection_eval.find(query).limit(limit)
+        return [res for res in results]
+    
+    def insert_evaluation(self, eval_result: dict) -> pymongo.results.InsertOneResult:
+        res = self.collection_eval.insert_one(eval_result)
+        return res
 
 
 if __name__ == "__main__":

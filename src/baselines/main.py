@@ -143,6 +143,18 @@ class BaselineController:
         infos_header = tabulate.tabulate(pd.DataFrame([infos]).T, tablefmt='psql', maxcolwidths=100)
         self.logger.log(infos_header, with_print=verbose)
 
+        # check if run!
+        if self.cfg.log_to_db:
+            db = DBManager(self.cfg.db_uri, self.cfg.db_name, self.cfg.db_message_collection_name)
+            query = {
+                "exp_version": self.cfg.exp_version,
+                **{ k:v for k,v in self.cfg.to_dict().items() if k.startswith("workflow") },
+            }
+            query_res = db.query_run_experiments(query)
+            if len(query_res) > 0:
+                self.logger.log(f"NOTE: the experiment has already been run!", with_print=verbose)
+                return infos, None  # the returned results haven't been used
+
         conversation = self.conversation(verbose=verbose)      # main loop!
         
         if self.cfg.log_to_db:
