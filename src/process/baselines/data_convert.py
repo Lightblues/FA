@@ -83,6 +83,8 @@ def build_task_infos(version="v240908"):
     task_infos = {}
     for name in name_map:
         try: 
+            if check_is_binary(IDIR / "NL" / f"{name}.json"):
+                raise Exception(f"{name} is binary")
             with open(IDIR / "NL" / f"{name}.json", "r") as f:
                 infos = json.load(f)
             task_infos[name_map[name]] = {
@@ -110,9 +112,8 @@ def convert_format_code():
     for name in name_map:
         try:
             # check that code in not binary
-            with open(IDIR / "code" / f"{name}.py", "rb") as f:
-                code = f.read()
-                if b'\0' in code: raise Exception(f"{name} is binary")
+            if check_is_binary(IDIR / "code" / f"{name}.py"):
+                raise Exception(f"{name} is binary")
             with open(IDIR / "code" / f"{name}.py", "r") as f:
                 code = f.read()
             with open(ODIR / "code" / f"{name_map[name]}.py", "w") as f:
@@ -169,7 +170,7 @@ def convert_format_text():
 convert_format_text()
 
 # %%
-def fix_type(d: dict, old_key: str = "interative_pattern", new_key: str = "interactive_pattern"):
+def fix_typo(d: dict, old_key: str = "interative_pattern", new_key: str = "interactive_pattern"):
     # interative_pattern -> interactive_pattern
     if old_key in d:
         d[new_key] = d[old_key]
@@ -187,7 +188,7 @@ def convert_format_userprofile():
                 raise Exception(f"{name} is binary")
             with open(IDIR / "../user_profile" / f"{name}.json", "r") as f:
                 data = json.load(f)
-            data = [fix_type(d) for d in data]
+            data = [fix_typo(d) for d in data]
             with open(ODIR / "user_profile" / f"{name_map[name]}.json", "w") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
             num_success += 1

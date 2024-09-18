@@ -8,6 +8,7 @@ class Config:
     workflow_dataset: str = "STAR"
     workflow_type: str = "text"     # text, code, flowchart
     workflow_id: str = "000"
+    exp_version: str = "default"
     
     user_mode: str = "llm_profile"
     user_llm_name: str = "gpt-4o"

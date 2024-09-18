@@ -1,6 +1,6 @@
 """ updated 240906
 usage:
-    python run_baseline.py --config=default.yaml \
+    python run_baseline.py --config=default.yaml --exp-version=default \
         --workflow-type=text --workflow-id=000 \
         --user-mode=llm_profile --user-llm-name=gpt-4o --user-profile-id=0 \
         --bot-mode=react_bot --bot-llm-name=gpt-4o \
@@ -21,6 +21,7 @@ def run_baseline(
     workflow_dataset: str = typer.Option(None, help="Workflow dataset", case_sensitive=False),
     workflow_type: WorkflowTypeStr = typer.Option(None, help="Workflow type", case_sensitive=False),
     workflow_id: str = typer.Option(None, help="Workflow ID"),
+    exp_version: str = typer.Option(None, help="Experiment version"),
     user_mode: UserMode = typer.Option(None, help="User mode", case_sensitive=False), # type: ignore
     user_llm_name: str = typer.Option(None, help="User LLM name"),
     user_template_fn: str = typer.Option(None, help="User template filename"),
@@ -38,6 +39,7 @@ def run_baseline(
     if workflow_dataset is not None: cfg.workflow_dataset = workflow_dataset
     if workflow_type is not None: cfg.workflow_type = workflow_type.value
     if workflow_id is not None: cfg.workflow_id = workflow_id
+    if exp_version is not None: cfg.exp_version = exp_version
     if user_mode is not None: cfg.user_mode = user_mode.value
     if user_llm_name is not None: cfg.user_llm_name = user_llm_name
     if user_template_fn is not None: cfg.user_template_fn = user_template_fn

@@ -1,6 +1,7 @@
 workflow_dataset: "STAR"
 workflow_type: "text"
 workflow_id: "000"
+exp_version: "default"
 
 user_mode: "llm_profile"   # dummy_user, input_user, llm_profile
 user_llm_name: "gpt-4o"

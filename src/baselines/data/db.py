@@ -24,7 +24,6 @@ class DBManager:
     def insert_conversation(self, conversation: Conversation) -> pymongo.results.InsertManyResult:
         conversation_list = conversation.to_list()
         res = self.collection.insert_many(conversation_list)
-        # print(f"  <db> Inserted conversation with {len(res.inserted_ids)} messages")
         return res
 
     def query_messages_by_conversation_id(self, conversation_id: str) -> Conversation:
