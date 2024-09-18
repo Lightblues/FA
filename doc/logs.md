@@ -4,6 +4,10 @@
 3. json 解析出错 -- 发现eval的兼容性更好
 
 
+
+
+
+
 ## 240905 进度讨论
 1. Workflow构造: 用户query + 网页检索 -> 自动化 生成 (based on the first page) + 改写 (w/ following pages) PDL
 2. 使用画布的三种角色

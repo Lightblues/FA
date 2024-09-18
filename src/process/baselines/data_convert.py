@@ -58,12 +58,14 @@
 # %%
 import os, sys, json, yaml, pathlib
 
-IDIR = pathlib.Path("/apdcephfs_cq8/share_2992827/shennong_5/siqiicai/data/STAR/tasks_transfered")
-ODIR = pathlib.Path("/work/huabu/dataset/STAR")
+# IDIR = pathlib.Path("/apdcephfs_cq8/share_2992827/shennong_5/siqiicai/data/STAR/tasks_transfered")
+# ODIR = pathlib.Path("/work/huabu/dataset/STAR")
+IDIR = pathlib.Path("/apdcephfs_cq8/share_2992827/shennong_5/siqiicai/data/SGD/workflows")
+ODIR = pathlib.Path("/work/huabu/dataset/SGD")
 os.makedirs(ODIR, exist_ok=True)
 
-def build_name_map():
-    fns = os.listdir(IDIR / "../user_profile")
+def build_name_map(subdir="../user_profile"):
+    fns = os.listdir(IDIR / subdir)
     fns.sort()
     # remove the extension
     names = [os.path.splitext(fn)[0] for fn in fns]
@@ -200,16 +202,16 @@ def convert_format_userprofile():
 convert_format_userprofile()
 
 # %%
-def convert_format_api():
-    print(f"Converting api from `../apis/apis_transfered` subfolder")
+def convert_format_api(subdir="../apis/apis_transfered"):
+    print(f"Converting api from `{subdir}` subfolder")
     os.makedirs(ODIR / "tools", exist_ok=True)
     num_success = 0
     for name in name_map:
         try:
             # check that code in not binary
-            if check_is_binary(IDIR / "../apis/apis_transfered" / f"{name}.json"):
+            if check_is_binary(IDIR / subdir / f"{name}.json"):
                 raise Exception(f"{name} is binary")
-            with open(IDIR / "../apis/apis_transfered" / f"{name}.json", "r") as f:
+            with open(IDIR / subdir / f"{name}.json", "r") as f:
                 data = json.load(f)
             with open(ODIR / "tools" / f"{name_map[name]}.yaml", "w") as f:
                 yaml.dump(data, f, indent=2)
@@ -219,6 +221,6 @@ def convert_format_api():
             continue
     print(f"Converted {num_success} tasks")
     return num_success
-convert_format_api()
+convert_format_api("../apis")
 
 # %%

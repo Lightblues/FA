@@ -70,7 +70,7 @@ class Evaluator:
             # 1. check if executated (query db)
             # TODO: check if exist
             
-            # 2. run with retry (3 times)
+            # 2. run with retry (3 times) NOTE: can be a decorator? 
             for retry_ in range(3):
                 try:
                     return task_simulate(cfg)
