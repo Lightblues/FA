@@ -10,19 +10,18 @@ from easonsi import utils
 from .eval_utils import task_simulate, task_judge
 from ..main import BaselineController
 from ..data import Config, DataManager, DBManager
-
+from .analyzer import Analyzer
 
 
 class Evaluator:
     cfg: Config = None
     data_namager: DataManager = None
-    # version: str = None
-    # simulation_output_dir: str = None
+    db: DBManager = None
     
     def __init__(self, cfg: Config):
         self.cfg = cfg
         self.data_namager = DataManager(cfg)
-        # self.version = cfg.simulate_version
+        self.db = DBManager(cfg.db_uri, cfg.db_name, cfg.db_message_collection_name)
         # if cfg.to_gsheet: 
         #     from easonsi.files.gsheet import GSheet
         #     self.gsheet = GSheet()
@@ -39,15 +38,11 @@ class Evaluator:
         self.print_header_info(step_name="STEP 1: Simulating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("simulate")})
         self.run_simulations()
 
-        self.print_header_info(step_name="STEP 2.1: Evaluating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("judge")})
+        self.print_header_info(step_name="STEP 2: Evaluating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("judge")})
         self.run_evaluations()
-        # self.print_header_info(step_name="STEP 2.2: Collecting evaluation results")
-        # self.collect_evaluation_results(version="01")
         
-        # self.print_header_info(step_name="STEP 2.3: Evaluating V2", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("judge")})
-        # self.run_evaluations_v2()
-        # self.print_header_info(step_name="STEP 2.4: Collecting evaluation results")
-        # self.collect_evaluation_results(version="02")
+        self.print_header_info(step_name="STEP 3: Analyzing")
+        self.analyze()
     
     def process_configs(self):
         """ Log the config. If existed, reload it! """
@@ -141,7 +136,7 @@ class Evaluator:
 
 
     def run_evaluations(self):
-        """ 
+        """ evaluation process:
         1. get the experiments to be evaluated
         2. run evaluations in parallel
         """
@@ -160,51 +155,38 @@ class Evaluator:
         if num_errors > 0:
             raise Exception(f"# of errors when evaluation: {num_errors}")
 
-    @staticmethod
-    def get_evaluation_configs(cfg:Config):
+    def get_evaluation_configs(self, cfg:Config):
         """filter the experiments by `exp_version`
         """
         # 1. find all run experiments
-        db = DBManager(cfg.db_uri, cfg.db_name, cfg.db_message_collection_name)
         query = {
             "exp_version": cfg.exp_version
         }
-        run_exps = db.query_run_experiments(query, limit=0)
+        run_exps = self.db.query_run_experiments(query, limit=0)
         
         # 2. write all exp configs to a new cfg
         tasks = []
         for exp in run_exps:
             cfg_new = cfg.copy()
             cfg_new.judge_conversation_id = exp["conversation_id"]
-            # TODO: check the configs
+            # NOTE: check if the configs of run exps match the input config? partly done by the "reloading" mechanism
             tasks.append(cfg_new)
         return tasks
 
-    def collect_evaluation_results(self):
-        """ 
-        FIXED: the eval format checked in `task_judge`
+    def analyze(self):
+        """ analysis process:
+        1. collecte the evaluation results
         """
-        
-        # 1) convert to format of doc
-        #   cols: [error_types, score, misc]
 
-        # 2) analyze
-        analyzer = Analyzer(df_labelled_raw, output_dir=self.judger_output_dir)
-        _num_workflows = len(df_labelled_raw["workflow_name"].unique())
-        stat_dict = {
-            "num_workflows": _num_workflows,
-            "support": len(df_labelled_raw) // _num_workflows
-        }
-        _ = analyzer.stat_num_turns(stat_dict=stat_dict)
-        _ = analyzer.stat_scores_overall(th=self.cfg.judge_passrate_threshold, ofn=_ofn_stat_score, stat_dict=stat_dict)
-        _ = analyzer.stat_error_types(ofn=_ofn_stat_error)
-        df_grouped_passrate = analyzer.stat_grouped_passrate(th=self.cfg.judge_passrate_threshold).round(3)
-        df_stats = pd.DataFrame([stat_dict]).T.round(3) \
-            .reset_index().rename(columns={"index": "key", 0: "value"})
-        print(f"--- stats ---\n" + tabulate.tabulate(df_stats, tablefmt='psql'))
-        print(f"--- grouped passrate ---\n" + tabulate.tabulate(df_grouped_passrate, tablefmt='psql'))
+        analyzer = Analyzer(self.cfg)
+        analyzer.analyze()
+        # _ = analyzer.stat_num_turns()
+        # _ = analyzer.stat_scores_overall()
+        # _ = analyzer.stat_error_types()
+        # df_grouped_passrate = analyzer.stat_grouped_passrate(th=self.cfg.judge_passrate_threshold).round(3)
+        # df_stats = pd.DataFrame([stat_dict]).T.round(3) \
+        #     .reset_index().rename(columns={"index": "key", 0: "value"})
+        # print(f"--- stats ---\n" + tabulate.tabulate(df_stats, tablefmt='psql'))
+        # print(f"--- grouped passrate ---\n" + tabulate.tabulate(df_grouped_passrate, tablefmt='psql'))
         
-        # useful to copy and paste into Excel??
-        # grouped_passrate = grouped_passrate.round(3)
-        # tabbed_str = "\t".join(grouped_passrate.columns) + "\n" + "\n".join(["\t".join(map(str, row)) for row in grouped_passrate.values])
-        # print(tabbed_str)
+

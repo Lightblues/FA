@@ -1,3 +1,7 @@
+""" updated @240918
+
+"""
+
 import re, yaml, tabulate
 import pandas as pd
 from typing import List, Dict, Optional, Tuple
@@ -75,6 +79,7 @@ class Judger:
             # TODO: standardize the judge results
             "prompt": prompt,
             "llm_response": res,
+            "num_turns": len(simulated_conversation),       # //2
         }
         # 2.2. save the judge result to db
         self.db.insert_evaluation(out)
