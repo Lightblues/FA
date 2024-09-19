@@ -16,6 +16,9 @@ bot_mode: "react_bot"     # dummy_bot, react_bot
 bot_template_fn: "baselines/flowbench.jinja"
 bot_llm_name: "gpt-4o"
 bot_action_limit: 5
+pdl_check_dependency: true
+pdl_check_api_dup_calls: true
+pdl_check_api_dup_calls_threshold: 2
 
 api_mode: "llm"           # dummy_api, llm
 api_template_fn: "baselines/api_llm.jinja"

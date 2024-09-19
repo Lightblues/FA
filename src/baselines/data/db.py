@@ -3,7 +3,7 @@
 """
 from typing import List
 import pymongo, pymongo.results
-from engine import Message, Conversation, Role
+from .base_data import Message, Conversation, Role
 
 class DBManager:
     def __init__(

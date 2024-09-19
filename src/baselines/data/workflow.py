@@ -1,5 +1,5 @@
 """ updated @240906
-WorkflowType: text, code, flowchart
+WorkflowType: text, code, flowchart, pdl
     with different subdirs and suffixes!
 """
 import yaml, json
@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import List, Dict, Optional, Union
 from .user_profile import UserProfile
 from .config import Config
+from .pdl import PDL
 
 @dataclass
 class DataManager:
@@ -17,7 +18,7 @@ class DataManager:
     DIR_root = Path(__file__).resolve().parent.parent.parent.parent
     DIR_src_base = (DIR_root / "src")
     
-    DIR_engine_config = DIR_root / "src/baselines/configs"
+    DIR_config = DIR_root / "src/baselines/configs"
     
     DIR_data_root = DIR_root / "dataset"
     # DIR_data_flowbench = None
@@ -34,7 +35,7 @@ class DataManager:
 
     @staticmethod
     def normalize_config_name(config_name:str):
-        config_fn = DataManager.DIR_engine_config / config_name
+        config_fn = DataManager.DIR_config / config_name
         return config_fn
 
     @property
@@ -46,6 +47,7 @@ class WorkflowType(Enum):
     TEXT = ("TEXT", "format for natural language", ".txt", 'text')
     CODE = ("CODE", "format of code", ".py", 'code')
     FLOWCHART = ("FLOWCHART", "format of flowchart", ".md", 'flowchart')
+    PDL = ("PDL", "format of PDL", ".yaml", 'pdl')
 
     def __init__(self, workflow_type, description, suffix, subdir):
         self.workflow_type: str = workflow_type
@@ -66,6 +68,7 @@ class WorkflowTypeStr(str, Enum):
     TEXT = "TEXT"
     CODE = "CODE"
     FLOWCHART = "FLOWCHART"
+    PDL = "PDL"
 
 @dataclass
 class Tool:
@@ -86,6 +89,8 @@ class Workflow:  # rename -> Data
     
     data_manager: DataManager = None
     
+    pdl: PDL = None         # only for PDL
+    
     def __init__(self, data_manager:DataManager, type:str, id:str, name:str, task_background:str, load_user_profiles=False, **kwargs):
         self.data_manager = data_manager
         
@@ -103,6 +108,9 @@ class Workflow:  # rename -> Data
             with open(data_manager.DIR_data_flowbench / f"user_profile/{id}.json", 'r') as f:
                 user_profiles = json.load(f)
             self.user_profiles = [UserProfile.load_from_dict(profile) for profile in user_profiles]
+        
+        if _type == WorkflowType.PDL:
+            self.pdl = PDL.load_from_file(data_manager.DIR_data_flowbench / f"pdl/{id}.yaml")
     
     @classmethod
     def load_by_id(cls, data_manager:DataManager, id:str, type:str, **kwargs):
@@ -112,14 +120,5 @@ class Workflow:  # rename -> Data
         return cls(data_manager, type, id, **infos, **kwargs)
     
     def to_str(self):
-        return f"{self.type} {self.id}: {self.name}\nTask: {self.task_background}\n{self.workflow}"
+        return f"{self.type} {self.id}: {self.name}\nTask: {self.task_background}\n---\n{self.workflow}"
 
-
-if __name__ == '__main__':
-    workflow = Workflow(
-        _type='text',
-        id="000",
-        name="flight_booking_inquiry",
-        task_background="search for flight tickets",
-    )
-    print(workflow)

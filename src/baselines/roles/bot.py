@@ -2,9 +2,8 @@
 """
 import re, datetime, json
 from typing import List
-from engine import Message, Role, init_client, LLM_CFG
 from .base import BaseBot
-from ..data import BotOutput, BotOutputType
+from ..data import BotOutput, BotOutputType, Message, Role, init_client, LLM_CFG
 from utils.jinja_templates import jinja_render
 from easonsi.llm.openai_client import OpenAIClient, Formater
 

@@ -11,11 +11,8 @@ from easonsi.llm.openai_client import OpenAIClient, Formater
 
 from ..data import (
     Config,
-    Workflow, DBManager, DataManager, UserProfile
-)
-from engine import (
-    Role, Message, Conversation, ActionType, ConversationInfos, Logger, BaseLogger,
-    LLM_CFG, init_client
+    Workflow, DBManager, DataManager, UserProfile,
+    Conversation, Logger, BaseLogger, LLM_CFG, init_client
 )
 from utils.jinja_templates import jinja_render
 

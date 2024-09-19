@@ -2,8 +2,10 @@ import collections
 from abc import abstractmethod
 from typing import List, Dict, Optional, Tuple, Union
 from easonsi.llm.openai_client import OpenAIClient
-from engine import Conversation, Message, Role
-from ..data import Config, UserOutput, BotOutput, APIOutput, BotOutputType
+from ..data import (
+    Config, UserOutput, BotOutput, APIOutput, BotOutputType,
+    Conversation, Message, Role
+)
 from ..data import Tool, Workflow
 
 

@@ -27,8 +27,8 @@ class UserOutput:
 @dataclass
 class BotOutput:
     thought: str = None
-    action: str = None
-    action_input: Union[str, Dict] = None
+    action: str = None                      # api name
+    action_input: Union[str, Dict] = None   # api paras
     response: str = None
     
     thought_str = "Thought"

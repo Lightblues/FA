@@ -5,8 +5,7 @@ LLMSimulatedUserWithProfile
 import re
 from typing import List
 from .base import BaseUser
-from ..data import UserOutput, UserProfile
-from engine import Role, Message, prompt_user_input, init_client, LLM_CFG
+from ..data import UserOutput, UserProfile, Role, Message, prompt_user_input, init_client, LLM_CFG
 from utils.jinja_templates import jinja_render
 from easonsi.llm.openai_client import OpenAIClient, Formater
 

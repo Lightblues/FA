@@ -10,7 +10,7 @@ import concurrent.futures
 from easonsi import utils
 
 from .eval_utils import task_simulate, task_judge
-from ..main import BaselineController
+from ..controller import FlowbenchController
 from ..data import Config, DataManager, DBManager
 from .analyzer import Analyzer
 
@@ -51,7 +51,7 @@ class Evaluator:
     
     def process_configs(self):
         """ Log the config. If existed, reload it! """
-        cfn_fn = self.data_namager.DIR_engine_config / f"exps/{self.cfg.exp_version}.yaml"
+        cfn_fn = self.data_namager.DIR_config / f"exps/{self.cfg.exp_version}.yaml"
         os.makedirs(cfn_fn.parent, exist_ok=True)
         if os.path.exists(cfn_fn):
             print(f"EXP {self.cfg.exp_version} config existed! Loading from {cfn_fn}")
@@ -110,7 +110,7 @@ class Evaluator:
         """ Run simulation for a specific workflow
         """
         # 1. get all user ids
-        user_profiles = BaselineController(cfg).workflow.user_profiles
+        user_profiles = FlowbenchController(cfg).workflow.user_profiles
         num_user_profile = len(user_profiles)
         if simulate_num_persona is not None and simulate_num_persona > 0:
             num_user_profile = min(num_user_profile, simulate_num_persona)

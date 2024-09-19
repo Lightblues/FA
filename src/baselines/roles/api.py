@@ -3,9 +3,8 @@
 """
 import json, re
 from typing import List
-from engine import Role, Message, init_client, LLM_CFG
 from .base import BaseAPIHandler
-from ..data import APIOutput, BotOutput
+from ..data import APIOutput, BotOutput, Role, Message, init_client, LLM_CFG
 from utils.jinja_templates import jinja_render
 from easonsi.llm.openai_client import OpenAIClient, Formater
 

@@ -20,6 +20,9 @@ class Config:
     bot_template_fn: str = "baselines/flowbench.jinja"
     bot_llm_name: str = "gpt-4o"
     bot_action_limit: int = 5
+    pdl_check_dependency: bool = True
+    pdl_check_api_dup_calls: bool = True
+    pdl_check_api_dup_calls_threshold: int = 2
     
     api_mode: str = "llm"
     api_template_fn: str = "baselines/api_llm.jinja"

@@ -9,7 +9,7 @@ usage:
         --conversation-turn-limit=20 --log-utterence-time --log-to-db
 """
 import typer
-from baselines import Config, BaselineController, DataManager
+from baselines import Config, DataManager, WORKFLOW_TYPE2CONTROLLER, BaseController
 from baselines.data import WorkflowType, WorkflowTypeStr
 from baselines.roles import UserMode, BotMode, ApiMode
 
@@ -54,7 +54,7 @@ def run_baseline(
     if log_to_db is not None: cfg.log_to_db = log_to_db
     # print(f">> config: {cfg}")
 
-    controller = BaselineController(cfg)
+    controller: BaseController = WORKFLOW_TYPE2CONTROLLER[cfg.workflow_type](cfg)
     controller.start_conversation()
 
 if __name__ == "__main__":
