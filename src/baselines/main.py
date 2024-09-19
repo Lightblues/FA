@@ -9,13 +9,14 @@
 - data
     - [ ] convert from v240820
     - [x] dataset orginization (Datamanager)
-    - [ ] whole generation | simulation
+    - [x] whole generation | simulation
     - [x] store the generated conversation data in a database! (with a session_id)
 - evaluation
-    - [ ] start simulations. 
-- robustness
-    - [ ] add retry for API or bot? -> how to evaluate?
-    - [ ] user simulation: make simulated user to be more realistic (shorter utterance, ...)
+    - [x] start simulations. 
+- robustness & accuracy
+    - [x] add retry for API or bot? -> how to evaluate?
+    - [x] user simulation: make simulated user to be more realistic (shorter utterance, ...)
+    - [ ] API: refine the prompt of API simulator
 
 ------------------------------ abstraction ------------------------------
 Conversation:
@@ -94,7 +95,7 @@ class BaselineController:
                 self.log_msg(self.conv.get_last_message(), verbose=verbose)
                 role = Role.BOT
                 if user_output.is_end:
-                    print(f"  <main> ended by user!")
+                    self.logger.log(f"  <main> ended by user!", with_print=verbose)
                     break
             elif role == Role.BOT:
                 num_bot_actions = 0

@@ -7,6 +7,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from ..data import Config, DBManager
+from .metric import MetricAcc, MetricF1
 
 class Analyzer:
     cfg: Config = None
@@ -38,24 +39,43 @@ class Analyzer:
     
     def analyze(self):
         # TODO: summary exp settings
-        df = self.df
-        
-        df['if_pass'] = df['judge_result'].apply(lambda x: x['Result'] == 'yes')
-        df['goals_total'] = df['judge_result'].apply(lambda x: int(x['Total number of goals']))
-        df['goals_accomplished'] = df['judge_result'].apply(lambda x: int(x['Number of accomplished goals']))
-        df['task_progress'] = df['goals_accomplished'] / df['goals_total']
-        # metric: Success Rate, Task Progress. 
-        metrics = dict(
-            success_rate=df['if_pass'].mean(),
-            task_progress=df['task_progress'].mean()
-        )
-        self.stat_dict.update(metrics)
+        self.stat_judge_session()
+        self.stat_judge_session_stat()
         
         self.stat_num_turns()
         
         # log to W&B
         for k, v in self.stat_dict.items():
             wandb.summary[k] = v
+
+    def stat_judge_session(self):
+        """ 
+        input key: judge_session_result
+        metric: Success Rate, Task Progress.  
+        """
+        df = self.df
+        df['if_pass'] = df['judge_session_result'].apply(lambda x: x['Result'] == 'yes')
+        df['goals_total'] = df['judge_session_result'].apply(lambda x: int(x['Total number of goals']))
+        df['goals_accomplished'] = df['judge_session_result'].apply(lambda x: int(x['Number of accomplished goals']))
+        df['task_progress'] = df['goals_accomplished'] / df['goals_total']
+        metrics = dict(
+            success_rate=df['if_pass'].mean(),
+            task_progress=df['task_progress'].mean()
+        )
+        self.stat_dict.update(metrics)
+
+    def stat_judge_session_stat(self):
+        """ 
+        input key: judge_session_stat
+        metric: Precision, Recall, F1
+        """
+        metric = MetricF1()
+        for session_stat in self.df['judge_session_stat']:
+            metric.update(y_truth=session_stat['apis_gt'], y_pred=session_stat['apis_pred'])
+        f1, recall, precision = metric.get_detail()
+        self.stat_dict.update(dict(
+            f1=f1, recall=recall, precision=precision
+        ))
 
     def stat_num_turns(self):
         avg_conv_turns = self.df["num_turns"].mean()

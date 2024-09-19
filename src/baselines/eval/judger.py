@@ -1,5 +1,6 @@
 """ updated @240918
 
+- [ ] add "Tool Invocation" metrics in FlowBench
 """
 
 import re, yaml, tabulate
@@ -9,7 +10,7 @@ from easonsi.llm.openai_client import OpenAIClient, Formater
 
 from ..data import (
     Config,
-    Workflow, DBManager, DataManager
+    Workflow, DBManager, DataManager, UserProfile
 )
 from engine import (
     Role, Message, Conversation, ActionType, ConversationInfos, Logger, BaseLogger,
@@ -60,6 +61,35 @@ class Judger:
         
         # 2. judge: call the judge model & parse the output
         self.logger.log(f"  <judge> start to judge {self.cfg.judge_conversation_id}", with_print=verbose)
+
+        out_dict = {
+            "conversation_id": self.cfg.judge_conversation_id,
+            "exp_version": self.cfg.exp_version,  # these infos can also be found in `db.config`
+            **{ k:v for k,v in self.cfg.to_dict().items() if k.startswith("workflow") },
+
+            "num_turns": len(simulated_conversation),       # //2
+        }
+        # NOTE: standardize the judge results
+        # output format: `judge_session_result, judge_session_stat`
+        _judge_session_res = self._judge_session(user_profile, workflow, simulated_conversation)
+        _judge_session_stat_res = self._judge_stat_session(user_profile, simulated_conversation)
+        # out_dict.update(_judge_session_res); out_dict.update(_judge_session_stat_res)
+        out_dict |= _judge_session_res | _judge_session_stat_res
+        
+        # 2.2. save the judge result to db
+        self.db.insert_evaluation(out_dict)
+        self.logger.log(f"  <judge> {self.cfg.judge_conversation_id} has been judged", with_print=verbose)
+        return out_dict
+    
+    def _judge_session(
+        self, user_profile: UserProfile, workflow: Workflow, simulated_conversation: Conversation,
+        retry:int=3
+    ) -> Dict[str, str]:
+        """ 
+        output format:
+            judge_session_result: Dict of results
+            judge_session_details: Dict of detailed infos
+        """
         client = init_client(llm_cfg=LLM_CFG[self.cfg.judge_model_name])
         prompt = jinja_render(
             "baselines/eval_session.jinja",
@@ -67,27 +97,40 @@ class Judger:
             workflow_info=workflow.to_str(),
             session=simulated_conversation.to_str(),  # TODO: format the conversation
         )
-        res, _model_name, _usage = client.query_one(prompt, return_usage=True)
-        jr = self.parse_react_output(res)
-        out = {
-            "conversation_id": self.cfg.judge_conversation_id,
-            "exp_version": self.cfg.exp_version,  # these infos can be found in `db.config`
-            **{ k:v for k,v in self.cfg.to_dict().items() if k.startswith("workflow") },
-            "judge_model": _model_name,
-            "judge_usage": _usage,
-            "judge_result": jr,
-            # TODO: standardize the judge results
-            "prompt": prompt,
-            "llm_response": res,
-            "num_turns": len(simulated_conversation),       # //2
+        for _retry in range(retry):
+            try:
+                res, _model_name, _usage = client.query_one(prompt, return_usage=True)
+                jr = self._parse_react_output(res)
+                break
+            except Exception as e:
+                self.logger.log(f"  <judge> error: {e}", with_print=True)
+        else:
+            raise Exception(f"  <judge> failed to judge for {retry} times!!! Prompt: \n{prompt}")
+        
+        return {
+            "judge_session_result": jr,
+            "judge_session_details": {
+                "model": _model_name,   # judge model & detailed infos
+                "usage": _usage,
+                "prompt": prompt,
+                "llm_response": res,
+            }
         }
-        # 2.2. save the judge result to db
-        self.db.insert_evaluation(out)
-        self.logger.log(f"  <judge> {self.cfg.judge_conversation_id} has been judged", with_print=verbose)
-        return out
+    
+    def _judge_stat_session(self, user_profile: UserProfile, simulated_conversation: Conversation):
+        apis_gt = user_profile.required_apis
+        assert apis_gt is not None, "user_profile.required_apis is None"
+        # stat called apis. 
+        apis_pred = simulated_conversation.get_called_apis()
+        return {
+            "judge_session_stat": {
+                "apis_gt": apis_gt,
+                "apis_pred": apis_pred
+            }
+        }
     
     @staticmethod
-    def parse_react_output(s: str, slots:List[str] = ['Result', 'Total number of goals', 'Number of accomplished goals', 'Reason']):
+    def _parse_react_output(s: str, slots:List[str] = ['Result', 'Total number of goals', 'Number of accomplished goals', 'Reason']):
         if "```" in s:
             s = Formater.parse_codeblock(s, type="").strip()
         _slots = '|'.join(slots)    # Status Code|Data)

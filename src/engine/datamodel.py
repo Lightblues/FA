@@ -82,6 +82,19 @@ class Message:
         return self.to_str()
     def __repr__(self):
         return self.to_str()
+    
+    def is_api_calling(self) -> bool:
+        return self.role == Role.BOT and self.content.startswith("<Call API>")
+    def get_api_infos(self) -> Tuple[str, str]:
+        """ 
+        return: action_name, action_parameters
+        """
+        # content = f"<Call API> {action_name}({action_parameters})"
+        assert self.is_api_calling(), f"Must be API calling message! But got {self}"
+        content = self.content[len("<Call API> "):].strip()
+        re_pattern = r"(.*)\((.*)\)"
+        re_match = re.match(re_pattern, content)
+        return re_match.group(1), re_match.group(2)
 
 class Conversation():
     msgs: List[Message] = []
@@ -106,8 +119,20 @@ class Conversation():
     def current_utterance_id(self) -> int:
         return len(self.msgs)
     
+    @property
+    def messages(self) -> List[Message]:
+        return self.msgs
+    
     def get_last_message(self) -> Message:
         return self.msgs[-1]
+    
+    def get_called_apis(self) -> List[str]:
+        """ collect all API calls in the conversation by BOT """
+        apis = []
+        for msg in self.msgs:
+            if msg.is_api_calling():
+                apis.append(msg.get_api_infos()[0])
+        return apis
 
     @classmethod
     def from_messages(cls, msgs: List[Message]):

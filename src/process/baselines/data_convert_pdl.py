@@ -177,7 +177,7 @@ def create_user_profiles(task_desc, personas):
         _apis = _apis.split(',')
         required_apis = [api.strip() for api in _apis]
         dialogue_style = split_info[3].strip()
-        interative_pattern = split_info[4].strip()
+        interactive_pattern = split_info[4].strip()
         
         user_profile = {
             'persona': persona,
@@ -185,7 +185,7 @@ def create_user_profiles(task_desc, personas):
             'user_needs': user_needs,
             'required_apis': required_apis,
             'dialogue_style': dialogue_style,
-            'interative_pattern': interative_pattern
+            'interactive_pattern': interactive_pattern
         }
         profiles.append(user_profile)
     os.makedirs(ODIR / 'user_profile', exist_ok=True)
