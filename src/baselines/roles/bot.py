@@ -60,7 +60,7 @@ class ReactBot(BaseBot):
             except Exception as e:
                 print(f"  <bot> Error when trying {i}th time: {e}")
         else:
-            raise RuntimeError(f"  <bot> Error when trying 3 times: {e}")
+            raise RuntimeError(f"  <bot> Error when trying 3 times!!! prompt\n{prompt}")
         if prediction.action_type==BotOutputType.RESPONSE:
             msg_content = prediction.response
         else:

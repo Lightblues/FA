@@ -1,6 +1,7 @@
-""" updated @240918
+""" Main judge/evaluation process: 
+updated @240918
 
-- [ ] add "Tool Invocation" metrics in FlowBench
+- [x] add "Tool Invocation" metrics in FlowBench
 """
 
 import re, yaml, tabulate
@@ -20,6 +21,11 @@ from utils.jinja_templates import jinja_render
 
 
 class Judger:
+    """ abstraction of judging / evaluation
+    USAGE:
+        judger = Judger(cfg)
+        judger.start_judge()
+    """
     cfg: Config = None
     db: DBManager = None
     logger: Logger = None

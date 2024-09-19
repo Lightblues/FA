@@ -1,5 +1,5 @@
-""" updated @240918
-
+""" updated @240919
+collect the evaluation results from DB, generate a report to WanDB
 """
 
 import collections, wandb
@@ -9,7 +9,13 @@ import matplotlib.pyplot as plt
 from ..data import Config, DBManager
 from .metric import MetricAcc, MetricF1
 
+
 class Analyzer:
+    """ abstraction of evaluation results analysis 
+    USAGE:
+        analyzer = Analyzer(cfg)
+        analyzer.analyze()
+    """
     cfg: Config = None
     db: DBManager = None
     
@@ -20,12 +26,12 @@ class Analyzer:
         self.cfg = cfg
         self.db = DBManager(cfg.db_uri, cfg.db_name, cfg.db_message_collection_name)
     
-        self.collect_results()
+        self._collect_exp_results()
         self.stat_dict = dict()
         
         wandb.init(project="pdl", name=cfg.exp_version)
     
-    def collect_results(self):
+    def _collect_exp_results(self):
         query = {
             "exp_version": self.cfg.exp_version
         }

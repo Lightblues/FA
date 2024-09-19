@@ -30,7 +30,7 @@ db_name: "pdl"
 db_message_collection_name: "messages"
 db_meta_collection_name: "config"
 
-simulate_num_persona: 3
+simulate_num_persona: 5
 simulate_max_workers: 10
 
 judge_max_workers: 10

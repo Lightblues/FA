@@ -1,4 +1,6 @@
-""" updated @240918
+""" Main entrypoint for evaluation! run simulations, judge, and analyze
+
+updated @240918
 """
 
 import os, json, tqdm, itertools, pickle, collections, traceback, datetime, argparse, tabulate
@@ -14,6 +16,11 @@ from .analyzer import Analyzer
 
 
 class Evaluator:
+    """ abstraction of whole evaluation process
+    USAGE:
+        evaluator = Evaluator(cfg)
+        evaluator.main()
+    """
     cfg: Config = None
     data_namager: DataManager = None
     db: DBManager = None
@@ -22,16 +29,14 @@ class Evaluator:
         self.cfg = cfg
         self.data_namager = DataManager(cfg)
         self.db = DBManager(cfg.db_uri, cfg.db_name, cfg.db_message_collection_name)
-        # if cfg.to_gsheet: 
-        #     from easonsi.files.gsheet import GSheet
-        #     self.gsheet = GSheet()
         
     def main(self):
         """ 
         0. set configs. log the configs by `exp_version`
         1. run simulations, use `BaselineController(cfg).start_conversation()` to start a single exp with specific config
             output to db with `exp_version` (clean if exist)
-        2. run evaluations (query db to find run exps)
+        2. run evaluations/judges (query db to find run exps)
+        3. analyze the evaluation results
         """
         self.process_configs()
         
@@ -174,19 +179,7 @@ class Evaluator:
         return tasks
 
     def analyze(self):
-        """ analysis process:
-        1. collecte the evaluation results
+        """ analysis process: -> to `Analyzer`
         """
-
         analyzer = Analyzer(self.cfg)
         analyzer.analyze()
-        # _ = analyzer.stat_num_turns()
-        # _ = analyzer.stat_scores_overall()
-        # _ = analyzer.stat_error_types()
-        # df_grouped_passrate = analyzer.stat_grouped_passrate(th=self.cfg.judge_passrate_threshold).round(3)
-        # df_stats = pd.DataFrame([stat_dict]).T.round(3) \
-        #     .reset_index().rename(columns={"index": "key", 0: "value"})
-        # print(f"--- stats ---\n" + tabulate.tabulate(df_stats, tablefmt='psql'))
-        # print(f"--- grouped passrate ---\n" + tabulate.tabulate(df_grouped_passrate, tablefmt='psql'))
-        
-
