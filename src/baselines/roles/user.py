@@ -5,7 +5,7 @@ LLMSimulatedUserWithProfile
 import re
 from typing import List
 from .base import BaseUser
-from ..data import UserOutput, UserProfile, Role, Message, prompt_user_input, init_client, LLM_CFG
+from ..data import UserOutput, UserProfile, Role, Message, LogUtils, init_client, LLM_CFG
 from utils.jinja_templates import jinja_render
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
@@ -30,9 +30,9 @@ class InputUser(BaseUser):
     names = ["manual", "input_user", "InputUser"]
     
     def process(self, *args, **kwargs) -> UserOutput:
-        user_input = prompt_user_input("[USER] ")       # user_input_prefix, user_color
+        user_input = ""
         while not user_input.strip():
-            user_input = prompt_user_input("[USER] ")
+            user_input = LogUtils.prompt_user_input("[USER] ")
         self.conv.add_message(
             Message(Role.USER, user_input)
         )

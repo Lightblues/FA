@@ -3,11 +3,11 @@
 
 from abc import abstractmethod
 from typing import List
-import tabulate, datetime
+import datetime
 import pandas as pd
 from ..data import (
-    Config, DBManager, DataManager, Workflow,
-    Role, Message, Conversation, Logger, BaseLogger
+    Config, DBManager, DataManager, Workflow, LogUtils,
+    Role, Message, Conversation, BaseLogger
 )
 from ..roles import InputUser, BaseBot, BaseUser, BaseAPIHandler
 
@@ -21,7 +21,7 @@ class BaseController:
     user: BaseUser = None
     bot: BaseBot = None
     api: BaseAPIHandler = None
-    logger: Logger = None
+    logger: BaseLogger = None
     conv: Conversation = None       # global variable for conversation
     data_namager: DataManager = None
     workflow: Workflow = None
@@ -47,8 +47,7 @@ class BaseController:
             "log_file": self.logger.log_fn,
             "config": self.cfg.to_dict(),
         }
-        infos_header = tabulate.tabulate(pd.DataFrame([infos]).T, tablefmt='psql', maxcolwidths=100)
-        self.logger.log(infos_header, with_print=verbose)
+        self.logger.log(LogUtils.format_infos_with_tabulate(infos), with_print=verbose)
 
         # check if run!
         if self.cfg.log_to_db:
@@ -79,8 +78,7 @@ class BaseController:
             self.logger.log(f"  <db> Inserted config", with_print=verbose)
 
         conversation_df = pd.DataFrame(conversation.to_list())[['role', 'content']].set_index('role')
-        infos_end = tabulate.tabulate(conversation_df, tablefmt='psql', maxcolwidths=100)
-        self.logger.log(infos_end, with_print=verbose)
+        self.logger.log(LogUtils.format_infos_with_tabulate(conversation_df), with_print=verbose)
         return infos, conversation
     
     def log_msg(self, msg:Message, verbose=True):

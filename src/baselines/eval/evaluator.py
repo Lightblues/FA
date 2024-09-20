@@ -3,7 +3,7 @@
 updated @240918
 """
 
-import os, json, tqdm, itertools, pickle, collections, traceback, datetime, argparse, tabulate
+import os, json, tqdm, itertools, pickle, collections, traceback, datetime, argparse
 from typing import List, Dict, Optional, Tuple, Union
 import pandas as pd
 import concurrent.futures
@@ -11,7 +11,7 @@ from easonsi import utils
 
 from .eval_utils import task_simulate, task_judge
 from ..controller import FlowbenchController
-from ..data import Config, DataManager, DBManager
+from ..data import Config, DataManager, DBManager, LogUtils
 from .analyzer import Analyzer
 
 
@@ -66,13 +66,7 @@ class Evaluator:
         step_name = f" {step_name.strip()} "
         s_print = step_name.center(150, "=") + "\n"
         if infos is not None:
-            if isinstance(infos, dict):
-                infos = pd.DataFrame([infos]).T
-            elif isinstance(infos, pd.DataFrame):
-                pass
-            else:
-                raise NotImplementedError
-            s_infos = tabulate.tabulate(infos, tablefmt='psql')    # , headers='keys', 
+            s_infos = LogUtils.format_infos_with_tabulate(infos)
             s_print += f"--- infos ---\n{s_infos}\n"
         s_print += "-"*150
         print(s_print)

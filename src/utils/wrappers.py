@@ -2,6 +2,11 @@ import time
 
 
 class Timer:
+    """ timer of a function
+    USAGE:
+        with Timer("func_name", print=True):
+            func()
+    """
     def __init__(self, name, print=True):
         self.name = name
         self.print = print

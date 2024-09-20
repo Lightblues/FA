@@ -5,4 +5,5 @@ from .role_outputs import BotOutput, UserOutput, APIOutput, BotOutputType
 from .user_profile import UserProfile
 from .db import DBManager
 # dependecies
-from .base_data import Role, Message, Conversation, init_client, LLM_CFG, Logger, BaseLogger, prompt_user_input
+from .base_data import Role, Message, Conversation, init_client, LLM_CFG
+from .log import BaseLogger, LogUtils

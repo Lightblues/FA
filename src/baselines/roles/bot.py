@@ -1,9 +1,10 @@
-""" updated 240905
+""" updated 240920
+- [ ] add pdl bot
 """
 import re, datetime, json
-from typing import List
+from typing import List, Tuple
 from .base import BaseBot
-from ..data import BotOutput, BotOutputType, Message, Role, init_client, LLM_CFG
+from ..data import BotOutput, BotOutputType, Message, Role, init_client, LLM_CFG, LogUtils
 from utils.jinja_templates import jinja_render
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
@@ -42,24 +43,15 @@ class ReactBot(BaseBot):
         self.llm = init_client(llm_cfg=LLM_CFG[self.cfg.bot_llm_name])
         
     def process(self, *args, **kwargs) -> BotOutput:
-        prompt = jinja_render(
-            self.cfg.bot_template_fn,     # "baselines/flowbench.jinja": task_background, workflow, toolbox, current_time
-            task_background=self.workflow.task_background,
-            workflow=self.workflow.workflow,
-            toolbox=self.workflow.toolbox,
-            current_time=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            history_conversation=self.conv.to_str(),
-        )
+        prompt = self._gen_prompt()
         for i in range(3):
             try:
-                llm_response = self.llm.query_one(prompt)
-                # ...parse the response! -> BotOutput, conv
-                prediction = self.parse_react_output(llm_response)
+                llm_response, prediction = self._process(prompt)
                 break
             except Exception as e:
                 print(f"  <bot> Error when trying {i}th time: {e}")
         else:
-            raise RuntimeError(f"  <bot> Error when trying 3 times!!! prompt\n{prompt}")
+            raise RuntimeError(f"  <bot> Error after trying 3 times!!! prompt:\n" + LogUtils.format_infos_with_tabulate(prompt))
         if prediction.action_type==BotOutputType.RESPONSE:
             msg_content = prediction.response
         else:
@@ -71,25 +63,38 @@ class ReactBot(BaseBot):
         self.conv.add_message(msg)
         self.cnt_bot_actions += 1  # stat
         return prediction
+
+    def _gen_prompt(self) -> str:
+        prompt = jinja_render(
+            self.cfg.bot_template_fn,     # "baselines/flowbench.jinja": task_background, workflow, toolbox, current_time
+            task_background=self.workflow.task_background,
+            workflow=self.workflow.workflow,
+            toolbox=self.workflow.toolbox,
+            current_time=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            history_conversation=self.conv.to_str(),
+        )
+        return prompt
+
+    def _process(self, prompt:str=None) -> Tuple[str, BotOutput]:
+        llm_response = self.llm.query_one(prompt)
+        prediction = self.parse_react_output(llm_response)
+        return llm_response, prediction
         
     @staticmethod
     def parse_react_output(s: str) -> BotOutput:
         if "```" in s:
             s = Formater.parse_codeblock(s, type="").strip()
-        # pattern = r"(Thought|Action|Action Input|Response):\s*(.*?)(?=\n\w+:|\Z)"
-        # matches = re.findall(pattern, s, re.DOTALL)
-        # result = {key: value.strip() for key, value in matches}
         pattern = r"(?P<field>Thought|Action|Action Input|Response):\s*(?P<value>.*?)(?=\n(Thought|Action|Action Input|Response):|\Z)"
         matches = re.finditer(pattern, s, re.DOTALL)
         result = {match.group('field'): match.group('value').strip() for match in matches}
         
         # validate result
-        assert BotOutput.thought_str in result, f"Thought not in prediction: {s}"
+        assert BotOutput.thought_str in result, f"Thought not in prediction! LLM output:\n" + LogUtils.format_infos_with_tabulate(s)
         if BotOutput.action_str in result:        # Action
-            assert BotOutput.action_input_str in result, f"Action Input not in prediction: {s}"
+            assert BotOutput.action_input_str in result, f"Action Input not in prediction! LLM output:\n" + LogUtils.format_infos_with_tabulate(s)
             result[BotOutput.action_input_str] = json.loads(result[BotOutput.action_input_str]) # eval: NameError: name 'null' is not defined
             output = BotOutput(action=result[BotOutput.action_str], action_input=result[BotOutput.action_input_str], thought=result[BotOutput.thought_str])
         else:
-            assert BotOutput.response_str in result, f"Response not in prediction: {s}"
+            assert BotOutput.response_str in result, f"Response not in prediction! LLM output:\n" + LogUtils.format_infos_with_tabulate(s)
             output = BotOutput(response=result[BotOutput.response_str], thought=result[BotOutput.thought_str])
         return output

@@ -4,7 +4,7 @@ updated @240918
 - [x] add "Tool Invocation" metrics in FlowBench
 """
 
-import re, yaml, tabulate
+import re, yaml
 import pandas as pd
 from typing import List, Dict, Optional, Tuple
 from easonsi.llm.openai_client import OpenAIClient, Formater
@@ -12,7 +12,7 @@ from easonsi.llm.openai_client import OpenAIClient, Formater
 from ..data import (
     Config,
     Workflow, DBManager, DataManager, UserProfile,
-    Conversation, Logger, BaseLogger, LLM_CFG, init_client
+    Conversation, BaseLogger, LogUtils, LLM_CFG, init_client
 )
 from utils.jinja_templates import jinja_render
 
@@ -25,7 +25,7 @@ class Judger:
     """
     cfg: Config = None
     db: DBManager = None
-    logger: Logger = None
+    logger: BaseLogger = None
     
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
@@ -152,11 +152,9 @@ class Judger:
             **{ k:v for k,v in self.cfg.to_dict().items() if k.startswith("workflow") },
             "config": self.cfg.to_dict(),
         }
-        infos_header = tabulate.tabulate(pd.DataFrame([infos]).T, tablefmt='psql', maxcolwidths=100)
-        self.logger.log(infos_header, with_print=verbose)
+        self.logger.log(LogUtils.format_infos_with_tabulate(infos), with_print=verbose)
         
         res = self.judge(verbose=verbose)
         
-        infos_end = tabulate.tabulate(pd.DataFrame([res]).T, tablefmt='psql', maxcolwidths=100)
-        self.logger.log(infos_end, with_print=verbose)
+        self.logger.log(LogUtils.format_infos_with_tabulate(res), with_print=verbose)
         return res
