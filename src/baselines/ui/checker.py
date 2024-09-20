@@ -1,4 +1,5 @@
-""" 
+""" CLI data checker
+updated @240920
 
 """
 

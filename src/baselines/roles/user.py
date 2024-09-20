@@ -32,7 +32,7 @@ class InputUser(BaseUser):
     def process(self, *args, **kwargs) -> UserOutput:
         user_input = ""
         while not user_input.strip():
-            user_input = LogUtils.prompt_user_input("[USER] ")
+            user_input = LogUtils.format_user_input("[USER] ")
         self.conv.add_message(
             Message(Role.USER, user_input)
         )

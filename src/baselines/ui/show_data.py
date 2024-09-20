@@ -5,27 +5,51 @@ import pandas as pd
 from ..data import DBManager, Config, DataManager, WorkflowType
 
 
+def build_workflow_infos(workflow_infos) -> pd.DataFrame:
+    data = []
+    for k,v in workflow_infos.items():
+        v['workflow_id'] = k
+        data.append(v)
+    st.session_state.df_workflow_infos = pd.DataFrame(data).set_index('workflow_id')
+
+def refresh_dataset():
+    # 1. update config
+    _cfg:Config = st.session_state.cfg
+    _cfg.workflow_dataset = st.session_state.selected_workflow_dataset
+    # 2. update data_manager
+    _dm:DataManager = st.session_state.data_manager
+    _dm.refresh_config(_cfg)
+    # 3. 
+    build_workflow_infos(_dm.workflow_infos)
+
+
 def show_data_page():
     # ------------------ session_state --------------------
     data_manager:DataManager = st.session_state.data_manager
-    data = []
-    for k,v in data_manager.workflow_infos.items():
-        v['workflow_id'] = k
-        data.append(v)
-    df = pd.DataFrame(data).set_index('workflow_id')
+    build_workflow_infos(data_manager.workflow_infos)
 
     if "db" not in st.session_state:
         assert 'cfg' in st.session_state
-        cfg: Config = st.session_state.cfg
-        st.session_state.db = DBManager(cfg.db_uri, cfg.db_name, cfg.db_message_collection_name)
-    cfg: Config = st.session_state.cfg
+        _cfg: Config = st.session_state.cfg
+        st.session_state.db = DBManager(_cfg.db_uri, _cfg.db_name, _cfg.db_message_collection_name)
     db:DBManager = st.session_state.db
 
     # ------------------ sidebar --------------------
-    selected_workflow_id = st.sidebar.selectbox(
-        "1️⃣ Select Workflow ID",
-        df.index, index=1
-    )
+    col1, col2 = st.sidebar.columns(2)
+    with col1:
+        st.selectbox(
+            "1️⃣ Select data", 
+            options=data_manager.get_workflow_dataset_names(),
+            key="selected_workflow_dataset",
+            on_change=refresh_dataset,
+            
+        )
+    with col2: 
+        st.selectbox(
+            "Workflow ID",
+            st.session_state.df_workflow_infos.index, index=1,
+            key="selected_workflow_id"
+        )
     
     col1, col2 = st.sidebar.columns(2)
     with col1:
@@ -35,11 +59,12 @@ def show_data_page():
         show_code = st.checkbox("Show Code")
         show_flowchart = st.checkbox("Show Flowchart")
 
-    with open(data_manager.DIR_data_flowbench / f"user_profile/{selected_workflow_id}.json", 'r') as f:
+    with open(data_manager.DIR_data_flowbench / f"user_profile/{st.session_state.selected_workflow_id}.json", 'r') as f:
         user_profiles = json.load(f)
-    selected_user_profile_id = st.sidebar.selectbox(
+    st.sidebar.selectbox(
         "2️⃣ Secect User Profile ID",
         list(range(len(user_profiles))),
+        key="selected_user_profile_id"
     )
     
     ava_workflow_types = ["ALL"] + [wt.workflow_type for wt in WorkflowType]
@@ -64,30 +89,30 @@ def show_data_page():
     # 1. show workflow_infos
     st.markdown("### Workflow Infos")
     with st.expander("Show Workflow Infos", expanded=True):
-        st.dataframe(df)
+        st.dataframe(st.session_state.df_workflow_infos)
 
     # 2. show workflow details
-    st.markdown(f"### Details of `{selected_workflow_id}`")
+    st.markdown(f"### Details of `{st.session_state.selected_workflow_id}`")
     if show_toolbox:
-        with open(data_manager.DIR_data_flowbench / f"tools/{selected_workflow_id}.yaml", 'r') as f:
+        with open(data_manager.DIR_data_flowbench / f"tools/{st.session_state.selected_workflow_id}.yaml", 'r') as f:
             toolbox = yaml.safe_load(f)
             st.markdown("#### Toolbox")
             st.write(toolbox)
     if show_text:
         _type = WorkflowType.TEXT
-        with open(data_manager.DIR_data_flowbench / f"{_type.subdir}/{selected_workflow_id}{_type.suffix}", 'r') as f:
+        with open(data_manager.DIR_data_flowbench / f"{_type.subdir}/{st.session_state.selected_workflow_id}{_type.suffix}", 'r') as f:
             workflow = f.read().strip()
             st.markdown("#### Text")
             st.write(workflow)
     if show_code:
         _type = WorkflowType.CODE
-        with open(data_manager.DIR_data_flowbench / f"{_type.subdir}/{selected_workflow_id}{_type.suffix}", 'r') as f:
+        with open(data_manager.DIR_data_flowbench / f"{_type.subdir}/{st.session_state.selected_workflow_id}{_type.suffix}", 'r') as f:
             workflow = f.read().strip()
             st.markdown("#### Code")
             st.code(workflow, language='python')
     if show_flowchart:
         _type = WorkflowType.FLOWCHART
-        with open(data_manager.DIR_data_flowbench / f"{_type.subdir}/{selected_workflow_id}{_type.suffix}", 'r') as f:
+        with open(data_manager.DIR_data_flowbench / f"{_type.subdir}/{st.session_state.selected_workflow_id}{_type.suffix}", 'r') as f:
             workflow = f.read().strip()
             st.markdown("#### Flowchart")
             # workflow = f"```mermaid\n{workflow}\n```"
@@ -98,15 +123,15 @@ def show_data_page():
     # 3. show user profiles
     st.markdown("### User Profiles")
     with st.expander("Show User Profiles", expanded=False):
-        st.write(user_profiles[selected_user_profile_id])
+        st.write(user_profiles[st.session_state.selected_user_profile_id])
 
     # 4. show run experiemnts
     st.markdown("### Run Experiments")
     query = {
-        'workflow_dataset': cfg.workflow_dataset,
+        'workflow_dataset': st.session_state.selected_workflow_dataset,
     }
-    if use_current_workflow: query['workflow_id'] = selected_workflow_id
-    if use_current_user_profile: query['user_profile_id'] = selected_user_profile_id
+    if use_current_workflow: query['workflow_id'] = st.session_state.selected_workflow_id
+    if use_current_user_profile: query['user_profile_id'] = st.session_state.selected_user_profile_id
     if selected_workflow_type!="ALL": query["workflow_type"] = selected_workflow_type
     if customized_query:
         try:
