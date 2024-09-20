@@ -55,6 +55,10 @@ class DBManager:
         sort_order = [('conversation_id', -1)]
         results = self.collection_meta.find(query).sort(sort_order).limit(limit)
         return [res for res in results]
+    
+    def query_run_exp_versions(self) -> List[str]:
+        results = self.collection_meta.distinct("exp_version")
+        return results
 
     def query_evaluations(self, query: dict = {}, limit: int = 0) -> List[dict]:
         results = self.collection_eval.find(query).limit(limit)

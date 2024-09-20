@@ -1,4 +1,4 @@
-import os, datetime, traceback, functools, tabulate
+import os, datetime, traceback, functools, tabulate, pprint
 from collections import defaultdict
 from pathlib import Path
 from typing import List, Dict, Optional, Union, Any
@@ -22,17 +22,21 @@ COLOR_DICT.update({
 
 class LogUtils:
     @staticmethod
-    def prompt_user_input(prompt_text, prompt_color='blue', input_color='bold_blue'):
+    def format_user_input(prompt_text, prompt_color='blue', input_color='bold_blue'):
         """ styled user input """
         user_input = input(COLOR_DICT[prompt_color] + prompt_text + COLOR_DICT[input_color])
         print(Style.RESET_ALL, end='')
         return user_input
     
     @staticmethod
+    def format_infos_with_pprint(infos:Any) -> str:
+        return pprint.pformat(infos)
+    
+    @staticmethod
     def format_infos_with_tabulate(
         infos: Any, 
-        tablefmt='psql', maxcolwidths=100,
-        color: str = None, auto_transform: bool = True
+        tablefmt='psql', maxcolwidths=100, headers='keys',
+        color: str = None, auto_transform: bool = False
     ) -> str:
         """ format infos tables with tabulate """
         if isinstance(infos, dict):
@@ -55,11 +59,12 @@ class LogUtils:
                 infos = infos.T
         
         # 预处理字符串，处理换行符
-        def preprocess_string(s):
-            return s.split('\n')
-        for col in infos.columns:
-            infos[col] = infos[col].apply(lambda x: preprocess_string(str(x)) if isinstance(x, str) else x)
-        infos_str = tabulate.tabulate(infos, tablefmt=tablefmt, maxcolwidths=maxcolwidths)
+        # def preprocess_string(s):
+        #     if '\n' in s: s = s.split('\n')
+        #     return s
+        # for col in infos.columns:
+        #     infos[col] = infos[col].apply(lambda x: preprocess_string(str(x)) if isinstance(x, str) else x)
+        infos_str = tabulate.tabulate(infos, tablefmt=tablefmt, maxcolwidths=maxcolwidths, headers=headers)
 
         if color is not None:
             infos_str = COLOR_DICT[color] + infos_str + Style.RESET_ALL
@@ -131,7 +136,18 @@ class FileLogger(BaseLogger):
 
 if __name__ == '__main__':
     infos = dict(a=1223, b="ss")
-    infos = "This is a string that needs to be highlighted with borders.\nAnother line. "
+    infos = {
+        'name': 'Alice',
+        'age': 30,
+        'hobbies': ['reading', 'cycling', 'hiking'],
+        'education': {
+            'undergraduate': 'Computer Science',
+            'graduate': 'Data Science'
+        },
+        "infos": "This is a string that needs to be highlighted with borders.\nAnother line. "
+    }
+    # infos = "This is a string that needs to be highlighted with borders.\nAnother line. "
     print(LogUtils.format_infos_with_tabulate(infos))
+    print(LogUtils.format_infos_with_pprint(infos))
     print()
 

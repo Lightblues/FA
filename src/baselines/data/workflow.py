@@ -2,7 +2,7 @@
 WorkflowType: text, code, flowchart, pdl
     with different subdirs and suffixes!
 """
-import yaml, json
+import yaml, json, os
 from dataclasses import dataclass, asdict, field
 from enum import Enum, auto
 from pathlib import Path
@@ -21,17 +21,24 @@ class DataManager:
     DIR_config = DIR_root / "src/baselines/configs"
     
     DIR_data_root = DIR_root / "dataset"
-    # DIR_data_flowbench = None
-    # FN_data_flowbench_infos = None
+    
+    DIR_data_flowbench = None               # subdir for specific dataset
+    FN_data_flowbench_infos = None
     
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
-        self.DIR_data_flowbench = self.DIR_data_root / cfg.workflow_dataset
-        self.FN_data_flowbench_infos = self.DIR_data_flowbench / "task_infos.json"
+        self._build_workflow_infos(cfg.workflow_dataset)
         
+    def _build_workflow_infos(self, workflow_dataset: str):
+        self.DIR_data_flowbench = self.DIR_data_root / workflow_dataset
+        self.FN_data_flowbench_infos = self.DIR_data_flowbench / "task_infos.json"
         infos: dict = json.load(open(self.FN_data_flowbench_infos, 'r'))
         self.data_version = infos['version']
         self.workflow_infos = infos['task_infos']
+    
+    def refresh_config(self, cfg: Config) -> None:
+        self.cfg = cfg
+        self._build_workflow_infos(cfg.workflow_dataset)
 
     @staticmethod
     def normalize_config_name(config_name:str):
@@ -41,6 +48,12 @@ class DataManager:
     @property
     def num_workflows(self):
         return len(self.workflow_infos)
+    
+    def get_workflow_dataset_names(self):
+        # return folder name in self.DIR_data_root
+        all_entries = os.listdir(self.DIR_data_root)
+        names = [entry for entry in all_entries if os.path.isdir(os.path.join(self.DIR_data_root, entry))]
+        return names
 
 
 class WorkflowType(Enum):
