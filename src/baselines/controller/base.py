@@ -44,7 +44,6 @@ class BaseController:
         infos = {
             "conversation_id": self.conversation_id,
             "exp_version": self.cfg.exp_version,
-            "log_file": self.logger.log_fn,
             "config": self.cfg.to_dict(),
         }
         self.logger.log(LogUtils.format_infos_with_tabulate(infos), with_print=verbose)
@@ -71,7 +70,7 @@ class BaseController:
             self.logger.log(f"  <db> Inserted conversation with {len(res.inserted_ids)} messages", with_print=verbose)
             # 2. insert configuration
             infos_dict = {
-                "conversation_id": self.conversation_id, "exp_version": self.cfg.exp_version, "log_file": self.logger.log_fn, 
+                "conversation_id": self.conversation_id, "exp_version": self.cfg.exp_version,
                 **self.cfg.to_dict()
             }
             res = db.insert_config(infos_dict)

@@ -29,25 +29,45 @@ class LogUtils:
         return user_input
     
     @staticmethod
-    def format_infos_with_tabulate(infos: Any, tablefmt='psql', maxcolwidths=100) -> str:
+    def format_infos_with_tabulate(
+        infos: Any, 
+        tablefmt='psql', maxcolwidths=100,
+        color: str = None, auto_transform: bool = True
+    ) -> str:
         """ format infos tables with tabulate """
         if isinstance(infos, dict):
             infos = pd.DataFrame([infos]).T
         elif isinstance(infos, pd.DataFrame):
-            # smartly .T the df?
-            if infos.shape[1] > infos.shape[0]:
-                infos = infos.T
+            pass
         elif isinstance(infos, (list, tuple)):
             if isinstance(infos[0], (list, tuple)):
-                pass
+                infos = pd.DataFrame(infos)
             else:
-                infos = [infos]
+                infos = pd.DataFrame([infos]).T
         elif isinstance(infos, (str, int, float)):
-            infos = [[infos]]
+            infos = str(infos)
+            infos = pd.DataFrame([infos.split('\n')]).T
         else:
             raise NotImplementedError
+        # smartly .T the df?
+        if auto_transform:
+            if infos.shape[1] > infos.shape[0]:
+                infos = infos.T
+        
+        # 预处理字符串，处理换行符
+        def preprocess_string(s):
+            return s.split('\n')
+        for col in infos.columns:
+            infos[col] = infos[col].apply(lambda x: preprocess_string(str(x)) if isinstance(x, str) else x)
         infos_str = tabulate.tabulate(infos, tablefmt=tablefmt, maxcolwidths=maxcolwidths)
+
+        if color is not None:
+            infos_str = COLOR_DICT[color] + infos_str + Style.RESET_ALL
         return infos_str
+
+    @staticmethod
+    def format_str_with_color(text: str, color: str = 'blue') -> str:
+        return COLOR_DICT[color] + text + Style.RESET_ALL
 
 
 class BaseLogger:
@@ -111,7 +131,7 @@ class FileLogger(BaseLogger):
 
 if __name__ == '__main__':
     infos = dict(a=1223, b="ss")
-    infos = "This is a string that needs to be highlighted with borders."
+    infos = "This is a string that needs to be highlighted with borders.\nAnother line. "
     print(LogUtils.format_infos_with_tabulate(infos))
     print()
 

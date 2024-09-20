@@ -108,7 +108,7 @@ class Judger:
             except Exception as e:
                 self.logger.log(f"  <judge> error: {e}", with_print=True)
         else:
-            raise Exception(f"  <judge> failed to judge for {retry} times!!! Prompt: \n{prompt}")
+            raise Exception(f"  <judge> failed to judge for {retry} times!!! Prompt: \n" + LogUtils.format_infos_with_tabulate(prompt))
         
         return {
             "judge_session_result": jr,
@@ -141,7 +141,8 @@ class Judger:
         matches = re.finditer(pattern, s, re.DOTALL)
         result = {match.group('field'): match.group('value').strip() for match in matches}
         # validate result
-        assert all(key in result for key in slots), f"{slots} not all in prediction: {s}"
+        slots_to_check = [i for i in slots if i not in ("Reason")]  # reason is not required for correct one
+        assert all(key in result for key in slots_to_check), f"{slots_to_check} not all in prediction: \n" + LogUtils.format_infos_with_tabulate(s)
         return result
     
     def start_judge(self, verbose=True):

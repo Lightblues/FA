@@ -58,7 +58,7 @@
 # %%
 import os, sys, json, yaml, pathlib
 
-# IDIR = pathlib.Path("/apdcephfs_cq8/share_2992827/shennong_5/siqiicai/data/STAR/tasks_transfered")
+# IDIR = pathlib.Path("/apdcephfs_cq8/share_2992827/shennong_5/siqiicai/data/STAR/tasks_transformed")
 # ODIR = pathlib.Path("/work/huabu/dataset/STAR")
 IDIR = pathlib.Path("/apdcephfs_cq8/share_2992827/shennong_5/siqiicai/data/SGD/workflows")
 ODIR = pathlib.Path("/work/huabu/dataset/SGD")
@@ -179,16 +179,16 @@ def fix_typo(d: dict, old_key: str = "interative_pattern", new_key: str = "inter
         del d[old_key]
     return d
 
-def convert_format_userprofile():
-    print(f"Converting user profile from `../user_profile` subfolder")
+def convert_format_userprofile(subdir="../user_profile_w_apis"):
+    print(f"Converting user profile from `{subdir}` subfolder")
     os.makedirs(ODIR / "user_profile", exist_ok=True)
     num_success = 0
     for name in name_map:
         try:
             # check that code in not binary
-            if check_is_binary(IDIR / "../user_profile" / f"{name}.json"):
+            if check_is_binary(IDIR / subdir / f"{name}.json"):
                 raise Exception(f"{name} is binary")
-            with open(IDIR / "../user_profile" / f"{name}.json", "r") as f:
+            with open(IDIR / subdir / f"{name}.json", "r") as f:
                 data = json.load(f)
             data = [fix_typo(d) for d in data]
             with open(ODIR / "user_profile" / f"{name_map[name]}.json", "w") as f:

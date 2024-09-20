@@ -40,7 +40,7 @@ class Evaluator:
         """
         self.process_configs()
         
-        self.print_header_info(step_name="STEP 1: Simulating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("simulate")})
+        self.print_header_info(step_name="STEP 1: Simulating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("simulate") or k.startswith("exp")})
         self.run_simulations()
 
         self.print_header_info(step_name="STEP 2: Evaluating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("judge")})
@@ -66,9 +66,7 @@ class Evaluator:
         step_name = f" {step_name.strip()} "
         s_print = step_name.center(150, "=") + "\n"
         if infos is not None:
-            s_infos = LogUtils.format_infos_with_tabulate(infos)
-            s_print += f"--- infos ---\n{s_infos}\n"
-        s_print += "-"*150
+            s_print += LogUtils.format_infos_with_tabulate(infos)
         print(s_print)
 
     def run_simulations(self):
