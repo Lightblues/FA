@@ -59,5 +59,27 @@ class Config:
         with open(yaml_file, 'w') as file:
             yaml.dump(asdict(self), file)
     
+    @classmethod
+    def from_dict(cls, dic: dict):
+        # ignore unknown fields
+        obj = cls(**{ k:v for k,v in dic.items() if k in cls.__dataclass_fields__ })
+        return obj
+    
     def copy(self):
         return copy.deepcopy(self)
+
+    def __getitem__(self, key):
+        try:
+            return getattr(self, key)
+        except AttributeError:
+            raise KeyError(f"Key '{key}' not found in Config")
+
+if __name__ == '__main__':
+    config_dict = {
+        "workflow_dataset": "xxx",
+        "workflow_type": "xxx",
+        "workflow_id": "000",
+        "xxx": "xxx"
+    }
+    cfg = Config.from_dict(config_dict)
+    print(cfg)

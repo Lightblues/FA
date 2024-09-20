@@ -119,7 +119,7 @@ class Evaluator:
         for uid in range(num_user_profile):
             cfg_new = cfg.copy()
             cfg_new.user_profile_id = uid
-            tasks.append((cfg))
+            tasks.append((cfg_new))
         return tasks
     
     @staticmethod
@@ -169,13 +169,20 @@ class Evaluator:
         }
         run_exps = self.db.query_run_experiments(query, limit=0)
         
-        # 2. write all exp configs to a new cfg
+        # 2. get all evaluation configs
         tasks = []
         for exp in run_exps:
-            cfg_new = cfg.copy()
-            cfg_new.judge_conversation_id = exp["conversation_id"]
-            # NOTE: check if the configs of run exps match the input config? partly done by the "reloading" mechanism
-            tasks.append(cfg_new)
+            # 2.1 restore the exp config
+            cfg_exp = Config.from_dict(
+                self.db.query_config_by_conversation_id(exp["conversation_id"])
+            )
+            # 2.2 check if the configs of run exps match the input config. partly done by the "reloading" mechanism?
+            keys_to_check = ["exp_version", "workflow_dataset", "workflow_type"]
+            assert all([cfg_exp[k] == cfg[k] for k in keys_to_check]), f"Config mismatch: {cfg_exp} vs {cfg}"
+            # 2.3 ensure the judge config slots: `judge_conversation_id, judge_model_name`
+            cfg_exp.judge_model_name = cfg.judge_model_name
+            cfg_exp.judge_conversation_id = exp["conversation_id"]
+            tasks.append(cfg_exp)
         return tasks
 
     def analyze(self):

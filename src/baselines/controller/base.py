@@ -53,9 +53,10 @@ class BaseController:
         # check if run!
         if self.cfg.log_to_db:
             db = DBManager(self.cfg.db_uri, self.cfg.db_name, self.cfg.db_message_collection_name)
-            query = {
+            query = {  # identify a single exp
                 "exp_version": self.cfg.exp_version,
                 **{ k:v for k,v in self.cfg.to_dict().items() if k.startswith("workflow") },
+                "user_profile_id": self.cfg.user_profile_id
             }
             query_res = db.query_run_experiments(query)
             if len(query_res) > 0:
