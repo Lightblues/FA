@@ -18,7 +18,7 @@ class DataManager:
     DIR_root = Path(__file__).resolve().parent.parent.parent.parent
     DIR_src_base = (DIR_root / "src")
     
-    DIR_config = DIR_root / "src/baselines/configs"
+    DIR_config = DIR_root / "src/flowagent/configs"
     
     DIR_data_root = DIR_root / "dataset"
     

@@ -95,7 +95,7 @@ class Judger:
         """
         client = init_client(llm_cfg=LLM_CFG[self.cfg.judge_model_name])
         prompt = jinja_render(
-            "baselines/eval_session.jinja",
+            "flowagent/eval_session.jinja",
             user_target=user_profile.to_str(),
             workflow_info=workflow.to_str(),
             session=simulated_conversation.to_str(),  # TODO: format the conversation

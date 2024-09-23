@@ -73,7 +73,7 @@ class ReactBot(BaseBot):
 
     def _gen_prompt(self) -> str:
         prompt = jinja_render(
-            self.cfg.bot_template_fn,     # "baselines/flowbench.jinja": task_background, workflow, toolbox, current_time, history_conversation
+            self.cfg.bot_template_fn,     # "flowagent/flowbench.jinja": task_background, workflow, toolbox, current_time, history_conversation
             task_background=self.workflow.task_background,
             workflow=self.workflow.workflow,
             toolbox=self.workflow.toolbox,
@@ -120,7 +120,7 @@ class PDLBot(ReactBot):
             "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         prompt = jinja_render(
-            self.cfg.bot_template_fn,       # "baselines/pdl.jinja"
+            self.cfg.bot_template_fn,       # "flowagent/pdl.jinja"
             head_info="\n".join(f"{k}: {v}" for k,v in header_info.items()),
             PDL=self.workflow.pdl.to_str(),
             conversation=self.conv.to_str(), 

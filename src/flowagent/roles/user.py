@@ -51,7 +51,7 @@ class LLMSimulatedUserWithProfile(BaseUser):
 
     def process(self, *args, **kwargs) -> UserOutput:
         prompt = jinja_render(
-            self.cfg.user_template_fn,  # "baselines/user_llm.jinja": assistant_description, user_profile, history_conversation
+            self.cfg.user_template_fn,  # "flowagent/user_llm.jinja": assistant_description, user_profile, history_conversation
             assistant_description=self.workflow.task_background,
             user_profile=self.user_profile.to_str(),
             history_conversation=self.conv.to_str()
