@@ -46,7 +46,7 @@ class LLMSimulatedAPIHandler(BaseAPIHandler):
         # ... match the api by name? check params? 
         # TODO: integrate with FastAPI
         prompt = jinja_render(
-            self.cfg.api_template_fn,     # "baselines/api_llm.jinja": api_infos, api_name, api_input
+            self.cfg.api_template_fn,     # "flowagent/api_llm.jinja": api_infos, api_name, api_input
             api_infos=self.api_infos,
             api_name=apicalling_info.action,
             api_input=apicalling_info.action_input,

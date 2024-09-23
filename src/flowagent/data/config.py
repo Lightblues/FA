@@ -12,12 +12,12 @@ class Config:
     
     user_mode: str = "llm_profile"
     user_llm_name: str = "gpt-4o"
-    user_template_fn: str = "baselines/user_llm.jinja"
+    user_template_fn: str = "flowagent/user_llm.jinja"
     user_profile: bool = True
     user_profile_id: int = 0
     
     bot_mode: str = "react_bot"
-    bot_template_fn: str = "baselines/flowbench.jinja"
+    bot_template_fn: str = "flowagent/flowbench.jinja"
     bot_llm_name: str = "gpt-4o"
     bot_action_limit: int = 5
     pdl_check_dependency: bool = True
@@ -25,7 +25,7 @@ class Config:
     pdl_check_api_dup_calls_threshold: int = 2
     
     api_mode: str = "llm"
-    api_template_fn: str = "baselines/api_llm.jinja"
+    api_template_fn: str = "flowagent/api_llm.jinja"
     api_llm_name: str = "gpt-4o"
 
     conversation_turn_limit: int = 20
