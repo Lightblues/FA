@@ -13,10 +13,10 @@ from .base import BaseController
 from utils.wrappers import Timer
 from .pdl_checker import PDLDependencyChecker, APIDuplicatedChecker
 
-class PDLController(BaseController):
+class FlowagentController(BaseController):
     """ main loop of a simulated conversation
     USAGE:
-        controller = FlowbenchController(cfg)
+        controller = FlowagentController(cfg)
         controller.start_conversation()
     """
     workflow_types = ["pdl"]

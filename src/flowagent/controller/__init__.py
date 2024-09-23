@@ -1,6 +1,6 @@
 from .base import BaseController
 from .flowbench import FlowbenchController
-from .pdl import PDLController
+from .flowagent import FlowagentController
 
 WORKFLOW_TYPE2CONTROLLER = {}
 for cls in BaseController.__subclasses__():
