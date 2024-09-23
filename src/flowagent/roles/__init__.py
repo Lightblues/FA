@@ -5,19 +5,19 @@ from .api import DummyAPIHandler
 from .user import DummyUser, InputUser
 from .bot import DummyBot
 
+def add_subclasses_to_dict(base_class: BaseRole, name_to_class_dict: Dict[str, BaseRole]):
+    for cls in base_class.__subclasses__():
+        for name in cls.names:
+            name_to_class_dict[name] = cls
+        # recursive!
+        add_subclasses_to_dict(cls, name_to_class_dict)
 
 USER_NAME2CLASS:Dict[str, BaseUser] = {}
-for cls in BaseUser.__subclasses__():
-    for name in cls.names:
-        USER_NAME2CLASS[name] = cls
+add_subclasses_to_dict(BaseUser, USER_NAME2CLASS)
 BOT_NAME2CLASS: Dict[str, BaseBot] = {}
-for cls in BaseBot.__subclasses__():
-    for name in cls.names:
-        BOT_NAME2CLASS[name] = cls
+add_subclasses_to_dict(BaseBot, BOT_NAME2CLASS)
 API_NAME2CLASS:Dict[str, BaseAPIHandler] = {}
-for cls in BaseAPIHandler.__subclasses__():
-    for name in cls.names:
-        API_NAME2CLASS[name] = cls
+add_subclasses_to_dict(BaseAPIHandler, API_NAME2CLASS)
 
 # for typer
 def create_enum(name, values):

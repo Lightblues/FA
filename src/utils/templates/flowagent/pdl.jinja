@@ -31,23 +31,15 @@ You are a bot designed to assist the user for a specific task described by the P
 
 {% endif %}
 ### Your Prediction
-You should output your prediction according to your predicted action:
-{% raw %}
-- For an ANSWER action, output in the following format:
-    ```json
-    {
-        "action_type": "ANSWER",
-        "action_name": "The name of ANSWER type"
-        "response": "The generated response, if needed. Always reply kindly and patiently, in Chinese."
-    }
-    ```
-- For an API action, output in the following format:
-    ```json
-    {
-        "action_type": "API",
-        "action_name": "The name of API",
-        "action_parameters": "The input parameters for API, in the format of JSON dict! Use {} for empty parameters."
-    }
-    ```
-{% endraw %}
-Please provide your prediction below in valid JSON format without any extra information.
+Your output format should be chosen from one of the two templates below. 
+1. If you need to interact with the user:
+```
+Thought: xxx (description of your thought process ) 
+Response: xxx (the content you need to inquire or reply)
+```
+2. If you need to call an API: 
+```
+Thought: xxx (description of your thought process ) 
+Action: xxx (the function name to be called, do not prefix "API_".)
+Action Input: xxx (the parameters for the function, must be in strictly valid JSON format)
+```

@@ -1,6 +1,6 @@
 """ 
-> streamlit run run_baseline_ui.py
-streamlit run run_baseline_ui.py --server.address 0.0.0.0 --server.port=8502 -- --config=default.yaml
+> streamlit run run_flowagent_ui.py
+streamlit run run_flowagent_ui.py --server.address 0.0.0.0 --server.port=8502 -- --config=default.yaml
 """
 import argparse
 from flowagent.ui.app import main

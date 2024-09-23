@@ -5,7 +5,7 @@ from ..data import DBManager, Config, DataManager
 
 def show_conversation_page():
     """
-    Streamlit UI for baseline experiment.
+    Streamlit UI for finished experiment.
 
     1. select a conversation_id from the sidebar
     2. display the conversation in the main window

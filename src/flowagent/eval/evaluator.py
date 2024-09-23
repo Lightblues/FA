@@ -1,6 +1,8 @@
 """ Main entrypoint for evaluation! run simulations, judge, and analyze
-
 updated @240918
+
+- [ ] add stat of #error_output (for parse)
+- [ ] turn-level evaluation
 """
 
 import os, json, tqdm, itertools, pickle, collections, traceback, datetime, argparse
@@ -33,7 +35,7 @@ class Evaluator:
     def main(self):
         """ 
         0. set configs. log the configs by `exp_version`
-        1. run simulations, use `BaselineController(cfg).start_conversation()` to start a single exp with specific config
+        1. run simulations, use `XXXController(cfg).start_conversation()` to start a single exp with specific config
             output to db with `exp_version` (clean if exist)
         2. run evaluations/judges (query db to find run exps)
         3. analyze the evaluation results
@@ -75,7 +77,7 @@ class Evaluator:
         2. run simulations in parallel
         """
         def f_exec(cfg):
-            # 1. check if run (query db) -- DONE in `BaselineController.start_conversation`
+            # 1. check if run (query db) -- DONE in `XXXController.start_conversation`
             # 2. run with retry (3 times) NOTE: can be a decorator? 
             for retry_ in range(3):
                 try:

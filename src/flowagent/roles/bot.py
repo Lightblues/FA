@@ -100,6 +100,8 @@ class ReactBot(BaseBot):
         if BotOutput.action_str in result:        # Action
             assert BotOutput.action_input_str in result, f"Action Input not in prediction! LLM output:\n" + LogUtils.format_infos_with_tabulate(s)
             result[BotOutput.action_input_str] = json.loads(result[BotOutput.action_input_str]) # eval: NameError: name 'null' is not defined
+            if result[BotOutput.action_str].startswith("API_"):
+                result[BotOutput.action_str] = result[BotOutput.action_str][4:]
             output = BotOutput(action=result[BotOutput.action_str], action_input=result[BotOutput.action_input_str], thought=result[BotOutput.thought_str])
         else:
             assert BotOutput.response_str in result, f"Response not in prediction! LLM output:\n" + LogUtils.format_infos_with_tabulate(s)
@@ -134,10 +136,10 @@ class PDLBot(ReactBot):
         prediction = self.parse_react_output(llm_response)
         return llm_response, prediction
     
-    @staticmethod
-    def parse_react_output(s: str) -> BotOutput:
-        parsed_response = Formater.parse_llm_output_json(s)
-        assert "action_type" in parsed_response, f"parsed_response: {parsed_response}"
-        action_type = ActionType[parsed_response["action_type"]]
-        action_metas = APICalling_Info(name=action_name, kwargs=action_parameters)
-        
+    # @staticmethod
+    # def parse_json_output(s: str) -> BotOutput:
+    #     parsed_response = Formater.parse_llm_output_json(s)
+    #     assert "action_type" in parsed_response, f"parsed_response: {parsed_response}"
+    #     action_type = ActionType[parsed_response["action_type"]]
+    #     action_metas = APICalling_Info(name=action_name, kwargs=action_parameters)
+    

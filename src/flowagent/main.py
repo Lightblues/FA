@@ -1,6 +1,6 @@
 """ updated @240904
 - basic implementations
-    - [x] BaselineController logic @240905
+    - [x] XXXController logic @240905
     - [x] logging and metrics -> append prompts to Message
     - [x] data: Workflow abstraction | align with FlowBench 
     - [x] user: add user profiling? aware of workflow?
