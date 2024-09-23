@@ -1,5 +1,7 @@
 """ updated 240920
 - [ ] add pdl bot
+    - [ ] check performance diff for JSON / React output
+- [ ] add lke bot? 
 """
 import re, datetime, json
 from typing import List, Tuple
@@ -35,6 +37,11 @@ class DummyBot(BaseBot):
     
     
 class ReactBot(BaseBot):
+    """ ReactBot
+    prediction format: 
+        (Thought, Response) for response node
+        (Thought, Action, Action Input) for call api node
+    """
     llm: OpenAIClient = None
     names = ["react", "ReactBot", "react_bot"]
     
@@ -66,7 +73,7 @@ class ReactBot(BaseBot):
 
     def _gen_prompt(self) -> str:
         prompt = jinja_render(
-            self.cfg.bot_template_fn,     # "baselines/flowbench.jinja": task_background, workflow, toolbox, current_time
+            self.cfg.bot_template_fn,     # "baselines/flowbench.jinja": task_background, workflow, toolbox, current_time, history_conversation
             task_background=self.workflow.task_background,
             workflow=self.workflow.workflow,
             toolbox=self.workflow.toolbox,
@@ -98,3 +105,39 @@ class ReactBot(BaseBot):
             assert BotOutput.response_str in result, f"Response not in prediction! LLM output:\n" + LogUtils.format_infos_with_tabulate(s)
             output = BotOutput(response=result[BotOutput.response_str], thought=result[BotOutput.thought_str])
         return output
+    
+class PDLBot(ReactBot):
+    """ 
+    prediction format: 
+        (Thought, Response) for response node
+        (Thought, Action, Action Input) for call api node
+    """
+    llm: OpenAIClient = None
+    names = ["pdl", "PDLBot", "pdl_bot"]
+    
+    def _gen_prompt(self) -> str:
+        header_info = {
+            "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        prompt = jinja_render(
+            self.cfg.bot_template_fn,       # "baselines/pdl.jinja"
+            head_info="\n".join(f"{k}: {v}" for k,v in header_info.items()),
+            PDL=self.workflow.pdl.to_str(),
+            conversation=self.conv.to_str(), 
+            # current_state=,
+        )
+        return prompt
+    
+    def _process(self, prompt:str=None) -> Tuple[str, BotOutput]:
+        llm_response = self.llm.query_one(prompt)
+        # transform json -> react format? 
+        prediction = self.parse_react_output(llm_response)
+        return llm_response, prediction
+    
+    @staticmethod
+    def parse_react_output(s: str) -> BotOutput:
+        parsed_response = Formater.parse_llm_output_json(s)
+        assert "action_type" in parsed_response, f"parsed_response: {parsed_response}"
+        action_type = ActionType[parsed_response["action_type"]]
+        action_metas = APICalling_Info(name=action_name, kwargs=action_parameters)
+        

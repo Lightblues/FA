@@ -32,7 +32,7 @@ class Judger:
         self.db = DBManager(cfg.db_uri, cfg.db_name, cfg.db_message_collection_name)
         self.logger = BaseLogger()
 
-    def judge(self, verbose=True):
+    def judge(self, verbose=True) -> Dict:
         """ judge process:
         1. check if judged
         2. collect related infos
@@ -47,7 +47,7 @@ class Judger:
         query_res = self.db.query_evaluations(query)
         if len(query_res) > 0:
             self.logger.log(f"  <judge> {self.cfg.judge_conversation_id} has already been judged", with_print=verbose)
-            return True
+            return query_res[0] # out_dict
 
         # 1.1. get the simultead conversation
         simulated_conversation = self.db.query_messages_by_conversation_id(self.cfg.judge_conversation_id)
