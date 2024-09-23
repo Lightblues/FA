@@ -1,6 +1,6 @@
 """ updated 240906
 usage:
-    python run_baseline_eval.py --config=default.yaml --exp-version=default \
+    python run_flowagent_exp.py --config=default.yaml --exp-version=default \
         --workflow-type=text \
         --user-mode=llm_profile --user-llm-name=gpt-4o \
         --bot-mode=react_bot --bot-llm-name=gpt-4o \
@@ -9,14 +9,14 @@ usage:
         --conversation-turn-limit=20 --log-utterence-time --log-to-db
 """
 import typer
-from baselines import Config, DataManager, Evaluator
-from baselines.data import WorkflowType, WorkflowTypeStr
-from baselines.roles import UserMode, BotMode, ApiMode
+from flowagent import Config, DataManager, Evaluator
+from flowagent.data import WorkflowType, WorkflowTypeStr
+from flowagent.roles import UserMode, BotMode, ApiMode
 
 app = typer.Typer()
 
 @app.command()
-def run_baseline(
+def run_exp(
     config: str = typer.Option("default.yaml", help="Configuration file"),
     workflow_dataset: str = typer.Option(None, help="Workflow dataset", case_sensitive=False),
     workflow_type: WorkflowTypeStr = typer.Option(None, help="Workflow type", case_sensitive=False),

@@ -3,7 +3,7 @@
 streamlit run run_baseline_ui.py --server.address 0.0.0.0 --server.port=8502 -- --config=default.yaml
 """
 import argparse
-from baselines.ui.app import main
+from flowagent.ui.app import main
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser()
