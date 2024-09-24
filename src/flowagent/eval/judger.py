@@ -98,7 +98,7 @@ class Judger:
             "flowagent/eval_session.jinja",
             user_target=user_profile.to_str(),
             workflow_info=workflow.to_str(),
-            session=simulated_conversation.to_str(),  # TODO: format the conversation
+            session=simulated_conversation.to_str(),  # NOTE: format the conversation
         )
         for _retry in range(retry):
             try:

@@ -44,11 +44,11 @@ class DBManager:
         return res
     
     def get_most_recent_unique_conversation_ids(
-        self, query: dict = {}, num: int = 10
+        self, query: dict = {}, limit: int = 0
     ) -> List[str]:
         """ query collection_meta, sort by conversation_id """
         sort_order = [('conversation_id', -1)]
-        results = self.collection_meta.find(query).sort(sort_order).limit(num)
+        results = self.collection_meta.find(query).sort(sort_order).limit(limit)
         return [res["conversation_id"] for res in results]
     
     def query_run_experiments(self, query: dict = {}, limit: int = 0) -> List[dict]:

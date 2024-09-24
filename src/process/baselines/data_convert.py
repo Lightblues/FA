@@ -51,17 +51,22 @@
 {
     "000":{
         "name": "flight booking",
-        "task_background": "flight booking"
+        "task_description": "flight booking",
+        "task_detailed_description": "xxxx
     }
 }
 """
 # %%
 import os, sys, json, yaml, pathlib
 
-# IDIR = pathlib.Path("/apdcephfs_cq8/share_2992827/shennong_5/siqiicai/data/STAR/tasks_transformed")
-# ODIR = pathlib.Path("/work/huabu/dataset/STAR")
-IDIR = pathlib.Path("/apdcephfs_cq8/share_2992827/shennong_5/siqiicai/data/SGD/workflows")
-ODIR = pathlib.Path("/work/huabu/dataset/SGD")
+DATA = "STAR"
+DATA = "SGD"
+if DATA == "STAR":
+    IDIR = pathlib.Path("/apdcephfs_cq8/share_2992827/shennong_5/siqiicai/data/STAR/tasks_transformed")
+    ODIR = pathlib.Path("/work/huabu/dataset/STAR")
+elif DATA == "SGD":
+    IDIR = pathlib.Path("/apdcephfs_cq8/share_2992827/shennong_5/siqiicai/data/SGD/workflows")
+    ODIR = pathlib.Path("/work/huabu/dataset/SGD")
 os.makedirs(ODIR, exist_ok=True)
 
 def build_name_map(subdir="../user_profile"):
@@ -91,7 +96,8 @@ def build_task_infos(version="v240908"):
                 infos = json.load(f)
             task_infos[name_map[name]] = {
                 "name": infos["task_name"],
-                "task_background": infos["task_description"],
+                "task_description": infos["task_description"],
+                "task_detailed_description": infos["task_detailed_description"],
             }
         except Exception as e:
             print(f"Error for {name}: {e}")
@@ -126,6 +132,29 @@ def convert_format_code():
             continue
     print(f"Converted {num_success} tasks")
 convert_format_code()
+
+# %%
+def convert_format_pdl():
+    print(f"Converting PDL from `PDL` subfolder")
+    os.makedirs(ODIR / "PDL", exist_ok=True)
+    num_success = 0
+    for name in name_map:
+        try:
+            # check that code in not binary
+            if check_is_binary(IDIR / "PDL" / f"{name}.txt"): raise Exception(f"{name} is binary")
+            with open(IDIR / "PDL" / f"{name}.txt", "r") as f:
+                content = f.read()
+                _data = yaml.load(content, Loader=yaml.FullLoader)
+            with open(ODIR / "PDL" / f"{name_map[name]}.yaml", "w") as f:
+                # yaml.dump(data, f, indent=2)
+                f.write(content)
+            num_success += 1
+        except Exception as e:
+            print(f"Error for {name}: {e}")
+            continue
+    print(f"Converted {num_success} tasks")
+    return num_success
+convert_format_pdl()
 
 # %%
 def convert_format_flowchart():
@@ -214,7 +243,7 @@ def convert_format_api(subdir="../apis/apis_transfered"):
             with open(IDIR / subdir / f"{name}.json", "r") as f:
                 data = json.load(f)
             with open(ODIR / "tools" / f"{name_map[name]}.yaml", "w") as f:
-                yaml.dump(data, f, indent=2)
+                yaml.dump(data, f, indent=2, sort_keys=False)
             num_success += 1
         except Exception as e:
             print(f"Error for {name}: {e}")

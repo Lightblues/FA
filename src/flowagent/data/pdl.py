@@ -1,15 +1,29 @@
 import re, yaml
+from dataclasses import dataclass, asdict, field
 
+
+class MyDumper(yaml.SafeDumper):
+    def ignore_aliases(self, data):
+        return True
+
+    def represent_scalar(self, tag, value, style=None):
+        if style is None:
+            if '\n' in value:
+                style = '|'
+        return super(MyDumper, self).represent_scalar(tag, value, style)
+
+
+@dataclass
 class PDL:
     PDL_str: str = None
     
-    taskflow_name: str = ""
-    taskflow_desc: str = ""
-    taskflow_desc_detail: str = ""
-    apis: list = []
-    slots: list = []
-    answers: list = []
-    workflow_str: str = ""      # the core logic of the taskflow
+    name: str = ""
+    desc: str = ""
+    desc_detail: str = ""
+    apis: list = field(default_factory=list)
+    slots: list = field(default_factory=list)
+    answers: list = field(default_factory=list)
+    procedure: str = ""      # the core logic of the taskflow
     
     version: str = "v2"
     
@@ -29,15 +43,21 @@ class PDL:
     
     def parse_PDL_str(self):
         ob = yaml.load(self.PDL_str, Loader=yaml.FullLoader)
-        self.taskflow_name = ob["Name"]
-        self.taskflow_desc = ob["Desc"]
-        self.taskflow_desc_detail = ob.get("Detailed_desc", "")
+        self.name = ob["Name"]
+        self.desc = ob["Desc"]
+        self.desc_detail = ob.get("Detailed_desc", "")
         self.apis = ob.get("APIs", [])
         self.slots = ob["SLOTs"]
         self.answers = ob["ANSWERs"]
-        self.workflow_str = ob["PDL"]
+        self.procedure = ob["PDL"]
 
     def to_str(self):
         return self.PDL_str
+    def to_str_wo_api(self):
+        infos = asdict(self)
+        selected_keys = ["name", "desc", "desc_detail", "slots", "answers", "procedure"]
+        infos_selected = {k: infos[k] for k in selected_keys}
+        return yaml.dump(infos_selected, sort_keys=False, Dumper=MyDumper, default_flow_style=False)
+        
     def __repr__(self):
         return self.PDL_str

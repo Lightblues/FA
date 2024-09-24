@@ -57,7 +57,7 @@ class Config:
     
     def to_yaml(self, yaml_file: str):
         with open(yaml_file, 'w') as file:
-            yaml.dump(asdict(self), file)
+            yaml.dump(asdict(self), file, sort_keys=False)
     
     @classmethod
     def from_dict(cls, dic: dict):

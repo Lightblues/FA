@@ -95,7 +95,8 @@ class Workflow:  # rename -> Data
     type: WorkflowType = None
     id: str = None              # 000
     name: str = None
-    task_background: str = None
+    task_description: str = None
+    task_detailed_description: str = None
     workflow: str = None
     toolbox: List[Tool] = field(default_factory=list)   # apis
     user_profiles: List[UserProfile] = field(default_factory=list) # user profiles
@@ -104,14 +105,18 @@ class Workflow:  # rename -> Data
     
     pdl: PDL = None         # only for PDL
     
-    def __init__(self, data_manager:DataManager, type:str, id:str, name:str, task_background:str, load_user_profiles=False, **kwargs):
+    def __init__(
+        self, data_manager:DataManager, 
+        type:str, id:str, name:str, task_description:str, task_detailed_description: str,
+        load_user_profiles=False, **kwargs):
         self.data_manager = data_manager
         
         _type: WorkflowType = WorkflowType[type.upper()]
         self.type = _type
         self.id = id
         self.name = name
-        self.task_background = task_background
+        self.task_description = task_description
+        self.task_detailed_description = task_detailed_description
         # load the workflow & toolbox
         with open(data_manager.DIR_data_flowbench / f"tools/{id}.yaml", 'r') as f:
             self.toolbox = yaml.safe_load(f)
@@ -124,14 +129,22 @@ class Workflow:  # rename -> Data
         
         if _type == WorkflowType.PDL:
             self.pdl = PDL.load_from_file(data_manager.DIR_data_flowbench / f"pdl/{id}.yaml")
+            self.workflow = self.pdl.to_str_wo_api() # self.pdl.procedure
     
     @classmethod
     def load_by_id(cls, data_manager:DataManager, id:str, type:str, **kwargs):
         assert id in data_manager.workflow_infos, f"[ERROR] {id} not found in {data_manager.workflow_infos.keys()}"
         infos = data_manager.workflow_infos[id]
-        assert all([k in infos for k in ['name', 'task_background']]), f"[ERROR] missing key in {infos}"
+        assert all([k in infos for k in ['name', 'task_description', 'task_detailed_description']]), f"[ERROR] missing key in {infos}"
         return cls(data_manager, type, id, **infos, **kwargs)
     
     def to_str(self):
-        return f"{self.type} {self.id}: {self.name}\nTask: {self.task_background}\n---\n{self.workflow}"
+        # return f"ID: {self.type}-{self.id}\nName: {self.name}\nTask: {self.task_description}\nWorkflow: {self.workflow}"
+        info_dict = {
+            "ID": f"{self.type}-{self.id}",
+            "Name": self.name,
+            "Task": self.task_description,
+            "Workflow": self.task_detailed_description
+        }
+        return "".join([f"{k}: {v}\n" for k, v in info_dict.items()])
 

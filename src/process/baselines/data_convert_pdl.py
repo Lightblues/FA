@@ -82,9 +82,8 @@ class DataConverter:
             with open(IDIR / subdir / f"{name}.json", "r") as f: task_info = json.load(f)
             task_infos[name] = {
                 "name": task_info["task_name"],
-                "task_background": task_info["task_description"],  # task_description
+                "task_description": task_info["task_description"],  # task_description
                 "task_detailed_description": task_info["task_detailed_description"],
-                
             }
             with open(ODIR / "text" / f"{name}.txt", "w") as f: f.write(task_info["task_detailed_description"])
         result = {
@@ -191,7 +190,7 @@ class DataConverter:
             converted_api = Formater.parse_llm_output_json(llm_resp)
 
             with open(_ofn, "w") as f:
-                yaml.dump(converted_api, f, indent=2, allow_unicode=True)
+                yaml.dump(converted_api, f, indent=2, allow_unicode=True, sort_keys=False)
         return num_success
 
     def translate_PDL_to_en(self):

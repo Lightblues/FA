@@ -52,6 +52,7 @@ class Evaluator:
         self.analyze()
     
     def process_configs(self):
+        # TODO: add config: weather save config 
         """ Log the config. If existed, reload it! """
         cfn_fn = self.data_namager.DIR_config / f"exps/{self.cfg.exp_version}.yaml"
         os.makedirs(cfn_fn.parent, exist_ok=True)
