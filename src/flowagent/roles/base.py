@@ -6,7 +6,7 @@ from ..data import (
     Config, UserOutput, BotOutput, APIOutput, BotOutputType,
     Conversation, Message, Role
 )
-from ..data import Tool, Workflow
+from ..data import Workflow
 
 
 class BaseRole:
@@ -35,7 +35,7 @@ class BaseAPIHandler(BaseRole):
     API structure: (see apis_v0/apis.json)
     """
     names: List[str] = None
-    api_infos: Dict[str, Dict] = None
+    api_infos: List[Dict] = None
     cnt_api_callings: Dict[str, int] = None
     
     def __init__(self, **args) -> None:

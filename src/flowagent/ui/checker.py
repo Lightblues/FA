@@ -92,7 +92,7 @@ class CLIChecker():
         with open(self.data_manager.DIR_data_flowbench / f"user_profile/{self.conv_cfg.workflow_id}.json", 'r') as f:
             user_profiles = json.load(f)
             selected_up = user_profiles[self.conv_cfg.user_profile_id]
-            print(LogUtils.format_infos_with_pprint(selected_up))
+            print(LogUtils.format_infos_basic(selected_up))
             
 
     def show_utterance(self, utterance_id: int):
@@ -113,7 +113,7 @@ class CLIChecker():
         while True:
             cmd = self.select_cmd()
             if cmd == CmdType.EXP:
-                candidate_exp_versions = self.db.query_run_exp_versions()
+                candidate_exp_versions = self.db.get_all_run_exp_versions()
                 print(LogUtils.format_str_with_color("> Candidate exp versions: " + ", ".join(candidate_exp_versions), 'gray'))
                 exp_version = LogUtils.format_user_input("Enter exp_version: ")
                 self.query_run_experiments(exp_version)

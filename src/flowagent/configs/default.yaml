@@ -13,7 +13,7 @@ user_profile: true
 user_profile_id: 0
 
 bot_mode: "react_bot"     # dummy_bot, react_bot, pdl_bot
-bot_template_fn: "flowagent/flowbench.jinja"
+bot_template_fn: "flowagent/bot_flowbench.jinja"
 bot_llm_name: "gpt-4o"
 bot_action_limit: 5
 pdl_check_dependency: true

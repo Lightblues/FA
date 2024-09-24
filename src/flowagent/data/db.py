@@ -30,6 +30,9 @@ class DBManager:
     def query_messages_by_conversation_id(self, conversation_id: str) -> Conversation:
         query = {"conversation_id": conversation_id}
         results = self.collection.find(query)
+        results = [res for res in results]
+        if len(results)==0:
+            return Conversation()
         messages = [Message(**{**res, "role": Role.get_by_rolename(res["role"])}) for res in results]
         return Conversation.from_messages(messages)
     
@@ -56,7 +59,7 @@ class DBManager:
         results = self.collection_meta.find(query).sort(sort_order).limit(limit)
         return [res for res in results]
     
-    def query_run_exp_versions(self) -> List[str]:
+    def get_all_run_exp_versions(self) -> List[str]:
         results = self.collection_meta.distinct("exp_version")
         return results
 

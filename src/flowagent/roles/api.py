@@ -1,5 +1,6 @@
 """ updated @240906
 - [ ] generate api response with given history calling infos
+- [ ] integrate with FastAPI
 """
 import json, re
 from typing import List
@@ -43,29 +44,45 @@ class LLMSimulatedAPIHandler(BaseAPIHandler):
         self.llm = init_client(llm_cfg=LLM_CFG[self.cfg.api_llm_name])
         
     def process(self, apicalling_info: BotOutput, *args, **kwargs) -> APIOutput:
+        flag, m = self.check_validation(apicalling_info)
+        if not flag:        # base check error!
+            msg = Message(
+                Role.SYSTEM, m,
+                conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
+            )
+            prediction = APIOutput(apicalling_info.action, apicalling_info.action_input, m, 400)
+        else:
+            self.cnt_api_callings[apicalling_info.action] += 1  # stat
+            
+            prompt = self._gen_prompt(apicalling_info)
+            llm_response = self.llm.query_one(prompt)
+            prediction = self.parse_react_output(llm_response, apicalling_info) # parse_json_output
+            if prediction.response_status_code==200:
+                msg_content = f"<API response> {prediction.response_data}"
+            else:
+                msg_content = f"<API response> {prediction.response_status_code} {prediction.response_data}"
+            msg = Message(
+                Role.SYSTEM, msg_content, prompt=prompt, llm_response=llm_response, 
+                conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
+            )
+        self.conv.add_message(msg)
+        return prediction
+    
+    def check_validation(self, apicalling_info: BotOutput) -> bool:
         # ... match the api by name? check params? 
-        # TODO: integrate with FastAPI
+        api_names = [api["API"] for api in self.api_infos]
+        if apicalling_info.action not in api_names: 
+            return False, f"<Calling API Error> : {apicalling_info.action} not in {api_names}"
+        return True, None
+
+    def _gen_prompt(self, apicalling_info: BotOutput) -> str:
         prompt = jinja_render(
             self.cfg.api_template_fn,     # "flowagent/api_llm.jinja": api_infos, api_name, api_input
             api_infos=self.api_infos,
             api_name=apicalling_info.action,
             api_input=apicalling_info.action_input,
         )
-        llm_response = self.llm.query_one(prompt)
-        # ...parse the response! -> APIOutput, conv
-        # prediction = self.parse_json_output(llm_response, apicalling_info)
-        prediction = self.parse_react_output(llm_response, apicalling_info)
-        if prediction.response_status_code==200:
-            msg_content = f"<API response> {prediction.response_data}"
-        else:
-            msg_content = f"<API response> {prediction.response_status_code} {prediction.response_data}"
-        msg = Message(
-            Role.SYSTEM, msg_content, prompt=prompt, llm_response=llm_response, 
-            conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
-        )
-        self.conv.add_message(msg)
-        self.cnt_api_callings[prediction.name] += 1 # stat
-        return prediction
+        return prompt
 
     @staticmethod
     def parse_json_output(s:str, apicalling_info:BotOutput) -> APIOutput:
@@ -98,6 +115,6 @@ class LLMSimulatedAPIHandler(BaseAPIHandler):
         return APIOutput(
             name=apicalling_info.action,
             request=apicalling_info.action_input,
-            response_data=result[APIOutput.response_data_str_react],
+            response_data=json.dumps(result[APIOutput.response_data_str_react], ensure_ascii=False),
             response_status_code=int(result[APIOutput.response_status_str_react]),
         )

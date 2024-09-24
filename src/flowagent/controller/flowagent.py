@@ -94,6 +94,7 @@ class FlowagentController(BaseController):
     def check_bot_action(self, bot_output: BotOutput) -> bool:
         """ Check the validation of bot action
         NOTE: if not validated, the error infomation will be added to self.conv!
+        - [ ]j check api name? -> done in APIHandler
         """
         if self.cfg.pdl_check_dependency:
             if not self.pdl_dependency_checker.check(bot_output): return False

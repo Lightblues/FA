@@ -3,6 +3,7 @@ updated @240918
 
 - [ ] add stat of #error_output (for parse)
 - [ ] turn-level evaluation
+- [ ] update analyzer: more metrics
 """
 
 import os, json, tqdm, itertools, pickle, collections, traceback, datetime, argparse
@@ -52,7 +53,6 @@ class Evaluator:
         self.analyze()
     
     def process_configs(self):
-        # TODO: add config: weather save config 
         """ Log the config. If existed, reload it! """
         cfn_fn = self.data_namager.DIR_config / f"exps/{self.cfg.exp_version}.yaml"
         os.makedirs(cfn_fn.parent, exist_ok=True)
@@ -60,8 +60,9 @@ class Evaluator:
             print(f"EXP {self.cfg.exp_version} config existed! Loading from {cfn_fn}")
             self.cfg = Config.from_yaml(cfn_fn)     # NOTE: reload the config!
         else:
-            self.cfg.to_yaml(cfn_fn)
-            print(f"EXP {self.cfg.exp_version} config saved to {cfn_fn}")
+            if self.cfg.exp_save_config: # save the config
+                self.cfg.to_yaml(cfn_fn)
+                print(f"EXP {self.cfg.exp_version} config saved to {cfn_fn}")
 
     @staticmethod
     def print_header_info(step_name: str, infos: Union[None, Dict, pd.DataFrame]=None):

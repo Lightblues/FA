@@ -6,11 +6,11 @@ from ..data import DBManager, Config, DataManager
 
 def refresh_conversation_id():
     _db: DBManager = st.session_state.db
-    selected_exp_version = st.session_state.exp_version
+    selected_exp_version = st.session_state.get("exp_version", None)
     query = {}
     if selected_exp_version is not None:
         query["exp_version"] = selected_exp_version
-    st.session_state.conversation_ids = _db.get_most_recent_unique_conversation_ids(query=query)
+    st.session_state.run_exps = _db.query_run_experiments(query=query)
 
 def show_conversation_page():
     """
@@ -22,7 +22,7 @@ def show_conversation_page():
         cfg: Config = st.session_state.cfg
         st.session_state.db = DBManager(cfg.db_uri, cfg.db_name, cfg.db_message_collection_name)
         st.session_state.data_manager = DataManager(cfg)
-    if "conversation_ids" not in st.session_state:
+    if "run_exps" not in st.session_state:
         refresh_conversation_id()
     
     db:DBManager = st.session_state.db
@@ -31,22 +31,26 @@ def show_conversation_page():
     # ------------------ sidebar --------------------
     with st.sidebar:
         # 1. select interested `exp_version`
-        _ava_exp_versions = [None] + db.query_run_exp_versions()
+        _ava_exp_versions = [None] + db.get_all_run_exp_versions()
         st.selectbox(
             "1️⃣ Select exp_version", 
             options=_ava_exp_versions,
             key="exp_version",
             on_change=refresh_conversation_id
         )
-        st.info(f"run exps: {len(st.session_state.conversation_ids)}")
+        st.info(f"run exps: {len(st.session_state.run_exps)}")
         
         # 2. select speicific `conversation_id`
         col1, col2 = st.columns([3, 1])
+        _options = [f"(({exp['workflow_id']})-{exp['user_profile_id']})_{exp['conversation_id']}" for exp in st.session_state.run_exps]
+        _options.sort()
         with col1:
             conversation_id = st.selectbox(
                 "2️⃣ Select conversation_id", 
-                options=st.session_state.conversation_ids
+                options=_options,
+                
             )
+            conversation_id = conversation_id.split("_", 1)[1]
         with col2:
             if st.button("Refresh"):
                 refresh_conversation_id()
@@ -57,13 +61,16 @@ def show_conversation_page():
         st.info(f"selected conversation_id: {conversation_id}")
         display_option = st.selectbox(
             "Choose display option",
-            ["Dataframe", "Table"]
+            options=["Table", "Dataframe"],
         )
 
     # ------------------ main --------------------
     if conversation_id:
         # 1. query conversation from db ; show the conversation
         conv = db.query_messages_by_conversation_id(conversation_id)
+        if len(conv.msgs) == 0:
+            st.warning(f"Conversation `{conversation_id}` is empty.")
+            return
         df = conv.to_dataframe()
         selected_columns = ['role', 'content', 'utterance_id']
         df_selected = df[selected_columns].set_index('utterance_id')

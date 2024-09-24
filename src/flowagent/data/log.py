@@ -1,4 +1,4 @@
-import os, datetime, traceback, functools, tabulate, pprint
+import os, datetime, traceback, functools, tabulate, pprint, textwrap
 from collections import defaultdict
 from pathlib import Path
 from typing import List, Dict, Optional, Union, Any
@@ -31,6 +31,27 @@ class LogUtils:
     @staticmethod
     def format_infos_with_pprint(infos:Any) -> str:
         return pprint.pformat(infos)
+    
+    @staticmethod
+    def format_infos_basic(infos: Any, width: int=100, replace_whitespace: bool=False) -> str:
+        """ prefer to format long string """
+        if not isinstance(infos, str):
+            infos = str(infos)
+        
+        # Wrap the text to the specified width
+        wrapped_text = textwrap.fill(infos, width=width, replace_whitespace=replace_whitespace)
+        
+        # surround the text with a box
+        lines = wrapped_text.split('\n')
+        box_width = max(len(line) for line in lines) + 2
+        top_border = '+' + '-' * (box_width+2) + '+'
+        bottom_border = '+' + '-' * (box_width+2) + '+'
+        boxed_text = top_border + '\n'
+        for line in lines:
+            boxed_text += '| ' + line.ljust(box_width) + ' |\n'
+        boxed_text += bottom_border
+        
+        return boxed_text
     
     @staticmethod
     def format_infos_with_tabulate(

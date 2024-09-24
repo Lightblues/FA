@@ -83,12 +83,12 @@ class WorkflowTypeStr(str, Enum):
     FLOWCHART = "FLOWCHART"
     PDL = "PDL"
 
-@dataclass
-class Tool:
-    api_name: str = None
-    api_desc: str = None
-    input_paras: Dict = None
-    output_paras: Dict = None
+# @dataclass
+# class Tool:
+#     api_name: str = None
+#     api_desc: str = None
+#     input_paras: Dict = None
+#     output_paras: Dict = None
 
 @dataclass
 class Workflow:  # rename -> Data
@@ -98,7 +98,7 @@ class Workflow:  # rename -> Data
     task_description: str = None
     task_detailed_description: str = None
     workflow: str = None
-    toolbox: List[Tool] = field(default_factory=list)   # apis
+    toolbox: List[Dict] = field(default_factory=list)   # apis
     user_profiles: List[UserProfile] = field(default_factory=list) # user profiles
     
     data_manager: DataManager = None

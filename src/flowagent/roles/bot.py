@@ -1,5 +1,5 @@
-""" updated 240920
-- [ ] add pdl bot
+""" updated 240924
+- [x] add pdl bot
     - [ ] check performance diff for JSON / React output
 - [ ] add lke bot? 
 """
@@ -58,7 +58,7 @@ class ReactBot(BaseBot):
             except Exception as e:
                 print(f"  <bot> Error when trying {i}th time: {e}")
         else:
-            raise RuntimeError(f"  <bot> Error after trying 3 times!!! prompt:\n" + LogUtils.format_infos_with_pprint(prompt))
+            raise RuntimeError(f"  <bot> Error after trying 3 times!!! prompt:\n" + LogUtils.format_infos_basic(prompt))
         if prediction.action_type==BotOutputType.RESPONSE:
             msg_content = prediction.response
         else:
@@ -73,7 +73,7 @@ class ReactBot(BaseBot):
 
     def _gen_prompt(self) -> str:
         prompt = jinja_render(
-            self.cfg.bot_template_fn,     # "flowagent/flowbench.jinja": task_description, workflow, toolbox, current_time, history_conversation
+            self.cfg.bot_template_fn,     # "flowagent/bot_flowbench.jinja": task_description, workflow, toolbox, current_time, history_conversation
             task_description=self.workflow.task_description,
             workflow=self.workflow.workflow,
             toolbox=self.workflow.toolbox,
@@ -96,15 +96,15 @@ class ReactBot(BaseBot):
         result = {match.group('field'): match.group('value').strip() for match in matches}
         
         # validate result
-        assert BotOutput.thought_str in result, f"Thought not in prediction! LLM output:\n" + LogUtils.format_infos_with_pprint(s)
+        assert BotOutput.thought_str in result, f"Thought not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
         if BotOutput.action_str in result:        # Action
-            assert BotOutput.action_input_str in result, f"Action Input not in prediction! LLM output:\n" + LogUtils.format_infos_with_pprint(s)
+            assert BotOutput.action_input_str in result, f"Action Input not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
             result[BotOutput.action_input_str] = json.loads(result[BotOutput.action_input_str]) # eval: NameError: name 'null' is not defined
             if result[BotOutput.action_str].startswith("API_"):
                 result[BotOutput.action_str] = result[BotOutput.action_str][4:]
             output = BotOutput(action=result[BotOutput.action_str], action_input=result[BotOutput.action_input_str], thought=result[BotOutput.thought_str])
         else:
-            assert BotOutput.response_str in result, f"Response not in prediction! LLM output:\n" + LogUtils.format_infos_with_pprint(s)
+            assert BotOutput.response_str in result, f"Response not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
             output = BotOutput(response=result[BotOutput.response_str], thought=result[BotOutput.thought_str])
         return output
     
@@ -122,7 +122,7 @@ class PDLBot(ReactBot):
             "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         prompt = jinja_render(
-            self.cfg.bot_template_fn,       # "flowagent/pdl.jinja"
+            self.cfg.bot_template_fn,       # "flowagent/bot_pdl.jinja"
             head_info="\n".join(f"{k}: {v}" for k,v in header_info.items()),
             PDL=self.workflow.pdl.to_str(),
             conversation=self.conv.to_str(), 
