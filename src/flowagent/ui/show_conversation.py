@@ -1,53 +1,64 @@
+import json, yaml
 import streamlit as st
 import pandas as pd
 from ..data import DBManager, Config, DataManager
 
 
+def refresh_conversation_id():
+    _db: DBManager = st.session_state.db
+    selected_exp_version = st.session_state.exp_version
+    query = {}
+    if selected_exp_version is not None:
+        query["exp_version"] = selected_exp_version
+    st.session_state.conversation_ids = _db.get_most_recent_unique_conversation_ids(query=query)
+
 def show_conversation_page():
     """
-    Streamlit UI for finished experiment.
-
-    1. select a conversation_id from the sidebar
-    2. display the conversation in the main window
-    3. select an utterance_id from the main window
-    4. display the details of the selected utterance_id in the main window
-
-    st.session_state:
-        - cfg: Config object
-        - db: DBManager object
-        - conversation_ids: list of conversation_ids
-
-    Parameters
-    ----------
-    cfg_name : str
-        the name of the configuration file
+    Streamlit UI for checking a finished experiment.
     """
     # ------------------ session_state --------------------
     if "db" not in st.session_state:
         assert 'cfg' in st.session_state
         cfg: Config = st.session_state.cfg
         st.session_state.db = DBManager(cfg.db_uri, cfg.db_name, cfg.db_message_collection_name)
+        st.session_state.data_manager = DataManager(cfg)
     if "conversation_ids" not in st.session_state:
-        st.session_state.conversation_ids = st.session_state.db.get_most_recent_unique_conversation_ids()
+        refresh_conversation_id()
+    
     db:DBManager = st.session_state.db
+    data_manager:DataManager = st.session_state.data_manager
     
     # ------------------ sidebar --------------------
-    # st.sidebar.title("Select Conversation")
-    col1, col2 = st.sidebar.columns([3, 1])
-    with col1:
-        conversation_id = st.selectbox("1️⃣ Select conversation_id (recent 10)", st.session_state.conversation_ids)
-    with col2:
-        if st.button("Refresh"):
-            st.session_state.conversation_ids = db.get_most_recent_unique_conversation_ids()
-    customized_conversation_id = st.sidebar.text_input(
-        "Customized conversation_id"
-    )
-    if customized_conversation_id: conversation_id = customized_conversation_id
-    st.sidebar.info(f"selected conversation_id: {conversation_id}")
-    display_option = st.sidebar.selectbox(
-        "Choose display option",
-        ["Dataframe", "Table"]
-    )
+    with st.sidebar:
+        # 1. select interested `exp_version`
+        _ava_exp_versions = [None] + db.query_run_exp_versions()
+        st.selectbox(
+            "1️⃣ Select exp_version", 
+            options=_ava_exp_versions,
+            key="exp_version",
+            on_change=refresh_conversation_id
+        )
+        st.info(f"run exps: {len(st.session_state.conversation_ids)}")
+        
+        # 2. select speicific `conversation_id`
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            conversation_id = st.selectbox(
+                "2️⃣ Select conversation_id", 
+                options=st.session_state.conversation_ids
+            )
+        with col2:
+            if st.button("Refresh"):
+                refresh_conversation_id()
+        customized_conversation_id = st.text_input(
+            "Customized conversation_id"
+        )
+        if customized_conversation_id: conversation_id = customized_conversation_id
+        st.info(f"selected conversation_id: {conversation_id}")
+        display_option = st.selectbox(
+            "Choose display option",
+            ["Dataframe", "Table"]
+        )
 
     # ------------------ main --------------------
     if conversation_id:
@@ -68,13 +79,35 @@ def show_conversation_page():
         with st.expander("Details"):
             st.write(conversation_metas)
         
-        # 3. 创建一个下拉菜单来选择 utterance_id, 展示所选 utterance_id 的完整信息
+        # 3. show the user profile
+        conv_cfg = Config.from_dict(conversation_metas)
+        data_manager.refresh_config(conv_cfg)               # update the data_manager first~
+        with open(data_manager.DIR_data_flowbench / f"user_profile/{conv_cfg.workflow_id}.json", 'r') as f:
+            user_profiles = json.load(f)
+            selected_up = user_profiles[conv_cfg.user_profile_id]
+        st.markdown(f"### User Profile")
+        with st.expander("Details"):
+            st.write(selected_up)
+        
+        # 4. show the judge results
+        st.markdown(f"### Judge Results")
+        judge_res = db.query_evaluations({"conversation_id": conversation_id})
+        if len(judge_res) == 0:
+            st.write("No evaluation results found!")
+        else:
+            with st.expander("Details"):
+                st.write(judge_res[0])
+        
+        # 5. show the utterance infors
         utterance_ids = df['utterance_id'].unique()
-        selected_utterance_id = st.sidebar.selectbox("2️⃣ Select utterance_id", utterance_ids, placeholder="Select an utterance_id")
+        with st.sidebar: 
+            selected_utterance_id = st.selectbox(
+                "3️⃣ Select utterance_id", options=utterance_ids)
     
         st.markdown(f"### Details of `utterance_id={selected_utterance_id}`")
         with st.expander("Details"):
             if selected_utterance_id is not None:
                 selected_row = df[df['utterance_id'] == selected_utterance_id].iloc[0]
                 st.write(selected_row.to_dict())
+
 
