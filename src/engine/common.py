@@ -216,15 +216,13 @@ LLM_CFG = {
         "base_url": f"http://{_IP_02}/v1/",
         "api_key": "xxx",
     },
-    # "gpt-4o": {
-    #     "model_name": "gpt-4o",
-    #     "base_url": os.getenv("OPENAI_PROXY_BASE_URL"),
-    #     "api_key": os.getenv("OPENAI_PROXY_API_KEY"),
-    # }
 }
 def add_openai_models():
     global LLM_CFG
-    model_list = ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo"]
+    model_list = [
+        "gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo", "gpt-4",
+        "claude-3-haiku-20240307",
+    ]
     for model in model_list:
         assert model not in LLM_CFG, f"{model} already in LLM_CFG"
         LLM_CFG[model] = {

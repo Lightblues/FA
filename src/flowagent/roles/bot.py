@@ -58,7 +58,7 @@ class ReactBot(BaseBot):
             except Exception as e:
                 print(f"  <bot> Error when trying {i}th time: {e}")
         else:
-            raise RuntimeError(f"  <bot> Error after trying 3 times!!! prompt:\n" + LogUtils.format_infos_basic(prompt))
+            raise RuntimeError(f"  <bot> Error after trying 3 times!!! prompt:\n" + LogUtils.format_str_with_color(prompt, 'yellow'))
         if prediction.action_type==BotOutputType.RESPONSE:
             msg_content = prediction.response
         else:
@@ -99,7 +99,10 @@ class ReactBot(BaseBot):
         assert BotOutput.thought_str in result, f"Thought not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
         if BotOutput.action_str in result:        # Action
             assert BotOutput.action_input_str in result, f"Action Input not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
-            result[BotOutput.action_input_str] = json.loads(result[BotOutput.action_input_str]) # eval: NameError: name 'null' is not defined
+            try:
+                result[BotOutput.action_input_str] = json.loads(result[BotOutput.action_input_str]) # eval: NameError: name 'null' is not defined
+            except Exception as e:
+                raise RuntimeError(f"Action Input not in json format! LLM output:\n" + LogUtils.format_infos_basic(s))
             if result[BotOutput.action_str].startswith("API_"):
                 result[BotOutput.action_str] = result[BotOutput.action_str][4:]
             output = BotOutput(action=result[BotOutput.action_str], action_input=result[BotOutput.action_input_str], thought=result[BotOutput.thought_str])

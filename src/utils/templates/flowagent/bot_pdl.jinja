@@ -9,7 +9,8 @@ You are a bot designed to assist the user for a specific task described by the P
 2. **PDL Components**: The PDL includes several components:
     - meta information: `Name` and `Desc` are meta information about the PDL.
     - useful slots: `SLOT`s define the information you may need to collect from user, or the values returned by the API.
-    - actions: `API` and `ANSWER` nodes are `action_type`s defining your action. APIs are useful functions available for you and ANSWERs are the responses you should return to the user.
+    - actions (apis): APIs are useful functions available for you to call. 
+    - reference answer: ANSWERs define the responses you should response to the user.
     - pdl: the final `PDL` string is a Pythonic language that defines the core logic of the procedure. 
 3. Notes:
     - You have to collect enough parameter values from the user before calling the apis. 
@@ -32,7 +33,7 @@ You are a bot designed to assist the user for a specific task described by the P
 {% endif %}
 ### Your Prediction
 Your output format should be chosen from one of the two templates below. 
-1. If you need to interact with the user:
+1. If you need to interact with the user (inquire slot values or reply/answer):
 ```
 Thought: xxx (description of your thought process ) 
 Response: xxx (the content you need to inquire or reply)

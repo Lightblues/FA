@@ -1,9 +1,10 @@
 cd src
 python run_flowagent_exp.py --config=default.yaml --exp-version=240919_01 --workflow-dataset=PDL --workflow-type=flowchart
+python run_flowagent_exp.py --config=default.yaml --exp-version=pdl_pdl_${ID} --workflow-dataset=PDL --workflow-type=pdl --simulate-num-persona=1 \
+    --bot-mode=pdl_bot --bot-template-fn=flowagent/bot_pdl.jinja
 
 python run_flowagent_cli.py --config=default.yaml --exp-version=pdl_pdl_${ID} --workflow-dataset=PDL --workflow-type=pdl \
     --bot-mode=pdl_bot --bot-template-fn=flowagent/bot_pdl.jinja
-
 
 # =======================================================================================================================
 ID=0920 # star_flowchart_0920

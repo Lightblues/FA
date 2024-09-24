@@ -42,7 +42,7 @@ def show_conversation_page():
         
         # 2. select speicific `conversation_id`
         col1, col2 = st.columns([3, 1])
-        _options = [f"(({exp['workflow_id']})-{exp['user_profile_id']})_{exp['conversation_id']}" for exp in st.session_state.run_exps]
+        _options = [f"({exp['workflow_id']}-{exp['user_profile_id']})_{exp['conversation_id']}" for exp in st.session_state.run_exps]
         _options.sort()
         with col1:
             conversation_id = st.selectbox(

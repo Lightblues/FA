@@ -6,7 +6,7 @@ import collections, wandb
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from ..data import Config, DBManager
+from ..data import Config, DBManager, LogUtils
 from .metric import MetricAcc, MetricF1
 
 
@@ -50,6 +50,7 @@ class Analyzer:
         
         self.stat_num_turns()
         
+        print(LogUtils.format_infos_with_tabulate(self.stat_dict))
         # log to W&B
         for k, v in self.stat_dict.items():
             wandb.summary[k] = v
