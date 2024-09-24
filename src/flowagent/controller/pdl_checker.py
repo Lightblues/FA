@@ -89,3 +89,4 @@ class APIDuplicatedChecker(BaseChecker):
                 return False, msg
         msg = "Check success!"
         return True, msg
+    

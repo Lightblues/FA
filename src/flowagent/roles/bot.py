@@ -121,15 +121,18 @@ class PDLBot(ReactBot):
     names = ["PDLBot", "pdl_bot"]
     
     def _gen_prompt(self) -> str:
-        header_info = {
-            "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # valid_apis = self.workflow.pdl.get_valid_apis()
+        # valid_apis_str = "There are no valid apis now!" if not valid_apis else f"you can call {valid_apis}"
+        state_infos = {
+            "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            # "Current state": self.workflow.pdl.current_state,
+            # "Current valid apis": valid_apis_str,
         }
         prompt = jinja_render(
             self.cfg.bot_template_fn,       # "flowagent/bot_pdl.jinja"
-            head_info="\n".join(f"{k}: {v}" for k,v in header_info.items()),
-            PDL=self.workflow.pdl.to_str(),
+            PDL=self.workflow.pdl.to_str_wo_api(),  # .to_str()
             conversation=self.conv.to_str(), 
-            # current_state=,
+            current_state="\n".join(f"{k}: {v}" for k,v in state_infos.items()),
         )
         return prompt
     
