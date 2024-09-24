@@ -1,4 +1,4 @@
-from ..controller import FlowbenchController
+from ..controller import BOT_TYPE2CONTROLLER, BaseController
 from ..data import Config
 from .judger import Judger
 
@@ -6,7 +6,7 @@ from .judger import Judger
 def task_simulate(cfg: Config) -> None:
     """ One simulation task
     """
-    controller = FlowbenchController(cfg)
+    controller: BaseController = BOT_TYPE2CONTROLLER[cfg.bot_mode](cfg)
     controller.start_conversation(verbose=False)
     
 def task_judge(cfg: Config) -> None:

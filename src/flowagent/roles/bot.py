@@ -43,7 +43,7 @@ class ReactBot(BaseBot):
         (Thought, Action, Action Input) for call api node
     """
     llm: OpenAIClient = None
-    names = ["react", "ReactBot", "react_bot"]
+    names = ["ReactBot", "react_bot"]
     
     def __init__(self, **args) -> None:
         super().__init__(**args)
@@ -118,7 +118,7 @@ class PDLBot(ReactBot):
         (Thought, Action, Action Input) for call api node
     """
     llm: OpenAIClient = None
-    names = ["pdl", "PDLBot", "pdl_bot"]
+    names = ["PDLBot", "pdl_bot"]
     
     def _gen_prompt(self) -> str:
         header_info = {

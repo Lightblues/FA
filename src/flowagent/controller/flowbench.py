@@ -18,7 +18,7 @@ class FlowbenchController(BaseController):
         controller = FlowbenchController(cfg)
         controller.start_conversation()
     """
-    workflow_types = ["text", "code", "flowchart"]
+    bot_types = ["ReactBot", "react_bot"]
     
     def __init__(self, cfg:Config) -> None:
         super().__init__(cfg)

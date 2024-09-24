@@ -2,8 +2,8 @@ from .base import BaseController
 from .flowbench import FlowbenchController
 from .flowagent import FlowagentController
 
-WORKFLOW_TYPE2CONTROLLER = {}
+BOT_TYPE2CONTROLLER = {}
 for cls in BaseController.__subclasses__():
-    for name in cls.workflow_types:
-        WORKFLOW_TYPE2CONTROLLER[name] = cls
-        WORKFLOW_TYPE2CONTROLLER[name.upper()] = cls
+    for name in cls.bot_types:
+        BOT_TYPE2CONTROLLER[name] = cls
+        BOT_TYPE2CONTROLLER[name.upper()] = cls

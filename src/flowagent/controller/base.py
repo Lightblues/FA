@@ -27,7 +27,7 @@ class BaseController:
     workflow: Workflow = None
     conversation_id: str = None
     
-    workflow_types: List[str] = None    # to build WORKFLOW_TYPE2CONTROLLER
+    bot_types: List[str] = None    # to build WORKFLOW_TYPE2CONTROLLER
     
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg

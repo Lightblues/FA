@@ -10,7 +10,6 @@ import os, json, tqdm, itertools, pickle, collections, traceback, datetime, argp
 from typing import List, Dict, Optional, Tuple, Union
 import pandas as pd
 import concurrent.futures
-from easonsi import utils
 
 from .eval_utils import task_simulate, task_judge
 from ..controller import FlowbenchController
@@ -160,10 +159,7 @@ class Evaluator:
         """filter the experiments by `exp_version`
         """
         # 1. find all run experiments
-        query = {
-            "exp_version": cfg.exp_version
-        }
-        run_exps = self.db.query_run_experiments(query, limit=0)
+        run_exps = self.db.query_run_experiments({ "exp_version": cfg.exp_version }, limit=0)
         
         # 2. get all evaluation configs
         tasks = []
