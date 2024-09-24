@@ -27,7 +27,7 @@ class BaseController:
     workflow: Workflow = None
     conversation_id: str = None
     
-    bot_types: List[str] = None    # to build WORKFLOW_TYPE2CONTROLLER
+    # bot_types: List[str] = None    # to build WORKFLOW_TYPE2CONTROLLER
     
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
@@ -48,7 +48,7 @@ class BaseController:
         }
         self.logger.log(LogUtils.format_infos_with_tabulate(infos), with_print=verbose)
 
-        # check if run!
+        # check if has been run!
         if self.cfg.log_to_db:
             db = DBManager(self.cfg.db_uri, self.cfg.db_name, self.cfg.db_message_collection_name)
             query = {  # identify a single exp

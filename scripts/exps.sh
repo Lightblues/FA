@@ -4,7 +4,8 @@ python run_flowagent_exp.py --config=default.yaml --exp-version=pdl_pdl_${ID} --
     --bot-mode=pdl_bot --bot-template-fn=flowagent/bot_pdl.jinja
 
 python run_flowagent_cli.py --config=default.yaml --exp-version=pdl_pdl_${ID} --workflow-dataset=PDL --workflow-type=pdl \
-    --bot-mode=pdl_bot --bot-template-fn=flowagent/bot_pdl.jinja
+    --bot-mode=pdl_bot --bot-template-fn=flowagent/bot_pdl.jinja \
+    --user-mode=manual --no-log-to-db
 
 # =======================================================================================================================
 ID=0920 # star_flowchart_0920

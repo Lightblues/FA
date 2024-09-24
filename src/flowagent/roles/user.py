@@ -36,7 +36,7 @@ class InputUser(BaseUser):
         self.conv.add_message(
             Message(Role.USER, user_input)
         )
-        return UserOutput()
+        return UserOutput(response_content=user_input.strip())
 
 
 class LLMSimulatedUserWithProfile(BaseUser):

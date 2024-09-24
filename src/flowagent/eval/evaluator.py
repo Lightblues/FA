@@ -12,8 +12,7 @@ import pandas as pd
 import concurrent.futures
 
 from .eval_utils import task_simulate, task_judge
-from ..controller import FlowbenchController
-from ..data import Config, DataManager, DBManager, LogUtils
+from ..data import Config, DataManager, DBManager, LogUtils, Workflow
 from .analyzer import Analyzer
 
 
@@ -105,7 +104,8 @@ class Evaluator:
         """ Run simulation for a specific workflow
         """
         # 1. get all user ids
-        user_profiles = FlowbenchController(cfg).workflow.user_profiles
+        user_profiles = Workflow.load_by_id(
+            data_manager=DataManager(cfg), id=cfg.workflow_id, type=cfg.workflow_type).user_profiles # FlowbenchController(cfg).workflow.user_profiles
         num_user_profile = len(user_profiles)
         if simulate_num_persona is not None and simulate_num_persona > 0:
             num_user_profile = min(num_user_profile, simulate_num_persona)

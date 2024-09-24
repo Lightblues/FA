@@ -19,7 +19,7 @@ class FlowagentController(BaseController):
         controller = FlowagentController(cfg)
         controller.start_conversation()
     """
-    bot_types = ["PDLBot", "pdl_bot"]
+    # bot_types = ["PDLBot", "pdl_bot", "ReactBot", "react_bot"]
     
     def __init__(self, cfg:Config) -> None:
         super().__init__(cfg)
