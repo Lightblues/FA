@@ -99,7 +99,7 @@ class ReactBot(BaseBot):
         assert BotOutput.thought_str in result, f"Thought not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
         if BotOutput.action_str in result:        # Action
             assert BotOutput.action_input_str in result, f"Action Input not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
-            try:
+            try: # NOTE: ensure the input is in json format! 
                 result[BotOutput.action_input_str] = json.loads(result[BotOutput.action_input_str]) # eval: NameError: name 'null' is not defined
             except Exception as e:
                 raise RuntimeError(f"Action Input not in json format! LLM output:\n" + LogUtils.format_infos_basic(s))

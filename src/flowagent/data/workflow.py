@@ -81,10 +81,10 @@ class WorkflowType(Enum):
 
 
 class WorkflowTypeStr(str, Enum):
-    TEXT = "TEXT"
-    CODE = "CODE"
-    FLOWCHART = "FLOWCHART"
-    PDL = "PDL"
+    TEXT = "text"
+    CODE = "code"
+    FLOWCHART = "flowchart"
+    PDL = "pdl"
 
 # @dataclass
 # class Tool:
@@ -167,7 +167,7 @@ class Workflow:  # rename -> Data
             "ID": f"{self.type}-{self.id}",
             "Name": self.name,
             "Task": self.task_description,
-            "Workflow": self.task_detailed_description
+            "Workflow": self.task_detailed_description # just use natural language-format workflow? 
         }
         return "".join([f"{k}: {v}\n" for k, v in info_dict.items()])
 

@@ -2,7 +2,7 @@
 import datetime, os, re, yaml, copy, pathlib, time
 from enum import Enum, auto
 from dataclasses import dataclass, asdict, field
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Iterator, Union
 import pandas as pd
 
 
@@ -35,10 +35,12 @@ class APICall:
     
     @classmethod
     def from_dict(cls, d:Dict):
-        data = {
-            "name": d["API"],
-            "params": { i['name']: i['value'] for i in d["params"] }
-        }
+        if "name" not in d:
+            data = {
+                "name": d.get("API"),
+                "params": { i['name']: i['value'] for i in d["params"] }
+            }
+        else: data = d
         return cls(**data)
 
 
@@ -60,7 +62,7 @@ class Message:
         self, role: Role, content: str, 
         conversation_id: str=None, utterance_id: int=None, 
         prompt: str=None, llm_response: str=None, 
-        type: str=None, apis: List[APICall]=None,
+        type: str=None, apis: List[APICall]=None, content_predict: str=None,
         **kwargs
     ):
         self.role = role
@@ -74,6 +76,7 @@ class Message:
             if not isinstance(apis[0], APICall):
                 apis = [APICall.from_dict(i) for i in apis]
             self.apis = apis
+        if content_predict is not None: self.content_predict = content_predict
     
     def to_str(self):
         return f"{self.role.prefix}{self.content}"
@@ -90,21 +93,26 @@ class Message:
         return copy.deepcopy(self)
     
     # auto determined api v.s. GT api calls (.apis, .type)
-    def is_api_calling(self) -> bool:
+    def is_api_calling(self, content: str = None) -> bool:
+        if content:
+            return content.startswith("<Call API>")
         return self.role == Role.BOT and self.content.startswith("<Call API>")
-    def get_api_infos(self) -> Tuple[str, str]:
+    def get_api_infos(self, content: str = None) -> Tuple[str, str]:
         """ 
         return: action_name, action_parameters
         """
         # content = f"<Call API> {action_name}({action_parameters})"
-        assert self.is_api_calling(), f"Must be API calling message! But got {self}"
-        content = self.content[len("<Call API> "):].strip()
+        if content is None:
+            content = self.content
+        assert self.is_api_calling(content), f"Must be API calling message! But got {content}"
+        content = content[len("<Call API> "):].strip()
         re_pattern = r"(.*)\((.*)\)"
         re_match = re.match(re_pattern, content)
-        return re_match.group(1), re_match.group(2)
+        name, paras = re_match.group(1), re_match.group(2)
+        return name, eval(paras)
     
-    def substitue_with_GT_content(self, GT_content: str):
-        self.content, self.content_predict = GT_content, self.content
+    # def substitue_with_GT_content(self, GT_content: str):
+    #     self.content, self.content_predict = GT_content, self.content
 
 
 class Conversation():
@@ -119,8 +127,17 @@ class Conversation():
 
     def add_message(self, msg: Message):
         # assert isinstance(msg, Message), f"Must be Message! But got {type(msg)}"
+        msg.conversation_id = self.conversation_id
+        msg.utterance_id = self.current_utterance_id
         self.msgs.append(msg)
-            
+    
+    def substitue_message(self, new_msg: Message, idx: int=-1, old_to_prediction: bool=True):
+        new_msg.conversation_id = self.conversation_id
+        new_msg.utterance_id = self.msgs[idx].utterance_id
+        if old_to_prediction:
+            new_msg.content_predict = self.msgs[idx].content
+        self.msgs[idx] = new_msg
+        
     def get_message_by_idx(self, idx: int) -> Message:
         return self.msgs[idx]
     
@@ -207,7 +224,18 @@ class Conversation():
         return self.to_str()
     def __len__(self):
         return len(self.msgs)
+    
+    def __getitem__(self, index: Union[int, slice]) -> Union[Message, 'Conversation']:
+        # different behaviors for conv[0] and conv[:2]
+        if isinstance(index, int):
+            return self.msgs[index]
+        elif isinstance(index, slice):
+            new_conversation = Conversation(self.conversation_id)
+            new_conversation.msgs = self.msgs[index]
+            return new_conversation
 
+    def __iter__(self) -> Iterator[Message]:
+        return iter(self.msgs)
 
 class ConversationWithIntention():
     def __init__(self, user_intention: str, conversation: Conversation) -> None:

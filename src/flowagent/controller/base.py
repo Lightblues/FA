@@ -90,7 +90,7 @@ class BaseController:
         return infos, conversation
     
     def _check_if_already_run(self) -> bool:
-        if self.cfg.log_to_db: return False
+        # if not self.cfg.log_to_db: return False
         
         query = {  # identify a single exp
             "exp_version": self.cfg.exp_version,

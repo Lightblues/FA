@@ -14,10 +14,18 @@ def task_simulate_teacher_forcing(cfg: Config) -> None:
     """
     controller = FlowagentController(cfg)
     controller.start_conversation_teacher_forcing(verbose=False)
-    
+
+
 def task_judge(cfg: Config) -> None:
     """ One evaluation task
     return: True if pass
     """
     judger = Judger(cfg)
-    judger.start_judge(verbose=False)
+    judger.start_judge(verbose=False, mode="session")
+
+def task_judge_turn_level(cfg: Config) -> None:
+    """ One evaluation task
+    return: True if pass
+    """
+    judger = Judger(cfg)
+    judger.start_judge(verbose=False, mode="turn")

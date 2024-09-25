@@ -11,7 +11,7 @@ from typing import List, Dict, Optional, Tuple, Union, Callable
 import pandas as pd
 import concurrent.futures
 
-from .eval_utils import task_simulate, task_judge, task_simulate_teacher_forcing
+from .eval_utils import task_simulate, task_judge, task_simulate_teacher_forcing, task_judge_turn_level
 from ..data import Config, DataManager, DBManager, LogUtils, Workflow
 from .analyzer import Analyzer
 
@@ -45,12 +45,15 @@ class Evaluator: # rename -> Exp?
             self.print_header_info(step_name="STEP 1: Simulating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("simulate") or k.startswith("exp")})
             self.run_simulations(f_task=task_simulate)
             self.print_header_info(step_name="STEP 2: Evaluating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("judge")})
-            self.run_evaluations()
+            self.run_evaluations(f_task=task_judge)
             self.print_header_info(step_name="STEP 3: Analyzing")
             self.analyze()
         if self.cfg.exp_mode == "turn":
             self.print_header_info(step_name="STEP 1: Simulating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("simulate") or k.startswith("exp")})
             self.run_simulations(f_task=task_simulate_teacher_forcing)
+            self.print_header_info(step_name="STEP 2: Evaluating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("judge")})
+            self.run_evaluations(f_task=task_judge_turn_level)
+            # TODO: analyze
         else:
             raise NotImplementedError(f"Unknown exp_mode: {self.cfg.exp_mode}")
     
@@ -93,7 +96,7 @@ class Evaluator: # rename -> Exp?
                 print(f"ERROR!!! Task failed after 3 retrys for {cfg}")
                 return None
 
-        tasks = self.get_configs_all_workflows(self.cfg, simulate_num_persona=self.cfg.simulate_num_persona)
+        tasks = self._get_configs_all_workflows(self.cfg, simulate_num_persona=self.cfg.simulate_num_persona)
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.cfg.simulate_max_workers) as executor:
             futures = []
             for cfg in tasks:
@@ -104,7 +107,7 @@ class Evaluator: # rename -> Exp?
                 future.result()  # 获取结果以捕获异常并打印错误信息
     
     @staticmethod
-    def get_configs_per_workflow(cfg:Config, simulate_num_persona:int=None):
+    def _get_configs_per_workflow(cfg:Config, simulate_num_persona:int=None):
         """ collect simulation for a specific workflow
         """
         # 1. get all user ids
@@ -123,33 +126,33 @@ class Evaluator: # rename -> Exp?
         return tasks
     
     @staticmethod
-    def get_configs_all_workflows(cfg:Config, simulate_num_persona:int=None, workflow_ids: List[str]=None):
+    def _get_configs_all_workflows(cfg:Config, simulate_num_persona:int=None, workflow_ids: List[str]=None):
         """ collect simulation for all workflows
         """
         # 1. get all workflow_ids
         if workflow_ids is None:
             num_workflow = DataManager(cfg).num_workflows
-            workflow_ids = [f"{i:03d}" for i in range(num_workflow)]
+            workflow_ids = [f"{i:03d}" for i in range(num_workflow)][:1]
         # 2. get all the configs
         tasks = []
         for workflow_id in workflow_ids:
             cfg_new = cfg.copy()
             cfg_new.workflow_id = workflow_id
-            tasks.extend(Evaluator.get_configs_per_workflow(cfg_new, simulate_num_persona=simulate_num_persona))
+            tasks.extend(Evaluator._get_configs_per_workflow(cfg_new, simulate_num_persona=simulate_num_persona))
         return tasks
     
 
 
-    def run_evaluations(self):
+    def run_evaluations(self, f_task: Callable):
         """ evaluation process:
         1. get the experiments to be evaluated
         2. run evaluations in parallel
         """
-        tasks = self.get_evaluation_configs(self.cfg)
+        tasks = self._get_evaluation_configs(self.cfg)
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.cfg.judge_max_workers) as executor:
             futures = []
             for cfg in tasks:
-                future = executor.submit(task_judge, cfg)
+                future = executor.submit(f_task, cfg)
                 futures.append(future)
             print(f"Executing {len(futures)} judge tasks...")
             num_errors = 0
@@ -160,7 +163,7 @@ class Evaluator: # rename -> Exp?
         if num_errors > 0:
             raise Exception(f"# of errors when evaluation: {num_errors}")
 
-    def get_evaluation_configs(self, cfg:Config):
+    def _get_evaluation_configs(self, cfg:Config):
         """filter the experiments by `exp_version`
         """
         # 1. find all run experiments

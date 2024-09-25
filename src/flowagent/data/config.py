@@ -44,7 +44,7 @@ class Config:
     
     judge_max_workers: int = 10
     judge_model_name: str = "gpt-4o"
-    judge_conversation_id: str = None
+    judge_conversation_id: str = None   # the conversation to be judged
     # judge_passrate_threshold: int = 3
 
     def to_dict(self):

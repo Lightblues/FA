@@ -113,16 +113,12 @@ class FlowagentController(BaseController):
         ref_conv = self.workflow.reference_conversations[self.cfg.user_profile_id].conversation
         for msg in ref_conv.msgs:
             if msg.role != Role.BOT:
-                self.conv.add_message(Message(  # msg should add the convsation id? TODO: automate it?
-                    role=msg.role, content=msg.content,
-                    conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
-                ))
+                self.conv.add_message(msg.copy())
             else:
                 # 1. bot predict an action (NOTE: will add a msg in self.conv)
                 with Timer("bot process", print=self.cfg.log_utterence_time):
                     bot_output: BotOutput = self.bot.process()
                 # 2. convert the msg! 
-                last_msg = self.conv.get_last_message()
-                last_msg.substitue_with_GT_content(msg.content)
-                self.logger.log(f"<teacher_forcing> gt: {last_msg.content}\n  predicted: {last_msg.content_predict}", with_print=verbose)
+                self.conv.substitue_message(msg.copy(), old_to_prediction=True, idx=-1)
+                self.logger.log(f"<teacher_forcing> gt: {self.conv.get_last_message().content}\n  predicted: {self.conv.get_last_message().content_predict}", with_print=verbose)
         return self.conv
