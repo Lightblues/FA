@@ -1,8 +1,8 @@
 cd /work/huabu/src/
 
 # workflow_types=("text" "code" "flowchart")
-workflow_types=("flowchart")
-MODEL=gpt-4o-mini
+workflow_types=("text" "flowchart")
+MODEL=gpt-4o
 dataset=PDL
 # dataset=STAR
 
