@@ -1,6 +1,6 @@
 """ updated 240906
 usage:
-    python run_flowagent_cli.py --config=default.yaml --exp-version=default \
+    python run_flowagent_cli.py --config=default.yaml --exp-version=default --exp-mode=turn \
         --workflow-type=text --workflow-id=000 \
         --user-mode=llm_profile --user-llm-name=gpt-4o --user-profile-id=0 \
         --bot-mode=react_bot --bot-llm-name=gpt-4o \
@@ -22,6 +22,7 @@ def run_cli(
     workflow_type: WorkflowTypeStr = typer.Option(None, help="Workflow type", case_sensitive=False),
     workflow_id: str = typer.Option(None, help="Workflow ID"),
     exp_version: str = typer.Option(None, help="Experiment version"),
+    exp_mode: str = typer.Option(None, help="Experiment mode", case_sensitive=False),
     user_mode: UserMode = typer.Option(None, help="User mode", case_sensitive=False), # type: ignore
     user_llm_name: str = typer.Option(None, help="User LLM name"),
     user_template_fn: str = typer.Option(None, help="User template filename"),
@@ -40,6 +41,7 @@ def run_cli(
     if workflow_type is not None: cfg.workflow_type = workflow_type.value
     if workflow_id is not None: cfg.workflow_id = workflow_id
     if exp_version is not None: cfg.exp_version = exp_version
+    if exp_mode is not None: cfg.exp_mode = exp_mode
     if user_mode is not None: cfg.user_mode = user_mode.value
     if user_llm_name is not None: cfg.user_llm_name = user_llm_name
     if user_template_fn is not None: cfg.user_template_fn = user_template_fn
@@ -52,7 +54,6 @@ def run_cli(
     if conversation_turn_limit is not None: cfg.conversation_turn_limit = conversation_turn_limit
     if log_utterence_time is not None: cfg.log_utterence_time = log_utterence_time
     if log_to_db is not None: cfg.log_to_db = log_to_db
-    # print(f">> config: {cfg}")
 
     controller = FlowagentController(cfg)
     controller.start_conversation()

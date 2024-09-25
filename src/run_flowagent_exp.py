@@ -54,7 +54,6 @@ def run_exp(
     if log_to_db is not None: cfg.log_to_db = log_to_db
     if simulate_num_persona is not None: cfg.simulate_num_persona = simulate_num_persona
     if simulate_max_workers is not None: cfg.simulate_max_workers = simulate_max_workers
-    # print(f">> config: {cfg}")
 
     controller = Evaluator(cfg)
     controller.main()
