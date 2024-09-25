@@ -4,6 +4,7 @@ collect the evaluation results from DB, generate a report to WanDB
 
 import collections, wandb
 import pandas as pd
+import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from ..data import Config, DBManager, LogUtils
@@ -19,7 +20,7 @@ class Analyzer:
     cfg: Config = None
     db: DBManager = None
     
-    df: pd.DataFrame = None
+    df: pd.DataFrame = None     # df of evaluation results
     stat_dict: dict = None      # collect key matrices
     
     def __init__(self, cfg: Config) -> None:
@@ -28,14 +29,10 @@ class Analyzer:
     
         self._collect_exp_results()
         self.stat_dict = dict()
-        
         wandb.init(project="pdl", name=cfg.exp_version)
     
     def _collect_exp_results(self):
-        query = {
-            "exp_version": self.cfg.exp_version
-        }
-        query_res = self.db.query_evaluations(query)
+        query_res = self.db.query_evaluations({ "exp_version": self.cfg.exp_version })
         assert len(query_res) > 0, "No evaluation results found!"
         df = pd.DataFrame(query_res)
         # check that workflow_dataset & workflow_type are all the same!
@@ -45,12 +42,16 @@ class Analyzer:
     
     def analyze(self):
         # TODO: summary exp settings
-        self.stat_judge_session()
-        self.stat_judge_session_stat()
+        if self.cfg.exp_mode == "session":
+            self.stat_judge_session()
+            self.stat_judge_session_stat()
+            self.stat_num_turns()
+        elif self.cfg.exp_mode == "turn":
+            self.stat_judge_turn()
+            self.stat_judge_turn_stat()
+            self.stat_num_turns()
         
-        self.stat_num_turns()
-        
-        print(LogUtils.format_infos_with_tabulate(self.stat_dict))
+        print(LogUtils.format_infos_with_tabulate(self.stat_dict, color="blue"))
         # log to W&B
         for k, v in self.stat_dict.items():
             wandb.summary[k] = v
@@ -69,20 +70,60 @@ class Analyzer:
             success_rate=df['if_pass'].mean(),
             task_progress=df['task_progress'].mean()
         )
-        self.stat_dict.update(metrics)
+        self.stat_dict |= metrics
+        return metrics
 
     def stat_judge_session_stat(self):
         """ 
         input key: judge_session_stat
-        metric: Precision, Recall, F1
+        metric: API Precision, Recall, F1
         """
         metric = MetricF1()
         for session_stat in self.df['judge_session_stat']:
             metric.update(y_truth=session_stat['apis_gt'], y_pred=session_stat['apis_pred'])
         f1, recall, precision = metric.get_detail()
-        self.stat_dict.update(dict(
+        metrics = dict(
             f1=f1, recall=recall, precision=precision
-        ))
+        )
+        self.stat_dict |= metrics
+        return metrics
+        
+    def stat_judge_turn(self):
+        """ 
+        input key: judge_turn_result
+        metric: Response Score
+        """
+        scores = []         # mean{ mean_score_of_a_session } 
+        passes = []         # mean{ pass of turns } 
+        for jr in self.df["judge_turn_result"]:
+            mean_score = np.mean([int(i["Score"]) for i in jr])
+            scores.append(mean_score)
+            passes += [int(i["Score"]) >= 9 for i in jr]
+        metrics = dict(
+            mean_score=np.mean(scores),
+            passrate=np.mean(passes),
+        )
+        self.stat_dict |= metrics
+        return metrics
+    
+    def stat_judge_turn_stat(self):
+        """ 
+        input key: judge_turn_stat
+        metric: API Precision, Recall, F1 / Parameter Precision, Recall, F1
+        """
+        api_metric = MetricF1()
+        for jr in self.df["judge_turn_stat"]:
+            for api_gt, api_pred in zip(jr["apis_gt"], jr["apis_pred"]):
+                api_gt_names, api_pred_names = set(), set()
+                if api_gt: api_gt_names.add(api_gt[0])
+                if api_pred: api_pred_names.add(api_pred[0])
+                api_metric.update(y_truth=api_gt_names, y_pred=api_pred_names)
+        f1, recall, precision = api_metric.get_detail()
+        metrics = dict(
+            f1=f1, recall=recall, precision=precision
+        )
+        self.stat_dict |= metrics
+        return metrics
 
     def stat_num_turns(self):
         avg_conv_turns = self.df["num_turns"].mean()

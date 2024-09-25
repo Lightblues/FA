@@ -96,7 +96,8 @@ class ReactBot(BaseBot):
         result = {match.group('field'): match.group('value').strip() for match in matches}
         
         # validate result
-        assert BotOutput.thought_str in result, f"Thought not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
+        # assert BotOutput.thought_str in result, f"Thought not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
+        thought = result.get(BotOutput.thought_str, "")
         if BotOutput.action_str in result:        # Action
             assert BotOutput.action_input_str in result, f"Action Input not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
             try: # NOTE: ensure the input is in json format! 
@@ -105,10 +106,10 @@ class ReactBot(BaseBot):
                 raise RuntimeError(f"Action Input not in json format! LLM output:\n" + LogUtils.format_infos_basic(s))
             if result[BotOutput.action_str].startswith("API_"):
                 result[BotOutput.action_str] = result[BotOutput.action_str][4:]
-            output = BotOutput(action=result[BotOutput.action_str], action_input=result[BotOutput.action_input_str], thought=result[BotOutput.thought_str])
+            output = BotOutput(action=result[BotOutput.action_str], action_input=result[BotOutput.action_input_str], thought=thought)
         else:
             assert BotOutput.response_str in result, f"Response not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
-            output = BotOutput(response=result[BotOutput.response_str], thought=result[BotOutput.thought_str])
+            output = BotOutput(response=result[BotOutput.response_str], thought=thought)
         return output
     
 class PDLBot(ReactBot):
