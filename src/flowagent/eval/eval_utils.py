@@ -9,6 +9,12 @@ def task_simulate(cfg: Config) -> None:
     controller = FlowagentController(cfg)
     controller.start_conversation(verbose=False)
     
+def task_simulate_teacher_forcing(cfg: Config) -> None:
+    """ One simulation task | turn-level
+    """
+    controller = FlowagentController(cfg)
+    controller.start_conversation_teacher_forcing(verbose=False)
+    
 def task_judge(cfg: Config) -> None:
     """ One evaluation task
     return: True if pass

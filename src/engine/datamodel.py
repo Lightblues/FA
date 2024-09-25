@@ -83,6 +83,9 @@ class Message:
     def __repr__(self):
         return self.to_str()
     
+    def copy(self):
+        return copy.deepcopy(self) # FIX: conversation_id? 
+    
     def is_api_calling(self) -> bool:
         return self.role == Role.BOT and self.content.startswith("<Call API>")
     def get_api_infos(self) -> Tuple[str, str]:

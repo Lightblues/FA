@@ -7,16 +7,16 @@ updated @240918
 """
 
 import os, json, tqdm, itertools, pickle, collections, traceback, datetime, argparse
-from typing import List, Dict, Optional, Tuple, Union
+from typing import List, Dict, Optional, Tuple, Union, Callable
 import pandas as pd
 import concurrent.futures
 
-from .eval_utils import task_simulate, task_judge
+from .eval_utils import task_simulate, task_judge, task_simulate_teacher_forcing
 from ..data import Config, DataManager, DBManager, LogUtils, Workflow
 from .analyzer import Analyzer
 
 
-class Evaluator:
+class Evaluator: # rename -> Exp?
     """ abstraction of whole evaluation process
     USAGE:
         evaluator = Evaluator(cfg)
@@ -41,14 +41,18 @@ class Evaluator:
         """
         self.process_configs()
         
-        self.print_header_info(step_name="STEP 1: Simulating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("simulate") or k.startswith("exp")})
-        self.run_simulations()
-
-        self.print_header_info(step_name="STEP 2: Evaluating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("judge")})
-        self.run_evaluations()
-        
-        self.print_header_info(step_name="STEP 3: Analyzing")
-        self.analyze()
+        if self.cfg.exp_mode == "session":
+            self.print_header_info(step_name="STEP 1: Simulating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("simulate") or k.startswith("exp")})
+            self.run_simulations(f_task=task_simulate)
+            self.print_header_info(step_name="STEP 2: Evaluating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("judge")})
+            self.run_evaluations()
+            self.print_header_info(step_name="STEP 3: Analyzing")
+            self.analyze()
+        if self.cfg.exp_mode == "turn":
+            self.print_header_info(step_name="STEP 1: Simulating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("simulate") or k.startswith("exp")})
+            self.run_simulations(f_task=task_simulate_teacher_forcing)
+        else:
+            raise NotImplementedError(f"Unknown exp_mode: {self.cfg.exp_mode}")
     
     def process_configs(self):
         """ Log the config. If existed, reload it! """
@@ -71,17 +75,17 @@ class Evaluator:
             s_print += LogUtils.format_infos_with_tabulate(infos)
         print(s_print)
 
-    def run_simulations(self):
+    def run_simulations(self, f_task: Callable):
         """ 
         1. get all the simulation configs
         2. run simulations in parallel
         """
-        def f_exec(cfg):
+        def f_exec(cfg, f_task=f_task):
             # 1. check if run (query db) -- DONE in `XXXController.start_conversation`
             # 2. run with retry (3 times) NOTE: can be a decorator? 
             for retry_ in range(3):
                 try:
-                    return task_simulate(cfg)
+                    return f_task(cfg)
                 except Exception as e:
                     print(f"Task failed for {cfg}: {e}")
                     traceback.print_exc()
@@ -93,7 +97,7 @@ class Evaluator:
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.cfg.simulate_max_workers) as executor:
             futures = []
             for cfg in tasks:
-                future = executor.submit(f_exec, cfg)
+                future = executor.submit(f_exec, cfg, f_task=f_task)
                 futures.append(future)
             print(f"Running {len(futures)} tasks...")
             for future in tqdm.tqdm(concurrent.futures.as_completed(futures), total=len(futures), desc="Executing tasks"):
@@ -101,12 +105,13 @@ class Evaluator:
     
     @staticmethod
     def get_configs_per_workflow(cfg:Config, simulate_num_persona:int=None):
-        """ Run simulation for a specific workflow
+        """ collect simulation for a specific workflow
         """
         # 1. get all user ids
-        user_profiles = Workflow.load_by_id(
-            data_manager=DataManager(cfg), id=cfg.workflow_id, type=cfg.workflow_type).user_profiles # FlowbenchController(cfg).workflow.user_profiles
-        num_user_profile = len(user_profiles)
+        num_user_profile = Workflow.load_by_id(
+            data_manager=DataManager(cfg), id=cfg.workflow_id, type=cfg.workflow_type,
+            load_user_profiles=(cfg.exp_mode=="session"), load_reference_conversation=(cfg.exp_mode=="turn")
+        ).num_user_profile  # FlowbenchController(cfg).workflow.user_profiles
         if simulate_num_persona is not None and simulate_num_persona > 0:
             num_user_profile = min(num_user_profile, simulate_num_persona)
         # 2. get all the configs
@@ -119,7 +124,7 @@ class Evaluator:
     
     @staticmethod
     def get_configs_all_workflows(cfg:Config, simulate_num_persona:int=None, workflow_ids: List[str]=None):
-        """ Run simulation for all workflows
+        """ collect simulation for all workflows
         """
         # 1. get all workflow_ids
         if workflow_ids is None:

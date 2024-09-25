@@ -1,0 +1,86 @@
+# init_client, LLM_CFG
+import os, datetime, traceback, functools
+from typing import List, Dict, Optional, Union
+from easonsi.llm.openai_client import OpenAIClient
+
+_IP_01 = "9.91.12.44:8000"
+_IP_02 = "9.91.0.28:13000"
+LLM_CFG = {
+    "custom": {
+        "model_name": "Qwen2-72B-Instruct",
+        "base_url": f"http://{_IP_01}/v1/",
+        "api_key": "xxx",
+    },
+    "Qwen2-72B": {
+        "model_name": "Qwen2-72B-Instruct",
+        "base_url": f"http://{_IP_01}/v1/",
+        "api_key": "xxx",
+    },
+    "v0729-Llama3_1-70B": {
+        "model_name": "Infinity-Instruct-7M-0729-Llama3_1-70B",
+        "base_url": f"http://{_IP_02}/v1/",
+        "api_key": "xxx",
+    },
+    "v0729-Qwen2-7B": {
+        "model_name": "Infinity-Instruct-7M-0729-Qwen2-7B-ianExp",
+        "base_url": f"http://{_IP_02}/v1/",
+        "api_key": "xxx",
+    },
+}
+def add_openai_models():
+    global LLM_CFG
+    model_list = [
+        "gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo", "gpt-4",
+        "claude-3-haiku-20240307",
+    ]
+    for model in model_list:
+        assert model not in LLM_CFG, f"{model} already in LLM_CFG"
+        LLM_CFG[model] = {
+            "model_name": model,
+            "base_url": os.getenv("OPENAI_PROXY_BASE_URL"),
+            "api_key": os.getenv("OPENAI_PROXY_API_KEY"),
+        }
+# add models registered in `/apdcephfs_cq8/share_2992827/shennong_5/ianxxu/chatchat/model_server/_run_multi_urls.py`
+# e.g. WizardLM2-8x22b, qwen2_72B
+def add_local_models():
+    global LLM_CFG
+    import importlib.util
+    from urllib.parse import urlparse
+    _fn = "/apdcephfs_cq8/share_2992827/shennong_5/ianxxu/chatchat/model_server/_run_multi_urls.py"
+    spec = importlib.util.spec_from_file_location("model_urls", _fn)
+    model_urls = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(model_urls)
+    model_info = {}
+    for name, url in model_urls.local_urls.items():     # process the `local_urls` object
+        if 'http' not in url: continue
+        parsed_url = urlparse(url)
+        model_info[name] = f"{parsed_url.scheme}://{parsed_url.netloc}"
+
+    for model, url in model_info.items():
+        assert model not in LLM_CFG, f"{model} already in LLM_CFG"
+        LLM_CFG[model] = {
+            "model_name": model, "base_url": url, 
+            "api_key": "xxx",   # NOTE: api_key 不能为 "" 不然也会报错
+            "is_sn": True
+        }
+# set model alias!!
+add_openai_models()
+add_local_models()
+_name_map = {
+    "default": "qwen2_72B",
+    "0.9.1": "Qwen1.5-72B-4M-1_0_3-Agent-1_2_KU_woClarify_AllRandom",
+}
+for k,v in _name_map.items():
+    LLM_CFG[k] = LLM_CFG[v]
+# print(f"[INFO] LLM models: {LLM_CFG.keys()}")
+
+def init_client(llm_cfg:Dict):
+    # global client
+    base_url = os.getenv("OPENAI_PROXY_BASE_URL") if llm_cfg.get("base_url") is None else llm_cfg["base_url"]
+    api_key = os.getenv("OPENAI_PROXY_API_KEY") if llm_cfg.get("api_key") is None else llm_cfg["api_key"]
+    model_name = llm_cfg.get("model_name", "gpt-4o")
+    client = OpenAIClient(
+        model_name=model_name, base_url=base_url, api_key=api_key, is_sn=llm_cfg.get("is_sn", False)
+    )
+    return client
+

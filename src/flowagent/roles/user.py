@@ -46,7 +46,7 @@ class LLMSimulatedUserWithProfile(BaseUser):
     def __init__(self, **args) -> None:
         super().__init__(**args)
         self.llm = init_client(llm_cfg=LLM_CFG[self.cfg.user_llm_name])
-        assert self.cfg.user_profile is not None and self.cfg.user_profile_id is not None, "cfg.user_profile or cfg.user_profile_id is None!"
+        assert self.cfg.user_profile_id is not None, "cfg.user_profile or cfg.user_profile_id is None!"
         self.user_profile = self.workflow.user_profiles[self.cfg.user_profile_id]
 
     def process(self, *args, **kwargs) -> UserOutput:

@@ -3,7 +3,7 @@ from enum import Enum
 from .base import BaseRole, BaseAPIHandler, BaseBot, BaseUser
 from .api import DummyAPIHandler
 from .user import DummyUser, InputUser
-from .bot import DummyBot
+from .bot import DummyBot, PDLBot
 
 def add_subclasses_to_dict(base_class: BaseRole, name_to_class_dict: Dict[str, BaseRole]):
     for cls in base_class.__subclasses__():

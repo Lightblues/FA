@@ -7,7 +7,7 @@ from ..data import (
     Role, Message, Conversation
 )
 from ..roles import (
-    USER_NAME2CLASS, BOT_NAME2CLASS, API_NAME2CLASS, 
+    USER_NAME2CLASS, BOT_NAME2CLASS, API_NAME2CLASS, PDLBot
 )
 from .base import BaseController
 from utils.wrappers import Timer
@@ -26,17 +26,19 @@ class FlowagentController(BaseController):
         self.workflow = Workflow.load_by_id(
             data_manager=self.data_namager,
             id=cfg.workflow_id, type=cfg.workflow_type,
-            load_user_profiles=cfg.user_profile
+            load_user_profiles=(cfg.exp_mode=="session"), load_reference_conversation=(cfg.exp_mode=="turn")
         )
-        self.user = USER_NAME2CLASS[cfg.user_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
         self.bot = BOT_NAME2CLASS[cfg.bot_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
-        self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
+        if self.cfg.exp_mode == "session":
+            self.user = USER_NAME2CLASS[cfg.user_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
+            self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
+
+            if isinstance(self.bot, PDLBot):
+                if cfg.pdl_check_dependency: self.pdl_dependency_checker = PDLDependencyChecker(self.cfg, self.conv, self.workflow.pdl)
+                if cfg.pdl_check_api_dup_calls: self.pdl_api_dup_checker = APIDuplicatedChecker(self.cfg, self.conv)
         
-        if cfg.pdl_check_dependency: self.pdl_dependency_checker = PDLDependencyChecker(self.cfg, self.conv, self.workflow.pdl)
-        if cfg.pdl_check_api_dup_calls: self.pdl_api_dup_checker = APIDuplicatedChecker(self.cfg, self.conv)
-    
     def conversation(self, verbose:bool=True) -> Conversation:
-        """ 
+        """ given three roles (system/user/bot), start a conversation
         1. initiation: initialize the variables, logger, etc.
         2. main loop
             stop: by user (or bot?) -- only user!
@@ -68,7 +70,7 @@ class FlowagentController(BaseController):
                         break
                     elif bot_output.action_type == BotOutputType.ACTION:
                         # 3. ACTION loop: call the API, append results to conversation
-                        # 3.1. check the action!
+                        # 3.1. check the action! (will be ignored for non-PDLBot)
                         if not self.check_bot_action(bot_output):
                             self.log_msg(self.conv.get_last_message(), verbose=verbose) # log the error info!
                             continue
@@ -96,8 +98,31 @@ class FlowagentController(BaseController):
         NOTE: if not validated, the error infomation will be added to self.conv!
         - [ ]j check api name? -> done in APIHandler
         """
+        if not (self.cfg.exp_mode == "session" and isinstance(self.bot, PDLBot)): 
+            return True
+        
         if self.cfg.pdl_check_dependency:
             if not self.pdl_dependency_checker.check(bot_output): return False
         if self.cfg.pdl_check_api_dup_calls:
             if not self.pdl_api_dup_checker.check(bot_output): return False
         return True
+
+    def conversation_teacher_forcing(self, verbose:bool=True) -> Conversation:
+        """ given a reference conversation, test the bot in a teacher-forcing manner
+        """
+        ref_conv = self.workflow.reference_conversations[self.cfg.user_profile_id].conversation
+        for msg in ref_conv.msgs:
+            if msg.role != Role.BOT:
+                self.conv.add_message(Message(  # msg should add the convsation id? TODO: automate it?
+                    role=msg.role, content=msg.content,
+                    conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
+                ))
+            else:
+                # 1. bot predict an action (NOTE: will add a msg in self.conv)
+                with Timer("bot process", print=self.cfg.log_utterence_time):
+                    bot_output: BotOutput = self.bot.process()
+                # 2. convert the msg! 
+                last_msg = self.conv.get_last_message()
+                last_msg.substitue_with_GT_content(msg.content)
+                self.logger.log(f"<teacher_forcing> gt: {last_msg.content}\n  predicted: {last_msg.content_predict}", with_print=verbose)
+        return self.conv

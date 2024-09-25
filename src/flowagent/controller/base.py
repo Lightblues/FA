@@ -36,8 +36,15 @@ class BaseController:
         self.conversation_id = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         self.conv = Conversation(conversation_id=self.conversation_id)
     
+        if self.cfg.log_to_db:
+            self.db = DBManager(self.cfg.db_uri, self.cfg.db_name, self.cfg.db_message_collection_name)
+    
     @abstractmethod
     def conversation(self, verbose:bool=True) -> Conversation:
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def conversation_teacher_forcing(self, verbose:bool=True) -> Conversation:
         raise NotImplementedError()
     
     def start_conversation(self, verbose=True):
@@ -48,37 +55,66 @@ class BaseController:
         }
         self.logger.log(LogUtils.format_infos_with_tabulate(infos), with_print=verbose)
 
-        # check if has been run!
-        if self.cfg.log_to_db:
-            db = DBManager(self.cfg.db_uri, self.cfg.db_name, self.cfg.db_message_collection_name)
-            query = {  # identify a single exp
-                "exp_version": self.cfg.exp_version,
-                **{ k:v for k,v in self.cfg.to_dict().items() if k.startswith("workflow") },
-                "user_profile_id": self.cfg.user_profile_id
-            }
-            query_res = db.query_run_experiments(query)
-            if len(query_res) > 0:
-                self.logger.log(f"NOTE: the experiment has already been run!", with_print=verbose)
-                return infos, None  # the returned results haven't been used
-
+        # 1. check if has been run!
+        if self._check_if_already_run():
+            self.logger.log(f"NOTE: the experiment has already been run!", with_print=verbose)
+            return infos, None  # the returned results haven't been used
+        # 2. run the conversation
         conversation = self.conversation(verbose=verbose)
-        
-        if self.cfg.log_to_db:
-            db = DBManager(self.cfg.db_uri, self.cfg.db_name, self.cfg.db_message_collection_name)
-            # 1. insert conversation
-            res = db.insert_conversation(conversation)
-            self.logger.log(f"  <db> Inserted conversation with {len(res.inserted_ids)} messages", with_print=verbose)
-            # 2. insert configuration
-            infos_dict = {
-                "conversation_id": self.conversation_id, "exp_version": self.cfg.exp_version,
-                **self.cfg.to_dict()
-            }
-            res = db.insert_config(infos_dict)
-            self.logger.log(f"  <db> Inserted config", with_print=verbose)
+        # 3. record the conversation
+        self._record_to_db(conversation, verbose=verbose)
 
         conversation_df = pd.DataFrame(conversation.to_list())[['role', 'content']].set_index('role')
         self.logger.log(LogUtils.format_infos_with_tabulate(conversation_df), with_print=verbose)
         return infos, conversation
+    
+    def start_conversation_teacher_forcing(self, verbose=True):
+        infos = {
+            "conversation_id": self.conversation_id,
+            "exp_version": self.cfg.exp_version,
+            "config": self.cfg.to_dict(),
+        }
+        self.logger.log(LogUtils.format_infos_with_tabulate(infos), with_print=verbose)
+
+        # 1. check if has been run!
+        if self._check_if_already_run():
+            self.logger.log(f"NOTE: the experiment has already been run!", with_print=verbose)
+            return infos, None  # the returned results haven't been used
+        # 2. run the conversation
+        conversation = self.conversation_teacher_forcing(verbose=verbose)
+        # 3. record the conversation
+        self._record_to_db(conversation, verbose=verbose)
+        
+        conversation_df = pd.DataFrame(conversation.to_list())[['role', 'content']].set_index('role')
+        self.logger.log(LogUtils.format_infos_with_tabulate(conversation_df), with_print=verbose)
+        return infos, conversation
+    
+    def _check_if_already_run(self) -> bool:
+        if self.cfg.log_to_db: return False
+        
+        query = {  # identify a single exp
+            "exp_version": self.cfg.exp_version,
+            **{ k:v for k,v in self.cfg.to_dict().items() if k.startswith("workflow") },
+            "user_profile_id": self.cfg.user_profile_id
+        }
+        query_res = self.db.query_run_experiments(query)
+        return len(query_res) > 0
+    
+    def _record_to_db(self, conversation:Conversation, verbose=True):
+        if not self.cfg.log_to_db: return 
+        
+        # 1. insert conversation
+        res = self.db.insert_conversation(conversation)
+        self.logger.log(f"  <db> Inserted conversation with {len(res.inserted_ids)} messages", with_print=verbose)
+        
+        # 2. insert configuration
+        infos_dict = {
+            "conversation_id": self.conversation_id, "exp_version": self.cfg.exp_version,
+            **self.cfg.to_dict()
+        }
+        res = self.db.insert_config(infos_dict)
+        self.logger.log(f"  <db> Inserted config", with_print=verbose)
+    
     
     def log_msg(self, msg:Message, verbose=True):
         """ log message to logger and stdout """

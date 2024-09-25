@@ -9,12 +9,13 @@ class Config:
     workflow_type: str = "text"     # text, code, flowchart
     workflow_id: str = "000"
     exp_version: str = "default"
+    exp_mode: str = "session"       # turn, session
     exp_save_config: bool = False
     
     user_mode: str = "llm_profile"
     user_llm_name: str = "gpt-4o"
     user_template_fn: str = "flowagent/user_llm.jinja"
-    user_profile: bool = True
+    # user_profile: bool = True
     user_profile_id: int = 0
     
     bot_mode: str = "react_bot"

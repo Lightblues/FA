@@ -10,6 +10,8 @@ from typing import List, Dict, Optional, Union
 from .user_profile import UserProfile
 from .config import Config
 from .pdl import PDL
+from .base_data import ConversationWithIntention, Conversation
+
 
 @dataclass
 class DataManager:
@@ -77,6 +79,7 @@ class WorkflowType(Enum):
     def __str__(self):
         return self.workflow_type
 
+
 class WorkflowTypeStr(str, Enum):
     TEXT = "TEXT"
     CODE = "CODE"
@@ -99,7 +102,9 @@ class Workflow:  # rename -> Data
     task_detailed_description: str = None
     workflow: str = None
     toolbox: List[Dict] = field(default_factory=list)   # apis
-    user_profiles: List[UserProfile] = field(default_factory=list) # user profiles
+    
+    user_profiles: List[UserProfile] = None
+    reference_conversations: List[ConversationWithIntention] = None
     
     data_manager: DataManager = None
     
@@ -108,7 +113,9 @@ class Workflow:  # rename -> Data
     def __init__(
         self, data_manager:DataManager, 
         type:str, id:str, name:str, task_description:str, task_detailed_description: str,
-        load_user_profiles=False, **kwargs):
+        load_user_profiles:bool=False, load_reference_conversation:bool=False,
+        **kwargs
+    ):
         self.data_manager = data_manager
         
         _type: WorkflowType = WorkflowType[type.upper()]
@@ -126,6 +133,16 @@ class Workflow:  # rename -> Data
             with open(data_manager.DIR_data_flowbench / f"user_profile/{id}.json", 'r') as f:
                 user_profiles = json.load(f)
             self.user_profiles = [UserProfile.load_from_dict(profile) for profile in user_profiles]
+        if load_reference_conversation: 
+            with open(data_manager.DIR_data_flowbench / f"user_profile_w_conversation/{id}.json", 'r') as f:
+                data = json.load(f)
+            self.reference_conversations = []
+            for d in data:
+                self.reference_conversations.append(
+                    ConversationWithIntention(
+                        d["user_intention"], Conversation.load_from_json(d["conversation"])
+                    )
+                )
         
         if _type == WorkflowType.PDL:
             self.pdl = PDL.load_from_file(data_manager.DIR_data_flowbench / f"pdl/{id}.yaml")
@@ -137,6 +154,12 @@ class Workflow:  # rename -> Data
         infos = data_manager.workflow_infos[id]
         assert all([k in infos for k in ['name', 'task_description', 'task_detailed_description']]), f"[ERROR] missing key in {infos}"
         return cls(data_manager, type, id, **infos, **kwargs)
+    
+    @property
+    def num_user_profile(self):
+        if self.user_profiles is not None: return len(self.user_profiles)
+        if self.reference_conversations is not None: return len(self.reference_conversations)
+        raise NotImplementedError
     
     def to_str(self):
         # return f"ID: {self.type}-{self.id}\nName: {self.name}\nTask: {self.task_description}\nWorkflow: {self.workflow}"

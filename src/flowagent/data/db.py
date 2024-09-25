@@ -23,8 +23,8 @@ class DBManager:
         # print(f"  <db> Inserted message: {message.content}")
 
     def insert_conversation(self, conversation: Conversation) -> pymongo.results.InsertManyResult:
-        conversation_list = conversation.to_list()
-        res = self.collection.insert_many(conversation_list)
+        msg_list = conversation.to_list()
+        res = self.collection.insert_many(msg_list)
         return res
 
     def query_messages_by_conversation_id(self, conversation_id: str) -> Conversation:
