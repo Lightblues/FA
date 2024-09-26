@@ -7,5 +7,6 @@
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
         "**/core.*": true, // exclude tmp files
-    }
+    },
+    "python.envFile": "${workspaceFolder}/.env"
 }

@@ -1,3 +1,9 @@
+""" by @siqi
+数据格式转换 NL -> PDL, code, CoRE, flowchart
+
+---
+datas: STAR
+"""
 import re
 import os
 import time

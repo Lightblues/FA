@@ -5,6 +5,7 @@ import datetime, os, re, yaml, copy, pathlib, time
 from enum import Enum, auto
 from dataclasses import dataclass, asdict, field
 from typing import List, Dict, Optional, Tuple
+import pandas as pd
 
 from .pdl import PDL
 from .common import DataManager, _DIRECTORY_MANAGER
@@ -43,6 +44,14 @@ class Role(Enum):
     def __str__(self):
         return f"Role(id={self.id}, prefix={self.prefix}, name={self.rolename})"
 
+    @classmethod
+    def get_by_rolename(cls, rolename: str):
+        for member in cls:
+            if member.rolename == rolename.lower():
+                return member
+        raise KeyError(f"{rolename} is not a valid key for {cls.__name__}")
+
+
 @dataclass
 class Message:
     role: Role = None
@@ -52,13 +61,16 @@ class Message:
     conversation_id: str = None
     utterance_id: int = None
 
-    def __init__(self, role: Role, content: str, prompt: str=None, llm_response: str=None, conversation_id: str=None, utterance_id: int=None):
+    def __init__(
+        self, role: Role, content: str, prompt: str=None, llm_response: str=None, 
+        conversation_id: str=None, utterance_id: int=None, **kwargs
+    ):
         self.role = role
         self.content = content
-        if prompt: self.prompt = prompt
-        if llm_response: self.llm_response = llm_response
-        if conversation_id: self.conversation_id = conversation_id
-        if utterance_id: self.utterance_id = utterance_id
+        if prompt is not None: self.prompt = prompt
+        if llm_response is not None: self.llm_response = llm_response
+        if conversation_id is not None: self.conversation_id = conversation_id
+        if utterance_id is not None: self.utterance_id = utterance_id
     
     def to_str(self):
         return f"{self.role.prefix}{self.content}"
@@ -70,6 +82,22 @@ class Message:
         return self.to_str()
     def __repr__(self):
         return self.to_str()
+    
+    def copy(self):
+        return copy.deepcopy(self) # FIX: conversation_id? 
+    
+    def is_api_calling(self) -> bool:
+        return self.role == Role.BOT and self.content.startswith("<Call API>")
+    def get_api_infos(self) -> Tuple[str, str]:
+        """ 
+        return: action_name, action_parameters
+        """
+        # content = f"<Call API> {action_name}({action_parameters})"
+        assert self.is_api_calling(), f"Must be API calling message! But got {self}"
+        content = self.content[len("<Call API> "):].strip()
+        re_pattern = r"(.*)\((.*)\)"
+        re_match = re.match(re_pattern, content)
+        return re_match.group(1), re_match.group(2)
 
 class Conversation():
     msgs: List[Message] = []
@@ -94,8 +122,31 @@ class Conversation():
     def current_utterance_id(self) -> int:
         return len(self.msgs)
     
+    @property
+    def messages(self) -> List[Message]:
+        return self.msgs
+    
     def get_last_message(self) -> Message:
         return self.msgs[-1]
+    
+    def get_called_apis(self) -> List[str]:
+        """ collect all API calls in the conversation by BOT """
+        apis = []
+        for msg in self.msgs:
+            if msg.is_api_calling():
+                apis.append(msg.get_api_infos()[0])
+        return apis
+
+    @classmethod
+    def from_messages(cls, msgs: List[Message]):
+        assert len(msgs) > 0, f"Must have at least one message!"
+        conv_id = msgs[0].conversation_id
+        instance = cls(conv_id)
+        instance.msgs = msgs
+        return instance
+    
+    def to_dataframe(self) -> pd.DataFrame:
+        return pd.DataFrame([m.to_dict() for m in self.msgs])
 
     @classmethod
     def load_from_json(cls, o:List):

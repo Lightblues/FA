@@ -1,7 +1,8 @@
 ref/
 ref_run/
 /data/
-tmp/
+*tmp*
+wandb/
 .env
 *.ipynb
 

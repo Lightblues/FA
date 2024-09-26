@@ -1,0 +1,40 @@
+This prompt is designed to guide the creation of user profile with a task-oriented dialogue assistant. The assistant is designed to assist the user for a specific task described below.
+
+### Task Description:
+{{ Task_Description }}
+
+### User Persona:
+{{ Persona }}
+
+### Instructions:
+Analyze the information provided above and generate user profile on the following aspects, including user details and dialogue strategies that the user might engage in with the assistant. 
+
+### User Profile:
+1. **User Details**:
+    - Name: (Provide a specific name with three words, not a general or generic term)
+    - Gender: 
+    - Age:
+    - Contact Infimation: (must be an 11-digit number starting with 1)
+    - ID Number: (must be an 18-digit number)
+2. **User needs**: Analyze the possible information the user hopes to obtain or the actions they wish to complete through the assistant, which may related to or exceed the task description.
+3. **Required APIs**: The necessary APIs required to accomplish the user's needs.
+4. **Dialogue Style**: Based on the user's role background, analyse their dialogue style, including personality traits, tone, and attitude.
+5. **Interaction Patterns**: Explore how the user might interact with the assistant.
+
+### NOTE:
+- Response in English, and do not output anything else except the information defined in the User Profile.
+- Ensure that the responses are clearly structured and directly address each point listed above.
+- Maintain a focus on how the user's role and background influence their communication preferences and needs.
+- If certain information about the user profile cannot be directly extracted from the task description and persona, make reasonable assumptions based on the available information.
+
+Please output in the following format:
+1. User Details:
+    - name:
+    - sex:
+    - age:
+    - phone number:
+    - id number:
+2. User needs:
+3. Required APIs: (list of API names, seperated by comma)
+4. Dialogue Style:
+5. Interaction Patterns:
