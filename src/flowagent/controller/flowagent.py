@@ -24,7 +24,7 @@ class FlowagentController(BaseController):
     def __init__(self, cfg:Config) -> None:
         super().__init__(cfg)
         self.workflow = Workflow.load_by_id(
-            data_manager=self.data_namager,
+            data_manager=self.data_manager,
             id=cfg.workflow_id, type=cfg.workflow_type,
             load_user_profiles=(cfg.exp_mode=="session"), load_reference_conversation=(cfg.exp_mode=="turn")
         )

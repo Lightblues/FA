@@ -41,4 +41,5 @@ simulate_max_workers: 10
 judge_max_workers: 10
 judge_model_name: "gpt-4o"
 judge_conversation_id: "2024-09-19 15:20:53.462895"
-
+judge_log_to: "wandb"
+judge_force_rejudge: false

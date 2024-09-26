@@ -8,7 +8,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from ..data import Config, DBManager, LogUtils
-from .metric import MetricAcc, MetricF1
+from .metric import MetricF1
 
 
 class Analyzer:
@@ -29,7 +29,8 @@ class Analyzer:
     
         self._collect_exp_results()
         self.stat_dict = dict()
-        wandb.init(project="pdl", name=cfg.exp_version)
+        if self.cfg.judge_log_to == "wandb":
+            wandb.init(project="pdl", name=cfg.exp_version)
     
     def _collect_exp_results(self):
         query_res = self.db.query_evaluations({ "exp_version": self.cfg.exp_version })
@@ -40,7 +41,7 @@ class Analyzer:
             f"workflow_dataset & workflow_type are not the same in {self.cfg.exp_version}"
         self.df = df
     
-    def analyze(self):
+    def analyze(self) -> dict:
         # TODO: summary exp settings
         if self.cfg.exp_mode == "session":
             self.stat_judge_session()
@@ -53,8 +54,10 @@ class Analyzer:
         
         print(LogUtils.format_infos_with_tabulate(self.stat_dict, color="blue"))
         # log to W&B
-        for k, v in self.stat_dict.items():
-            wandb.summary[k] = v
+        if self.cfg.judge_log_to == "wandb":
+            for k, v in self.stat_dict.items():
+                wandb.summary[k] = v
+        return self.stat_dict
 
     def stat_judge_session(self):
         """ 
@@ -89,19 +92,34 @@ class Analyzer:
         return metrics
         
     def stat_judge_turn(self):
-        """ 
+        """ turn-level | overall metric & selected metric
         input key: judge_turn_result
         metric: Response Score
         """
         scores = []         # mean{ mean_score_of_a_session } 
         passes = []         # mean{ pass of turns } 
-        for jr in self.df["judge_turn_result"]:
-            mean_score = np.mean([int(i["Score"]) for i in jr])
-            scores.append(mean_score)
-            passes += [int(i["Score"]) >= 9 for i in jr]
+        oow_scores = []
+        oow_passes = []
+        for jr_session in self.df["judge_turn_result"]:
+            score, oow_score = [], []
+            succ, oow_succ = [], []
+            for jr in jr_session:
+                # jr: {Score, utterance_id, type}
+                s = int(jr["Score"])
+                score.append(s)
+                succ.append(int(s >= 9))
+                if jr['type']: 
+                    oow_score.append(s)
+                    oow_succ.append(int(s >= 9))
+            scores.append(np.mean(score))
+            passes += succ
+            oow_scores.append(np.mean(oow_score))
+            oow_passes += oow_succ
         metrics = dict(
             mean_score=np.mean(scores),
             passrate=np.mean(passes),
+            oow_mean_score=np.mean(oow_scores),
+            oow_passrate=np.mean(oow_passes)
         )
         self.stat_dict |= metrics
         return metrics
@@ -127,7 +145,6 @@ class Analyzer:
 
     def stat_num_turns(self):
         avg_conv_turns = self.df["num_turns"].mean()
-        # print(f"avg num turns: {avg_conv_turns:.2f}")
         self.stat_dict["avg_num_turns"] = avg_conv_turns
         
         vc_num_turns = self.df["num_turns"].value_counts().sort_index().reset_index()
@@ -137,7 +154,8 @@ class Analyzer:
         plt.title('Number of turns Distribution')
         plt.xlabel('Number of turns')
         plt.ylabel('Count')
-        wandb.log({"dist_num_turns": wandb.Image(plt)})
+        if self.cfg.judge_log_to == "wandb":
+            wandb.log({"dist_num_turns": wandb.Image(plt)})
         return vc_num_turns
     
     def stat_scores_overall(self):
@@ -155,5 +173,6 @@ class Analyzer:
         plt.title('Comparison of Scores between GPT and Human')
         plt.xticks(rotation=0)
         plt.tight_layout()
-        wandb.log({"dist_scores_overall": wandb.Image(plt)})
+        if self.cfg.judge_log_to == "wandb":
+            wandb.log({"dist_scores_overall": wandb.Image(plt)})
         return df_scores

@@ -23,7 +23,7 @@ class BaseController:
     api: BaseAPIHandler = None
     logger: BaseLogger = None
     conv: Conversation = None       # global variable for conversation
-    data_namager: DataManager = None
+    data_manager: DataManager = None
     workflow: Workflow = None
     conversation_id: str = None
     
@@ -31,7 +31,7 @@ class BaseController:
     
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
-        self.data_namager = DataManager(cfg)
+        self.data_manager = DataManager(cfg)
         self.logger = BaseLogger()
         self.conversation_id = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         self.conv = Conversation(conversation_id=self.conversation_id)
@@ -94,6 +94,7 @@ class BaseController:
         
         query = {  # identify a single exp
             "exp_version": self.cfg.exp_version,
+            "exp_mode": self.cfg.exp_mode,
             **{ k:v for k,v in self.cfg.to_dict().items() if k.startswith("workflow") },
             "user_profile_id": self.cfg.user_profile_id
         }

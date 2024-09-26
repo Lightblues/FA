@@ -15,7 +15,7 @@ class Config:
     user_mode: str = "llm_profile"
     user_llm_name: str = "gpt-4o"
     user_template_fn: str = "flowagent/user_llm.jinja"
-    # user_profile: bool = True
+    # user_profile: bool = True # controlled by exp_mode
     user_profile_id: int = 0
     
     bot_mode: str = "react_bot"
@@ -46,6 +46,8 @@ class Config:
     judge_model_name: str = "gpt-4o"
     judge_conversation_id: str = None   # the conversation to be judged
     # judge_passrate_threshold: int = 3
+    judge_log_to: str = "wandb"
+    judge_force_rejudge: bool = False
 
     def to_dict(self):
         return asdict(self)

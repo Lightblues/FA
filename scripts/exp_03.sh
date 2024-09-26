@@ -2,11 +2,11 @@ cd /work/huabu/src/
 
 # MODE=react
 MODE=pdl
-MODEL=gpt-4o
+# MODEL=gpt-4o
 # MODEL=claude-3-sonnet-20240229
-# MODEL=Qwen2-72B
-# datasets=("PDL" "SGD" "STAR")
-datasets=("PDL")
+MODEL=Qwen2-72B
+datasets=("PDL" "SGD" "STAR")
+# datasets=("PDL")
 
 for dataset in "${datasets[@]}"; do
     echo ">> running pdl-${MODE} on dataset: ${dataset}"
@@ -25,7 +25,7 @@ for dataset in "${datasets[@]}"; do
 
     python run_flowagent_exp.py --config=default.yaml --exp-version=${exp_version} --exp-mode=turn \
         --workflow-dataset=${dataset} --workflow-type=pdl \
-        --simulate-num-persona=1 \
+        --simulate-num-persona=3 \
         --bot-llm-name=${MODEL} \
         --bot-mode=${bot_mode} --bot-template-fn=${bot_template_fn}
 done

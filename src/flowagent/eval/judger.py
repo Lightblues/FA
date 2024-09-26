@@ -43,10 +43,14 @@ class Judger:
         """
         # 0. check if judged
         assert self.cfg.judge_conversation_id is not None, "judge_conversation_id is None"
-        query_res = self.db.query_evaluations({ "conversation_id": self.cfg.judge_conversation_id })
-        if len(query_res) > 0:
-            self.logger.log(f"  <judge> {self.cfg.judge_conversation_id} has already been judged", with_print=verbose)
-            return query_res[0] # out_dict
+        if self.cfg.judge_force_rejudge: # whether forcing rejudge
+            # remove the judge result if it has been judged
+            res = self.db.delete_evaluations({ "conversation_id": self.cfg.judge_conversation_id })
+        else:
+            query_res = self.db.query_evaluations({ "conversation_id": self.cfg.judge_conversation_id }) # donot need {"exp_version"} becased conversaion_id 1:1 map to exp_version
+            if len(query_res) > 0:
+                self.logger.log(f"  <judge> {self.cfg.judge_conversation_id} has already been judged", with_print=verbose)
+                return query_res[0] # out_dict
 
         # 1.1. get the simultead conversation
         simulated_conversation = self.db.query_messages_by_conversation_id(self.cfg.judge_conversation_id)
@@ -145,6 +149,10 @@ class Judger:
                 jr = self._parse_react_output(llm_response, slots=['Score'], slots_to_check=['Score'])
                 return jr, llm_response, _model_name, _usage
             jr, llm_response, _model_name, _usage = judge_turn(prompt)
+            jr.update({
+                "utterance_id": i,
+                "type": simulated_conversation.get_message_by_idx(i-1).type
+            })
             out["judge_turn_result"].append(jr)
             out["judge_turn_details"].append({
                 "model": _model_name,   # judge model & detailed infos

@@ -1,9 +1,9 @@
 """ Main entrypoint for evaluation! run simulations, judge, and analyze
-updated @240918
+updated @240926
 
 - [ ] add stat of #error_output (for parse)
-- [ ] turn-level evaluation
-- [ ] update analyzer: more metrics
+- [x] turn-level evaluation
+- [x] update analyzer: more metrics
 """
 
 import os, json, tqdm, itertools, pickle, collections, traceback, datetime, argparse
@@ -15,6 +15,7 @@ from ..data import Config, DataManager, DBManager, LogUtils, Workflow
 from .analyzer import Analyzer
 from ..controller import FlowagentController
 from .judger import Judger
+from .eval_utils import EvalUtils
 
 
 def task_simulate(cfg: Config) -> None:
@@ -115,7 +116,7 @@ class Evaluator: # rename -> Exp?
         """
         def f_exec(cfg, f_task=f_task):
             # 1. check if run (query db) -- DONE in `XXXController.start_conversation`
-            # 2. run with retry (3 times) NOTE: can be a decorator? 
+            # 2. run with retry (3 times) NOTE: can be a decorator? @retry_wrapper
             for retry_ in range(3):
                 try:
                     return f_task(cfg)
@@ -126,7 +127,7 @@ class Evaluator: # rename -> Exp?
                 print(f"ERROR!!! Task failed after 3 retrys for {cfg}")
                 return None
 
-        tasks = self._get_configs_all_workflows(self.cfg, simulate_num_persona=self.cfg.simulate_num_persona)
+        tasks = EvalUtils.get_configs_all_workflows(self.cfg, simulate_num_persona=self.cfg.simulate_num_persona)
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.cfg.simulate_max_workers) as executor:
             futures = []
             for cfg in tasks:
@@ -134,42 +135,7 @@ class Evaluator: # rename -> Exp?
                 futures.append(future)
             print(f"Running {len(futures)} tasks...")
             for future in tqdm.tqdm(concurrent.futures.as_completed(futures), total=len(futures), desc="Executing tasks"):
-                future.result()  # 获取结果以捕获异常并打印错误信息
-    
-    @staticmethod
-    def _get_configs_per_workflow(cfg:Config, simulate_num_persona:int=None):
-        """ collect simulation for a specific workflow
-        """
-        # 1. get all user ids
-        num_user_profile = Workflow.load_by_id(
-            data_manager=DataManager(cfg), id=cfg.workflow_id, type=cfg.workflow_type,
-            load_user_profiles=(cfg.exp_mode=="session"), load_reference_conversation=(cfg.exp_mode=="turn")
-        ).num_user_profile  # FlowbenchController(cfg).workflow.user_profiles
-        if simulate_num_persona is not None and simulate_num_persona > 0:
-            num_user_profile = min(num_user_profile, simulate_num_persona)
-        # 2. get all the configs
-        tasks = []
-        for uid in range(num_user_profile):
-            cfg_new = cfg.copy()
-            cfg_new.user_profile_id = uid
-            tasks.append((cfg_new))
-        return tasks
-    
-    @staticmethod
-    def _get_configs_all_workflows(cfg:Config, simulate_num_persona:int=None, workflow_ids: List[str]=None):
-        """ collect simulation for all workflows
-        """
-        # 1. get all workflow_ids
-        if workflow_ids is None:
-            num_workflow = DataManager(cfg).num_workflows
-            workflow_ids = [f"{i:03d}" for i in range(num_workflow)]
-        # 2. get all the configs
-        tasks = []
-        for workflow_id in workflow_ids:
-            cfg_new = cfg.copy()
-            cfg_new.workflow_id = workflow_id
-            tasks.extend(Evaluator._get_configs_per_workflow(cfg_new, simulate_num_persona=simulate_num_persona))
-        return tasks
+                future.result()
 
 
     def run_evaluations(self, f_task: Callable):
@@ -177,7 +143,7 @@ class Evaluator: # rename -> Exp?
         1. get the experiments to be evaluated
         2. run evaluations in parallel
         """
-        tasks = self._get_evaluation_configs(self.cfg)
+        tasks = EvalUtils.get_evaluation_configs(self.cfg, db=self.db)
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.cfg.judge_max_workers) as executor:
             futures = []
             for cfg in tasks:
@@ -186,33 +152,11 @@ class Evaluator: # rename -> Exp?
             print(f"Executing {len(futures)} judge tasks...")
             num_errors = 0
             for future in tqdm.tqdm(concurrent.futures.as_completed(futures), total=len(futures), desc="Executing tasks"):
-                r = future.result()  # 获取结果以捕获异常并打印错误信息
+                r = future.result() 
                 if r: num_errors += 1
             print(f"# of errors: {num_errors}")
         if num_errors > 0:
             raise Exception(f"# of errors when evaluation: {num_errors}")
-
-    def _get_evaluation_configs(self, cfg:Config):
-        """filter the experiments by `exp_version`
-        """
-        # 1. find all run experiments
-        run_exps = self.db.query_run_experiments({ "exp_version": cfg.exp_version }, limit=0)
-        
-        # 2. get all evaluation configs
-        tasks = []
-        for exp in run_exps:
-            # 2.1 restore the exp config
-            cfg_exp = Config.from_dict(
-                self.db.query_config_by_conversation_id(exp["conversation_id"])
-            )
-            # 2.2 check if the configs of run exps match the input config. partly done by the "reloading" mechanism?
-            keys_to_check = ["exp_version", "workflow_dataset", "workflow_type"]
-            assert all([cfg_exp[k] == cfg[k] for k in keys_to_check]), f"Config mismatch: {cfg_exp} vs {cfg}"
-            # 2.3 ensure the judge config slots: `judge_conversation_id, judge_model_name`
-            cfg_exp.judge_model_name = cfg.judge_model_name
-            cfg_exp.judge_conversation_id = exp["conversation_id"]
-            tasks.append(cfg_exp)
-        return tasks
 
     def analyze(self):
         """ analysis process: -> to `Analyzer`
