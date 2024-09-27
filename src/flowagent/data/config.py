@@ -12,22 +12,25 @@ class Config:
     exp_mode: str = "session"       # turn, session
     exp_save_config: bool = False
     
-    user_mode: str = "llm_profile"
+    user_mode: str = "llm_profile"  # llm_oow, manual, llm_profile
     user_llm_name: str = "gpt-4o"
-    user_template_fn: str = "flowagent/user_llm.jinja"
+    user_template_fn: str = None    # "flowagent/user_llm.jinja"
     # user_profile: bool = True # controlled by exp_mode
     user_profile_id: int = 0
+    user_retry_limit: int = 3
+    user_oow_ratio: float = 0.1
     
     bot_mode: str = "react_bot"
-    bot_template_fn: str = "flowagent/bot_flowbench.jinja"
+    bot_template_fn: str = None     # "flowagent/bot_flowbench.jinja"
     bot_llm_name: str = "gpt-4o"
     bot_action_limit: int = 5
+    bot_retry_limit: int = 3
     pdl_check_dependency: bool = True
     pdl_check_api_dup_calls: bool = True
     pdl_check_api_dup_calls_threshold: int = 2
     
     api_mode: str = "llm"
-    api_template_fn: str = "flowagent/api_llm.jinja"
+    api_template_fn: str = None     # "flowagent/api_llm.jinja"
     api_llm_name: str = "gpt-4o"
 
     conversation_turn_limit: int = 20
@@ -41,6 +44,7 @@ class Config:
     
     simulate_num_persona: int = -1
     simulate_max_workers: int = 10
+    simulate_force_rerun: bool = False
     
     judge_max_workers: int = 10
     judge_model_name: str = "gpt-4o"
@@ -48,6 +52,7 @@ class Config:
     # judge_passrate_threshold: int = 3
     judge_log_to: str = "wandb"
     judge_force_rejudge: bool = False
+    judge_retry_limit: int = 3
 
     def to_dict(self):
         return asdict(self)

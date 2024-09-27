@@ -8,10 +8,7 @@ class EvalUtils:
         """ collect simulation for a specific workflow
         """
         # 1. get all user ids
-        num_user_profile = Workflow.load_by_id(
-            data_manager=DataManager(cfg), id=cfg.workflow_id, type=cfg.workflow_type,
-            load_user_profiles=(cfg.exp_mode=="session"), load_reference_conversation=(cfg.exp_mode=="turn")
-        ).num_user_profile  # FlowbenchController(cfg).workflow.user_profiles
+        num_user_profile = Workflow(cfg).num_user_profile
         if simulate_num_persona is not None and simulate_num_persona > 0:
             num_user_profile = min(num_user_profile, simulate_num_persona)
         # 2. get all the configs

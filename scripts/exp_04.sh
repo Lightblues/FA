@@ -1,12 +1,9 @@
+# turn exp for other models
 cd /work/huabu/src/
 
 workflow_types=("text" "code" "flowchart")
-# workflow_types=("text" "flowchart")
-# MODEL=gpt-4o
-MODEL=Qwen2-72B
-dataset=PDL
-# dataset=STAR
-# dataset=SGD
+MODEL=Qwen2-72B # gpt-4o
+dataset=STAR # PDL SGD STAR
 
 for wt in "${workflow_types[@]}"; do
     echo ">> running ${MODEL} on dataset: ${dataset} with workflow_type: ${wt}"

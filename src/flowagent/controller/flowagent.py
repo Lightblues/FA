@@ -23,11 +23,7 @@ class FlowagentController(BaseController):
     
     def __init__(self, cfg:Config) -> None:
         super().__init__(cfg)
-        self.workflow = Workflow.load_by_id(
-            data_manager=self.data_manager,
-            id=cfg.workflow_id, type=cfg.workflow_type,
-            load_user_profiles=(cfg.exp_mode=="session"), load_reference_conversation=(cfg.exp_mode=="turn")
-        )
+        self.workflow = Workflow(cfg)
         self.bot = BOT_NAME2CLASS[cfg.bot_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
         if self.cfg.exp_mode == "session":
             self.user = USER_NAME2CLASS[cfg.user_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)

@@ -23,7 +23,7 @@ class BaseController:
     api: BaseAPIHandler = None
     logger: BaseLogger = None
     conv: Conversation = None       # global variable for conversation
-    data_manager: DataManager = None
+    data_manager: DataManager = None        # remove it? 
     workflow: Workflow = None
     conversation_id: str = None
     
@@ -90,16 +90,18 @@ class BaseController:
         return infos, conversation
     
     def _check_if_already_run(self) -> bool:
-        # if not self.cfg.log_to_db: return False
-        
         query = {  # identify a single exp
             "exp_version": self.cfg.exp_version,
             "exp_mode": self.cfg.exp_mode,
             **{ k:v for k,v in self.cfg.to_dict().items() if k.startswith("workflow") },
             "user_profile_id": self.cfg.user_profile_id
         }
-        query_res = self.db.query_run_experiments(query)
-        return len(query_res) > 0
+        if self.cfg.simulate_force_rerun: 
+            res = self.db.delete_run_experiments(query)
+            return False
+        else:
+            query_res = self.db.query_run_experiments(query)
+            return len(query_res) > 0
     
     def _record_to_db(self, conversation:Conversation, verbose=True):
         if not self.cfg.log_to_db: return 

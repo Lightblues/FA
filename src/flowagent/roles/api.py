@@ -14,6 +14,7 @@ class DummyAPIHandler(BaseAPIHandler):
     API structure: (see apis_v0/apis.json)
     """
     names: List[str] = ["dummy_api"]
+    api_template_fn: str = ""
     
     def __init__(self, **args) -> None:
         super().__init__(**args)
@@ -37,6 +38,7 @@ class DummyAPIHandler(BaseAPIHandler):
 
 class LLMSimulatedAPIHandler(BaseAPIHandler):
     llm: OpenAIClient = None
+    api_template_fn: str = "flowagent/api_llm.jinja"
     names = ["llm", "LLMSimulatedAPIHandler"]
     
     def __init__(self, **args) -> None:
@@ -77,7 +79,7 @@ class LLMSimulatedAPIHandler(BaseAPIHandler):
 
     def _gen_prompt(self, apicalling_info: BotOutput) -> str:
         prompt = jinja_render(
-            self.cfg.api_template_fn,     # "flowagent/api_llm.jinja": api_infos, api_name, api_input
+            self.api_template_fn,     # "flowagent/api_llm.jinja": api_infos, api_name, api_input
             api_infos=self.api_infos,
             api_name=apicalling_info.action,
             api_input=apicalling_info.action_input,

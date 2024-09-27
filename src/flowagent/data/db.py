@@ -59,6 +59,10 @@ class DBManager:
         results = self.collection_meta.find(query).sort(sort_order).limit(limit)
         return [res for res in results]
     
+    def delete_run_experiments(self, query: dict = {}) -> pymongo.results.DeleteResult:
+        res = self.collection_meta.delete_many(query)
+        return res
+    
     def get_all_run_exp_versions(self) -> List[str]:
         results = self.collection_meta.distinct("exp_version")
         return results

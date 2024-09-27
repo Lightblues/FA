@@ -89,7 +89,7 @@ def show_conversation_page():
         # 3. show the user profile
         conv_cfg = Config.from_dict(conversation_metas)
         data_manager.refresh_config(conv_cfg)               # update the data_manager first~
-        with open(data_manager.DIR_data_flowbench / f"user_profile/{conv_cfg.workflow_id}.json", 'r') as f:
+        with open(data_manager.DIR_data_workflow / f"user_profile/{conv_cfg.workflow_id}.json", 'r') as f:
             user_profiles = json.load(f)
             selected_up = user_profiles[conv_cfg.user_profile_id]
         st.markdown(f"### User Profile")
