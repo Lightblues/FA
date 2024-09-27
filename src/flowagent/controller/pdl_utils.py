@@ -63,5 +63,14 @@ class PDLGraph:
                 assert name in names, f"precondition `{name}` not found in nodes: {names}!!"
         return True
     
+    def get_invalid_node_names(self) -> List[str]:
+        invalid_nodes = []
+        for node in self.name2node.values():
+            for precondition in node.precondition:
+                if not self.name2node[precondition].is_activated:
+                    invalid_nodes.append(node)
+                    break
+        return [node.name for node in invalid_nodes]
+    
     def __repr__(self) -> str:
         return f"PDLGraph({self.name2node})"

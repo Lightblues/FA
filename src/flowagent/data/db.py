@@ -70,6 +70,10 @@ class DBManager:
     def insert_evaluation(self, eval_result: dict) -> pymongo.results.InsertOneResult:
         res = self.collection_eval.insert_one(eval_result)
         return res
+    
+    def delete_run_experiments(self, query: dict = {}) -> pymongo.results.DeleteResult:
+        res = self.collection_meta.delete_many(query)
+        return res
 
 
 if __name__ == "__main__":

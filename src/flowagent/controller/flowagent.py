@@ -34,8 +34,9 @@ class FlowagentController(BaseController):
             self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
 
             if isinstance(self.bot, PDLBot):
+                self.pdl_check_api_w_tool_manipulation = cfg.pdl_check_api_w_tool_manipulation
                 if cfg.pdl_check_dependency: self.pdl_dependency_checker = PDLDependencyChecker(self.cfg, self.conv, self.workflow.pdl)
-                if cfg.pdl_check_api_dup_calls: self.pdl_api_dup_checker = APIDuplicatedChecker(self.cfg, self.conv)
+                if cfg.pdl_check_api_dup_calls: self.pdl_api_dup_checker = APIDuplicatedChecker(self.cfg, self.conv, self.workflow.pdl)
         
     def conversation(self, verbose:bool=True) -> Conversation:
         """ given three roles (system/user/bot), start a conversation
@@ -72,7 +73,12 @@ class FlowagentController(BaseController):
                         # 3. ACTION loop: call the API, append results to conversation
                         # 3.1. check the action! (will be ignored for non-PDLBot)
                         if not self.check_bot_action(bot_output):
-                            self.log_msg(self.conv.get_last_message(), verbose=verbose) # log the error info!
+                            # log the error info!
+                            if not self.cfg.pdl_check_api_w_tool_manipulation:
+                                self.log_msg(self.conv.get_last_message(), verbose=verbose) 
+                                print(self.conv.get_last_message())
+                            else:
+                                self.logger.log(self.workflow.pdl.current_api_status, with_print=verbose)
                             continue
                         # 3.2 call the API (system)
                         with Timer("api process", print=self.cfg.log_utterence_time):
@@ -85,6 +91,12 @@ class FlowagentController(BaseController):
                         # ... the default response
                         self.logger.log(f"  <main> bot retried actions reach limit!", with_print=verbose)
                         break
+                # prepare the avaliable tool list and reset the API status for next turn
+                if self.pdl_check_api_w_tool_manipulation:
+                    self.workflow.pdl.reset_api_status()
+                    self.workflow.pdl.reset_invalid_api()
+                    if self.cfg.pdl_check_dependency:
+                        self.pdl_dependency_checker.check_next_turn_dependencies()
                 role = Role.USER
             num_UB_turns += 1
             if num_UB_turns > self.cfg.conversation_turn_limit: 

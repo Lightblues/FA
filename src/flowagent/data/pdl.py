@@ -26,6 +26,8 @@ class PDL:
     procedure: str = ""      # the core logic of the taskflow
     
     version: str = "v2"
+    invalid_apis: dict = field(default_factory=dict)
+    current_api_status: list = field(default_factory=list)
     
     def __init__(self, PDL_str):
         self.PDL_str = PDL_str
@@ -50,6 +52,8 @@ class PDL:
         self.slots = ob["SLOTs"]
         self.answers = ob["ANSWERs"]
         self.procedure = ob["PDL"]
+        self.invalid_apis = {}
+        self.current_api_status = []
 
     def to_str(self):
         return self.PDL_str
@@ -58,6 +62,29 @@ class PDL:
         selected_keys = ["name", "desc", "desc_detail", "slots", "answers", "procedure"]
         infos_selected = {k: infos[k] for k in selected_keys}
         return yaml.dump(infos_selected, sort_keys=False, Dumper=MyDumper, default_flow_style=False)
+    
+    def add_invalid_apis(self, api_list):
+        for api in api_list:
+            if api["api_name"] in self.invalid_apis:
+                self.invalid_apis[api["api_name"]]["invalid_reason"].extend(api["invalid_reason"])
+            else:
+                self.invalid_apis[api["api_name"]] = api
+    def reset_invalid_api(self):
+        if self.invalid_apis:
+            self.invalid_apis.clear()
+    def get_valid_apis(self):
+        return [api for api in self.apis if api["name"] not in self.invalid_apis]
+    def to_str_wo_invalid_api(self):
+        infos = asdict(self)
+        selected_keys = ["name", "desc", "desc_detail", "slots", "answers", "procedure"]
+        infos_selected = {k: infos[k] for k in selected_keys}
+        infos_selected["api"] = self.get_valid_apis()
+        return yaml.dump(infos_selected, sort_keys=False, Dumper=MyDumper, default_flow_style=False)
+    
+    def add_current_api_status(self, status):
+        self.current_api_status.append(status)
+    def reset_api_status(self):
+        self.current_api_status.clear()
         
     def __repr__(self):
         return self.PDL_str

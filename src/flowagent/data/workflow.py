@@ -170,4 +170,7 @@ class Workflow:  # rename -> Data
             "Workflow": self.task_detailed_description # just use natural language-format workflow? 
         }
         return "".join([f"{k}: {v}\n" for k, v in info_dict.items()])
-
+    
+    def get_toolbox_by_names(self, names:List[str]):
+        return [tool for tool in self.toolbox if tool["API"] in names]
+    

@@ -120,21 +120,38 @@ class PDLBot(ReactBot):
     """
     llm: OpenAIClient = None
     names = ["PDLBot", "pdl_bot"]
+    add_tool_info: bool = None
+    
+    def __init__(self, **args):
+        super().__init__(**args)
+        self.add_tool_info = self.cfg.pdl_check_api_w_tool_manipulation
     
     def _gen_prompt(self) -> str:
-        # valid_apis = self.workflow.pdl.get_valid_apis()
-        # valid_apis_str = "There are no valid apis now!" if not valid_apis else f"you can call {valid_apis}"
+        valid_apis = self.workflow.pdl.get_valid_apis()
+        valid_api_names = [api["name"] for api in valid_apis]
+        valid_apis_str = "There are no valid apis now!" if not valid_apis else f"you can call {valid_api_names}"
         state_infos = {
             "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            # "Current state": self.workflow.pdl.current_state,
-            # "Current valid apis": valid_apis_str,
         }
+        if self.add_tool_info:
+            state_infos["Current state"] = self.workflow.pdl.current_api_status
+            state_infos["Current valid apis"] = valid_apis_str
+            # "Current state": self.workflow.pdl.current_api_status,
+            # "Current valid apis": valid_apis_str,
+            # "Curretn invalid apis": f"{list(self.workflow.pdl.invalid_apis.values())}"
         prompt = jinja_render(
             self.cfg.bot_template_fn,       # "flowagent/bot_pdl.jinja"
             PDL=self.workflow.pdl.to_str_wo_api(),  # .to_str()
+            # api_infos=self.workflow.get_toolbox_by_names(valid_api_names),
+            # api_infos=[tool["API"] for tool in self.workflow.toolbox],
+            api_infos=self.workflow.toolbox,
             conversation=self.conv.to_str(), 
             current_state="\n".join(f"{k}: {v}" for k,v in state_infos.items()),
         )
+        # if not valid_apis:
+        print(prompt)
+        # print(f"invalid apis: {list(self.workflow.pdl.invalid_apis.values())}")
+        print(f"Current state: {self.workflow.pdl.current_api_status}")
         return prompt
     
     def _process(self, prompt:str=None) -> Tuple[str, BotOutput]:

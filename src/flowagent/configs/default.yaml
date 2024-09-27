@@ -21,6 +21,7 @@ bot_action_limit: 5
 pdl_check_dependency: true
 pdl_check_api_dup_calls: true
 pdl_check_api_dup_calls_threshold: 2
+pdl_check_api_w_tool_manipulation: false
 
 api_mode: "llm"           # dummy_api, llm
 api_template_fn: "flowagent/api_llm.jinja"
@@ -30,7 +31,7 @@ conversation_turn_limit: 20
 log_utterence_time: false
 log_to_db: ture
 
-db_uri: 'mongodb://localhost:27017/'
+db_uri: 'mongodb://9.134.230.111:27017'
 db_name: "pdl"
 db_message_collection_name: "messages"
 db_meta_collection_name: "config"
@@ -41,4 +42,3 @@ simulate_max_workers: 10
 judge_max_workers: 10
 judge_model_name: "gpt-4o"
 judge_conversation_id: "2024-09-19 15:20:53.462895"
-
