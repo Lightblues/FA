@@ -5,19 +5,31 @@ from .api import DummyAPIHandler
 from .user import DummyUser, InputUser
 from .bot import DummyBot, PDLBot
 
-def add_subclasses_to_dict(base_class: BaseRole, name_to_class_dict: Dict[str, BaseRole]):
+def build_attr_list_map(base_class: BaseRole, name_to_class_dict: Dict[str, BaseRole], attr: str="names"):
     for cls in base_class.__subclasses__():
-        for name in cls.names:
+        for name in cls.__dict__[attr]:
             name_to_class_dict[name] = cls
         # recursive!
-        add_subclasses_to_dict(cls, name_to_class_dict)
+        build_attr_list_map(cls, name_to_class_dict)
 
 USER_NAME2CLASS:Dict[str, BaseUser] = {}
-add_subclasses_to_dict(BaseUser, USER_NAME2CLASS)
+build_attr_list_map(BaseUser, USER_NAME2CLASS)
 BOT_NAME2CLASS: Dict[str, BaseBot] = {}
-add_subclasses_to_dict(BaseBot, BOT_NAME2CLASS)
+build_attr_list_map(BaseBot, BOT_NAME2CLASS)
 API_NAME2CLASS:Dict[str, BaseAPIHandler] = {}
-add_subclasses_to_dict(BaseAPIHandler, API_NAME2CLASS)
+build_attr_list_map(BaseAPIHandler, API_NAME2CLASS)
+
+def build_attr_map(base_class: BaseRole, name_to_class_dict: Dict[str, BaseRole], attr: str="names"):
+    for cls in base_class.__subclasses__():
+        name_to_class_dict[cls.__dict__[attr]] = cls
+        # recursive!
+        build_attr_map(cls, name_to_class_dict, attr)
+USER_NAME2TEMPLATE:Dict[str, str] = {}
+build_attr_map(BaseUser, USER_NAME2TEMPLATE, attr="user_template_fn")
+BOT_NAME2TEMPLATE:Dict[str, str] = {}
+build_attr_map(BaseBot, BOT_NAME2TEMPLATE, attr="bot_template_fn")
+API_NAME2TEMPLATE:Dict[str, str] = {}
+build_attr_map(BaseAPIHandler, API_NAME2TEMPLATE, attr="api_template_fn")
 
 # for typer
 def create_enum(name, values):

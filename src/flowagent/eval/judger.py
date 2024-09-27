@@ -43,22 +43,21 @@ class Judger:
         """
         # 0. check if judged
         assert self.cfg.judge_conversation_id is not None, "judge_conversation_id is None"
-        query_res = self.db.query_evaluations({ "conversation_id": self.cfg.judge_conversation_id })
-        if len(query_res) > 0:
-            self.logger.log(f"  <judge> {self.cfg.judge_conversation_id} has already been judged", with_print=verbose)
-            return query_res[0] # out_dict
+        if self.cfg.judge_force_rejudge: # whether forcing rejudge
+            # remove the judge result if it has been judged
+            res = self.db.delete_evaluations({ "conversation_id": self.cfg.judge_conversation_id })
+        else:
+            query_res = self.db.query_evaluations({ "conversation_id": self.cfg.judge_conversation_id }) # donot need {"exp_version"} becased conversaion_id 1:1 map to exp_version
+            if len(query_res) > 0:
+                self.logger.log(f"  <judge> {self.cfg.judge_conversation_id} has already been judged", with_print=verbose)
+                return query_res[0] # out_dict
 
         # 1.1. get the simultead conversation
         simulated_conversation = self.db.query_messages_by_conversation_id(self.cfg.judge_conversation_id)
         assert len(simulated_conversation) > 0, "simulated conversation is empty"
         
         # 1.2. get the workflow infos
-        data_manager = DataManager(self.cfg)
-        workflow = Workflow.load_by_id(
-            data_manager=data_manager,
-            id=self.cfg.workflow_id, type=self.cfg.workflow_type,
-            load_user_profiles=(mode=="session"), load_reference_conversation=(mode=="turn")
-        )
+        workflow = Workflow(self.cfg)
         
         # 2. judge: call the judge model & parse the output
         self.logger.log(f"  <judge> start to judge {self.cfg.judge_conversation_id}", with_print=verbose)
@@ -87,7 +86,6 @@ class Judger:
     
     def _judge_session(
         self, workflow: Workflow, simulated_conversation: Conversation,
-        retry:int=3 # -> config
     ) -> Dict[str, Any]:
         """ 
         output format:
@@ -103,7 +101,7 @@ class Judger:
             session=simulated_conversation.to_str(),  # NOTE: format the conversation
         )
         # 2. query & parse the output
-        @retry_wrapper(retry=retry, step_name="judge_session", log_fn=print)
+        @retry_wrapper(retry=self.cfg.judge_retry_limit, step_name="judge_session", log_fn=print)
         def judge_session(prompt):
             llm_response, _model_name, _usage = self.llm.query_one(prompt, return_usage=True)
             _slots=['Result', 'Total number of goals', 'Number of accomplished goals', 'Reason']
@@ -124,7 +122,6 @@ class Judger:
     
     def _judge_turn(self, 
         workflow: Workflow, simulated_conversation: Conversation,
-        retry:int=3
     ) -> Dict[str, Any]:
         out = {
             "judge_turn_result": [],
@@ -139,12 +136,16 @@ class Judger:
                 workflow_info=workflow.to_str(),
                 reference_input=msg.content, predicted_input=msg.content_predict,
             )
-            @retry_wrapper(retry=retry, step_name="judge_turn", log_fn=print)
+            @retry_wrapper(retry=self.cfg.judge_retry_limit, step_name="judge_turn", log_fn=print)
             def judge_turn(prompt):
                 llm_response, _model_name, _usage = self.llm.query_one(prompt, return_usage=True)
                 jr = self._parse_react_output(llm_response, slots=['Score'], slots_to_check=['Score'])
                 return jr, llm_response, _model_name, _usage
             jr, llm_response, _model_name, _usage = judge_turn(prompt)
+            jr.update({
+                "utterance_id": i,
+                "type": simulated_conversation.get_message_by_idx(i-1).type
+            })
             out["judge_turn_result"].append(jr)
             out["judge_turn_details"].append({
                 "model": _model_name,   # judge model & detailed infos

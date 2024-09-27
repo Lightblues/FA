@@ -8,10 +8,12 @@ from typing import List, Tuple
 from .base import BaseBot
 from ..data import BotOutput, BotOutputType, Message, Role, init_client, LLM_CFG, LogUtils
 from utils.jinja_templates import jinja_render
+from utils.wrappers import retry_wrapper
 from easonsi.llm.openai_client import OpenAIClient, Formater
 
 class DummyBot(BaseBot):
     names: List[str] = ["dummy_bot"]
+    bot_template_fn: str = ""
     
     # def __init__(self, **args) -> None:
     #     super().__init__(**args)
@@ -34,8 +36,8 @@ class DummyBot(BaseBot):
                 Message(role=Role.BOT, content="bot response..."),
             )
         return bot_output
-    
-    
+
+
 class ReactBot(BaseBot):
     """ ReactBot
     prediction format: 
@@ -43,6 +45,7 @@ class ReactBot(BaseBot):
         (Thought, Action, Action Input) for call api node
     """
     llm: OpenAIClient = None
+    bot_template_fn: str = "flowagent/bot_flowbench.jinja"
     names = ["ReactBot", "react_bot"]
     
     def __init__(self, **args) -> None:
@@ -50,15 +53,16 @@ class ReactBot(BaseBot):
         self.llm = init_client(llm_cfg=LLM_CFG[self.cfg.bot_llm_name])
         
     def process(self, *args, **kwargs) -> BotOutput:
+        """ mian process logic.
+        gen prompt -> query & process -> gen message
+        """
         prompt = self._gen_prompt()
-        for i in range(3):
-            try:
-                llm_response, prediction = self._process(prompt)
-                break
-            except Exception as e:
-                print(f"  <bot> Error when trying {i}th time: {e}")
-        else:
-            raise RuntimeError(f"  <bot> Error after trying 3 times!!! prompt:\n" + LogUtils.format_str_with_color(prompt, 'yellow'))
+        @retry_wrapper(retry=self.cfg.bot_retry_limit, step_name="bot_process", log_fn=print)
+        def process_with_retry(prompt):
+            llm_response, prediction = self._process(prompt)
+            return llm_response, prediction
+        llm_response, prediction = process_with_retry(prompt)
+        
         if prediction.action_type==BotOutputType.RESPONSE:
             msg_content = prediction.response
         else:
@@ -73,7 +77,7 @@ class ReactBot(BaseBot):
 
     def _gen_prompt(self) -> str:
         prompt = jinja_render(
-            self.cfg.bot_template_fn,     # "flowagent/bot_flowbench.jinja": task_description, workflow, toolbox, current_time, history_conversation
+            self.bot_template_fn,     # "flowagent/bot_flowbench.jinja": task_description, workflow, toolbox, current_time, history_conversation
             task_description=self.workflow.task_description,
             workflow=self.workflow.workflow,
             toolbox=self.workflow.toolbox,
@@ -86,7 +90,7 @@ class ReactBot(BaseBot):
         llm_response = self.llm.query_one(prompt)
         prediction = self.parse_react_output(llm_response)
         return llm_response, prediction
-        
+    
     @staticmethod
     def parse_react_output(s: str) -> BotOutput:
         if "```" in s:
@@ -111,7 +115,8 @@ class ReactBot(BaseBot):
             assert BotOutput.response_str in result, f"Response not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
             output = BotOutput(response=result[BotOutput.response_str], thought=thought)
         return output
-    
+
+
 class PDLBot(ReactBot):
     """ 
     prediction format: 
@@ -119,6 +124,7 @@ class PDLBot(ReactBot):
         (Thought, Action, Action Input) for call api node
     """
     llm: OpenAIClient = None
+    bot_template_fn: str = "flowagent/bot_pdl.jinja"
     names = ["PDLBot", "pdl_bot"]
     add_tool_info: bool = None
     
@@ -140,7 +146,7 @@ class PDLBot(ReactBot):
             # "Current valid apis": valid_apis_str,
             # "Curretn invalid apis": f"{list(self.workflow.pdl.invalid_apis.values())}"
         prompt = jinja_render(
-            self.cfg.bot_template_fn,       # "flowagent/bot_pdl.jinja"
+            self.bot_template_fn,       # "flowagent/bot_pdl.jinja"
             PDL=self.workflow.pdl.to_str_wo_api(),  # .to_str()
             # api_infos=self.workflow.get_toolbox_by_names(valid_api_names),
             # api_infos=[tool["API"] for tool in self.workflow.toolbox],

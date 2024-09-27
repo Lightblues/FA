@@ -1,8 +1,23 @@
 """
 """
-from typing import List
+import yaml
+from typing import List, Dict
 from dataclasses import dataclass
 
+
+@dataclass
+class OOWIntention:
+    name: str
+    description: str
+    types: List[Dict]
+    
+    @classmethod
+    def from_dict(cls, data: Dict):
+        return cls(**data)
+    
+    def to_str(self) -> str:
+        return str(self.types)
+    
 # used for Chinese
 COMPONENTS_ZH = {
     'persona': '角色设定',
@@ -64,11 +79,12 @@ class UserProfile:
         instance = cls(**profile_dict)
         return instance
     
-    def to_str(self):
+    def to_str(self, profile: Dict = None):
+        if profile is None: profile = self.profile
         profile_str = ''
-        for i, key in enumerate(list(self.profile.keys())):
+        for i, key in enumerate(list(profile.keys())):
             profile_str += f"{i + 1}. {key}:\n    "
-            profile_str += self.profile[key]
+            profile_str += profile[key]
             profile_str += '\n'
         return profile_str
 

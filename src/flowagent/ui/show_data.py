@@ -59,7 +59,7 @@ def show_data_page():
         show_code = st.checkbox("Show Code")
         show_flowchart = st.checkbox("Show Flowchart")
 
-    with open(data_manager.DIR_data_flowbench / f"user_profile/{st.session_state.selected_workflow_id}.json", 'r') as f:
+    with open(data_manager.DIR_data_workflow / f"user_profile/{st.session_state.selected_workflow_id}.json", 'r') as f:
         user_profiles = json.load(f)
     st.sidebar.selectbox(
         "2️⃣ Secect User Profile ID",
@@ -94,25 +94,25 @@ def show_data_page():
     # 2. show workflow details
     st.markdown(f"### Details of `{st.session_state.selected_workflow_id}`")
     if show_toolbox:
-        with open(data_manager.DIR_data_flowbench / f"tools/{st.session_state.selected_workflow_id}.yaml", 'r') as f:
+        with open(data_manager.DIR_data_workflow / f"tools/{st.session_state.selected_workflow_id}.yaml", 'r') as f:
             toolbox = yaml.safe_load(f)
             st.markdown("#### Toolbox")
             st.write(toolbox)
     if show_text:
         _type = WorkflowType.TEXT
-        with open(data_manager.DIR_data_flowbench / f"{_type.subdir}/{st.session_state.selected_workflow_id}{_type.suffix}", 'r') as f:
+        with open(data_manager.DIR_data_workflow / f"{_type.subdir}/{st.session_state.selected_workflow_id}{_type.suffix}", 'r') as f:
             workflow = f.read().strip()
             st.markdown("#### Text")
             st.write(workflow)
     if show_code:
         _type = WorkflowType.CODE
-        with open(data_manager.DIR_data_flowbench / f"{_type.subdir}/{st.session_state.selected_workflow_id}{_type.suffix}", 'r') as f:
+        with open(data_manager.DIR_data_workflow / f"{_type.subdir}/{st.session_state.selected_workflow_id}{_type.suffix}", 'r') as f:
             workflow = f.read().strip()
             st.markdown("#### Code")
             st.code(workflow, language='python')
     if show_flowchart:
         _type = WorkflowType.FLOWCHART
-        with open(data_manager.DIR_data_flowbench / f"{_type.subdir}/{st.session_state.selected_workflow_id}{_type.suffix}", 'r') as f:
+        with open(data_manager.DIR_data_workflow / f"{_type.subdir}/{st.session_state.selected_workflow_id}{_type.suffix}", 'r') as f:
             workflow = f.read().strip()
             st.markdown("#### Flowchart")
             # workflow = f"```mermaid\n{workflow}\n```"

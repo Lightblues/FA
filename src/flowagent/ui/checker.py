@@ -89,7 +89,7 @@ class CLIChecker():
         df_selected = self.conv_df[_selected_columns].set_index('utterance_id')
         print(LogUtils.format_infos_with_tabulate(df_selected))
         # 3. show the related user profile
-        with open(self.data_manager.DIR_data_flowbench / f"user_profile/{self.conv_cfg.workflow_id}.json", 'r') as f:
+        with open(self.data_manager.DIR_data_workflow / f"user_profile/{self.conv_cfg.workflow_id}.json", 'r') as f:
             user_profiles = json.load(f)
             selected_up = user_profiles[self.conv_cfg.user_profile_id]
             print(LogUtils.format_infos_basic(selected_up))
