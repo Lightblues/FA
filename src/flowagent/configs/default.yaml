@@ -19,7 +19,7 @@ bot_mode: "react_bot"     # dummy_bot, react_bot, pdl_bot
 bot_template_fn: null     # "flowagent/bot_flowbench.jinja"
 bot_llm_name: "gpt-4o"
 bot_action_limit: 5
-pdl_check_dependency: true
+pdl_check_dependency: false
 pdl_check_api_dup_calls: true
 pdl_check_api_dup_calls_threshold: 2
 

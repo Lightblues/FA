@@ -1,5 +1,8 @@
 """ updated @240919
 collect the evaluation results from DB, generate a report to WanDB
+- [ ] summary exp settings
+- [ ] for session OOW eval, add metrics
+- [ ] update param F1
 """
 
 import collections, wandb
@@ -34,7 +37,9 @@ class Analyzer:
     
     def _collect_exp_results(self):
         query_res = self.db.query_evaluations({ "exp_version": self.cfg.exp_version })
-        assert len(query_res) > 0, "No evaluation results found!"
+        if len(query_res) == 0:
+            print(f"  <analyze> No evaluation results found for {self.cfg.exp_version}!!!")
+            return 
         df = pd.DataFrame(query_res)
         # check that workflow_dataset & workflow_type are all the same!
         assert df["workflow_dataset"].nunique() == 1 and df["workflow_type"].nunique() == 1, \
@@ -42,7 +47,7 @@ class Analyzer:
         self.df = df
     
     def analyze(self) -> dict:
-        # TODO: summary exp settings
+        if self.df is None: return None
         if self.cfg.exp_mode == "session":
             self.stat_judge_session()
             self.stat_judge_session_stat()
@@ -65,7 +70,7 @@ class Analyzer:
         metric: Success Rate, Task Progress.  
         """
         df = self.df
-        df['if_pass'] = df['judge_session_result'].apply(lambda x: x['Result'] == 'yes')
+        df['if_pass'] = df['judge_session_result'].apply(lambda x: x['Result'].strip() == 'yes')
         df['goals_total'] = df['judge_session_result'].apply(lambda x: int(x['Total number of goals']))
         df['goals_accomplished'] = df['judge_session_result'].apply(lambda x: int(x['Number of accomplished goals']))
         df['task_progress'] = df['goals_accomplished'] / df['goals_total']
@@ -130,15 +135,24 @@ class Analyzer:
         metric: API Precision, Recall, F1 / Parameter Precision, Recall, F1
         """
         api_metric = MetricF1()
+        params_metric = MetricF1()
         for jr in self.df["judge_turn_stat"]:
             for api_gt, api_pred in zip(jr["apis_gt"], jr["apis_pred"]):
                 api_gt_names, api_pred_names = set(), set()
-                if api_gt: api_gt_names.add(api_gt[0])
-                if api_pred: api_pred_names.add(api_pred[0])
+                params_gt, params_pred = set(), set()
+                if api_gt: 
+                    api_gt_names.add(api_gt[0])
+                    params_gt = set([str(i) for i in api_gt[1].values()])
+                if api_pred: 
+                    api_pred_names.add(api_pred[0])
+                    params_pred = set([str(i) for i in api_pred[1].values()])
                 api_metric.update(y_truth=api_gt_names, y_pred=api_pred_names)
+                params_metric.update(y_truth=params_gt, y_pred=params_pred)
         f1, recall, precision = api_metric.get_detail()
+        para_f1, para_recall, para_precision = params_metric.get_detail()
         metrics = dict(
-            f1=f1, recall=recall, precision=precision
+            f1=f1, recall=recall, precision=precision,
+            para_f1=para_f1, para_recall=para_recall, para_precision=para_precision
         )
         self.stat_dict |= metrics
         return metrics

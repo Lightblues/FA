@@ -104,9 +104,14 @@ class Judger:
         @retry_wrapper(retry=self.cfg.judge_retry_limit, step_name="judge_session", log_fn=print)
         def judge_session(prompt):
             llm_response, _model_name, _usage = self.llm.query_one(prompt, return_usage=True)
+            # 2. parse
             _slots=['Result', 'Total number of goals', 'Number of accomplished goals', 'Reason']
             _slots_to_check = _slots[:-1] # 'Reason' is not necessary
-            jr = self._parse_react_output(llm_response, slots=_slots, slots_to_check=_slots_to_check) 
+            jr = self._parse_react_output(llm_response, slots=_slots, slots_to_check=_slots_to_check)
+            # 3. validate
+            for s in ['Total number of goals', 'Number of accomplished goals']: 
+                jr[s] = int(jr[s])
+            assert jr['Result'] in ['yes', 'no']
             return jr, llm_response, _model_name, _usage
         jr, llm_response, _model_name, _usage = judge_session(prompt)
         # 3. formatted output

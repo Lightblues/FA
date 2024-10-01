@@ -143,20 +143,31 @@ class Evaluator: # rename -> Exp?
         1. get the experiments to be evaluated
         2. run evaluations in parallel
         """
+        def f_exec(cfg, f_task=f_task):
+            for retry_ in range(3):
+                try:
+                    return f_task(cfg)
+                except Exception as e:
+                    print(f"Task failed for {cfg}: {e}")
+                    traceback.print_exc()
+            else:
+                print(f"ERROR!!! Task failed after 3 retrys for {cfg}")
+                return None
+        
         tasks = EvalUtils.get_evaluation_configs(self.cfg, db=self.db)
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.cfg.judge_max_workers) as executor:
             futures = []
             for cfg in tasks:
-                future = executor.submit(f_task, cfg)
+                future = executor.submit(f_exec, cfg, f_task=f_task)
                 futures.append(future)
             print(f"Executing {len(futures)} judge tasks...")
-            num_errors = 0
+            # num_errors = 0
             for future in tqdm.tqdm(concurrent.futures.as_completed(futures), total=len(futures), desc="Executing tasks"):
-                r = future.result() 
-                if r: num_errors += 1
-            print(f"# of errors: {num_errors}")
-        if num_errors > 0:
-            raise Exception(f"# of errors when evaluation: {num_errors}")
+                future.result() 
+            #     if r: num_errors += 1
+            # print(f"# of errors: {num_errors}")
+        # if num_errors > 0:
+        #     raise Exception(f"# of errors when evaluation: {num_errors}")
 
     def analyze(self):
         """ analysis process: -> to `Analyzer`

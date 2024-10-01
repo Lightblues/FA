@@ -27,14 +27,15 @@ simulated_session:
 
 Now, your task is to decide whether the dialogue has fulfilled all the user's goals previously mentioned. This encompasses whether the dialogue has completed the information inquiry and interaction needed, if the corresponding APIs have been correctly called, and whether the API call parameters were transmitted accurately.
 
-Only consider whether the bot (assistant) has completed the task. You need to focus on examining whether the responses are reasonable, and whether each goal is completed. If user's main goals are completed, the whole dialogue is considered successful (yes/no).
+Only consider whether the bot (assistant) has completed the task. You need to focus on examining whether the responses are reasonable, and whether user's goals are completed. 
 
-You also need to output the total number of user goals (if there are multiple goals), and the number of goals that have been achieved. (The total number of goals is greater than or equal to the number of completed goals).
+1. You need to output the total number of user goals (if there are multiple goals), and the number of goals that have been achieved. (The total number of goals is greater than or equal to the number of completed goals).
+2. If user's main goals are completed, the whole dialogue is considered successful (yes/no).
 
 Your reply should follow this format: 
 ```
-Result: yes/no
+Reason: (If the goal is completed, no reason is required. If not, please specify why you judged it to be incomplete)
 Total number of goals: 4
 Number of accomplished goals: 3
-Reason: (If the goal is completed, no reason is required. If not, please specify why you judged it to be incomplete)
+Result: yes/no
 ```

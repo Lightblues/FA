@@ -137,6 +137,7 @@ class PDLBot(ReactBot):
         }
         prompt = jinja_render(
             self.bot_template_fn,       # "flowagent/bot_pdl.jinja"
+            api_infos=self.workflow.toolbox,
             PDL=self.workflow.pdl.to_str_wo_api(),  # .to_str()
             conversation=self.conv.to_str(), 
             current_state="\n".join(f"{k}: {v}" for k,v in state_infos.items()),

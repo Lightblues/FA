@@ -106,7 +106,7 @@ class Message:
             content = self.content
         assert self.is_api_calling(content), f"Must be API calling message! But got {content}"
         content = content[len("<Call API> "):].strip()
-        re_pattern = r"(.*)\((.*)\)"
+        re_pattern = r"(.*?)\((.*)\)"
         re_match = re.match(re_pattern, content)
         name, paras = re_match.group(1), re_match.group(2)
         return name, eval(paras)
