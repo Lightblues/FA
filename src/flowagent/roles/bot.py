@@ -142,21 +142,15 @@ class PDLBot(ReactBot):
         if self.add_tool_info:
             state_infos["Current state"] = self.workflow.pdl.current_api_status
             state_infos["Current valid apis"] = valid_apis_str
-            # "Current state": self.workflow.pdl.current_api_status,
-            # "Current valid apis": valid_apis_str,
-            # "Curretn invalid apis": f"{list(self.workflow.pdl.invalid_apis.values())}"
+            # state_infos["Curretn invalid apis"]: f"{list(self.workflow.pdl.invalid_apis.values())}"
         prompt = jinja_render(
             self.bot_template_fn,       # "flowagent/bot_pdl.jinja"
             PDL=self.workflow.pdl.to_str_wo_api(),  # .to_str()
             # api_infos=self.workflow.get_toolbox_by_names(valid_api_names),
-            # api_infos=[tool["API"] for tool in self.workflow.toolbox],
             api_infos=self.workflow.toolbox,
             conversation=self.conv.to_str(), 
             current_state="\n".join(f"{k}: {v}" for k,v in state_infos.items()),
         )
-        # if not valid_apis:
-        print(prompt)
-        # print(f"invalid apis: {list(self.workflow.pdl.invalid_apis.values())}")
         print(f"Current state: {self.workflow.pdl.current_api_status}")
         return prompt
     
