@@ -142,7 +142,7 @@ class PDLBot(ReactBot):
             conversation=self.conv.to_str(), 
             current_state="\n".join(f"{k}: {v}" for k,v in state_infos.items()),
         )
-        print(f"Current state: {self.workflow.pdl.current_api_status}")
+        print(f"Current pdl state: {self.workflow.pdl.status_for_prompt}")
         return prompt
     
     def _process(self, prompt:str=None) -> Tuple[str, BotOutput]:

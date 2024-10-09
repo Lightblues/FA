@@ -67,11 +67,14 @@ class FlowagentConversationManager(BaseConversationManager):
                     self.log_msg(self.conv.get_last_message(), verbose=verbose)
                     # 2. STOP: break until bot RESPONSE
                     if bot_output.action_type == BotOutputType.RESPONSE:
+                        if not self._response_control(bot_output):
+                            self.log_msg(self.conv.get_last_message(), verbose=verbose)  # log the error info!
+                            continue
                         break
                     elif bot_output.action_type == BotOutputType.ACTION:
                         # 3. ACTION loop: call the API, append results to conversation
                         # 3.1. post-check the action! (will be ignored for non-PDLBot)
-                        if not self._post_check(bot_output):
+                        if not self._post_control(bot_output):
                             self.log_msg(self.conv.get_last_message(), verbose=verbose)  # log the error info!
                             continue
                         # 3.2 call the API (system)
@@ -93,24 +96,35 @@ class FlowagentConversationManager(BaseConversationManager):
         
         return self.conv
     
-    def _post_check(self, bot_output: BotOutput) -> bool:
+    def _post_control(self, bot_output: BotOutput) -> bool:
         """ Check the validation of bot's action
         NOTE: if not validated, the error infomation will be added to self.conv!
         """
         if not (self.cfg.exp_mode == "session" and isinstance(self.bot, PDLBot)):  return True
         for controller in self.controllers:
-            if not controller.if_post_check: continue
-            if not controller.post_check(bot_output): return False
+            if not controller.if_post_control: continue
+            if not controller.post_control(bot_output): return False
         return True
     
     def _pre_control(self, bot_output: BotOutput) -> None:
-        """ Make pre-control on the bot
+        """ Make pre-control on the bot's action
         will change the PDLBot's prompt! 
         """
         if not (self.cfg.exp_mode == "session" and isinstance(self.bot, PDLBot)):  return
         for controller in self.controllers:
-            if not controller.if_pre_check: continue
+            if not controller.if_pre_control: continue
             controller.pre_control(bot_output)
+    
+    def _response_control(self, bot_output: BotOutput) -> bool:
+        """ Check the validation of bot's response 
+        NOTE: if not validated, the error infomation will be added to self.conv!
+        """
+        if not (self.cfg.exp_mode == "session" and isinstance(self.bot, PDLBot)):  return True
+        for controller in self.controllers:
+            if not controller.if_response_control: continue
+            if not controller.response_control(bot_output): return False
+        return True
+    
 
     def conversation_teacher_forcing(self, verbose:bool=True) -> Conversation:
         """ given a reference conversation, test the bot in a teacher-forcing manner

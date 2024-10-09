@@ -2,6 +2,7 @@ from typing import Dict
 from .base_controller import BaseController
 from .dep_controller import NodeDependencyController
 from .api_controller import APIDuplicationController
+from .session_controller import SessionLengthController
 
 def build_attr_map(base_class: BaseController, name_to_class_dict: Dict[str, BaseController], attr: str="name"):
     for cls in base_class.__subclasses__():

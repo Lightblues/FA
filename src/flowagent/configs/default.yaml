@@ -23,6 +23,7 @@ bot_action_limit: 5
 bot_pdl_controllers: 
   - {name: "api_duplication", config: {if_pre: true, if_post: true, threshold: 2}}
   - {name: "node_dependency", config: {if_pre: true, if_post: true}}
+  - {name: "session_length", config: {if_pre: true, min: 5, max: 15}}
 
 api_mode: "llm"           # dummy_api, llm
 api_template_fn: null     # "flowagent/api_llm.jinja"

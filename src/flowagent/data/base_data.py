@@ -141,8 +141,13 @@ class Conversation():
     def get_message_by_idx(self, idx: int) -> Message:
         return self.msgs[idx]
     
-    def get_messages_num(self) -> int:
-        return len(self.msgs)
+    def get_messages_num(self, role: Role=None) -> int:
+        if isinstance(role, str): role = Role.get_by_rolename(role)
+        if role is None: return len(self.msgs)
+        cnt = 0
+        for msg in self.msgs:
+            if msg.role == role: cnt += 1
+        return cnt
     @property
     def current_utterance_id(self) -> int:
         return len(self.msgs)

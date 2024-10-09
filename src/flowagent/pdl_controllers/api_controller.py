@@ -6,8 +6,7 @@ from ..data import PDL, Conversation, Role, Message, Config, BotOutput, BotOutpu
 class APIDuplicationController(BaseController):
     """ to avoid duplicated API calls! """
     name = "api_duplication"
-    if_post_check = True  # default value, can be overwritten in config
-    if_pre_check = False
+    if_post_control = True  # default value, can be overwritten in config
     
     def _post_check_with_message(self, bot_output: BotOutput) -> Tuple[bool, str]:
         res = self.check_validation()
