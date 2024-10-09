@@ -13,20 +13,18 @@ class BaseChecker:
     cfg: Config = None
     conv: Conversation = None
     pdl: PDL = None
-    manipulate_tool: bool = None
     
     def __init__(self, cfg: Config, conv:Conversation, pdl: PDL, *args, **kwargs) -> None:
         self.cfg = cfg
         self.conv = conv        # the conversation! update it when necessary!
         self.pdl = pdl
-        self.manipulate_tool = cfg.pdl_check_api_w_tool_manipulation
 
     def check(self, bot_output: BotOutput) -> bool:
         # 1. check validation
         res, msg_content = self._check_with_message(bot_output)
         # 2. if not validated, log the error info!
         if not res:
-            if not self.manipulate_tool:
+            if not self.cfg.pdl_check_api_w_tool_manipulation:
                 msg = Message(
                     Role.SYSTEM, msg_content, prompt="", llm_response="",
                     conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
@@ -60,7 +58,7 @@ class PDLDependencyChecker(BaseChecker):
         self.pdl = pdl
         self.graph = self._build_graph(pdl)
         # set initial API list, if checking the API call with tool manipulation
-        if self.manipulate_tool:
+        if self.cfg.pdl_check_api_w_tool_manipulation:
             self.check_next_turn_dependencies()
     
     def _build_graph(self, pdl:PDL):
@@ -99,7 +97,7 @@ class PDLDependencyChecker(BaseChecker):
             self.pdl.add_current_api_status(self._get_invalid_status_str(next_turn_invalid_apis, "API dependency not satisfied: The precondintion API has not been called."))
         
     def _get_invalid_status_str(self, api_names: List[str], msg: str):
-        return f"APIs: {api_names} is unavailable, reason: {msg}"
+        return f"APIs `{api_names}` is unavailable. Reason: {msg}"
 
 
 class APIDuplicatedChecker(BaseChecker):

@@ -8,10 +8,10 @@ usage:
         --conversation-turn-limit=20 --log-to-db \
         --pdl-check-dependency \
         --pdl-check-api-dup-calls \
-        --pdl-check-api-w-tool-manipulation \
+        --pdl-check-api-w-tool-manipulation
 """
 import typer
-from flowagent import Config, DataManager, Evaluator
+from flowagent import Config, DataManager, Evaluator, FlowagentController
 from flowagent.data import WorkflowType, WorkflowTypeStr
 from flowagent.roles import UserMode, BotMode, ApiMode
 
@@ -37,8 +37,8 @@ def run_exp(
     log_to_db: bool = typer.Option(None, help="Log to DB"),
     simulate_num_persona: int = typer.Option(None, help="Simulate num persona"),
     simulate_max_workers: int = typer.Option(None, help="Simulate max workers"),
-    pdl_check_api_dup_calls: bool = typer.Option(False, help="PDL check API duplicate calls"),
-    pdl_check_dependency: bool = typer.Option(False, help="PDL check API dependency"),
+    pdl_check_api_dup_calls: bool = typer.Option(None, help="PDL check API duplicate calls"),
+    pdl_check_dependency: bool = typer.Option(None, help="PDL check API dependency"),
     pdl_check_api_w_tool_manipulation: bool = typer.Option(None, help="PDL check API with tool manipulation")
 ):
     cfg = Config.from_yaml(DataManager.normalize_config_name(config))
@@ -63,8 +63,16 @@ def run_exp(
     if pdl_check_dependency is not None: cfg.pdl_check_dependency = pdl_check_dependency
     if pdl_check_api_w_tool_manipulation is not None: cfg.pdl_check_api_w_tool_manipulation = pdl_check_api_w_tool_manipulation
 
-    controller = Evaluator(cfg)
-    controller.main()
+    # controller = Evaluator(cfg)
+    # controller.main()
+    
+    # cfg.exp_version = "241009"
+    # cfg.workflow_dataset = "PDL"
+    # cfg.workflow_id = "000"
+    # cfg.workflow_type = "pdl"
+    # cfg.pdl_check_api_w_tool_manipulation = True
+    controller = FlowagentController(cfg)
+    controller.start_conversation()
 
 if __name__ == "__main__":
     app()

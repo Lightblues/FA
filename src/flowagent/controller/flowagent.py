@@ -30,7 +30,6 @@ class FlowagentController(BaseController):
             self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
 
             if isinstance(self.bot, PDLBot):
-                self.pdl_check_api_w_tool_manipulation = cfg.pdl_check_api_w_tool_manipulation
                 if cfg.pdl_check_dependency: self.pdl_dependency_checker = PDLDependencyChecker(self.cfg, self.conv, self.workflow.pdl)
                 if cfg.pdl_check_api_dup_calls: self.pdl_api_dup_checker = APIDuplicatedChecker(self.cfg, self.conv, self.workflow.pdl)
         
@@ -88,7 +87,7 @@ class FlowagentController(BaseController):
                         self.logger.log(f"  <main> bot retried actions reach limit!", with_print=verbose)
                         break
                 # prepare the avaliable tool list and reset the API status for next turn
-                if self.pdl_check_api_w_tool_manipulation:
+                if self.cfg.pdl_check_api_w_tool_manipulation:
                     self.workflow.pdl.reset_api_status()
                     self.workflow.pdl.reset_invalid_api()
                     if self.cfg.pdl_check_dependency:

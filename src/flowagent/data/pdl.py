@@ -1,5 +1,6 @@
 import re, yaml
 from dataclasses import dataclass, asdict, field
+from typing import Dict, List, Tuple
 
 
 class MyDumper(yaml.SafeDumper):
@@ -26,8 +27,8 @@ class PDL:
     procedure: str = ""      # the core logic of the taskflow
     
     version: str = "v2"
-    invalid_apis: dict = field(default_factory=dict)
-    current_api_status: list = field(default_factory=list)
+    invalid_apis: Dict[str, Dict] = field(default_factory=dict)   # {name: {api_name, [invalid_reason]}}
+    current_api_status: List = field(default_factory=list)
     
     def __init__(self, PDL_str):
         self.PDL_str = PDL_str
