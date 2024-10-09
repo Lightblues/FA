@@ -11,7 +11,7 @@ usage:
         --pdl-check-api-w-tool-manipulation
 """
 import typer
-from flowagent import Config, DataManager, Evaluator, FlowagentController
+from flowagent import Config, DataManager, Evaluator, FlowagentConversationManager
 from flowagent.data import WorkflowType, WorkflowTypeStr
 from flowagent.roles import UserMode, BotMode, ApiMode
 
@@ -71,7 +71,7 @@ def run_exp(
     # cfg.workflow_id = "000"
     # cfg.workflow_type = "pdl"
     # cfg.pdl_check_api_w_tool_manipulation = True
-    controller = FlowagentController(cfg)
+    controller = FlowagentConversationManager(cfg)
     controller.start_conversation()
 
 if __name__ == "__main__":

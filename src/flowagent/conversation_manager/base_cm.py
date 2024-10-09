@@ -11,11 +11,11 @@ from ..data import (
 )
 from ..roles import InputUser, BaseBot, BaseUser, BaseAPIHandler
 
-class BaseController:
+class BaseConversationManager:
     """ main loop of a simulated conversation
     USAGE:
-        controller = XXXController(cfg)
-        controller.start_conversation()
+        cm = XXXConversationManager(cfg)
+        cm.start_conversation()
     """
     cfg: Config = None
     user: BaseUser = None
@@ -26,8 +26,6 @@ class BaseController:
     data_manager: DataManager = None        # remove it? 
     workflow: Workflow = None
     conversation_id: str = None
-    
-    # bot_types: List[str] = None    # to build WORKFLOW_TYPE2CONTROLLER
     
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
@@ -57,7 +55,7 @@ class BaseController:
 
         # 1. check if has been run!
         if self._check_if_already_run():
-            self.logger.log(f"NOTE: the experiment has already been run!", with_print=verbose)
+            self.logger.log(f"NOTE: the experiment {self.cfg.exp_version} has already been run!", with_print=verbose)
             return infos, None  # the returned results haven't been used
         # 2. run the conversation
         conversation = self.conversation(verbose=verbose)
@@ -78,7 +76,7 @@ class BaseController:
 
         # 1. check if has been run!
         if self._check_if_already_run():
-            self.logger.log(f"NOTE: the experiment has already been run!", with_print=verbose)
+            self.logger.log(f"NOTE: the experiment {self.cfg.exp_version} has already been run!", with_print=verbose)
             return infos, None  # the returned results haven't been used
         # 2. run the conversation
         conversation = self.conversation_teacher_forcing(verbose=verbose)
@@ -90,6 +88,7 @@ class BaseController:
         return infos, conversation
     
     def _check_if_already_run(self) -> bool:
+        if not self.cfg.exp_check_if_run: return False  # DONOT check this experiment if it has been run
         query = {  # identify a single exp
             "exp_version": self.cfg.exp_version,
             "exp_mode": self.cfg.exp_mode,

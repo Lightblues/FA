@@ -1,5 +1,5 @@
 """ test a single simulation/exp """
-from flowagent import Config, DataManager, FlowagentController
+from flowagent import Config, DataManager, FlowagentConversationManager
 
 if __name__ == '__main__':
     cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
@@ -13,5 +13,5 @@ if __name__ == '__main__':
     cfg.user_profile_id = 0
     # cfg.workflow_id = "001"
     cfg.workflow_id = "002"
-    controller = FlowagentController(cfg)
+    controller = FlowagentConversationManager(cfg)
     controller.start_conversation(verbose=True)

@@ -27,7 +27,9 @@ class PDL:
     procedure: str = ""      # the core logic of the taskflow
     
     invalid_apis: Dict[str, Dict] = field(default_factory=dict)   # {name: {api_name, [invalid_reason]}}
-    current_api_status: List = field(default_factory=list)
+    current_api_status: List[str] = field(default_factory=list)   # strings that descripts api status
+    
+    status_for_prompt: Dict[str, str] = field(default_factory=dict)
     
     def __init__(self, PDL_str):
         self.PDL_str = PDL_str
@@ -52,8 +54,10 @@ class PDL:
         self.slots = ob["SLOTs"]
         self.answers = ob["ANSWERs"]
         self.procedure = ob["PDL"]
+        
         self.invalid_apis = {}
         self.current_api_status = []
+        self.status_for_prompt = {}
 
     def to_str(self):
         return self.PDL_str

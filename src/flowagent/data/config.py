@@ -2,6 +2,7 @@
 """
 import yaml, copy
 from dataclasses import dataclass, asdict, field
+from typing import List, Dict
 
 @dataclass
 class Config:
@@ -11,6 +12,7 @@ class Config:
     exp_version: str = "default"
     exp_mode: str = "session"       # turn, session
     exp_save_config: bool = False
+    exp_check_if_run: bool = True
     
     user_mode: str = "llm_profile"  # llm_oow, manual, llm_profile
     user_llm_name: str = "gpt-4o"
@@ -25,10 +27,11 @@ class Config:
     bot_llm_name: str = "gpt-4o"
     bot_action_limit: int = 5
     bot_retry_limit: int = 3
-    pdl_check_dependency: bool = True
-    pdl_check_api_dup_calls: bool = True
-    pdl_check_api_dup_calls_threshold: int = 2
-    pdl_check_api_w_tool_manipulation: bool = False  # whether to check API calls with tool manipulation
+    # pdl_check_dependency: bool = True
+    # pdl_check_api_dup_calls: bool = True
+    # pdl_check_api_dup_calls_threshold: int = 2
+    # pdl_check_api_w_tool_manipulation: bool = False  # whether to check API calls with tool manipulation
+    bot_pdl_controllers: List[Dict] = field(default_factory=list)
     
     api_mode: str = "llm"
     api_template_fn: str = None     # "flowagent/api_llm.jinja"
@@ -64,7 +67,7 @@ class Config:
             data = yaml.safe_load(file)
         obj = cls(**data)
         return obj
-    
+     
     def to_yaml(self, yaml_file: str):
         with open(yaml_file, 'w') as file:
             yaml.dump(asdict(self), file, sort_keys=False)

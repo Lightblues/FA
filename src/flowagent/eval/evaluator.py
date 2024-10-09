@@ -13,7 +13,7 @@ import concurrent.futures
 
 from ..data import Config, DataManager, DBManager, LogUtils, Workflow
 from .analyzer import Analyzer
-from ..controller import FlowagentController
+from ..conversation_manager import FlowagentConversationManager
 from .judger import Judger
 from .eval_utils import EvalUtils
 
@@ -21,13 +21,13 @@ from .eval_utils import EvalUtils
 def task_simulate(cfg: Config) -> None:
     """ One simulation task
     """
-    controller = FlowagentController(cfg)
+    controller = FlowagentConversationManager(cfg)
     controller.start_conversation(verbose=False)
     
 def task_simulate_teacher_forcing(cfg: Config) -> None:
     """ One simulation task | turn-level
     """
-    controller = FlowagentController(cfg)
+    controller = FlowagentConversationManager(cfg)
     controller.start_conversation_teacher_forcing(verbose=False)
 
 

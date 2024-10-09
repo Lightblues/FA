@@ -9,7 +9,7 @@ usage:
         --conversation-turn-limit=20 --log-utterence-time --log-to-db
 """
 import typer
-from flowagent import Config, DataManager, FlowagentController
+from flowagent import Config, DataManager, FlowagentConversationManager
 from flowagent.data import WorkflowType, WorkflowTypeStr
 from flowagent.roles import UserMode, BotMode, ApiMode
 
@@ -55,7 +55,7 @@ def run_cli(
     if log_utterence_time is not None: cfg.log_utterence_time = log_utterence_time
     if log_to_db is not None: cfg.log_to_db = log_to_db
 
-    controller = FlowagentController(cfg)
+    controller = FlowagentConversationManager(cfg)
     controller.start_conversation()
 
 if __name__ == "__main__":

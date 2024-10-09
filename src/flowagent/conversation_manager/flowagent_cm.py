@@ -1,6 +1,6 @@
 """ updated @240919
 """
-
+from typing import List
 from ..data import (
     Config, Workflow, 
     BotOutput, UserOutput, BotOutputType, APIOutput,
@@ -9,29 +9,30 @@ from ..data import (
 from ..roles import (
     USER_NAME2CLASS, BOT_NAME2CLASS, API_NAME2CLASS, PDLBot
 )
-from .base import BaseController
+from .base_cm import BaseConversationManager
 from utils.wrappers import Timer
-from .pdl_checker import PDLDependencyChecker, APIDuplicatedChecker
+from ..pdl_controllers import NodeDependencyController, APIDuplicationController, CONTROLLER_NAME2CLASS, BaseController
 
-class FlowagentController(BaseController):
+
+class FlowagentConversationManager(BaseConversationManager):
     """ main loop of a simulated conversation
     USAGE:
         controller = FlowagentController(cfg)
         controller.start_conversation()
     """
-    # bot_types = ["PDLBot", "pdl_bot", "ReactBot", "react_bot"]
-    
     def __init__(self, cfg:Config) -> None:
         super().__init__(cfg)
         self.workflow = Workflow(cfg)
         self.bot = BOT_NAME2CLASS[cfg.bot_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
+        
         if self.cfg.exp_mode == "session":
             self.user = USER_NAME2CLASS[cfg.user_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
             self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
-
-            if isinstance(self.bot, PDLBot):
-                if cfg.pdl_check_dependency: self.pdl_dependency_checker = PDLDependencyChecker(self.cfg, self.conv, self.workflow.pdl)
-                if cfg.pdl_check_api_dup_calls: self.pdl_api_dup_checker = APIDuplicatedChecker(self.cfg, self.conv, self.workflow.pdl)
+            if isinstance(self.bot, PDLBot):    # for PDLBot, build the controllers
+                self.controllers: List[BaseController] = []
+                for c in self.cfg.bot_pdl_controllers:
+                    controller = CONTROLLER_NAME2CLASS[c['name']](cfg, self.conv, self.workflow.pdl, c['config'])
+                    self.controllers.append(controller)
         
     def conversation(self, verbose:bool=True) -> Conversation:
         """ given three roles (system/user/bot), start a conversation
@@ -56,7 +57,10 @@ class FlowagentController(BaseController):
                     break
             elif role == Role.BOT:
                 num_bot_actions = 0
+                bot_output: BotOutput = None
                 while True:         # limit the bot prediction steps
+                    # 0. pre-control
+                    self._pre_control(bot_output)
                     # 1. bot predict an action
                     with Timer("bot process", print=self.cfg.log_utterence_time):
                         bot_output: BotOutput = self.bot.process()
@@ -66,14 +70,9 @@ class FlowagentController(BaseController):
                         break
                     elif bot_output.action_type == BotOutputType.ACTION:
                         # 3. ACTION loop: call the API, append results to conversation
-                        # 3.1. check the action! (will be ignored for non-PDLBot)
-                        if not self.check_bot_action(bot_output):
-                            # log the error info!
-                            if not self.cfg.pdl_check_api_w_tool_manipulation:
-                                self.log_msg(self.conv.get_last_message(), verbose=verbose) 
-                                print(self.conv.get_last_message())
-                            else:
-                                self.logger.log(self.workflow.pdl.current_api_status, with_print=verbose)
+                        # 3.1. post-check the action! (will be ignored for non-PDLBot)
+                        if not self._post_check(bot_output):
+                            self.log_msg(self.conv.get_last_message(), verbose=verbose)  # log the error info!
                             continue
                         # 3.2 call the API (system)
                         with Timer("api process", print=self.cfg.log_utterence_time):
@@ -86,12 +85,6 @@ class FlowagentController(BaseController):
                         # ... the default response
                         self.logger.log(f"  <main> bot retried actions reach limit!", with_print=verbose)
                         break
-                # prepare the avaliable tool list and reset the API status for next turn
-                if self.cfg.pdl_check_api_w_tool_manipulation:
-                    self.workflow.pdl.reset_api_status()
-                    self.workflow.pdl.reset_invalid_api()
-                    if self.cfg.pdl_check_dependency:
-                        self.pdl_dependency_checker.check_next_turn_dependencies()
                 role = Role.USER
             num_UB_turns += 1
             if num_UB_turns > self.cfg.conversation_turn_limit: 
@@ -100,19 +93,24 @@ class FlowagentController(BaseController):
         
         return self.conv
     
-    def check_bot_action(self, bot_output: BotOutput) -> bool:
-        """ Check the validation of bot action
+    def _post_check(self, bot_output: BotOutput) -> bool:
+        """ Check the validation of bot's action
         NOTE: if not validated, the error infomation will be added to self.conv!
-        - [ ]j check api name? -> done in APIHandler
         """
-        if not (self.cfg.exp_mode == "session" and isinstance(self.bot, PDLBot)): 
-            return True
-        
-        if self.cfg.pdl_check_dependency:
-            if not self.pdl_dependency_checker.check(bot_output): return False
-        if self.cfg.pdl_check_api_dup_calls:
-            if not self.pdl_api_dup_checker.check(bot_output): return False
+        if not (self.cfg.exp_mode == "session" and isinstance(self.bot, PDLBot)):  return True
+        for controller in self.controllers:
+            if not controller.if_post_check: continue
+            if not controller.post_check(bot_output): return False
         return True
+    
+    def _pre_control(self, bot_output: BotOutput) -> None:
+        """ Make pre-control on the bot
+        will change the PDLBot's prompt! 
+        """
+        if not (self.cfg.exp_mode == "session" and isinstance(self.bot, PDLBot)):  return
+        for controller in self.controllers:
+            if not controller.if_pre_check: continue
+            controller.pre_control(bot_output)
 
     def conversation_teacher_forcing(self, verbose:bool=True) -> Conversation:
         """ given a reference conversation, test the bot in a teacher-forcing manner

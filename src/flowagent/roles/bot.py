@@ -131,16 +131,10 @@ class PDLBot(ReactBot):
         super().__init__(**args)
     
     def _gen_prompt(self) -> str:
-        valid_apis = self.workflow.pdl.get_valid_apis()
-        valid_api_names = [api["name"] for api in valid_apis]
-        valid_apis_str = "There are no valid apis now!" if not valid_apis else f"You can call `{valid_api_names}`"
         state_infos = {
             "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
-        if self.cfg.pdl_check_api_w_tool_manipulation:
-            state_infos["Current state"] = self.workflow.pdl.current_api_status
-            state_infos["Current valid apis"] = valid_apis_str
-            # state_infos["Curretn invalid apis"]: f"{list(self.workflow.pdl.invalid_apis.values())}"
+        state_infos |= self.workflow.pdl.status_for_prompt # NOTE: add the status infos from PDL!
         prompt = jinja_render(
             self.bot_template_fn,       # "flowagent/bot_pdl.jinja"
             api_infos=self.workflow.toolbox,        # self.workflow.get_toolbox_by_names(valid_api_names),

@@ -22,7 +22,6 @@ build_attr_list_map(BaseAPIHandler, API_NAME2CLASS)
 def build_attr_map(base_class: BaseRole, name_to_class_dict: Dict[str, BaseRole], attr: str="names"):
     for cls in base_class.__subclasses__():
         name_to_class_dict[cls.__dict__[attr]] = cls
-        # recursive!
         build_attr_map(cls, name_to_class_dict, attr)
 USER_NAME2TEMPLATE:Dict[str, str] = {}
 build_attr_map(BaseUser, USER_NAME2TEMPLATE, attr="user_template_fn")
