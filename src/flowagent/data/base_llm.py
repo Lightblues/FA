@@ -83,4 +83,3 @@ def init_client(llm_cfg:Dict):
         model_name=model_name, base_url=base_url, api_key=api_key, is_sn=llm_cfg.get("is_sn", False)
     )
     return client
-
