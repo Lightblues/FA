@@ -67,7 +67,7 @@ class PDLDependencyChecker(BaseChecker):
         apis = pdl.apis
         g = PDLGraph()
         for api in apis:
-            node = PDLNode(name=api["name"], preconditions=api.get("precondition", None), version=pdl.version)
+            node = PDLNode(name=api["name"], preconditions=api.get("precondition", None))
             g.add_node(node)
         g.check_preconditions()
         return g

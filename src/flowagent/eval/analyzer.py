@@ -134,10 +134,10 @@ class Analyzer:
         input key: judge_turn_stat
         metric: API Precision, Recall, F1 / Parameter Precision, Recall, F1
         """
-        api_metric = MetricF1()
-        params_metric = MetricF1()
-        for jr in self.df["judge_turn_stat"]:
-            for api_gt, api_pred in zip(jr["apis_gt"], jr["apis_pred"]):
+        api_metric = MetricF1(); params_metric = MetricF1()
+        oow_api_metric = MetricF1(); oow_params_metric = MetricF1()
+        for jr_session_stat, jr_session in zip(self.df["judge_turn_stat"], self.df["judge_turn_result"]):
+            for api_gt, api_pred, jr in zip(jr_session_stat["apis_gt"], jr_session_stat["apis_pred"], jr_session):
                 api_gt_names, api_pred_names = set(), set()
                 params_gt, params_pred = set(), set()
                 if api_gt: 
@@ -146,13 +146,20 @@ class Analyzer:
                 if api_pred: 
                     api_pred_names.add(api_pred[0])
                     params_pred = set([str(i) for i in api_pred[1].values()])
-                api_metric.update(y_truth=api_gt_names, y_pred=api_pred_names)
-                params_metric.update(y_truth=params_gt, y_pred=params_pred)
+                if jr['type']:
+                   oow_api_metric.update(y_truth=api_gt_names, y_pred=api_pred_names)
+                   oow_params_metric.update(y_truth=params_gt, y_pred=params_pred)
+                else:
+                    api_metric.update(y_truth=api_gt_names, y_pred=api_pred_names)
+                    params_metric.update(y_truth=params_gt, y_pred=params_pred)
         f1, recall, precision = api_metric.get_detail()
         para_f1, para_recall, para_precision = params_metric.get_detail()
+        oow_f1, _, _ = oow_api_metric.get_detail()
+        oow_para_f1, _, _ = oow_params_metric.get_detail()
         metrics = dict(
             f1=f1, recall=recall, precision=precision,
-            para_f1=para_f1, para_recall=para_recall, para_precision=para_precision
+            para_f1=para_f1, para_recall=para_recall, para_precision=para_precision,
+            oow_f1=oow_f1, oow_para_f1=oow_para_f1, 
         )
         self.stat_dict |= metrics
         return metrics

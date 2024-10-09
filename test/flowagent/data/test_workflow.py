@@ -19,3 +19,12 @@ intention = OOWIntention.from_dict(data[0])
 # %%
 "" or 1
 # %%
+import yaml, json
+with open("/work/huabu/dataset/PDL/tools/000.yaml", 'r') as f:
+    data = yaml.safe_load(f)
+data
+# %%
+str(data)
+# %%
+print(data)
+# %%

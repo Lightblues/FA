@@ -18,7 +18,7 @@ for dataset in "${datasets[@]}"; do
     fi
     
     python run_flowagent_exp.py --config=default.yaml --exp-version=${exp_version} --workflow-dataset=${dataset} --workflow-type=pdl \
-        --simulate-num-persona=3 \
+        --simulate-num-persona=5 \
         --bot-llm-name=${MODEL} \
         --bot-mode=${bot_mode} --user-mode="llm_oow"
 done

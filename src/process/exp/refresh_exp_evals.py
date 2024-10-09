@@ -36,20 +36,42 @@ def task_judge_turn_level(cfg: Config) -> None:
         judger = Judger(cfg)
         judger.start_judge(verbose=False, mode="turn")
 
+def task_judge_session_level(cfg: Config) -> None:
+    def check(): # check whether need to be rejudged
+        db = DBManager(cfg.db_uri, cfg.db_name, cfg.db_message_collection_name)
+        query_res = db.query_evaluations({ "conversation_id": cfg.judge_conversation_id })
+        if len(query_res) == 0: return True
+        else:
+            try: 
+                res = query_res[0]['judge_session_result']
+                assert res['Result'].strip() in ['yes', 'no']
+                for key in ['Total number of goals', 'Number of accomplished goals']:
+                    r = int(res[key])
+                return False
+            except:
+                return True
+    if check():
+        judger = Judger(cfg)
+        judger.start_judge(verbose=False, mode="session")
+
 
 if __name__ == '__main__':
-    model = "Qwen2-72B"
+    models = ["Qwen2-72B", 'gpt-4o', 'gpt-4o-mini']
     selected_formats = ['text', 'code', 'flowchart', 'pdl-pdl']
     selected_datasets = ['sgd', 'pdl', 'star']
-    for format, dataset in itertools.product(selected_formats, selected_datasets):
-        exp_version = f"turn_{dataset}_{format}_{model}"
+    prefix = "sessionOOW_"
+    # prefix = ""
+    exp_mode = "session"
+    for format, dataset, model in itertools.product(selected_formats, selected_datasets, models):
+        exp_version = f"{prefix}{dataset}_{format}_{model}"
         print(f">> rejudging: {exp_version}")
         
         cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
         cfg.judge_force_rejudge = True  # force rejudge
         cfg.exp_version = exp_version
-        cfg.exp_mode = "turn"
+        cfg.exp_mode = exp_mode
         cfg.workflow_dataset = dataset.upper()
         cfg.workflow_type = format if (not format.startswith("pdl")) else 'pdl'
-    
-        run_evaluations(task_judge_turn_level, cfg)
+
+        task = task_judge_session_level if exp_mode == "session" else task_judge_turn_level
+        run_evaluations(task, cfg)

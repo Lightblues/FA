@@ -2,7 +2,7 @@
 cd /work/huabu/src/
 
 MODE=pdl # react pdl
-MODEL=Qwen2-72B
+MODEL=claude-3-5-sonnet-20240620 #claude-3-haiku-20240307 # Qwen2-72B
 datasets=("PDL" "SGD" "STAR")
 
 for dataset in "${datasets[@]}"; do
@@ -21,7 +21,8 @@ for dataset in "${datasets[@]}"; do
     fi
 
     python run_flowagent_exp.py --config=default.yaml --exp-version=${exp_version} --workflow-dataset=${dataset} --workflow-type=pdl \
-        --simulate-num-persona=3 \
+        --simulate-num-persona=2 \
         --bot-llm-name=${MODEL} \
         --bot-mode=${bot_mode} --bot-template-fn=${bot_template_fn}
 done
+# --simulate-force-rerun

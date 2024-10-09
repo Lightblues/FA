@@ -3,7 +3,7 @@ cd /work/huabu/src/
 
 workflow_types=("text" "code" "flowchart")
 MODEL=Qwen2-72B # gpt-4o-mini
-dataset=PDL # PDL STAR
+dataset=SGD # PDL STAR
 
 for wt in "${workflow_types[@]}"; do
     echo ">> [session OOW] running ${MODEL} on dataset: ${dataset} with workflow_type: ${wt}"

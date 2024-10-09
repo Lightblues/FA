@@ -35,6 +35,7 @@ def run_exp(
     log_to_db: bool = typer.Option(None, help="Log to DB"),
     simulate_num_persona: int = typer.Option(None, help="Simulate num persona"),
     simulate_max_workers: int = typer.Option(None, help="Simulate max workers"),
+    simulate_force_rerun: bool = typer.Option(None, help="Simulate force rerun"),
 ):
     cfg = Config.from_yaml(DataManager.normalize_config_name(config))
     if workflow_dataset is not None: cfg.workflow_dataset = workflow_dataset
@@ -54,6 +55,7 @@ def run_exp(
     if log_to_db is not None: cfg.log_to_db = log_to_db
     if simulate_num_persona is not None: cfg.simulate_num_persona = simulate_num_persona
     if simulate_max_workers is not None: cfg.simulate_max_workers = simulate_max_workers
+    if simulate_force_rerun is not None: cfg.simulate_force_rerun = simulate_force_rerun
 
     controller = Evaluator(cfg)
     controller.main()

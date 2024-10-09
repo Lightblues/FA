@@ -10,31 +10,12 @@ class PDLNode:
     precondition: List[str] = []
     is_activated: bool = False
     # is_end: bool = False
-    version: str = "v1"
     
-    def __init__(self, name:str, preconditions:str=None, version:str=None) -> None:
+    def __init__(self, name:str, preconditions:str=None) -> None:
         self.name = name
-        if version: self.version = version
         if preconditions is not None:
-            if self.version == "v1":
-                self.precondition = self._parse_preconditions(preconditions)
-            elif self.version == "v2":
-                assert isinstance(preconditions, list)
-                self.precondition = preconditions
-            else: raise Exception(f"unknown version {self.version}")
-        
-
-    def _parse_preconditions(self, s:str) -> List[str]:
-        try:
-            preconditions = eval(s)
-        except Exception as e:
-            s = s.strip().lstrip("[").rstrip("]")
-            names = s.split(",")
-            preconditions = []
-            for s in names:
-                s = s.strip('\'').strip('\"').strip()
-                if s: preconditions.append(s)
-        return preconditions
+            assert isinstance(preconditions, list)
+            self.precondition = preconditions
 
     def __repr__(self) -> str:
         return f"PDLNode({self.name}, with precondition {self.precondition})"
@@ -45,11 +26,9 @@ class PDLNode:
 class PDLGraph:
     # nodes: List[PDLNode] = []
     name2node: Dict[str, PDLNode] = {}
-    version: str = "v1"
     
-    def __init__(self, version:str=None) -> None:
+    def __init__(self) -> None:
         self.name2node = {}     # NOTE: have to add __init__ to clear the dict
-        if version: self.version = version
     
     def add_node(self, node:PDLNode):
         assert node.name not in self.name2node, f"node {node.name} already exists!"

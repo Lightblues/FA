@@ -26,7 +26,6 @@ class PDL:
     answers: list = field(default_factory=list)
     procedure: str = ""      # the core logic of the taskflow
     
-    version: str = "v2"
     invalid_apis: Dict[str, Dict] = field(default_factory=dict)   # {name: {api_name, [invalid_reason]}}
     current_api_status: List = field(default_factory=list)
     
