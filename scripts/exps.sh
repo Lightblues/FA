@@ -2,7 +2,7 @@ cd src
 
 # =======================================================================================================================
 # CLI conversation
-python run_flowagent_cli.py --mode=conv \
+python run_flowagent.py --mode=conv \
     --config=default.yaml --exp-version=default --exp-mode=turn \
     --workflow-type=text --workflow-id=000 \
     --user-mode=llm_profile --user-llm-name=gpt-4o --user-profile-id=0 \
@@ -12,7 +12,7 @@ python run_flowagent_cli.py --mode=conv \
     --conversation-turn-limit=20 --log-utterence-time --log-to-db
 
 # run a single Judge
-python run_flowagent_cli.py --mode=eval \
+python run_flowagent.py --mode=eval \
     --config=default.yaml --exp-version=default \
     --workflow-type=text \
     --user-mode=llm_profile --user-llm-name=gpt-4o \
@@ -22,7 +22,7 @@ python run_flowagent_cli.py --mode=eval \
     --conversation-turn-limit=20 --log-utterence-time --log-to-db
 
 # run an experiment
-python run_flowagent_cli.py --model=exp \
+python run_flowagent.py --model=exp \
     --config=default.yaml --exp-version=default \
     --workflow-type=text \
     --user-mode=llm_profile --user-llm-name=gpt-4o \

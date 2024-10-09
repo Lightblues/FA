@@ -1,32 +1,35 @@
-""" updated 240906
+""" entrypoint for flowagent CLI
 usage:
-    python run_flowagent_ablation.py --config=default.yaml --exp-version=pdl_pdl_w_checker_w_tool \
-        --workflow-dataset=PDL \
-        --workflow-type=pdl \
-        --bot-mode=pdl_bot --bot-llm-name=gpt-4o \
-        --bot-template-fn=flowagent/bot_pdl.jinja \
-        --conversation-turn-limit=20 --log-to-db \
-        --pdl-check-dependency \
-        --pdl-check-api-dup-calls \
-        --pdl-check-api-w-tool-manipulation
+    python run_flowagent.py --mode=conv \
+        --config=default.yaml --exp-version=default --exp-mode=turn \
+        --workflow-type=text --workflow-id=000 \
+        --user-mode=llm_profile --user-llm-name=gpt-4o --user-profile-id=0 \
+        --bot-mode=react_bot --bot-llm-name=gpt-4o \
+        --api-mode=llm --api-llm-name=gpt-4o \
+        --user-template-fn=baselines/user_llm.jinja --bot-template-fn=baselines/flowbench.jinja \
+        --conversation-turn-limit=20 --log-utterence-time --log-to-db
 """
 import typer
-from flowagent import Config, DataManager, Evaluator, FlowagentConversationManager
+from typing import Literal
+from flowagent import Config, DataManager, FlowagentConversationManager, Judger, Evaluator
 from flowagent.data import WorkflowType, WorkflowTypeStr
 from flowagent.roles import UserMode, BotMode, ApiMode
 
 app = typer.Typer()
 
 @app.command()
-def run_exp(
+def run_cli(
+    mode: Literal["conv", "eval"] = typer.Option("conv", help="Experiment mode", case_sensitive=False),
     config: str = typer.Option("default.yaml", help="Configuration file"),
     workflow_dataset: str = typer.Option(None, help="Workflow dataset", case_sensitive=False),
     workflow_type: WorkflowTypeStr = typer.Option(None, help="Workflow type", case_sensitive=False),
+    workflow_id: str = typer.Option(None, help="Workflow ID"),
     exp_version: str = typer.Option(None, help="Experiment version"),
     exp_mode: str = typer.Option(None, help="Experiment mode", case_sensitive=False),
     user_mode: UserMode = typer.Option(None, help="User mode", case_sensitive=False), # type: ignore
     user_llm_name: str = typer.Option(None, help="User LLM name"),
     user_template_fn: str = typer.Option(None, help="User template filename"),
+    user_profile_id: int = typer.Option(None, help="User profile ID"),
     bot_mode: BotMode = typer.Option(None, help="Bot mode", case_sensitive=False), # type: ignore
     bot_template_fn: str = typer.Option(None, help="Bot template filename"),
     bot_llm_name: str = typer.Option(None, help="Bot LLM name"),
@@ -37,18 +40,18 @@ def run_exp(
     log_to_db: bool = typer.Option(None, help="Log to DB"),
     simulate_num_persona: int = typer.Option(None, help="Simulate num persona"),
     simulate_max_workers: int = typer.Option(None, help="Simulate max workers"),
-    pdl_check_api_dup_calls: bool = typer.Option(None, help="PDL check API duplicate calls"),
-    pdl_check_dependency: bool = typer.Option(None, help="PDL check API dependency"),
-    pdl_check_api_w_tool_manipulation: bool = typer.Option(None, help="PDL check API with tool manipulation")
+    simulate_force_rerun: bool = typer.Option(None, help="Simulate force rerun"),
 ):
     cfg = Config.from_yaml(DataManager.normalize_config_name(config))
     if workflow_dataset is not None: cfg.workflow_dataset = workflow_dataset
     if workflow_type is not None: cfg.workflow_type = workflow_type.value
+    if workflow_id is not None: cfg.workflow_id = workflow_id
     if exp_version is not None: cfg.exp_version = exp_version
     if exp_mode is not None: cfg.exp_mode = exp_mode
     if user_mode is not None: cfg.user_mode = user_mode.value
     if user_llm_name is not None: cfg.user_llm_name = user_llm_name
     if user_template_fn is not None: cfg.user_template_fn = user_template_fn
+    if user_profile_id is not None: cfg.user_profile_id = user_profile_id
     if bot_mode is not None: cfg.bot_mode = bot_mode.value
     if bot_template_fn is not None: cfg.bot_template_fn = bot_template_fn
     if bot_llm_name is not None: cfg.bot_llm_name = bot_llm_name
@@ -59,20 +62,17 @@ def run_exp(
     if log_to_db is not None: cfg.log_to_db = log_to_db
     if simulate_num_persona is not None: cfg.simulate_num_persona = simulate_num_persona
     if simulate_max_workers is not None: cfg.simulate_max_workers = simulate_max_workers
-    if pdl_check_api_dup_calls is not None: cfg.pdl_check_api_dup_calls = pdl_check_api_dup_calls
-    if pdl_check_dependency is not None: cfg.pdl_check_dependency = pdl_check_dependency
-    if pdl_check_api_w_tool_manipulation is not None: cfg.pdl_check_api_w_tool_manipulation = pdl_check_api_w_tool_manipulation
+    if simulate_force_rerun is not None: cfg.simulate_force_rerun = simulate_force_rerun
 
-    # controller = Evaluator(cfg)
-    # controller.main()
-    
-    # cfg.exp_version = "241009"
-    # cfg.workflow_dataset = "PDL"
-    # cfg.workflow_id = "000"
-    # cfg.workflow_type = "pdl"
-    # cfg.pdl_check_api_w_tool_manipulation = True
-    controller = FlowagentConversationManager(cfg)
-    controller.start_conversation()
+    if mode == "conv":
+        controller = FlowagentConversationManager(cfg)
+        controller.start_conversation()
+    elif mode == "eval":
+        judge = Judger(cfg)
+        judge.start_judge()
+    elif mode == "exp":
+        controller = Evaluator(cfg)
+        controller.main()
 
 if __name__ == "__main__":
     app()
