@@ -1,6 +1,7 @@
-""" updated 240906
+""" entrypoint for flowagent CLI
 usage:
-    python run_flowagent_cli.py --config=default.yaml --exp-version=default --exp-mode=turn \
+    python run_flowagent_cli.py --mode=conv \
+        --config=default.yaml --exp-version=default --exp-mode=turn \
         --workflow-type=text --workflow-id=000 \
         --user-mode=llm_profile --user-llm-name=gpt-4o --user-profile-id=0 \
         --bot-mode=react_bot --bot-llm-name=gpt-4o \
@@ -9,7 +10,8 @@ usage:
         --conversation-turn-limit=20 --log-utterence-time --log-to-db
 """
 import typer
-from flowagent import Config, DataManager, FlowagentConversationManager
+from typing import Literal
+from flowagent import Config, DataManager, FlowagentConversationManager, Judger, Evaluator
 from flowagent.data import WorkflowType, WorkflowTypeStr
 from flowagent.roles import UserMode, BotMode, ApiMode
 
@@ -17,6 +19,7 @@ app = typer.Typer()
 
 @app.command()
 def run_cli(
+    mode: Literal["conv", "eval"] = typer.Option("conv", help="Experiment mode", case_sensitive=False),
     config: str = typer.Option("default.yaml", help="Configuration file"),
     workflow_dataset: str = typer.Option(None, help="Workflow dataset", case_sensitive=False),
     workflow_type: WorkflowTypeStr = typer.Option(None, help="Workflow type", case_sensitive=False),
@@ -35,6 +38,9 @@ def run_cli(
     conversation_turn_limit: int = typer.Option(None, help="Conversation turn limit"),
     log_utterence_time: bool = typer.Option(None, help="Log utterance time"),
     log_to_db: bool = typer.Option(None, help="Log to DB"),
+    simulate_num_persona: int = typer.Option(None, help="Simulate num persona"),
+    simulate_max_workers: int = typer.Option(None, help="Simulate max workers"),
+    simulate_force_rerun: bool = typer.Option(None, help="Simulate force rerun"),
 ):
     cfg = Config.from_yaml(DataManager.normalize_config_name(config))
     if workflow_dataset is not None: cfg.workflow_dataset = workflow_dataset
@@ -54,9 +60,19 @@ def run_cli(
     if conversation_turn_limit is not None: cfg.conversation_turn_limit = conversation_turn_limit
     if log_utterence_time is not None: cfg.log_utterence_time = log_utterence_time
     if log_to_db is not None: cfg.log_to_db = log_to_db
+    if simulate_num_persona is not None: cfg.simulate_num_persona = simulate_num_persona
+    if simulate_max_workers is not None: cfg.simulate_max_workers = simulate_max_workers
+    if simulate_force_rerun is not None: cfg.simulate_force_rerun = simulate_force_rerun
 
-    controller = FlowagentConversationManager(cfg)
-    controller.start_conversation()
+    if mode == "conv":
+        controller = FlowagentConversationManager(cfg)
+        controller.start_conversation()
+    elif mode == "eval":
+        judge = Judger(cfg)
+        judge.start_judge()
+    elif mode == "exp":
+        controller = Evaluator(cfg)
+        controller.main()
 
 if __name__ == "__main__":
     app()

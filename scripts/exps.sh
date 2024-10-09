@@ -1,11 +1,35 @@
 cd src
-python run_flowagent_exp.py --config=default.yaml --exp-version=240919_01 --workflow-dataset=PDL --workflow-type=flowchart
-python run_flowagent_exp.py --config=default.yaml --exp-version=pdl_pdl_${ID} --workflow-dataset=PDL --workflow-type=pdl --simulate-num-persona=1 \
-    --bot-mode=pdl_bot --bot-template-fn=flowagent/bot_pdl.jinja
 
-python run_flowagent_cli.py --config=default.yaml --exp-version=pdl_pdl_${ID} --workflow-dataset=PDL --workflow-type=pdl \
-    --bot-mode=pdl_bot --bot-template-fn=flowagent/bot_pdl.jinja \
-    --user-mode=manual --no-log-to-db
+# =======================================================================================================================
+# CLI conversation
+python run_flowagent_cli.py --mode=conv \
+    --config=default.yaml --exp-version=default --exp-mode=turn \
+    --workflow-type=text --workflow-id=000 \
+    --user-mode=llm_profile --user-llm-name=gpt-4o --user-profile-id=0 \
+    --bot-mode=react_bot --bot-llm-name=gpt-4o \
+    --api-mode=llm --api-llm-name=gpt-4o \
+    --user-template-fn=baselines/user_llm.jinja --bot-template-fn=baselines/flowbench.jinja \
+    --conversation-turn-limit=20 --log-utterence-time --log-to-db
+
+# run a single Judge
+python run_flowagent_cli.py --mode=eval \
+    --config=default.yaml --exp-version=default \
+    --workflow-type=text \
+    --user-mode=llm_profile --user-llm-name=gpt-4o \
+    --bot-mode=react_bot --bot-llm-name=gpt-4o \
+    --api-mode=llm --api-llm-name=gpt-4o \
+    --user-template-fn=baselines/user_llm.jinja --bot-template-fn=baselines/flowbench.jinja \
+    --conversation-turn-limit=20 --log-utterence-time --log-to-db
+
+# run an experiment
+python run_flowagent_cli.py --model=exp \
+    --config=default.yaml --exp-version=default \
+    --workflow-type=text \
+    --user-mode=llm_profile --user-llm-name=gpt-4o \
+    --bot-mode=react_bot --bot-llm-name=gpt-4o \
+    --api-mode=llm --api-llm-name=gpt-4o \
+    --user-template-fn=baselines/user_llm.jinja --bot-template-fn=baselines/flowbench.jinja \
+    --conversation-turn-limit=20 --log-utterence-time --log-to-db
 
 # =======================================================================================================================
 ID=0920 # star_flowchart_0920
