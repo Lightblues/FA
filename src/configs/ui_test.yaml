@@ -1,5 +1,5 @@
 # ================================= update @240820
-workflow_dir: "pdl2_step3"        # 
+workflow_dir: "pdl"        # 
 workflow_name: "000"
 
 available_models: 
@@ -8,8 +8,7 @@ available_models:
 - "default"
 - "0.9.1"
 available_workflow_dirs:
-- "pdl2_step3"
-- pdl_v0828
+- "pdl"
 available_workflows:
 # - '000-114挂号'
 # - "002-新闻查询"
