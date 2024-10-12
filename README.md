@@ -6,7 +6,9 @@ data
 
 - [x] LLM auto generate node dependencies #2 @0724
 - [x] LLM-based PDL generation @0729
-    - [ ] other datasets 
+- [x] auto conversation simulation (user agent) #1
+- [x] auto conversation evaluation (based on specific PDL) #1
+- [ ] auto PDL generation (with user query) [data source: wikihow] #P0
 
 functionalities
 
@@ -34,17 +36,14 @@ prompting
 - [ ] add summary/memory #2
 - [x] add datetime @0729
 
-paper
+baselines
 
-- [ ] auto conversation simulation (user agent) #1
-- [ ] auto conversation evaluation (based on specific PDL) #1
-- [ ] auto PDL generation (with user query) [data source: wikihow] #P0
-- [ ] baselines
-    - [ ] FlowBench 
+- [x] FlowBench 
+- [ ] CoRE
 
 bugs
 
-- [ ] fix `Current state` info -- action type and # user query
+- [x] fix `Current state` info -- action type and # user query
 - [x] fix: entity linking result write back to Message  #1 @240821
 - [x] V2: remove `REQUEST` type @240821
 
