@@ -60,14 +60,15 @@
 
 import os, sys, json, yaml, pathlib
 
-DATA = "SGD"
 DATA = "STAR"
+DATA = "SGD"
+print(f"Current data: {DATA}")
 if DATA == "STAR":
     IDIR = pathlib.Path("/apdcephfs_cq8/share_2992827/shennong_5/siqiicai/data/STAR/tasks_transformed")
-    ODIR = pathlib.Path("/work/huabu/dataset/STAR")
+    ODIR = pathlib.Path("/mnt/huabu/dataset/STAR")
 elif DATA == "SGD":
     IDIR = pathlib.Path("/apdcephfs_cq8/share_2992827/shennong_5/siqiicai/data/SGD/workflows")
-    ODIR = pathlib.Path("/work/huabu/dataset/SGD")
+    ODIR = pathlib.Path("/mnt/huabu/dataset/SGD")
 os.makedirs(ODIR, exist_ok=True)
 
 
@@ -181,6 +182,26 @@ class DataConverter:
         print(f"Converted {num_success} tasks")
         return num_success
     
+    def convert_format_core(self):
+        print(f"Converting core from `CoRE` subfolder")
+        os.makedirs(ODIR / "core", exist_ok=True)
+        num_success = 0
+        for name, oname in self.name_map.items():
+            try:
+                # check that code in not binary
+                if check_is_binary(IDIR / "CoRE" / f"{name}.txt"):
+                    raise Exception(f"{name} is binary")
+                with open(IDIR / "CoRE" / f"{name}.txt", "r") as f:
+                    data = f.read()
+                with open(ODIR / "core" / f"{oname}.txt", "w") as f:
+                    f.write(data)
+                num_success += 1
+            except Exception as e:
+                print(f"Error for {name}: {e}")
+                continue
+        print(f"Converted {num_success} tasks")
+        return num_success
+    
     def convert_format_text(self):
         print(f"Converting text from `NL` subfolder")
         os.makedirs(ODIR / "text", exist_ok=True)
@@ -268,8 +289,9 @@ if __name__ == '__main__':
     c = DataConverter()
     # c.convert_format_code()
     # c.convert_format_pdl()
-    # c.convert_format_flowchart
+    # c.convert_format_flowchart()
+    c.convert_format_core()
     # c.convert_format_text()
     # c.convert_format_userprofile()
     # c.convert_format_api("../apis")
-    c.convert_format_convsation()
+    # c.convert_format_convsation()

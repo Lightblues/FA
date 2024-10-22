@@ -33,7 +33,7 @@ class FlowagentConversationManager(BaseConversationManager):
                 for c in self.cfg.bot_pdl_controllers:
                     controller = CONTROLLER_NAME2CLASS[c['name']](cfg, self.conv, self.workflow.pdl, c['config'])
                     self.controllers.append(controller)
-        
+    
     def conversation(self, verbose:bool=True) -> Conversation:
         """ given three roles (system/user/bot), start a conversation
         1. initiation: initialize the variables, logger, etc.
@@ -66,7 +66,8 @@ class FlowagentConversationManager(BaseConversationManager):
                         bot_output: BotOutput = self.bot.process()
                     self.log_msg(self.conv.get_last_message(), verbose=verbose)
                     # 2. STOP: break until bot RESPONSE
-                    if bot_output.action_type == BotOutputType.RESPONSE:
+                    if bot_output.action_type == BotOutputType.END: break
+                    elif bot_output.action_type == BotOutputType.RESPONSE:
                         if not self._response_control(bot_output):
                             self.log_msg(self.conv.get_last_message(), verbose=verbose)  # log the error info!
                             continue
@@ -88,9 +89,12 @@ class FlowagentConversationManager(BaseConversationManager):
                         # ... the default response
                         self.logger.log(f"  <main> bot retried actions reach limit!", with_print=verbose)
                         break
+                if bot_output.action_type == BotOutputType.END:
+                    self.logger.log(f"  <main> ended by bot!", with_print=verbose)
+                    break
                 role = Role.USER
             num_UB_turns += 1
-            if num_UB_turns > self.cfg.conversation_turn_limit: 
+            if (num_UB_turns > self.cfg.conversation_turn_limit): 
                 self.logger.log("  <main> end due to conversation turn limit!", with_print=verbose)
                 break
         

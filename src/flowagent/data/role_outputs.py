@@ -7,6 +7,7 @@ from typing import List, Dict, Optional, Tuple, Union
 class BotOutputType(Enum):
     RESPONSE = ("RESPONSE", "response to the user")
     ACTION = ("ACTION", "call an API")
+    END = ("END", "end the conversation")
 
     def __init__(self, actionname, description):
         self.actionname = actionname
@@ -40,9 +41,10 @@ class BotOutput:
     def action_type(self) -> BotOutputType:
         if self.action is not None:
             return BotOutputType.ACTION
-        else:
-            assert self.response is not None, "both action and response are None!"
+        elif self.response is not None:
             return BotOutputType.RESPONSE
+        else:
+            return BotOutputType.END
 
 @dataclass
 class APIOutput:

@@ -2,7 +2,7 @@
 # specifically, workflow_dataset & workflow_type should be all same for one exp_version
 # i.e. one `exp_version + workflow_id` identify one experiment
 workflow_dataset: "PDL"
-workflow_type: "pdl" # text, code, flowchart, pdl
+workflow_type: "pdl"      # text, code, flowchart, pdl, core
 workflow_id: "000"
 exp_version: "default"
 exp_mode: "session"        # session, turn
@@ -16,7 +16,7 @@ user_template_fn: null    # "flowagent/user_llm.jinja"
 user_profile_id: 0
 user_oow_ratio: 0.2
 
-bot_mode: "pdl_bot"     # dummy_bot, react_bot, pdl_bot
+bot_mode: "pdl_bot"     # dummy_bot, react_bot, pdl_bot, core_bot
 bot_template_fn: null     # "flowagent/bot_flowbench.jinja"
 bot_llm_name: "gpt-4o"
 bot_action_limit: 5

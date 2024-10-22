@@ -23,13 +23,16 @@ class ReactBot(BaseBot):
         """ mian process logic.
         gen prompt -> query & process -> gen message
         """
+        # 1. (maybe) pre-decisions, see CoREBot
+        # 2. query and parse LLM
         prompt = self._gen_prompt()
         @retry_wrapper(retry=self.cfg.bot_retry_limit, step_name="bot_process", log_fn=print)
         def process_with_retry(prompt):
+            # todo: retry with random / search?
             llm_response, prediction = self._process(prompt)
             return llm_response, prediction
-        llm_response, prediction = process_with_retry(prompt)
-        
+        llm_response, prediction = process_with_retry(prompt)  # prediction: BotOutput
+        # 3. add message to conversation
         if prediction.action_type==BotOutputType.RESPONSE:
             msg_content = prediction.response
         else:

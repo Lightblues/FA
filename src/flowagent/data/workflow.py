@@ -10,6 +10,7 @@ from typing import List, Dict, Optional, Union
 from .user_profile import UserProfile, OOWIntention
 from .config import Config
 from .pdl import PDL
+from .core import CoreFlow, CoreBlock
 from .base_data import ConversationWithIntention, Conversation
 
 
@@ -66,6 +67,7 @@ class WorkflowType(Enum):
     CODE = ("CODE", "format of code", ".py", 'code')
     FLOWCHART = ("FLOWCHART", "format of flowchart", ".md", 'flowchart')
     PDL = ("PDL", "format of PDL", ".yaml", 'pdl')
+    CORE = ("CORE", "format of CoRE", ".txt", 'core')
 
     def __init__(self, workflow_type, description, suffix, subdir):
         self.workflow_type: str = workflow_type
@@ -88,6 +90,7 @@ class WorkflowTypeStr(str, Enum):
     CODE = "code"
     FLOWCHART = "flowchart"
     PDL = "pdl"
+    CORE = "core"
 
 
 @dataclass
@@ -100,7 +103,8 @@ class Workflow:  # rename -> Data
     
     workflow: str = None
     toolbox: List[Dict] = field(default_factory=list)   # apis
-    pdl: PDL = None         # only for PDL
+    pdl: PDL = None             # only for PDL
+    core_flow: CoreFlow = None  # only for CORE
     
     user_profiles: List[UserProfile] = None
     reference_conversations: List[ConversationWithIntention] = None
@@ -131,6 +135,8 @@ class Workflow:  # rename -> Data
         if self.type == WorkflowType.PDL:   # sepcial for PDL
             self.pdl = PDL.load_from_file(data_manager.DIR_data_workflow / f"pdl/{self.id}.yaml")
             self.workflow = self.pdl.to_str_wo_api() # self.pdl.procedure
+        if self.type == WorkflowType.CORE:
+            self.core_flow = CoreFlow.load_from_file(data_manager.DIR_data_workflow / f"core/{self.id}.txt")
         # 3. load the user infos
         if (self.cfg.exp_mode=="session"): # load_user_profiles:
             with open(data_manager.DIR_data_workflow / f"user_profile/{self.id}.json", 'r') as f:

@@ -9,9 +9,8 @@ import argparse
 from typing import Optional, List
 from tabulate import tabulate
 
+from flowagent.utils import init_client, LLM_CFG, OpenAIClient, Formater
 from utils.jinja_templates import jinja_render
-from easonsi.llm.openai_client import OpenAIClient, Formater
-from engine import init_client, LLM_CFG
 
 # class for transforming workflow format
 class FormatTransformer:
