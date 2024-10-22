@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "flowagent"
+version = "0.1.0"
+description = "FlowAgent demo"
+authors = ["easonsshi <easonsshi@tencent.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+openai = "^1.51.2"
+Jinja2 = "^3.1.4"
+colorama = "^0.4.6"
+python-engineio = "^4.10.1"
+python-socketio = "^5.11.4"
+streamlit = "^1.39.0"
+pyyaml = "^6.0.2"
+pymongo = "^4.10.1"
+
+[tool.poetry.group.dev.dependencies]
+tencentcloud-sdk-python = "^3.0.1251"
+jwcrypto = "^1.5.6"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

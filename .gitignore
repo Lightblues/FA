@@ -5,6 +5,7 @@ ref_run/
 wandb/
 .env
 *.ipynb
+poetry.lock
 
 core.*
 
@@ -12,3 +13,4 @@ core.*
 __*/
 
 __pycache__/
+*.pyc

@@ -3,3 +3,6 @@ colorama
 jinja2
 python-engineio
 tencentcloud-sdk-python
+python-socketio
+streamlit
+pymongo
