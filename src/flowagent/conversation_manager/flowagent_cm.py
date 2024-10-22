@@ -10,7 +10,7 @@ from ..roles import (
     USER_NAME2CLASS, BOT_NAME2CLASS, API_NAME2CLASS, PDLBot
 )
 from .base_cm import BaseConversationManager
-from utils.wrappers import Timer
+from ..utils import Timer
 from ..pdl_controllers import NodeDependencyController, APIDuplicationController, CONTROLLER_NAME2CLASS, BaseController
 
 

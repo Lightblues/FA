@@ -5,10 +5,8 @@ LLMSimulatedUserWithProfile
 import re, random
 from typing import List, Tuple
 from .base import BaseUser
-from ..data import UserOutput, UserProfile, OOWIntention, Role, Message, LogUtils, init_client, LLM_CFG
-from utils.jinja_templates import jinja_render
-from utils.wrappers import retry_wrapper
-from easonsi.llm.openai_client import OpenAIClient, Formater
+from ..data import UserOutput, UserProfile, OOWIntention, Role, Message, LogUtils
+from ..utils import jinja_render, retry_wrapper, OpenAIClient, Formater, init_client, LLM_CFG
 
 
 class DummyUser(BaseUser):

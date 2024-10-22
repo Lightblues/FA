@@ -12,10 +12,9 @@ from easonsi.llm.openai_client import OpenAIClient, Formater
 from ..data import (
     Config, Role, Message, Conversation, 
     Workflow, DBManager, DataManager, UserProfile,
-    BaseLogger, LogUtils, LLM_CFG, init_client
+    BaseLogger, LogUtils
 )
-from utils.jinja_templates import jinja_render
-from utils.wrappers import retry_wrapper
+from ..utils import jinja_render, retry_wrapper, LLM_CFG, init_client
 
 
 class Judger:

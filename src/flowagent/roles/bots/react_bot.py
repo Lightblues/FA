@@ -1,41 +1,8 @@
-""" updated 240924
-- [x] add pdl bot
-    - [ ] check performance diff for JSON / React output
-- [ ] add lke bot? 
-"""
 import re, datetime, json
 from typing import List, Tuple
-from .base import BaseBot
-from ..data import BotOutput, BotOutputType, Message, Role, init_client, LLM_CFG, LogUtils
-from utils.jinja_templates import jinja_render
-from utils.wrappers import retry_wrapper
-from easonsi.llm.openai_client import OpenAIClient, Formater
-
-class DummyBot(BaseBot):
-    names: List[str] = ["dummy_bot"]
-    bot_template_fn: str = ""
-    
-    # def __init__(self, **args) -> None:
-    #     super().__init__(**args)
-
-    def process(self, *args, **kwargs) -> BotOutput:
-        """ 
-        1. generate ReAct format output by LLM
-        2. parse to BotOutput
-        """
-        self.cnt_bot_actions += 1
-        
-        if (self.cnt_bot_actions % 2) == 0:
-            bot_output = BotOutput(action="calling api!")
-            self.conv.add_message(
-                Message(role=Role.BOT, content="bot action..."),
-            )
-        else:
-            bot_output = BotOutput(response="bot response...")
-            self.conv.add_message(
-                Message(role=Role.BOT, content="bot response..."),
-            )
-        return bot_output
+from ..base import BaseBot
+from ...data import BotOutput, BotOutputType, Message, Role, LogUtils
+from ...utils import jinja_render, retry_wrapper, OpenAIClient, Formater, init_client, LLM_CFG
 
 
 class ReactBot(BaseBot):
@@ -45,7 +12,7 @@ class ReactBot(BaseBot):
         (Thought, Action, Action Input) for call api node
     """
     llm: OpenAIClient = None
-    bot_template_fn: str = "flowagent/bot_flowbench.jinja"
+    bot_template_fn: str = "flowagent/bot_flowbench.jinja"  # using the prompt from FlowBench
     names = ["ReactBot", "react_bot"]
     
     def __init__(self, **args) -> None:
@@ -115,46 +82,3 @@ class ReactBot(BaseBot):
             assert BotOutput.response_str in result, f"Response not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
             output = BotOutput(response=result[BotOutput.response_str], thought=thought)
         return output
-
-
-class PDLBot(ReactBot):
-    """ 
-    prediction format: 
-        (Thought, Response) for response node
-        (Thought, Action, Action Input) for call api node
-    """
-    llm: OpenAIClient = None
-    bot_template_fn: str = "flowagent/bot_pdl.jinja"
-    names = ["PDLBot", "pdl_bot"]
-    
-    def __init__(self, **args):
-        super().__init__(**args)
-    
-    def _gen_prompt(self) -> str:
-        state_infos = {
-            "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        }
-        state_infos |= self.workflow.pdl.status_for_prompt # NOTE: add the status infos from PDL!
-        prompt = jinja_render(
-            self.bot_template_fn,       # "flowagent/bot_pdl.jinja"
-            api_infos=self.workflow.toolbox,        # self.workflow.get_toolbox_by_names(valid_api_names),
-            PDL=self.workflow.pdl.to_str_wo_api(),  # .to_str()
-            conversation=self.conv.to_str(), 
-            current_state="\n".join(f"{k}: {v}" for k,v in state_infos.items()),
-        )
-        print(f"Current pdl state: {self.workflow.pdl.status_for_prompt}")
-        return prompt
-    
-    def _process(self, prompt:str=None) -> Tuple[str, BotOutput]:
-        llm_response = self.llm.query_one(prompt)
-        # transform json -> react format? 
-        prediction = self.parse_react_output(llm_response)
-        return llm_response, prediction
-    
-    # @staticmethod
-    # def parse_json_output(s: str) -> BotOutput:
-    #     parsed_response = Formater.parse_llm_output_json(s)
-    #     assert "action_type" in parsed_response, f"parsed_response: {parsed_response}"
-    #     action_type = ActionType[parsed_response["action_type"]]
-    #     action_metas = APICalling_Info(name=action_name, kwargs=action_parameters)
-    

@@ -3,7 +3,7 @@ from enum import Enum
 from .base import BaseRole, BaseAPIHandler, BaseBot, BaseUser
 from .api import DummyAPIHandler
 from .user import DummyUser, InputUser
-from .bot import DummyBot, PDLBot
+from .bots import DummyBot, PDLBot, ReactBot, CoREBot
 
 def build_attr_list_map(base_class: BaseRole, name_to_class_dict: Dict[str, BaseRole], attr: str="names"):
     for cls in base_class.__subclasses__():
