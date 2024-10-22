@@ -7,10 +7,10 @@ cfg.simulate_force_rerun = True
 
 cfg.user_mode = "llm_oow"
 cfg.user_oow_ratio = 0.8
+# cfg.user_mode = "input_user"
 cfg.user_profile_id = 0
 cfg.workflow_id = "002"
 
-# react
 mode = "core"
 if mode == "react":
     cfg.workflow_type = "text"
@@ -18,6 +18,7 @@ if mode == "react":
 elif mode == "core":
     cfg.workflow_type = "core"
     cfg.bot_mode = "core_bot"
+    cfg.api_mode = "core"
 elif mode == "pdl":
     cfg.workflow_type = "pdl"
     cfg.bot_mode = "pdl_bot"

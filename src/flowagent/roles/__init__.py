@@ -1,7 +1,7 @@
 from typing import Dict
 from enum import Enum
 from .base import BaseRole, BaseAPIHandler, BaseBot, BaseUser
-from .api import DummyAPIHandler
+from .tools import DummyAPIHandler, LLMSimulatedAPIHandler, CoREAPIHandler
 from .user import DummyUser, InputUser
 from .bots import DummyBot, PDLBot, ReactBot, CoREBot
 

@@ -20,7 +20,11 @@ You are a helpful assistant for the task of {{task_description}}.
 {{ conversation }}
 
 ### Question
-Question: {{ question }}
+Here is the current question maybe useful for your decision (but sometimes the question is not relevant).
+{{ question }}
+1. If the question mismatches the user's current query, response the user directly.
+2. If the question matched user's query, make decision based on the question.
+3. If the question is a binary choice between `Candidates`, give your result with the special `binary_choice` api. 
 
 ### Output format
 Your output format should be chosen from one of the two templates below. 
