@@ -10,16 +10,22 @@ usage:
         --conversation-turn-limit=20 --log-utterence-time --log-to-db
 """
 import typer
+from enum import Enum
 from typing import Literal
 from flowagent import Config, DataManager, FlowagentConversationManager, Judger, Evaluator
 from flowagent.data import WorkflowType, WorkflowTypeStr
 from flowagent.roles import UserMode, BotMode, ApiMode
 
+class Mode(str, Enum):
+    conv = "conv"
+    eval = "eval"
+    exp = "exp"
+
 app = typer.Typer()
 
 @app.command()
 def run_cli(
-    mode: Literal["conv", "eval"] = typer.Option("conv", help="Experiment mode", case_sensitive=False),
+    mode: Mode = typer.Option("conv", help="Experiment mode", case_sensitive=False),
     config: str = typer.Option("default.yaml", help="Configuration file"),
     workflow_dataset: str = typer.Option(None, help="Workflow dataset", case_sensitive=False),
     workflow_type: WorkflowTypeStr = typer.Option(None, help="Workflow type", case_sensitive=False),
@@ -64,13 +70,13 @@ def run_cli(
     if simulate_max_workers is not None: cfg.simulate_max_workers = simulate_max_workers
     if simulate_force_rerun is not None: cfg.simulate_force_rerun = simulate_force_rerun
 
-    if mode == "conv":
+    if mode.value == "conv":
         controller = FlowagentConversationManager(cfg)
         controller.start_conversation()
-    elif mode == "eval":
+    elif mode.value == "eval":
         judge = Judger(cfg)
         judge.start_judge()
-    elif mode == "exp":
+    elif mode.value == "exp":
         controller = Evaluator(cfg)
         controller.main()
 

@@ -22,6 +22,7 @@ class DataManager:
     DIR_src_base = (DIR_root / "src")
     
     DIR_config = DIR_root / "src/flowagent/configs"
+    DIR_wandb = DIR_root / "_wandb"
     
     DIR_data_root = DIR_root / "dataset"
     

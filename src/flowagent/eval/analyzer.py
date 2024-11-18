@@ -5,12 +5,12 @@ collect the evaluation results from DB, generate a report to WanDB
 - [ ] update param F1
 """
 
-import collections, wandb
+import wandb
 import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-from ..data import Config, DBManager, LogUtils
+from ..data import Config, DBManager, LogUtils, DataManager
 from .metric import MetricF1
 
 
@@ -33,7 +33,7 @@ class Analyzer:
         self._collect_exp_results()
         self.stat_dict = dict()
         if self.cfg.judge_log_to == "wandb":
-            wandb.init(project="pdl", name=cfg.exp_version)
+            wandb.init(project="pdl", name=cfg.exp_version, dir=DataManager.DIR_wandb)
     
     def _collect_exp_results(self):
         query_res = self.db.query_evaluations({ "exp_version": self.cfg.exp_version })

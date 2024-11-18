@@ -1,4 +1,18 @@
 ## TODOs
+1. PDL 是否可以自动转? 需要兼容新的节点定义 [待验证]
+
+
+
+
+241118
+- [ ] 实现工具: 现有画布转换, JSON -> PDL [可行性]
+- [ ] 验证在更大画布上的流程遵循稳定性
+    - [ ] 在新版本模型 (0.9.2) 上的效果测试
+- [ ] 探究多画布上的协作问题 & 通用插件的调用能力 [方案1] swarm 方案
+- [ ] 调研 MetaGPT 中 multi-agent 的通信方式
+
+
+
 
 see detailed in [feishu](https://v0r8x11vrv.feishu.cn/docx/WaMfdTbqaoH1WTx9ZDicVAB7nM9)
 
