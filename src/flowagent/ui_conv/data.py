@@ -27,7 +27,7 @@ def get_workflow_dirs() -> List[str]:
 def get_workflow_names_map() -> Dict[str, List[str]]:
     return DataManager.get_workflow_names_map()
 
-def refresh_conversation():
+def refresh_conversation() -> Conversation:
     print(f">> Refreshing conversation!")
     conversation = st.session_state.conversation = Conversation()
     selected_workflow_name = st.session_state.selected_workflow_name.split("-")[-1]
@@ -39,22 +39,18 @@ def refresh_conversation():
     st.session_state.t = now
     st.session_state.session_id = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
     st.session_state.logger = FileLogger(log_dir=st.session_state.data_manager.DIR_ui_log, t=st.session_state.t)  # note to set the log_dir
+    return conversation
 
-def refresh_bot():
-    print(f">> Refreshing bot: template_fn: {st.session_state.selected_template_fn} with model {st.session_state.selected_model_name}")
+def refresh_bot() -> PDL_UIBot:
+    print(f">> Refreshing bot: `{st.session_state.selected_template_fn}` with model `{st.session_state.selected_model_name}`")
     cfg:Config = st.session_state.config
-
     cfg.bot_template_fn = st.session_state.selected_template_fn
     cfg.bot_llm_name = st.session_state.selected_model_name
     
-    st.session_state.config = cfg
-    st.session_state.bot = PDL_UIBot(cfg=cfg)
-
-def init_bot():
-    cfg:Config = st.session_state.config
-    conv:Conversation = st.session_state.conversation
     workflow:Workflow = st.session_state.workflow
+    conv = refresh_conversation()
     st.session_state.bot = PDL_UIBot(cfg=cfg, conv=conv, workflow=workflow)
+    return st.session_state.bot
 
 def refresh_pdl(dir_change=False, PDL_str:str=None):
     """ 刷新PDL, 同时重制对话
@@ -82,9 +78,7 @@ def refresh_api():
 
 def init():
     assert "selected_workflow_name" in st.session_state, "workflow_name must be selected! "   # init_sidebar()
-    if "conversation" not in st.session_state:
-        refresh_conversation()
+    if "bot" not in st.session_state:
+        refresh_bot()
     if "api_handler" not in st.session_state:
         refresh_api()
-    if "bot" not in st.session_state:
-        init_bot()

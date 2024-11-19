@@ -6,6 +6,6 @@ from flowagent.ui_conv.app import main
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser()
-    args.add_argument("--config", type=str, default="default.yaml")
+    args.add_argument("--config", type=str, default="ui_deploy.yaml")
     args = args.parse_args()
     main(args.config)

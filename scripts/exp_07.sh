@@ -1,5 +1,5 @@
 # session OOW simulation for CORE
-cd /mnt/huabu/src/
+cd /work/huabu/src/
 
 MODEL=gpt-4o-mini # Qwen2-72B
 datasets=("PDL" "SGD" "STAR")

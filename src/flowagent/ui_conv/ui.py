@@ -9,16 +9,16 @@ from ..data import Config, Workflow, DataManager
 
 def init_page():
     st.set_page_config(
-        page_title="PDL Test",
+        page_title="PDL Agent",
         page_icon="🍊",
         initial_sidebar_state="auto",
-        # menu_items={
-        #     'Get Help': 'https://www.extremelycoolapp.com/help',
-        #     'Report a bug': "https://www.extremelycoolapp.com/bug",
-        #     'About': "# This is a header. This is an *extremely* cool app!"
-        # }
+        menu_items={
+            # 'Get Help': 'https://www.extremelycoolapp.com/help',
+            'Report a bug': "mailto:easonsshi@tencent.com",
+            # 'About': "# This is a header. This is an *extremely* cool app!"
+        }
     )
-    st.title('️🍊 PDL Test')
+    st.title('️🍊 PDL Agent')
 
     # def init_resource():
     # bot_icon = Image.open('resource/icon.png')
