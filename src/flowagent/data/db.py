@@ -1,5 +1,5 @@
 """ updated @240906
-
+- [ ] update to [af_core]
 """
 from typing import List
 import pymongo, pymongo.results
@@ -80,17 +80,3 @@ class DBManager:
         return res
 
 
-if __name__ == "__main__":
-    db_manager = DBManager(db_name="test_db", collection_name="messages")
-
-    message = Message(role=Role.USER, content="Hello", prompt="prompt", llm_response="response", conversation_id="conv1", utterance_id=1)
-    db_manager.insert_message(message)
-
-    conversation = Conversation()
-    conversation.msgs.append(message)
-    conversation.msgs.append(Message(role=Role.SYSTEM, content="Hi there!", prompt="prompt", llm_response="response", conversation_id="conv1", utterance_id=2))
-    db_manager.insert_conversation(conversation)
-
-    messages = db_manager.query_messages_by_conversation_id("conv1")
-    for msg in messages:
-        print(msg.to_str())

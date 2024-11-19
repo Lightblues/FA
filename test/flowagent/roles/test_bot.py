@@ -1,6 +1,6 @@
 from flowagent import Config, DataManager, Judger, Analyzer
 from flowagent.data import Conversation, Workflow, Role, Message
-from flowagent.roles import ReactBot, CoREBot
+from flowagent.roles import ReactBot, CoREBot, PDLBot
 
 def init_react_bot() -> ReactBot:
     cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
@@ -22,9 +22,22 @@ def init_core_bot() -> CoREBot:
     bot = CoREBot(cfg=cfg, conv=conv, workflow=workflow)
     return bot
 
+def init_pdl_bot() -> PDLBot:
+    cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
+    cfg.workflow_type = "pdl"
+    cfg.bot_mode = "pdl_bot"
+    cfg.workflow_dataset = "PDL_zh"
+    cfg.workflow_type = "pdl"
+    
+    workflow = Workflow(cfg)
+    conv = Conversation()
+    bot = PDLBot(cfg=cfg, conv=conv, workflow=workflow)
+    return bot
+
 if __name__ == '__main__':
     # bot = init_react_bot()
-    bot = init_core_bot()
+    # bot = init_core_bot()
+    bot = init_pdl_bot()
     conv = bot.conv
     
     query = "hello"

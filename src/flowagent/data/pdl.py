@@ -65,7 +65,7 @@ class PDL:
         infos = asdict(self)
         selected_keys = ["name", "desc", "desc_detail", "slots", "answers", "procedure"]
         infos_selected = {k: infos[k] for k in selected_keys}
-        return yaml.dump(infos_selected, sort_keys=False, Dumper=MyDumper, default_flow_style=False)
+        return yaml.dump(infos_selected, sort_keys=False, Dumper=MyDumper, default_flow_style=False, allow_unicode=True)
     
     def add_invalid_apis(self, api_list):
         for api in api_list:

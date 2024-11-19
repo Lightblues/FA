@@ -29,7 +29,7 @@ class UserOutput:
 class BotOutput:
     thought: str = None
     action: str = None                      # api name
-    action_input: Union[str, Dict] = None   # api paras
+    action_input: Dict = None               # api paras. deprecated: Union[str, Dict]
     response: str = None
     
     thought_str = "Thought"

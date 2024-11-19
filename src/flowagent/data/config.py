@@ -33,7 +33,7 @@ class Config:
     # pdl_check_api_w_tool_manipulation: bool = False  # whether to check API calls with tool manipulation
     bot_pdl_controllers: List[Dict] = field(default_factory=list)
     
-    api_mode: str = "llm"
+    api_mode: str = "llm"           # request/v01, llm
     api_template_fn: str = None     # "flowagent/api_llm.jinja"
     api_llm_name: str = "gpt-4o"
 

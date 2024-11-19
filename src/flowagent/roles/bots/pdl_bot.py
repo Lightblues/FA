@@ -20,6 +20,7 @@ class PDLBot(ReactBot):
             "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
         state_infos |= self.workflow.pdl.status_for_prompt # NOTE: add the status infos from PDL!
+        # TODO: format apis
         prompt = jinja_render(
             self.bot_template_fn,       # "flowagent/bot_pdl.jinja"
             api_infos=self.workflow.toolbox,        # self.workflow.get_toolbox_by_names(valid_api_names),

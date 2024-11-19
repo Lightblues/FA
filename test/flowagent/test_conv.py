@@ -5,13 +5,13 @@ from flowagent.roles import ReactBot, CoREBot, PDLBot
 cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
 cfg.simulate_force_rerun = True
 
-cfg.user_mode = "llm_oow"
+cfg.user_mode = "manual"
 cfg.user_oow_ratio = 0.8
 # cfg.user_mode = "input_user"
 cfg.user_profile_id = 0
-cfg.workflow_id = "002"
+cfg.workflow_id = "000"
 
-mode = "core"
+mode = "pdl"
 if mode == "react":
     cfg.workflow_type = "text"
     cfg.bot_mode = "react_bot"

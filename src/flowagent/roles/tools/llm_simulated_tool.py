@@ -44,7 +44,7 @@ class LLMSimulatedAPIHandler(BaseAPIHandler):
     
     def check_validation(self, apicalling_info: BotOutput) -> bool:
         # ... match the api by name? check params? 
-        api_names = [api["API"] for api in self.api_infos]
+        api_names = [api["name"] for api in self.api_infos]
         if apicalling_info.action not in api_names: 
             return False, f"<Calling API Error> : {apicalling_info.action} not in {api_names}"
         return True, None

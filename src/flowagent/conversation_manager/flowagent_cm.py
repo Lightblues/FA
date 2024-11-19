@@ -24,10 +24,10 @@ class FlowagentConversationManager(BaseConversationManager):
         super().__init__(cfg)
         self.workflow = Workflow(cfg)
         self.bot = BOT_NAME2CLASS[cfg.bot_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
+        self.user = USER_NAME2CLASS[cfg.user_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
+        self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
         
         if self.cfg.exp_mode == "session":
-            self.user = USER_NAME2CLASS[cfg.user_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
-            self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
             if isinstance(self.bot, PDLBot):    # for PDLBot, build the controllers
                 self.controllers: List[BaseController] = []
                 for c in self.cfg.bot_pdl_controllers:

@@ -12,7 +12,7 @@ from .config import Config
 from .pdl import PDL
 from .core import CoreFlow, CoreBlock
 from .base_data import ConversationWithIntention, Conversation
-
+from .tools import FunctionDefinition
 
 @dataclass
 class DataManager:
@@ -129,6 +129,7 @@ class Workflow:  # rename -> Data
         self.task_description = infos['task_description']
         self.task_detailed_description = infos['task_detailed_description']
         # 2. load the workflow & toolbox
+        # TODO: update toolbox
         with open(data_manager.DIR_data_workflow / f"tools/{self.id}.yaml", 'r') as f:
             self.toolbox = yaml.safe_load(f)
         with open(data_manager.DIR_data_workflow / f"{self.type.subdir}/{self.id}{self.type.suffix}", 'r') as f:
@@ -139,6 +140,7 @@ class Workflow:  # rename -> Data
         if self.type == WorkflowType.CORE:
             self.core_flow = CoreFlow.load_from_file(data_manager.DIR_data_workflow / f"core/{self.id}.txt")
         # 3. load the user infos
+        # TODO: load user profiles only when exp!
         if (self.cfg.exp_mode=="session"): # load_user_profiles:
             with open(data_manager.DIR_data_workflow / f"user_profile/{self.id}.json", 'r') as f:
                 user_profiles = json.load(f)

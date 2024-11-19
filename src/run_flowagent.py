@@ -1,12 +1,12 @@
 """ entrypoint for flowagent CLI
 usage:
     python run_flowagent.py --mode=conv \
-        --config=default.yaml --exp-version=default --exp-mode=turn \
-        --workflow-type=text --workflow-id=000 \
-        --user-mode=llm_profile --user-llm-name=gpt-4o --user-profile-id=0 \
+        --config=default.yaml --exp-version=default --exp-mode=session \
+        --workflow-dataset=PDL_zh --workflow-type=pdl --workflow-id=000 \
+        --user-mode=manual --user-llm-name=gpt-4o --user-profile-id=0 \
         --bot-mode=react_bot --bot-llm-name=gpt-4o \
-        --api-mode=llm --api-llm-name=gpt-4o \
-        --user-template-fn=baselines/user_llm.jinja --bot-template-fn=baselines/flowbench.jinja \
+        --api-mode=v01 --api-llm-name=gpt-4o \
+        --user-template-fn=flowagent/user_llm.jinja --bot-template-fn=flowagent/bot_pdl.jinja \
         --conversation-turn-limit=20 --log-utterence-time --log-to-db
 """
 import typer

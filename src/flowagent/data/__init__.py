@@ -6,4 +6,4 @@ from .user_profile import UserProfile, OOWIntention
 from .db import DBManager
 # dependecies
 from .base_data import Role, Message, Conversation, ConversationWithIntention
-from .log import BaseLogger, LogUtils
+from .log import BaseLogger, LogUtils, FileLogger

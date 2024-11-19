@@ -11,7 +11,9 @@
 - [ ] 探究多画布上的协作问题 & 通用插件的调用能力 [方案1] swarm 方案
 - [ ] 调研 MetaGPT 中 multi-agent 的通信方式
 
-
+misc
+- [ ] 合并 aget-pdl & master 分支 #P2
+- [ ] 标准化数据处理模块
 
 
 see detailed in [feishu](https://v0r8x11vrv.feishu.cn/docx/WaMfdTbqaoH1WTx9ZDicVAB7nM9)
@@ -77,3 +79,8 @@ python run_flowagent_cli.py --mode=conv \
     --conversation-turn-limit=20 --log-utterence-time --log-to-db
 ```
 
+## Updates
+
+- 241119
+    - 更新API定义为OpenAI格式;
+    - 实现 RequestAPIHandler
