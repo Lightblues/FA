@@ -10,3 +10,4 @@ gatherUsageStats = false
 
 [server]
 port = 18801
+fileWatcherType = "watchdog"

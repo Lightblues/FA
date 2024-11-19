@@ -136,8 +136,7 @@ class FileLogger(BaseLogger):
         _log_subdir = f"{log_dir}/{s_day}"
         os.makedirs(_log_subdir, exist_ok=True)
         self.log_fn = f"{_log_subdir}/{s_millisecond}.log"
-        log_detail_fn = f"{_log_subdir}/{s_millisecond}_detail.log"
-        self.log_detail_fn = log_detail_fn
+        self.log_detail_fn = f"{_log_subdir}/{s_millisecond}_detail.log"
         
         self.num_logs = 0
 

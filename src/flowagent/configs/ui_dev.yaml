@@ -3,6 +3,7 @@ ui_available_models:
   - "1.0.2"
   - "0.9.1"
   - "default"
+  - "gpt-4o"
 # ui_default_model: "1.0.2"
 ui_default_model: "default"
 ui_available_templates:

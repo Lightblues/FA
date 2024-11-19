@@ -8,12 +8,14 @@
 - [ ] 实现工具: 现有画布转换, JSON -> PDL [可行性]
 - [ ] 验证在更大画布上的流程遵循稳定性
     - [ ] 在新版本模型 (0.9.2) 上的效果测试
-- [ ] 探究多画布上的协作问题 & 通用插件的调用能力 [方案1] swarm 方案
+- [ ] 探究多画布上的协作问题 & 通用插件的调用能力 [方案1] swarm 方案 #P1
 - [ ] 调研 MetaGPT 中 multi-agent 的通信方式
 
 misc
-- [ ] 合并 aget-pdl & master 分支 #P2
+- [ ] 合并 aget-pdl & master 分支 #P2 (part 1)
 - [ ] 标准化数据处理模块
+- [ ] 合并数据存储
+- [ ] UI: 此前的功能实现: 自定义配置
 
 
 see detailed in [feishu](https://v0r8x11vrv.feishu.cn/docx/WaMfdTbqaoH1WTx9ZDicVAB7nM9)
@@ -55,7 +57,7 @@ prompting
 baselines
 
 - [x] FlowBench 
-- [ ] CoRE
+- [x] CoRE
 
 bugs
 
@@ -84,3 +86,4 @@ python run_flowagent_cli.py --mode=conv \
 - 241119
     - 更新API定义为OpenAI格式;
     - 实现 RequestAPIHandler
+    - 完成 agent-pdl 的UI迁移 (heavy work)

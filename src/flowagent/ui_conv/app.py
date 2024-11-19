@@ -15,17 +15,14 @@ url: http://agent-pdl.woa.com
 
 import time, os, json, glob, openai, yaml, datetime, pdb, copy, sys
 import streamlit as st
-from typing import List, Dict, Optional, Tuple
 
 from ..data import (
     DataManager, Config, Workflow, 
     Conversation, Message, Role, FileLogger,
     BotOutput, UserOutput, BotOutputType, APIOutput
 )
-from ..roles import RequestAPIHandler
 from .ui import init_page, init_sidebar
-from .data import init
-from .ui_bot import PDL_UIBot
+from .data import init_all
 
 
 # def set_global_exception_handler(f):
@@ -54,17 +51,13 @@ def main(config_version:str="default.yaml"):
         st.session_state.workflow = Workflow(st.session_state.config)
 
     init_page()
-    init_sidebar()      # data: DICT_workflow_info, user_additional_constraints, model_name, template_fn, workflow_dir, workflow_name
-    init()              # data: api_handler, 
-        # refresh: config, bot, (workflow_name, workflow_dir)
-        # refresh_conversation: conversation, conversation_infos, logger
+    init_sidebar()
+    init_all()
     
     # 2] prepare for session conversation
     config: Config = st.session_state.config
     conversation: Conversation = st.session_state.conversation
     logger: FileLogger = st.session_state.logger
-    bot: PDL_UIBot = st.session_state.bot
-    api: RequestAPIHandler = st.session_state.api_handler
     workflow: Workflow = st.session_state.workflow
     
     # curr_role, curr_action_type    # init!!! move to conversation_infos
@@ -80,7 +73,7 @@ def main(config_version:str="default.yaml"):
     # if conversation_infos.curr_action_type == ActionType.START:   # NOTE: 仍然为导致输出两遍!!
     if logger.num_logs == 0:
         logger.log(f"{'config'.center(50, '=')}\n{config.to_dict()}\n{'-'*50}", with_print=_with_print)
-        logger.log(f"available apis: {workflow.toolbox}\n{'-'*50}", with_print=_with_print)
+        logger.log(f"available apis: {[t['name'] for t in workflow.toolbox]}\n{'-'*50}", with_print=_with_print)
         logger.log(conversation.msgs[0].to_str(), with_print=_with_print)
 
     # 3] the main loop!
@@ -111,14 +104,17 @@ def main(config_version:str="default.yaml"):
                 # 0. pre-control
                 # self._pre_control(bot_output)
                 # 1. bot predict an action
-                prompt, stream = bot.process_stream()
+                prompt, stream = st.session_state.bot.process_stream()
                 with st.expander(f"Thinking...", expanded=True):
                     llm_response = st.write_stream(stream)
-                bot_output: BotOutput = bot.process_LLM_response(prompt, llm_response)
-                    # _debug_msg = f"{'[BOT]'.center(50, '=')}\n<<lllm prompt>>\n{action_metas['prompt']}\n\n<<llm response>>\n{action_metas['llm_response']}\n"
+                bot_output: BotOutput = st.session_state.bot.process_LLM_response(prompt, llm_response)
+                _debug_msg = f"{'[BOT]'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
+                logger.debug(_debug_msg)
+                
                 # 2. STOP: break until bot RESPONSE
                 if bot_output.action_type == BotOutputType.END: break  # TODO: remove END for web version
                 elif bot_output.action_type == BotOutputType.RESPONSE:
+                    logger.log(conversation.get_last_message().to_str(), with_print=_with_print)
                     break
                 elif bot_output.action_type == BotOutputType.ACTION:
                     # TODO: action control
@@ -130,9 +126,10 @@ def main(config_version:str="default.yaml"):
                     # _debug_msg = f"{'[PDL_controller]'.center(50, '=')}\n<<requested api>>\n{msg.content}\n\n<<controller response>>\n{sys_msg_str}\n"
                     # st.markdown(f'<p style="color: red;">[controller error] <code>{sys_msg_str}</code></p>', unsafe_allow_html=True)
                     # 3.2 call the API (system)
-                    api_output: APIOutput = api.process(bot_output)
-                    # _debug_msg = f"{'[API]'.center(50, '=')}\n<<calling api>>\n{_debug_info}\n\n<< api response>>\n{msg.content}\n"
+                    api_output: APIOutput = st.session_state.api_handler.process(bot_output)
                     st.markdown(f'<p style="color: green;">[API call] Got <code>{api_output.response_data}</code> from <code>{api_output.request}</code></p>', unsafe_allow_html=True)
+                    _debug_msg = f"{'[API]'.center(50, '=')}\n<<calling api>>\n{api_output.request}\n\n<< api response>>\n{api_output.response_data}\n"
+                    logger.debug(_debug_msg)
                 else: raise TypeError(f"Unexpected BotOutputType: {bot_output.action_type}")
                 
                 num_bot_actions += 1

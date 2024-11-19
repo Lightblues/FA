@@ -3,7 +3,7 @@ import streamlit as st
 from .uid import get_identity
 from .data import (
     get_template_name_list, get_model_name_list, get_workflow_dirs, get_workflow_names_map, 
-    refresh_bot, refresh_pdl, refresh_conversation
+    refresh_bot, refresh_workflow
 )
 from ..data import Config, Workflow, DataManager
 
@@ -61,7 +61,7 @@ def init_sidebar():
     _model_names = get_model_name_list()
     _template_names = get_template_name_list()
     _workflow_dirs = get_workflow_dirs()
-    _workflow_info = get_workflow_names_map()
+    _workflow_names_map, _ = get_workflow_names_map()
     
     # set the shown model names
     if config.ui_available_models:
@@ -113,15 +113,15 @@ def init_sidebar():
                 options=LIST_shown_dirs,
                 key="selected_workflow_dir",
                 format_func=lambda x: x.split("/")[-1],     # NOTE: only show the last subdir
-                on_change=lambda: refresh_pdl(dir_change=True)
+                # on_change=lambda: refresh_pdl(dir_change=True) # TODO: 需要这个接口吗? 
             )
         with select_col4:
             st.selectbox(
                 '选择画布',
-                options=_workflow_info[st.session_state.selected_workflow_dir],
+                options=_workflow_names_map[st.session_state.selected_workflow_dir],
                 key="selected_workflow_name",
                 index=0,        # default to choose the first one
-                on_change=refresh_pdl
+                on_change=refresh_workflow
             )
         
         with st.expander(f"⚙️ 自定义配置", expanded=False):
@@ -134,7 +134,7 @@ def init_sidebar():
                 if not st.session_state.user_additional_constraints:
                     st.warning("请填写自定义约束")
                 else:
-                    refresh_conversation()
+                    refresh_bot()
                     # print(f">> user_additional_constraints: {st.session_state.user_additional_constraints}")
 
         st.divider()
@@ -142,7 +142,7 @@ def init_sidebar():
         with button_col1:
             st.button(
                 '重置对话',
-                on_click=refresh_conversation
+                on_click=refresh_bot
             )
         with button_col2:
             st.link_button(
@@ -157,9 +157,10 @@ def init_sidebar():
             template = f.read()
         
         with st.expander(f"🔍 PDL", expanded=False):
-            st.text(f"{workflow.pdl.to_str()}")
+            st.code(f"{workflow.pdl.to_str()}", language="plaintext")
         with st.expander(f"🔍 Template", expanded=False):
-            st.text(f"{template}")
+            st.code(f"{template}", language="plaintext")
+            
 
         st.divider()
         st.info(f"- sessionid: {st.session_state.session_id}\n- name: {st.session_state.user_identity['staffname']}")

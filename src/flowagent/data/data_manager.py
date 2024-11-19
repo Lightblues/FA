@@ -70,11 +70,13 @@ class DataManager:
     @staticmethod
     def get_workflow_names_map():
         dirs = DataManager.get_workflow_dirs()
-        names_map = {}
+        names_map = {}      # {PDL_zh: ["task1", "task2"]}
+        name_id_map = {} # {PDL_zh: {"task1": "000"}}
         for dir in dirs:
             fn = DataManager.DIR_data_root / dir / "task_infos.json"
             if not os.path.exists(fn): continue
             infos = json.load(open(fn, 'r'))
             names_map[dir] = [task_info['name'] for task_info in infos['task_infos'].values()]
-        return names_map
+            name_id_map[dir] = {task_info['name']: key for key, task_info in infos['task_infos'].items()}
+        return names_map, name_id_map
     
