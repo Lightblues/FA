@@ -4,7 +4,7 @@ from typing import List, Dict, Optional, Tuple, Union
 from easonsi.llm.openai_client import OpenAIClient
 from ..data import (
     Config, UserOutput, BotOutput, APIOutput, BotOutputType,
-    Conversation, Message, Role, Workflow
+    Conversation, Workflow
 )
 
 

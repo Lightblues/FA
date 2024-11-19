@@ -1,0 +1,80 @@
+import json, os
+from pathlib import Path
+from dataclasses import dataclass, asdict, field
+from .config import Config
+
+
+@dataclass
+class DataManager:
+    cfg: Config = None
+    
+    DIR_root = Path(__file__).resolve().parent.parent.parent.parent
+    DIR_src_base = (DIR_root / "src")
+    
+    DIR_config = DIR_root / "src/flowagent/configs"
+    DIR_template = DIR_root / "src/flowagent/utils/templates/flowagent"
+    DIR_wandb = DIR_root / "_wandb"
+    DIR_ui_log = DIR_root / "log/ui"
+    
+    DIR_data_root = DIR_root / "dataset"
+    
+    DIR_data_workflow = None               # subdir for specific dataset
+    FN_data_workflow_infos = None
+    
+    data_version: str = None
+    workflow_infos: dict = field(default_factory=dict)
+    
+    def __init__(self, cfg:Config) -> None:
+        self.cfg = cfg
+        self._build_workflow_infos(cfg.workflow_dataset)
+        
+    def _build_workflow_infos(self, workflow_dataset: str):
+        self.DIR_data_workflow = self.DIR_data_root / workflow_dataset
+        self.FN_data_workflow_infos = self.DIR_data_workflow / "task_infos.json"
+        infos: dict = json.load(open(self.FN_data_workflow_infos, 'r'))
+        self.workflow_dataset = workflow_dataset
+        self.data_version = infos['version']
+        self.workflow_infos = infos['task_infos']
+    
+    def refresh_config(self, cfg: Config) -> None:
+        self.cfg = cfg
+        self._build_workflow_infos(cfg.workflow_dataset)
+
+    @staticmethod
+    def normalize_config_name(config_name:str):
+        config_fn = DataManager.DIR_config / config_name
+        return config_fn
+
+    @property
+    def num_workflows(self):
+        return len(self.workflow_infos)
+    
+    def get_workflow_dataset_names(self):
+        # return folder name in self.DIR_data_root
+        all_entries = os.listdir(self.DIR_data_root)
+        names = [entry for entry in all_entries if os.path.isdir(os.path.join(self.DIR_data_root, entry))]
+        return names
+
+
+    # --------------------- for ui ---------------------
+    @staticmethod
+    def get_template_name_list(prefix:str="bot_"):
+        fns = [fn for fn in os.listdir(DataManager.DIR_template) if fn.startswith(prefix)]
+        return list(sorted(fns))
+
+    @staticmethod
+    def get_workflow_dirs():
+        dirs = [entry for entry in os.listdir(DataManager.DIR_data_root) if os.path.isdir(os.path.join(DataManager.DIR_data_root, entry))]
+        return dirs
+    
+    @staticmethod
+    def get_workflow_names_map():
+        dirs = DataManager.get_workflow_dirs()
+        names_map = {}
+        for dir in dirs:
+            fn = DataManager.DIR_data_root / dir / "task_infos.json"
+            if not os.path.exists(fn): continue
+            infos = json.load(open(fn, 'r'))
+            names_map[dir] = [task_info['name'] for task_info in infos['task_infos'].values()]
+        return names_map
+    

@@ -1,4 +1,5 @@
-from .workflow import Workflow, DataManager, WorkflowType, WorkflowTypeStr
+from .data_manager import DataManager
+from .workflow import Workflow, WorkflowType, WorkflowTypeStr
 from .pdl import PDL
 from .config import Config
 from .role_outputs import BotOutput, UserOutput, APIOutput, BotOutputType

@@ -18,6 +18,7 @@ class ReactBot(BaseBot):
     def __init__(self, **args) -> None:
         super().__init__(**args)
         self.llm = init_client(llm_cfg=LLM_CFG[self.cfg.bot_llm_name])
+        if self.cfg.bot_template_fn is not None: self.bot_template_fn = self.cfg.bot_template_fn
         
     def process(self, *args, **kwargs) -> BotOutput:
         """ mian process logic.

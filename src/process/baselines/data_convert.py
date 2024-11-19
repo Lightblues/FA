@@ -268,18 +268,11 @@ class DataConverter:
         os.makedirs(ODIR / "tools", exist_ok=True)
         num_success = 0
         for name, oname in self.name_map.items():
-            try:
-                # check that code in not binary
-                if check_is_binary(IDIR / subdir / f"{name}.json"):
-                    raise Exception(f"{name} is binary")
-                with open(IDIR / subdir / f"{name}.json", "r") as f:
-                    data = json.load(f)
-                with open(ODIR / "tools" / f"{oname}.yaml", "w") as f:
-                    yaml.dump(data, f, indent=2, sort_keys=False)
-                num_success += 1
-            except Exception as e:
-                print(f"Error for {name}: {e}")
-                continue
+            with open(IDIR / subdir / f"{name}.json", "r") as f:
+                data = json.load(f)
+            with open(ODIR / "tools" / f"{oname}.yaml", "w") as f:
+                yaml.dump(data, f, indent=2, sort_keys=False)
+            num_success += 1
         print(f"Converted {num_success} tasks")
         return num_success
 
@@ -290,8 +283,8 @@ if __name__ == '__main__':
     # c.convert_format_code()
     # c.convert_format_pdl()
     # c.convert_format_flowchart()
-    c.convert_format_core()
+    # c.convert_format_core()
     # c.convert_format_text()
     # c.convert_format_userprofile()
-    # c.convert_format_api("../apis")
+    c.convert_format_api("../apis")
     # c.convert_format_convsation()

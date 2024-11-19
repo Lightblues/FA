@@ -1,0 +1,65 @@
+
+ui_available_models: 
+  - "1.0.2"
+  - "0.9.1"
+  - "default"
+ui_default_model: "1.0.2"
+ui_available_templates:
+  - bot_pdl.jinja
+ui_available_workflow_dirs:
+  - PDL_zh
+ui_available_workflows:
+  - 
+ui_greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
+
+bot_mode: "pdl_bot"     # dummy_bot, react_bot, pdl_bot, core_bot
+bot_template_fn: "flowagent/bot_pdl.jinja"
+bot_llm_name: "gpt-4o"
+bot_action_limit: 5
+bot_pdl_controllers: 
+  - {name: "api_duplication", config: {if_pre: true, if_post: true, threshold: 2}}
+  - {name: "node_dependency", config: {if_pre: true, if_post: true}}
+  - {name: "session_length", config: {if_pre: true, min: 5, max: 15}}
+
+api_mode: "request"           # dummy_api, llm, core, request
+api_template_fn: null     # "flowagent/api_llm.jinja"
+api_llm_name: "gpt-4o-mini"
+
+
+# NOTE: the following 5 fields identify one experiment!!!
+# specifically, workflow_dataset & workflow_type should be all same for one exp_version
+# i.e. one `exp_version + workflow_id` identify one experiment
+workflow_dataset: "PDL_zh"
+workflow_type: "pdl"      # text, code, flowchart, pdl, core
+workflow_id: "000"
+exp_version: "default"
+exp_mode: "session"        # session, turn
+exp_save_config: false
+exp_check_if_run: false    # DONOT check this experiment if it has been run if set as false!
+
+user_mode: "input_user"   # dummy_user, input_user, llm_profile, llm_oow
+user_llm_name: "gpt-4o-mini"
+user_template_fn: null    # "flowagent/user_llm.jinja"
+# user_profile: true      # -> exp_mode
+user_profile_id: 0
+user_oow_ratio: 0.2
+
+
+
+conversation_turn_limit: 20
+log_utterence_time: false
+log_to_db: true
+
+db_uri: 'mongodb://9.134.230.111:27017'
+db_name: "pdl"
+db_message_collection_name: "messages"
+db_meta_collection_name: "config"
+
+simulate_num_persona: 5
+simulate_max_workers: 10
+
+judge_max_workers: 10
+judge_model_name: "gpt-4o"
+judge_conversation_id: "2024-09-19 15:20:53.462895"
+judge_log_to: "wandb"
+judge_force_rejudge: false

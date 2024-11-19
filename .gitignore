@@ -1,5 +1,4 @@
-ref/
-ref_run/
+/log/
 /data/
 *tmp*
 wandb/

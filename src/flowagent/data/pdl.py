@@ -60,12 +60,12 @@ class PDL:
         self.status_for_prompt = {}
 
     def to_str(self):
-        return self.PDL_str
+        return self.PDL_str.strip()
     def to_str_wo_api(self):
         infos = asdict(self)
         selected_keys = ["name", "desc", "desc_detail", "slots", "answers", "procedure"]
         infos_selected = {k: infos[k] for k in selected_keys}
-        return yaml.dump(infos_selected, sort_keys=False, Dumper=MyDumper, default_flow_style=False, allow_unicode=True)
+        return yaml.dump(infos_selected, sort_keys=False, Dumper=MyDumper, default_flow_style=False, allow_unicode=True).strip()
     
     def add_invalid_apis(self, api_list):
         for api in api_list:

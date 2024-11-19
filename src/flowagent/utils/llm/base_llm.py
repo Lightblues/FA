@@ -69,6 +69,7 @@ add_local_models()
 _name_map = {
     "default": "qwen2.5_72B",
     "0.9.1": "Qwen1.5-72B-4M-1_0_3-Agent-1_2_KU_woClarify_AllRandom",
+    "1.0.2": "Taskformer1.0.2",
 }
 for k,v in _name_map.items():
     LLM_CFG[k] = LLM_CFG[v]

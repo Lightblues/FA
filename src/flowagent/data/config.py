@@ -36,7 +36,15 @@ class Config:
     api_mode: str = "llm"           # request/v01, llm
     api_template_fn: str = None     # "flowagent/api_llm.jinja"
     api_llm_name: str = "gpt-4o"
-
+    
+    ui_available_models: List[str] = None
+    ui_available_templates: List[str] = None
+    ui_available_workflow_dirs: List[str] = None
+    ui_available_workflows: List[str] = None
+    ui_default_model: str = "default"
+    ui_greeting_msg: str = "Hi, I'm HuaBu bot. How can I help you?"
+    ui_bot_template_fn: str = None     # "flowagent/bot_pdl.jinja"
+    
     conversation_turn_limit: int = 20
     log_utterence_time: bool = True
     log_to_db: bool = True

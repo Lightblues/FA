@@ -5,7 +5,6 @@ WorkflowType: text, code, flowchart, pdl
 import yaml, json, os
 from dataclasses import dataclass, asdict, field
 from enum import Enum, auto
-from pathlib import Path
 from typing import List, Dict, Optional, Union
 from .user_profile import UserProfile, OOWIntention
 from .config import Config
@@ -13,55 +12,7 @@ from .pdl import PDL
 from .core import CoreFlow, CoreBlock
 from .base_data import ConversationWithIntention, Conversation
 from .tools import FunctionDefinition
-
-@dataclass
-class DataManager:
-    cfg: Config = None
-    
-    DIR_root = Path(__file__).resolve().parent.parent.parent.parent
-    DIR_src_base = (DIR_root / "src")
-    
-    DIR_config = DIR_root / "src/flowagent/configs"
-    DIR_wandb = DIR_root / "_wandb"
-    
-    DIR_data_root = DIR_root / "dataset"
-    
-    DIR_data_workflow = None               # subdir for specific dataset
-    FN_data_workflow_infos = None
-    
-    data_version: str = None
-    workflow_infos: dict = field(default_factory=dict)
-    
-    def __init__(self, cfg:Config) -> None:
-        self.cfg = cfg
-        self._build_workflow_infos(cfg.workflow_dataset)
-        
-    def _build_workflow_infos(self, workflow_dataset: str):
-        self.DIR_data_workflow = self.DIR_data_root / workflow_dataset
-        self.FN_data_workflow_infos = self.DIR_data_workflow / "task_infos.json"
-        infos: dict = json.load(open(self.FN_data_workflow_infos, 'r'))
-        self.data_version = infos['version']
-        self.workflow_infos = infos['task_infos']
-    
-    def refresh_config(self, cfg: Config) -> None:
-        self.cfg = cfg
-        self._build_workflow_infos(cfg.workflow_dataset)
-
-    @staticmethod
-    def normalize_config_name(config_name:str):
-        config_fn = DataManager.DIR_config / config_name
-        return config_fn
-
-    @property
-    def num_workflows(self):
-        return len(self.workflow_infos)
-    
-    def get_workflow_dataset_names(self):
-        # return folder name in self.DIR_data_root
-        all_entries = os.listdir(self.DIR_data_root)
-        names = [entry for entry in all_entries if os.path.isdir(os.path.join(self.DIR_data_root, entry))]
-        return names
-
+from .data_manager import DataManager
 
 class WorkflowType(Enum):
     TEXT = ("TEXT", "format for natural language", ".txt", 'text')
