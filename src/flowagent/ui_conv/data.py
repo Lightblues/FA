@@ -43,7 +43,7 @@ def refresh_conversation() -> Conversation:
     now = datetime.datetime.now()
     st.session_state.t = now
     st.session_state.session_id = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
-    st.session_state.logger = FileLogger(log_dir=st.session_state.data_manager.DIR_ui_log, t=st.session_state.t)  # note to set the log_dir
+    # st.session_state.logger = FileLogger(log_dir=st.session_state.data_manager.DIR_ui_log, t=st.session_state.t)  # note to set the log_dir
     return st.session_state.conversation
 
 def refresh_bot() -> PDL_UIBot:

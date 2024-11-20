@@ -1,10 +1,12 @@
-import os, datetime, traceback, functools, tabulate, pprint, textwrap
+import os, sys, datetime, traceback, functools, tabulate, pprint, textwrap
 from collections import defaultdict
 from pathlib import Path
 from typing import List, Dict, Optional, Union, Any
 from colorama import init, Fore, Style
 init(autoreset=True)        # Reset color to default (autoreset=True handles this automatically)
 import pandas as pd
+from loguru import logger
+from loguru._logger import Logger
 
 COLOR_DICT = defaultdict(lambda: Style.RESET_ALL)
 COLOR_DICT.update({
@@ -152,6 +154,37 @@ class FileLogger(BaseLogger):
         with open(self.log_detail_fn, 'a') as f:
             f.write(f"{message}\n\n")
             f.flush()
+
+
+def init_loguru_logger(log_dir="logs") -> "Logger":
+    """initialize the loguru logger
+
+    Args:
+        log_dir (str, optional): the directory to save the log files. Defaults to "logs".
+
+    Returns:
+        Logger: loguru.logger
+
+    Examples::
+
+        logger = init_loguru_logger()
+        logger.info("logging to main log")
+        logger.bind(custom=True).debug("logging to custom log")
+    """
+    os.makedirs(log_dir, exist_ok=True)
+    
+    logger.remove()
+    logger.add(
+        f"{log_dir}/custom_debug.log",
+        rotation="10 MB",
+        compression="zip",
+        level="DEBUG",
+        filter=lambda record: "custom" in record["extra"],
+    )
+    logger.add(f"{log_dir}/app.log", rotation="10 MB", compression="zip", level="INFO")
+    logger.add(sys.stdout, level="INFO")
+    return logger
+
 
 
 if __name__ == '__main__':

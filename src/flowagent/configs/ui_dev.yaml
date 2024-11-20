@@ -5,7 +5,7 @@ ui_available_models:
   - "default"
   - "gpt-4o"
 # ui_default_model: "1.0.2"
-ui_default_model: "default"
+ui_default_model: "gpt-4o"
 ui_available_templates:
   - bot_pdl.jinja
 ui_available_workflow_dirs:

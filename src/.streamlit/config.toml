@@ -1,4 +1,6 @@
+# https://docs.streamlit.io/develop/api-reference/configuration/config.toml
 [theme]
+layout = "wide"
 primaryColor = "#FFA500"  # 橙色
 backgroundColor = "#FFF5E6"  # 非常浅的橙色
 secondaryBackgroundColor = "#FFE5B4"  # 浅橙色
@@ -10,4 +12,5 @@ gatherUsageStats = false
 
 [server]
 port = 18801
-fileWatcherType = "watchdog"
+runOnSave = true
+fileWatcherType = "auto"  # watchdog
