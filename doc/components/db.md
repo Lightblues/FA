@@ -1,4 +1,20 @@
-## 数据存储 (mongo)
+```python
+    def insert_conversation(self, conversation: Conversation):
+    def query_messages_by_conversation_id(self, conversation_id: str) -> Conversation:
+    
+    def insert_config(self, infos: dict):
+    def query_config_by_conversation_id(self, conversation_id: str) -> dict:
+    def get_most_recent_unique_conversation_ids(self, query={})
+
+    def query_evaluations(self, query: dict = {}, limit: int = 0) -> List[dict]:
+    def insert_evaluation(self, eval_result: dict):
+
+    # base_cm
+    def query_run_experiments(self, query: dict = {}, limit: int = 0) -> List[dict]:
+    def delete_run_experiments(self, query: dict = {}):
+```
+
+### 数据存储 (mongo)
 
 1. `conversation_id` 标记一个会话, 关联三张表
 2. `exp_version` 标记一组实验, 一个exp_version中的实验包含相同的 workflow_dataset & workflow_type

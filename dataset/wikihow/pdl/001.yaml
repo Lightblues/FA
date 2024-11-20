@@ -1,0 +1,22 @@
+Name: Find the Publication Date of a Website
+Desc: A guide to finding the publication date of a webpage 
+
+SUBTASKs:
+  - name: CheckPageAndURL
+    steps:
+      - Look underneath the headline of an article or blog post ...
+      - Check the bottom of the web page for a copyright date.
+      - See if the date is part of the URL.
+      - Look at the timestamps on any comments to get ...
+  - name: UseGoogleSearch
+    ...
+  - name: UseWaybackMachine
+    ...
+  - name: SearchSourceCode
+    ...
+
+PDL: |
+  [publication_date] = SUBTASK_CheckPageAndURL()
+  if publication_date is None:
+    [publication_date] = SUBTASK_UseGoogleSearch()
+  ...

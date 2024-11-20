@@ -144,3 +144,7 @@ def main(config_version:str="default.yaml"):
         with st.chat_message("assistant", avatar=st.session_state['avatars']['assistant']):
             st.write(conversation.get_last_message().content)
 
+        # DB
+        # infos_dict = {
+        #     "conversation_id": conversation.conversation_id, **config.to_dict()
+        # }
