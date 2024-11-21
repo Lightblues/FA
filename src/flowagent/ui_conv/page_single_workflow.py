@@ -52,6 +52,7 @@ def step_user_input(OBJECTIVE: str):
     # self.logger.info(f"{msg_user.to_str()}")
 
 def step_bot_prediction() -> BotOutput:
+    print(f">> conversation: {json.dumps(str(self.conv), ensure_ascii=False)}")
     prompt, stream = self.bot.process_stream()
     with st.expander(f"Thinking...", expanded=True):
         llm_response = st.write_stream(stream)
@@ -92,8 +93,6 @@ def main_single():
     show_conversations(conv)
     if OBJECTIVE := st.chat_input('Input...'):
         step_user_input(OBJECTIVE)
-        print(f">> conversation: {json.dumps(str(conv), ensure_ascii=False)}")
-
         with st.container():
             num_bot_actions = 0
             while True:

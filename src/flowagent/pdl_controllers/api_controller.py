@@ -28,6 +28,6 @@ class APIDuplicationController(BaseController):
             if previous_msg.role != Role.BOT: continue
             if previous_msg.content != app_calling_info: break
             duplicate_cnt += 1
-            if duplicate_cnt >= self.config['threshold']:
+            if duplicate_cnt > self.config['threshold']:
                 return False
         return True

@@ -83,6 +83,9 @@ python run_flowagent_cli.py --mode=conv \
 
 ## Updates
 
+- 241121
+    - 完成UI中控制controllers
+    - 分离 refresh 逻辑 (workflow, bot, controller, api)
 - 241119
     - 更新API定义为OpenAI格式;
     - 实现 RequestAPIHandler
