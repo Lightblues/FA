@@ -4,7 +4,7 @@ from flowagent import Config, DataManager, Evaluator
 
 if __name__ == '__main__':
     cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
-    cfg.workflow_dataset = "PDL"
+    cfg.workflow_dataset = "PDL_zh"
     cfg.exp_mode = "turn"
     cfg.exp_version = "test_turn"
     # cfg.user_mode = "manual"

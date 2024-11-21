@@ -82,11 +82,11 @@ def init_sidebar():
     else:
         LIST_shown_dirs = _workflow_dirs
     # set the shown workflow names
-    if config.ui_available_workflows:
-        # for d, l in DICT_workflow_info.items():
-        #     assert all(i in l for i in config.ui_available_workflows), f"config workflows: {config.ui_available_workflows} not in workflow_list: {l}"
-        #     DICT_workflow_info[d] = config.ui_available_workflows
-        pass
+    # if config.ui_available_workflows:
+    #     # for d, l in DICT_workflow_info.items():
+    #     #     assert all(i in l for i in config.ui_available_workflows), f"config workflows: {config.ui_available_workflows} not in workflow_list: {l}"
+    #     #     DICT_workflow_info[d] = config.ui_available_workflows
+    #     pass
     
     with st.sidebar:
         select_col1, select_col2 = st.columns(2)
@@ -103,22 +103,22 @@ def init_sidebar():
                 '选择模板',
                 options=LIST_shown_templates,
                 key="selected_template_fn",
-                on_change=refresh_bot
+                on_change=refresh_workflow
             )
         
         select_col3, select_col4 = st.columns(2)
         with select_col3:
             st.selectbox(
-                '选择画布目录',
+                '选择画布版本',
                 options=LIST_shown_dirs,
-                key="selected_workflow_dir",
+                key="selected_workflow_version",
                 format_func=lambda x: x.split("/")[-1],     # NOTE: only show the last subdir
-                # on_change=lambda: refresh_pdl(dir_change=True) # TODO: 需要这个接口吗? 
+                on_change=refresh_workflow
             )
         with select_col4:
             st.selectbox(
                 '选择画布',
-                options=_workflow_names_map[st.session_state.selected_workflow_dir],
+                options=_workflow_names_map["PDL_zh"],
                 key="selected_workflow_name",
                 index=0,        # default to choose the first one
                 on_change=refresh_workflow

@@ -32,6 +32,7 @@ class Config:
     # pdl_check_api_dup_calls_threshold: int = 2
     # pdl_check_api_w_tool_manipulation: bool = False  # whether to check API calls with tool manipulation
     bot_pdl_controllers: List[Dict] = field(default_factory=list)
+    bot_pdl_version: str = "pdl_2.1"
     
     api_mode: str = "llm"           # request/v01, llm
     api_template_fn: str = None     # "flowagent/api_llm.jinja"
@@ -40,10 +41,11 @@ class Config:
     ui_available_models: List[str] = None
     ui_available_templates: List[str] = None
     ui_available_workflow_dirs: List[str] = None
-    ui_available_workflows: List[str] = None
+    ui_available_workflows: List[str] = None        # NOTE: 暂未生效
     ui_default_model: str = "default"
     ui_greeting_msg: str = "Hi, I'm HuaBu bot. How can I help you?"
-    ui_bot_template_fn: str = None     # "flowagent/bot_pdl.jinja"
+    ui_bot_template_fn: str = None     # "flowagent/bot_pdl_ui.jinja"
+    ui_user_additional_constraints: str = None
     
     conversation_turn_limit: int = 20
     log_utterence_time: bool = True

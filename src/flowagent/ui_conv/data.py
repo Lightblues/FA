@@ -22,7 +22,7 @@ def get_model_name_list():
 
 @st.cache_data
 def get_workflow_dirs() -> List[str]:
-    return DataManager.get_workflow_dirs()
+    return DataManager.get_workflow_versions()
 
 @st.cache_data
 def get_workflow_names_map() -> Dict[str, List[str]]:
@@ -51,6 +51,8 @@ def refresh_bot() -> PDL_UIBot:
     cfg:Config = st.session_state.config
     cfg.bot_template_fn = st.session_state.selected_template_fn
     cfg.bot_llm_name = st.session_state.selected_model_name
+    if st.session_state.user_additional_constraints is not None:
+        cfg.ui_user_additional_constraints = st.session_state.user_additional_constraints
     
     workflow:Workflow = st.session_state.workflow
     conv = refresh_conversation()
@@ -60,9 +62,10 @@ def refresh_bot() -> PDL_UIBot:
 
 def refresh_workflow():
     # st.session_state.config.workflow_dataset = ...
+    st.session_state.config.bot_pdl_version = st.session_state.selected_workflow_version
     _, name_id_map = get_workflow_names_map()
-    st.session_state.config.workflow_id = name_id_map[st.session_state.selected_workflow_dir][st.session_state.selected_workflow_name]
-    print(f">> Refreshing workflow: `{st.session_state.config.workflow_id}`\n  {name_id_map[st.session_state.selected_workflow_dir]}")
+    st.session_state.config.workflow_id = name_id_map['PDL_zh'][st.session_state.selected_workflow_name]
+    print(f">> Refreshing workflow: `{st.session_state.selected_workflow_name}` of ``")
     st.session_state.workflow = Workflow(st.session_state.config)
     refresh_bot()
 

@@ -86,7 +86,8 @@ class Workflow:  # rename -> Data
         with open(data_manager.DIR_data_workflow / f"{self.type.subdir}/{self.id}{self.type.suffix}", 'r') as f:
             self.workflow = f.read().strip()
         if self.type == WorkflowType.PDL:   # sepcial for PDL
-            self.pdl = PDL.load_from_file(data_manager.DIR_data_workflow / f"pdl/{self.id}.yaml")
+            _dir = data_manager.DIR_data_workflow / self.cfg.bot_pdl_version / f"{self.id}.yaml"
+            self.pdl = PDL.load_from_file(_dir)
             self.workflow = self.pdl.to_str_wo_api() # self.pdl.procedure
         if self.type == WorkflowType.CORE:
             self.core_flow = CoreFlow.load_from_file(data_manager.DIR_data_workflow / f"core/{self.id}.txt")

@@ -68,6 +68,11 @@ class DataManager:
         return dirs
     
     @staticmethod
+    def get_workflow_versions():
+        _dir = DataManager.DIR_data_root / "PDL_zh"
+        dirs = [d for d in os.listdir(_dir) if d.startswith("pdl") and os.path.isdir(os.path.join(_dir, d))]
+        return dirs
+    @staticmethod
     def get_workflow_names_map():
         dirs = DataManager.get_workflow_dirs()
         names_map = {}      # {PDL_zh: ["task1", "task2"]}

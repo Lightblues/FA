@@ -14,32 +14,29 @@ from ..roles import ReactBot
 
 
 class PDL_UIBot(ReactBot):
-    ui_bot_template_fn: str = "flowagent/bot_pdl.jinja"  # using the prompt from FlowBench
+    ui_bot_template_fn: str = "flowagent/bot_pdl_ui.jinja"
     def __init__(self, **args) -> None:
         super().__init__(**args)
         if self.cfg.ui_bot_template_fn is not None: self.ui_bot_template_fn = self.cfg.ui_bot_template_fn
     
     def process_stream(self):
-        # TODO: add user_additional_constraints = None
-        # if conversation_infos:
-        #     s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
-        #     user_additional_constraints = conversation_infos.user_additional_constraints
-        # head_info = f"Current time: {datetime.datetime.now().strftime('%Y-%m-%d (%A) %H:%M:%S')}"
         prompt = self._gen_prompt()
         llm_response_stream = self.llm.query_one_stream_generator(prompt)
         return prompt, llm_response_stream
 
     def _gen_prompt(self) -> str:
+        # TODO: format apis
         state_infos = {
             "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
-        state_infos |= self.workflow.pdl.status_for_prompt # NOTE: add the status infos from PDL!
-        # TODO: format apis
+        # s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
+        state_infos |= self.workflow.pdl.status_for_prompt # add the status infos from PDL!
         prompt = jinja_render(
             self.ui_bot_template_fn,       # "flowagent/bot_pdl.jinja"
             PDL=self.workflow.pdl.to_str_wo_api(),  # .to_str()
             api_infos=self.workflow.toolbox,        # self.workflow.get_toolbox_by_names(valid_api_names),
-            conversation=self.conv.to_str(), 
+            conversation=self.conv.to_str(),
+            user_additional_constraints = self.cfg.ui_user_additional_constraints,
             current_state="\n".join(f"{k}: {v}" for k,v in state_infos.items()),
         )
         # print(f"Current pdl state: {self.workflow.pdl.status_for_prompt}")
