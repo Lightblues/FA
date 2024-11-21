@@ -1,6 +1,7 @@
 /log/
 /data/
-/dataset/
+/dataset/*
+!/dataset/.gitkeep
 *tmp*
 wandb/
 .env
