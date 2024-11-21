@@ -15,16 +15,17 @@ ui_default_template: "bot_pdl_ui_zh.jinja"
 ui_greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
 # ui_bot_template_fn: "flowagent/bot_pdl.jinja"
 
-bot_pdl_version: "pdl"    # set as default
+pdl_version: "pdl"    # set as default
+bot_action_limit: 5
+bot_pdl_controllers: 
+  - {name: "api_duplication", config: {if_pre: true, if_post: true, threshold: 0}}
+  - {name: "node_dependency", config: {if_pre: true, if_post: true}}
+  # - {name: "session_length", config: {if_pre: true, min: 5, max: 15}}
 
 bot_mode: "pdl_bot"     # dummy_bot, react_bot, pdl_bot, core_bot
 bot_template_fn: "flowagent/bot_pdl.jinja"
 bot_llm_name: "gpt-4o"
-bot_action_limit: 5
-bot_pdl_controllers: 
-  - {name: "api_duplication", config: {if_pre: true, if_post: true, threshold: 2}}
-  - {name: "node_dependency", config: {if_pre: true, if_post: true}}
-  - {name: "session_length", config: {if_pre: true, min: 5, max: 15}}
+
 
 api_mode: "request"           # dummy_api, llm, core, request
 api_template_fn: null     # "flowagent/api_llm.jinja"
@@ -51,20 +52,20 @@ user_oow_ratio: 0.2
 
 
 
-conversation_turn_limit: 20
-log_utterence_time: false
-log_to_db: true
+# conversation_turn_limit: 20
+# log_utterence_time: false
+# log_to_db: true
 
-db_uri: 'mongodb://9.134.230.111:27017'
-db_name: "pdl"
-db_message_collection_name: "messages"
-db_meta_collection_name: "config"
+# db_uri: 'mongodb://9.134.230.111:27017'
+# db_name: "pdl"
+# db_message_collection_name: "messages"
+# db_meta_collection_name: "config"
 
-simulate_num_persona: 5
-simulate_max_workers: 10
+# simulate_num_persona: 5
+# simulate_max_workers: 10
 
-judge_max_workers: 10
-judge_model_name: "gpt-4o"
-judge_conversation_id: "2024-09-19 15:20:53.462895"
-judge_log_to: "wandb"
-judge_force_rejudge: false
+# judge_max_workers: 10
+# judge_model_name: "gpt-4o"
+# judge_conversation_id: "2024-09-19 15:20:53.462895"
+# judge_log_to: "wandb"
+# judge_force_rejudge: false

@@ -137,7 +137,10 @@ class Conversation():
         if old_to_prediction:
             new_msg.content_predict = self.msgs[idx].content
         self.msgs[idx] = new_msg
-        
+    
+    def clear(self):
+        self.msgs = []
+    
     def get_message_by_idx(self, idx: int) -> Message:
         return self.msgs[idx]
     

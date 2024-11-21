@@ -19,6 +19,11 @@ class PDL_UIBot(ReactBot):
         super().__init__(**args)
         if self.cfg.ui_bot_template_fn is not None: self.ui_bot_template_fn = self.cfg.ui_bot_template_fn
     
+    def refresh_config(self, cfg: Config):
+        """For UI, only update the config and bot_template_fn"""
+        self.cfg = cfg
+        if self.cfg.ui_bot_template_fn is not None: self.ui_bot_template_fn = self.cfg.ui_bot_template_fn
+    
     def process_stream(self):
         prompt = self._gen_prompt()
         llm_response_stream = self.llm.query_one_stream_generator(prompt)

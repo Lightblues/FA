@@ -17,7 +17,7 @@ class BaseController:
     if_response_control = False
     
     def __init__(self, cfg: Config, conv:Conversation, pdl: PDL, config: Dict, *args, **kwargs) -> None:
-        self.cfg = cfg
+        # self.cfg = cfg        # 用不到!
         self.conv = conv        # the conversation! update it when necessary!
         self.pdl = pdl
         self.config = config
@@ -25,6 +25,10 @@ class BaseController:
         if "if_pre" in config: self.if_pre_control = config["if_pre"]
         if "if_response" in config: self.if_response_control = config["if_response"]
         assert self.if_post_control or self.if_pre_control, "at least one of if_post_control or if_pre_control should be True"
+        # print(f">>> Controller {self.name} initialized!")
+
+    def refresh_pdl(self, pdl: PDL):
+        self.pdl = pdl
 
     """ standard processes:
     pre_control: make modifications on `PDL.status_for_prompt` -> change the bot's prompt!
@@ -38,6 +42,7 @@ class BaseController:
     def post_control(self, bot_output: BotOutput) -> bool:
         assert self.if_post_control, "if_post_control should be True"
         res, msg_content = self._post_check_with_message(bot_output)
+        # print(f">>> {self.name} post_control: {res} {msg_content}")
         if not res:
             msg = Message(
                 Role.SYSTEM, msg_content, prompt="", llm_response="",

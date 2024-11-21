@@ -10,7 +10,7 @@
     - [x] convert from v240820
     - [x] dataset orginization (Datamanager)
     - [x] whole generation | simulation
-    - [x] store the generated conversation data in a database! (with a session_id)
+    - [x] store the generated conversation data in a database!
 - evaluation
     - [x] start simulations. 
 - robustness & accuracy

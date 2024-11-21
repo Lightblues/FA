@@ -83,12 +83,13 @@ class Workflow:  # rename -> Data
         # TODO: update toolbox
         with open(data_manager.DIR_data_workflow / f"tools/{self.id}.yaml", 'r') as f:
             self.toolbox = yaml.safe_load(f)
-        with open(data_manager.DIR_data_workflow / f"{self.type.subdir}/{self.id}{self.type.suffix}", 'r') as f:
-            self.workflow = f.read().strip()
         if self.type == WorkflowType.PDL:   # sepcial for PDL
-            _dir = data_manager.DIR_data_workflow / self.cfg.bot_pdl_version / f"{self.id}.yaml"
+            _dir = data_manager.DIR_data_workflow / self.cfg.pdl_version / f"{self.id}.yaml"
             self.pdl = PDL.load_from_file(_dir)
             self.workflow = self.pdl.to_str_wo_api() # self.pdl.procedure
+        else:
+            with open(data_manager.DIR_data_workflow / f"{self.type.subdir}/{self.id}{self.type.suffix}", 'r') as f:
+                self.workflow = f.read().strip()
         if self.type == WorkflowType.CORE:
             self.core_flow = CoreFlow.load_from_file(data_manager.DIR_data_workflow / f"core/{self.id}.txt")
         # 3. load the user infos
@@ -112,6 +113,19 @@ class Workflow:  # rename -> Data
                         d["user_intention"], Conversation.load_from_json(d["conversation"])
                     )
                 )
+    
+    def refresh_config(self, cfg: Config) -> 'Workflow':
+        """used for UI!"""
+        data_manager = self.data_manager
+        self.cfg = cfg
+        self.id = self.cfg.workflow_id
+        assert self.id in data_manager.workflow_infos, f"[ERROR] {self.id} not found in {data_manager.workflow_infos.keys()}"
+        with open(data_manager.DIR_data_workflow / f"tools/{self.id}.yaml", 'r') as f:
+            self.toolbox = yaml.safe_load(f)
+        _dir = data_manager.DIR_data_workflow / self.cfg.pdl_version / f"{self.id}.yaml"
+        self.pdl = PDL.load_from_file(_dir)
+        self.workflow = self.pdl.to_str_wo_api() # self.pdl.procedure
+        return self
 
     @property
     def num_user_profile(self):

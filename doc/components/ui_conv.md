@@ -26,3 +26,17 @@ def main():
         else: case_workflow()
 ```
 
+## single_workflow
+```python
+    """ 
+    交互逻辑: 
+        当用户输入query之后, 用一个while循环来执行ANSWER或者API调用:
+            用一个 expander 来展示stream输出
+            若为API调用, 则进一步展示中间结果
+        最后, 统一展示给用户的回复
+        NOTE: 用 container 包裹的部分会在下一轮 query 后被覆盖
+    日志:
+        summary: 类似conversation交互, 可以增加必要信息
+        detailed: 记录设计到LLM的详细信息
+    """
+```

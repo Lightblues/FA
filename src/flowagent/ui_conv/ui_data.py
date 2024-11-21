@@ -6,11 +6,11 @@ from .uid import get_identity
 from .ui_bot import PDL_UIBot
 from ..data import (
     Conversation, Message, Role,
-    Config, DataManager, 
-    Workflow
+    Config, DataManager
 )
 from ..utils import LLM_CFG
 from ..roles import API_NAME2CLASS
+from ..pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
 
 def init_resource():
     st.set_page_config(
@@ -63,10 +63,6 @@ def init_resource():
         # print(f"user_identity: {user_identity}")
         self.headers = headers
         self.user_identity = user_identity
-        
-        now = datetime.datetime.now()
-        self.t = now
-        self.session_id = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
 
 @st.cache_data
 def get_template_name_list():
@@ -86,19 +82,18 @@ def get_workflow_names_map() -> Dict[str, List[str]]:
 
 
 def refresh_conversation() -> Conversation:
+    """Init or refresh the conversation"""
     print(f">> Refreshing conversation!")
-    self.conv = Conversation()
+    if "conv" not in self:
+        self.conv = Conversation()
+    else:
+        self.conv.clear()
+        self.conv.conversation_id = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
     selected_workflow_name = self.selected_workflow_name.split("-")[-1]
     msg_hello = Message(
         Role.BOT, self.cfg.ui_greeting_msg.format(name=selected_workflow_name), 
-        conversation_id=self.conv.conversation_id, 
-        utterance_id=self.conv.current_utterance_id)
+        conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id)
     self.conv.add_message(msg_hello)
-    
-    # NOTE: logger is bind to a single session! 
-    now = datetime.datetime.now()
-    self.t = now
-    self.session_id = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
     return self.conv
 
 def refresh_bot() -> PDL_UIBot:
@@ -109,19 +104,31 @@ def refresh_bot() -> PDL_UIBot:
     if self.user_additional_constraints is not None:
         cfg.ui_user_additional_constraints = self.user_additional_constraints
     
-    workflow:Workflow = self.workflow
     conv = refresh_conversation()
-    self.bot = PDL_UIBot(cfg=cfg, conv=conv, workflow=workflow)
-    self.api_handler = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=conv, workflow=workflow)
+    if 'bot' not in self:
+        self.bot = PDL_UIBot(cfg=cfg, conv=conv, workflow=self.workflow)
+        self.api_handler = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=conv, workflow=self.workflow)
+    else:
+        self.bot.refresh_config(cfg)
+        self.api_handler.refresh_config(cfg)
+    refresh_controllers()
     return self.bot
 
 def refresh_workflow():
     """refresh workflow -> bot """
-    self.cfg.bot_pdl_version = self.selected_workflow_version
-    _, name_id_map = get_workflow_names_map()
-    self.cfg.workflow_id = name_id_map['PDL_zh'][self.selected_workflow_name]
     print(f">> Refreshing workflow: `{self.selected_workflow_name}` of ``")
-    self.workflow = Workflow(self.cfg)
+    _, name_id_map = get_workflow_names_map()
+    self.cfg.pdl_version = self.selected_pdl_version
+    self.cfg.workflow_id = name_id_map['PDL_zh'][self.selected_workflow_name]
+    self.workflow.refresh_config(self.cfg)
     refresh_bot()
 
-
+def refresh_controllers():
+    if 'controllers' not in self:
+        self.controllers = []  # : List[BaseController]
+        for c in self.cfg.bot_pdl_controllers:
+            controller = CONTROLLER_NAME2CLASS[c['name']](self.cfg, self.conv, self.workflow.pdl, c['config'])
+            self.controllers.append(controller)
+    else:
+        for c in self.controllers:
+            c.refresh_pdl(self.workflow.pdl)

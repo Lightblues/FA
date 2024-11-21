@@ -64,7 +64,7 @@ def init_sidebar():
             st.selectbox(
                 '选择画布版本',
                 options=LIST_shown_dirs,
-                key="selected_workflow_version",
+                key="selected_pdl_version",
                 format_func=lambda x: x.split("/")[-1],     # NOTE: only show the last subdir
                 on_change=refresh_workflow
             )
@@ -84,11 +84,10 @@ def init_sidebar():
                 placeholder="e.g. 当切换医院的时候, 默认科室不变. "
             )
             if st.button("应用"):
-                if not st.session_state.user_additional_constraints:
+                if not self.user_additional_constraints:
                     st.warning("请填写自定义约束")
                 else:
                     refresh_bot()
-                    # print(f">> user_additional_constraints: {st.session_state.user_additional_constraints}")
 
         st.divider()
         button_col1, button_col2 = st.columns(2)
@@ -105,16 +104,17 @@ def init_sidebar():
 
         # show the PDL and template
         st.divider()
-        data_manager: DataManager = st.session_state.data_manager
-        workflow: Workflow = st.session_state.workflow
-        with open(f"{data_manager.DIR_template}/{st.session_state.selected_template_fn}", "r") as f:
+        data_manager: DataManager = self.data_manager
+        workflow: Workflow = self.workflow
+        with open(f"{data_manager.DIR_template}/{self.selected_template_fn}", "r") as f:
             template = f.read()
         
         with st.expander(f"🔍 PDL", expanded=False):
             st.code(f"{workflow.pdl.to_str()}", language="plaintext")
         with st.expander(f"🔍 Template", expanded=False):
             st.code(f"{template}", language="plaintext")
-            
 
+def post_sidebar():
+    with st.sidebar:
         st.divider()
-        st.info(f"- sessionid: {st.session_state.session_id}\n- name: {st.session_state.user_identity['staffname']}")
+        st.info(f"- sessionid: {self.conv.conversation_id}\n- name: {self.user_identity['staffname']}")

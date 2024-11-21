@@ -7,7 +7,7 @@ from [branch agent-pdl] src/engine/role_api.py
 from typing import Dict, Tuple
 import requests, json, traceback
 from ..base import BaseAPIHandler
-from ...data import APIOutput, BotOutput, Role, Message
+from ...data import APIOutput, BotOutput, Role, Message, Config
 
 def handle_exceptions(func):
     """ 异常捕获, 返回错误信息 -> for LLM understaning!
@@ -30,11 +30,19 @@ class RequestAPIHandler(BaseAPIHandler):
         super().__init__(**args)
         # TODO: entity linker
         # if cfg.api_entity_linking: self.entity_linker = EntityLinker(cfg=cfg)
+        self._build_api_infos_map()
         
+    def _build_api_infos_map(self):
         self.api_infos_map = {}
         for api in self.api_infos:
             self.api_infos_map[api["name"]] = api
             self.api_infos_map[api["description"]] = api
+            
+    def refresh_config(self, cfg: Config):
+        """For UI! """
+        self.cfg = cfg
+        self.api_infos = self.workflow.toolbox
+        self._build_api_infos_map()
 
     @staticmethod
     def _call_api(api_info: Dict, api_params_dict: Dict):

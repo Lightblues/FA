@@ -15,6 +15,10 @@ class NodeDependencyController(BaseController):
         super().__init__(*args, **kwargs)
         self.graph = self._build_graph(self.pdl)
     
+    def refresh_pdl(self, pdl: PDL):
+        super().refresh_pdl(pdl)
+        self.graph = self._build_graph(pdl)
+    
     def _build_graph(self, pdl:PDL):
         if (pdl.apis is None) or (not pdl.apis):  # if pdl.apis is None
             pdl.apis = []
