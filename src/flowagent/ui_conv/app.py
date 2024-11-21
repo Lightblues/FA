@@ -3,7 +3,7 @@ Run::
     cd /mnt/huabu/src
     streamlit run run_flowagent_ui.py --server.port 8501 -- --config=ui_dev.yaml
 """
-import streamlit as st
+import streamlit as st; self = st.session_state
 from ..data import Config, DataManager
 from .page_single_workflow import main_single
 from .page_multi_workflow import main_multi
@@ -27,11 +27,11 @@ def main(config_version:str="default.yaml"):
     init_resource()
     
     # config and data_manager
-    if "config" not in st.session_state:
-        st.session_state.config = Config.from_yaml(DataManager.normalize_config_name(config_name=config_version))
-        print(f"[INFO] config: {st.session_state.config}")
-    if "data_manager" not in st.session_state:
-        st.session_state.data_manager = DataManager(st.session_state.config)
+    if "config" not in self:
+        self.cfg = Config.from_yaml(DataManager.normalize_config_name(config_name=config_version))
+        print(f"[INFO] config: {self.cfg}")
+    if "data_manager" not in self:
+        self.data_manager = DataManager(self.cfg)
     
     page = st.sidebar.selectbox("Select Mode", ["👤 Single", "👥 Multiple", ])
     st.sidebar.markdown("---")

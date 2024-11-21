@@ -1,5 +1,5 @@
 from loguru._logger import Logger
-import streamlit as st
+import streamlit as st; self = st.session_state
 import json
 from ..data import (
     DataManager, Config, Workflow, 
@@ -18,8 +18,8 @@ def main_multi():
     init_sidebar()
     # init_single_workflow()    # TODO: init status
     
-    config: Config = st.session_state.config
-    conversation: Conversation = st.session_state.conversation
+    config: Config = self.cfg
+    conversation: Conversation = self.conv
     logger: Logger = st.session_state.logger
     
     show_conversations(conversation)

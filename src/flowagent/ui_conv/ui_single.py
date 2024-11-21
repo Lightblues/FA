@@ -1,5 +1,5 @@
 import datetime
-import streamlit as st
+import streamlit as st; self = st.session_state
 from .ui_data import (
     get_template_name_list, get_model_name_list, get_workflow_dirs, get_workflow_names_map, 
     refresh_bot, refresh_workflow
@@ -8,7 +8,7 @@ from ..data import Config, Workflow, DataManager
 
 def init_sidebar():
     """Init the sidebar of single workflow"""
-    config: Config = st.session_state.config
+    config: Config = self.cfg
 
     _model_names = get_model_name_list()
     _template_names = get_template_name_list()

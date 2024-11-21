@@ -1,6 +1,6 @@
 from typing import List, Dict
 import yaml, os, pdb, datetime
-import streamlit as st
+import streamlit as st; self = st.session_state
 
 from .uid import get_identity
 from .ui_bot import PDL_UIBot
@@ -36,16 +36,16 @@ def init_resource():
     st.markdown(setting_stype, unsafe_allow_html=True)
 
     # bot_icon = Image.open('resource/icon.png')
-    if 'avatars' not in st.session_state:
-        st.session_state['avatars'] = {
+    if 'avatars' not in self:
+        self['avatars'] = {
             # 'ian': bot_icon,
             'system': '⚙️', # 🖥️
             'user': '💬',   # 🧑‍💻 👤 🙂 🙋‍♂️ / 🙋‍♀️
             'assistant': '🤖',
             'bot': '🤖',
         }
-    if 'tool_emoji' not in st.session_state:
-        st.session_state['tool_emoji'] = {
+    if 'tool_emoji' not in self:
+        self['tool_emoji'] = {
             "search": "🔍",
             "think": "🤔",
             "web_logo": "🌐",
@@ -57,16 +57,16 @@ def init_resource():
             "code_logo": "💻",
         }
 
-    if "headers" not in st.session_state:
+    if "headers" not in self:
         headers = st.context.headers
         user_identity = get_identity(headers, app_id="MAWYUI3UXKRDVJBLWMQNGUBDRE5SZOBL")
         # print(f"user_identity: {user_identity}")
-        st.session_state.headers = headers
-        st.session_state.user_identity = user_identity
+        self.headers = headers
+        self.user_identity = user_identity
         
         now = datetime.datetime.now()
-        st.session_state.t = now
-        st.session_state.session_id = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
+        self.t = now
+        self.session_id = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
 
 @st.cache_data
 def get_template_name_list():
@@ -87,41 +87,41 @@ def get_workflow_names_map() -> Dict[str, List[str]]:
 
 def refresh_conversation() -> Conversation:
     print(f">> Refreshing conversation!")
-    st.session_state.conversation = Conversation()
-    selected_workflow_name = st.session_state.selected_workflow_name.split("-")[-1]
+    self.conv = Conversation()
+    selected_workflow_name = self.selected_workflow_name.split("-")[-1]
     msg_hello = Message(
-        Role.BOT, st.session_state.config.ui_greeting_msg.format(name=selected_workflow_name), 
-        conversation_id=st.session_state.conversation.conversation_id, 
-        utterance_id=st.session_state.conversation.current_utterance_id)
-    st.session_state.conversation.add_message(msg_hello)
+        Role.BOT, self.cfg.ui_greeting_msg.format(name=selected_workflow_name), 
+        conversation_id=self.conv.conversation_id, 
+        utterance_id=self.conv.current_utterance_id)
+    self.conv.add_message(msg_hello)
     
     # NOTE: logger is bind to a single session! 
     now = datetime.datetime.now()
-    st.session_state.t = now
-    st.session_state.session_id = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
-    return st.session_state.conversation
+    self.t = now
+    self.session_id = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
+    return self.conv
 
 def refresh_bot() -> PDL_UIBot:
-    print(f">> Refreshing bot: `{st.session_state.selected_template_fn}` with model `{st.session_state.selected_model_name}`")
-    cfg:Config = st.session_state.config
-    cfg.ui_bot_template_fn = f"flowagent/{st.session_state.selected_template_fn}"
-    cfg.bot_llm_name = st.session_state.selected_model_name
-    if st.session_state.user_additional_constraints is not None:
-        cfg.ui_user_additional_constraints = st.session_state.user_additional_constraints
+    print(f">> Refreshing bot: `{self.selected_template_fn}` with model `{self.selected_model_name}`")
+    cfg:Config = self.cfg
+    cfg.ui_bot_template_fn = f"flowagent/{self.selected_template_fn}"
+    cfg.bot_llm_name = self.selected_model_name
+    if self.user_additional_constraints is not None:
+        cfg.ui_user_additional_constraints = self.user_additional_constraints
     
-    workflow:Workflow = st.session_state.workflow
+    workflow:Workflow = self.workflow
     conv = refresh_conversation()
-    st.session_state.bot = PDL_UIBot(cfg=cfg, conv=conv, workflow=workflow)
-    st.session_state.api_handler = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=conv, workflow=workflow)
-    return st.session_state.bot
+    self.bot = PDL_UIBot(cfg=cfg, conv=conv, workflow=workflow)
+    self.api_handler = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=conv, workflow=workflow)
+    return self.bot
 
 def refresh_workflow():
     """refresh workflow -> bot """
-    st.session_state.config.bot_pdl_version = st.session_state.selected_workflow_version
+    self.cfg.bot_pdl_version = self.selected_workflow_version
     _, name_id_map = get_workflow_names_map()
-    st.session_state.config.workflow_id = name_id_map['PDL_zh'][st.session_state.selected_workflow_name]
-    print(f">> Refreshing workflow: `{st.session_state.selected_workflow_name}` of ``")
-    st.session_state.workflow = Workflow(st.session_state.config)
+    self.cfg.workflow_id = name_id_map['PDL_zh'][self.selected_workflow_name]
+    print(f">> Refreshing workflow: `{self.selected_workflow_name}` of ``")
+    self.workflow = Workflow(self.cfg)
     refresh_bot()
 
 

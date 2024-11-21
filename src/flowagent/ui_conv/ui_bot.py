@@ -58,6 +58,7 @@ class PDL_UIBot(ReactBot):
 
     @staticmethod
     def parse_react_output(s: str) -> BotOutput:
+        """Parse output with full `Tought, Action, Action Input, Response`."""
         if "```" in s:
             s = Formater.parse_codeblock(s, type="").strip()
         # pattern = r"(?P<field>Thought|Action|Action Input|Response):\s*(?P<value>.*?)(?=\n(?:Thought|Action|Action Input|Response):|\Z)"
