@@ -5,7 +5,7 @@
 """
 import api_definitions  # NOTE: to register the apis
 
-import json, os, pathlib, sys, jinja2
+import json, os, pathlib, sys, jinja2, argparse
 _DIR = pathlib.Path(__file__).parent
 sys.path.append(str(_DIR.parent))
 from dataclasses import dataclass, field
@@ -13,8 +13,6 @@ from typing import Dict
 
 from flowagent.utils import init_client, LLM_CFG, Formater
 from api_registry import api_registry
-
-client = init_client(llm_cfg=LLM_CFG["1.0.2"])
 
 @dataclass
 class APICalling_Info:
@@ -81,6 +79,12 @@ for api_name, api_info in api_registry.registry.items():
 
 
 if __name__ == "__main__":
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("--model_name", type=str, default="1.0.2") # "gpt-4o"
+    args = argparser.parse_args()
+    
+    client = init_client(llm_cfg=LLM_CFG[args.model_name])
+    
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=9390)
     # uvicorn.run("main:app", host="127.0.0.1", port=8000, workers=4)

@@ -6,26 +6,26 @@ from easonsi.llm.openai_client import OpenAIClient
 _IP_01 = "9.91.12.44:8000"
 _IP_02 = "9.91.0.28:13000"
 LLM_CFG = {
-    "custom": {
-        "model_name": "Qwen2-72B-Instruct",
-        "base_url": f"http://{_IP_01}/v1/",
-        "api_key": "xxx",
-    },
-    "Qwen2-72B": {
-        "model_name": "Qwen2-72B-Instruct",
-        "base_url": f"http://{_IP_01}/v1/",
-        "api_key": "xxx",
-    },
-    "v0729-Llama3_1-70B": {
-        "model_name": "Infinity-Instruct-7M-0729-Llama3_1-70B",
-        "base_url": f"http://{_IP_02}/v1/",
-        "api_key": "xxx",
-    },
-    "v0729-Qwen2-7B": {
-        "model_name": "Infinity-Instruct-7M-0729-Qwen2-7B-ianExp",
-        "base_url": f"http://{_IP_02}/v1/",
-        "api_key": "xxx",
-    },
+    # "custom": {
+    #     "model_name": "Qwen2-72B-Instruct",
+    #     "base_url": f"http://{_IP_01}/v1/",
+    #     "api_key": "xxx",
+    # },
+    # "Qwen2-72B": {
+    #     "model_name": "Qwen2-72B-Instruct",
+    #     "base_url": f"http://{_IP_01}/v1/",
+    #     "api_key": "xxx",
+    # },
+    # "v0729-Llama3_1-70B": {
+    #     "model_name": "Infinity-Instruct-7M-0729-Llama3_1-70B",
+    #     "base_url": f"http://{_IP_02}/v1/",
+    #     "api_key": "xxx",
+    # },
+    # "v0729-Qwen2-7B": {
+    #     "model_name": "Infinity-Instruct-7M-0729-Qwen2-7B-ianExp",
+    #     "base_url": f"http://{_IP_02}/v1/",
+    #     "api_key": "xxx",
+    # },
 }
 def add_openai_models():
     global LLM_CFG
@@ -47,6 +47,7 @@ def add_local_models():
     import importlib.util
     from urllib.parse import urlparse
     _fn = "/apdcephfs_cq8/share_2992827/shennong_5/ianxxu/chatchat/model_server/_run_multi_urls.py"
+    if not os.path.exists(_fn): return
     spec = importlib.util.spec_from_file_location("model_urls", _fn)
     model_urls = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(model_urls)
@@ -72,6 +73,7 @@ _name_map = {
     "1.0.2": "Taskformer1.0.2",
 }
 for k,v in _name_map.items():
+    if v not in LLM_CFG: continue
     LLM_CFG[k] = LLM_CFG[v]
 # print(f"[INFO] LLM models: {LLM_CFG.keys()}")
 
