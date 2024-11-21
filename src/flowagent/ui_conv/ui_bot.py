@@ -14,15 +14,12 @@ from ..roles import ReactBot
 
 
 class PDL_UIBot(ReactBot):
-    ui_bot_template_fn: str = "flowagent/bot_pdl_ui.jinja"
     def __init__(self, **args) -> None:
         super().__init__(**args)
-        if self.cfg.ui_bot_template_fn is not None: self.ui_bot_template_fn = self.cfg.ui_bot_template_fn
     
     def refresh_config(self, cfg: Config):
         """For UI, only update the config and bot_template_fn"""
         self.cfg = cfg
-        if self.cfg.ui_bot_template_fn is not None: self.ui_bot_template_fn = self.cfg.ui_bot_template_fn
     
     def process_stream(self):
         prompt = self._gen_prompt()
@@ -37,7 +34,7 @@ class PDL_UIBot(ReactBot):
         # s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
         state_infos |= self.workflow.pdl.status_for_prompt # add the status infos from PDL!
         prompt = jinja_render(
-            self.ui_bot_template_fn,       # "flowagent/bot_pdl.jinja"
+            self.bot_template_fn,       # "flowagent/bot_pdl.jinja"
             PDL=self.workflow.pdl.to_str_wo_api(),  # .to_str()
             api_infos=self.workflow.toolbox,        # self.workflow.get_toolbox_by_names(valid_api_names),
             conversation=self.conv.to_str(),

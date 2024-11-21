@@ -77,6 +77,19 @@ def init_sidebar():
                 on_change=refresh_workflow
             )
         
+        # st.divider()
+        button_col1, button_col2 = st.columns(2)
+        with button_col1:
+            st.button(
+                '重置对话',
+                on_click=refresh_bot
+            )
+        with button_col2:
+            st.link_button(
+                '问题反馈',
+                "https://doc.weixin.qq.com/sheet/e3_AcMATAZtAPI6WfByux6S2abI1stST?scode=AJEAIQdfAAolOjFcj8AcMATAZtAPI&tab=dyka3y"
+            )
+        
         with st.expander(f"⚙️ 自定义配置", expanded=False):
             st.text_area(
                 "添加你对于PDL流程的额外约束", height=100, 
@@ -89,18 +102,17 @@ def init_sidebar():
                 else:
                     refresh_bot()
 
-        st.divider()
-        button_col1, button_col2 = st.columns(2)
-        with button_col1:
-            st.button(
-                '重置对话',
-                on_click=refresh_bot
-            )
-        with button_col2:
-            st.link_button(
-                '问题反馈',
-                "https://doc.weixin.qq.com/sheet/e3_AcMATAZtAPI6WfByux6S2abI1stST?scode=AJEAIQdfAAolOjFcj8AcMATAZtAPI&tab=dyka3y"
-            )
+
+def post_sidebar():
+    with st.sidebar:
+        cols = st.columns(3)
+        for index, controller in enumerate(self.controllers.values()):
+            col = cols[index % 3]
+            with col:
+                controller.is_activated = st.checkbox(
+                    controller.name,
+                    value=controller.is_activated
+                )
 
         # show the PDL and template
         st.divider()
@@ -113,8 +125,7 @@ def init_sidebar():
             st.code(f"{workflow.pdl.to_str()}", language="plaintext")
         with st.expander(f"🔍 Template", expanded=False):
             st.code(f"{template}", language="plaintext")
-
-def post_sidebar():
-    with st.sidebar:
+        
+        # show the user identity
         st.divider()
         st.info(f"- sessionid: {self.conv.conversation_id}\n- name: {self.user_identity['staffname']}")

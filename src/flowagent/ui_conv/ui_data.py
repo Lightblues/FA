@@ -1,3 +1,8 @@
+""" 
+@241121
+- 针对streamlit的形式, 实现了refresh机制: `refresh_config` of workflow, bot, api;  `refresh_pdl` of controller
+"""
+
 from typing import List, Dict
 import yaml, os, pdb, datetime
 import streamlit as st; self = st.session_state
@@ -99,7 +104,7 @@ def refresh_conversation() -> Conversation:
 def refresh_bot() -> PDL_UIBot:
     print(f">> Refreshing bot: `{self.selected_template_fn}` with model `{self.selected_model_name}`")
     cfg:Config = self.cfg
-    cfg.ui_bot_template_fn = f"flowagent/{self.selected_template_fn}"
+    cfg.bot_template_fn = f"flowagent/{self.selected_template_fn}"
     cfg.bot_llm_name = self.selected_model_name
     if self.user_additional_constraints is not None:
         cfg.ui_user_additional_constraints = self.user_additional_constraints
@@ -125,10 +130,10 @@ def refresh_workflow():
 
 def refresh_controllers():
     if 'controllers' not in self:
-        self.controllers = []  # : List[BaseController]
+        self.controllers = {}  # {name: BaseController}
         for c in self.cfg.bot_pdl_controllers:
-            controller = CONTROLLER_NAME2CLASS[c['name']](self.cfg, self.conv, self.workflow.pdl, c['config'])
-            self.controllers.append(controller)
-    else:
-        for c in self.controllers:
+            self.controllers[c['name']] = CONTROLLER_NAME2CLASS[c['name']](self.cfg, self.conv, self.workflow.pdl, c['config'])
+    for c in self.controllers.values():
+        # NOTE: 仅在更新了pdl的时候,才刷新
+        if self.workflow.pdl is not c.pdl:
             c.refresh_pdl(self.workflow.pdl)

@@ -12,6 +12,7 @@ class BaseController:
     config: Dict = None
     
     name: str = ""      # to build CONTROLLER_NAME2CLASS
+    is_activated = True # can be disabled
     if_pre_control = False
     if_post_control = False
     if_response_control = False
@@ -35,11 +36,13 @@ class BaseController:
     post_control: check validation, if not validated, log the error info to self.conv!
     response_control: similar to post_control
     """
-    def pre_control(self, prev_bot_output: BotOutput):
+    def pre_control(self, prev_bot_output: BotOutput) -> bool:
+        if not self.is_activated: return True
         assert self.if_pre_control, "if_pre_control should be True"
         self._pre_control(prev_bot_output)
     
     def post_control(self, bot_output: BotOutput) -> bool:
+        if not self.is_activated: return True
         assert self.if_post_control, "if_post_control should be True"
         res, msg_content = self._post_check_with_message(bot_output)
         # print(f">>> {self.name} post_control: {res} {msg_content}")
@@ -52,6 +55,7 @@ class BaseController:
         return res
     
     def response_control(self, bot_output: BotOutput) -> bool:
+        if not self.is_activated: return True
         assert self.if_response_control, "if_response_control should be True"
         res, msg_content = self._response_check_with_message(bot_output)
         if not res:

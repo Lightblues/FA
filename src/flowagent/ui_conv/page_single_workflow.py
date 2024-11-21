@@ -27,20 +27,18 @@ from ..data import (
 from .ui_single import init_sidebar, post_sidebar
 from .ui_data import refresh_bot, refresh_conversation
 
-def show_conversations(conversation, ):
+def show_conversations(conversation):
     for message in conversation.msgs:
         if (message.role == Role.SYSTEM) or (message.content.startswith("<")):
             continue  
         with st.chat_message(message.role.rolename, avatar=self['avatars'][message.role.rolename]):
             st.write(message.content)
 
-
-
 def _post_control(bot_output: BotOutput, ) -> bool:
     """ Check the validation of bot's action
     NOTE: if not validated, the error infomation will be added to self.conv!
     """
-    for controller in self.controllers:
+    for controller in self.controllers.values():
         if not controller.if_post_control: continue
         if not controller.post_control(bot_output): return False
     return True
