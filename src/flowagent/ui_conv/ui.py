@@ -1,47 +1,11 @@
 import datetime
 import streamlit as st
 from .uid import get_identity
-from .data import (
+from .ui_data import (
     get_template_name_list, get_model_name_list, get_workflow_dirs, get_workflow_names_map, 
     refresh_bot, refresh_workflow
 )
 from ..data import Config, Workflow, DataManager
-
-def init_page():
-    st.set_page_config(
-        page_title="PDL Agent",
-        page_icon="🍊",
-        initial_sidebar_state="auto",
-        menu_items={
-            # 'Get Help': 'https://www.extremelycoolapp.com/help',
-            'Report a bug': "mailto:easonsshi@tencent.com",
-            # 'About': "# This is a header. This is an *extremely* cool app!"
-        }
-    )
-    st.title('️🍊 PDL Agent')
-
-    # def init_resource():
-    # bot_icon = Image.open('resource/icon.png')
-    if 'avatars' not in st.session_state:
-        st.session_state['avatars'] = {
-            # 'ian': bot_icon,
-            'system': '⚙️', # 🖥️
-            'user': '💬',   # 🧑‍💻 👤 🙂 🙋‍♂️ / 🙋‍♀️
-            'assistant': '🤖',
-            'bot': '🤖',
-        }
-    if 'tool_emoji' not in st.session_state:
-        st.session_state['tool_emoji'] = {
-            "search": "🔍",
-            "think": "🤔",
-            "web_logo": "🌐",
-            "warning": "⚠️",
-            "analysis": "💡",
-            "success": "✅",
-            "doc_logo": "📄",
-            "calc_logo": "🧮",
-            "code_logo": "💻",
-        }
 
 def init_sidebar():
     config: Config = st.session_state.config

@@ -11,6 +11,28 @@ from ..data import (
 from ..utils import LLM_CFG
 from ..roles import API_NAME2CLASS
 
+def init_resource():
+    # bot_icon = Image.open('resource/icon.png')
+    if 'avatars' not in st.session_state:
+        st.session_state['avatars'] = {
+            # 'ian': bot_icon,
+            'system': '⚙️', # 🖥️
+            'user': '💬',   # 🧑‍💻 👤 🙂 🙋‍♂️ / 🙋‍♀️
+            'assistant': '🤖',
+            'bot': '🤖',
+        }
+    if 'tool_emoji' not in st.session_state:
+        st.session_state['tool_emoji'] = {
+            "search": "🔍",
+            "think": "🤔",
+            "web_logo": "🌐",
+            "warning": "⚠️",
+            "analysis": "💡",
+            "success": "✅",
+            "doc_logo": "📄",
+            "calc_logo": "🧮",
+            "code_logo": "💻",
+        }
 
 @st.cache_data
 def get_template_name_list():

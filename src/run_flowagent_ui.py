@@ -1,5 +1,7 @@
 """ 
-streamlit run run_flowagent_ui.py -- --config=ui_deploy.yaml
+Runs: 
+    streamlit run run_flowagent_ui.py -- --config=ui_deploy.yaml
+    streamlit run run_flowagent_ui.py --server.port 8501 -- --config=ui_dev.yaml
 """
 import argparse
 from flowagent.ui_conv.app import main
