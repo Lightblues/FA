@@ -5,11 +5,11 @@
     def refresh_conversation / refresh_workflow
 """
 
-import datetime, json
+import datetime, json, re
 from typing import List, Dict, Optional, Tuple
 
 from ..data import Config, Message, Conversation, BotOutput, Role, BotOutputType
-from ..utils import jinja_render, OpenAIClient
+from ..utils import jinja_render, OpenAIClient, Formater
 from ..roles import ReactBot
 
 
@@ -55,3 +55,27 @@ class PDL_UIBot(ReactBot):
         )
         self.conv.add_message(msg)
         return prediction
+
+    @staticmethod
+    def parse_react_output(s: str) -> BotOutput:
+        if "```" in s:
+            s = Formater.parse_codeblock(s, type="").strip()
+        # pattern = r"(?P<field>Thought|Action|Action Input|Response):\s*(?P<value>.*?)(?=\n(?:Thought|Action|Action Input|Response):|\Z)"
+        # result = {match.group('field'): match.group('value').strip() for match in matches}
+        pattern = r"(Thought|Action|Action Input|Response):\s*(.*?)\s*(?=Thought:|Action:|Action Input:|Response:|\Z)"
+        matches = re.finditer(pattern, s, re.DOTALL)
+        result = {match.group(1): match.group(2).strip() for match in matches}
+        
+        # validate result
+        try:
+            thought = result.get(BotOutput.thought_str, "")
+            action = action_input = ""
+            if BotOutput.action_str in result:        # Action
+                action = result[BotOutput.action_str]
+                if action:
+                    if action.startswith("API_"): action = action[4:]
+                    action_input = json.loads(result[BotOutput.action_input_str]) # eval: NameError: name 'null' is not defined
+            response = result.get(BotOutput.response_str, "")
+            return BotOutput(action=action, action_input=action_input, response=response, thought=thought)
+        except Exception as e:
+            raise RuntimeError(f"Parse error: {e}\n[LLM output] {s}\n[Result] {result}")

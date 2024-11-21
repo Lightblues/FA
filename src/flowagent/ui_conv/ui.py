@@ -103,6 +103,7 @@ def init_sidebar():
                 '选择模板',
                 options=LIST_shown_templates,
                 key="selected_template_fn",
+                index=LIST_shown_templates.index(config.ui_default_template),
                 on_change=refresh_workflow
             )
         

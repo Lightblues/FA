@@ -49,7 +49,7 @@ def refresh_conversation() -> Conversation:
 def refresh_bot() -> PDL_UIBot:
     print(f">> Refreshing bot: `{st.session_state.selected_template_fn}` with model `{st.session_state.selected_model_name}`")
     cfg:Config = st.session_state.config
-    cfg.bot_template_fn = st.session_state.selected_template_fn
+    cfg.ui_bot_template_fn = f"flowagent/{st.session_state.selected_template_fn}"
     cfg.bot_llm_name = st.session_state.selected_model_name
     if st.session_state.user_additional_constraints is not None:
         cfg.ui_user_additional_constraints = st.session_state.user_additional_constraints

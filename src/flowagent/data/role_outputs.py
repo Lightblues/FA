@@ -39,9 +39,9 @@ class BotOutput:
     
     @property
     def action_type(self) -> BotOutputType:
-        if self.action is not None:
+        if self.action:
             return BotOutputType.ACTION
-        elif self.response is not None:
+        elif self.response:
             return BotOutputType.RESPONSE
         else:
             return BotOutputType.END
