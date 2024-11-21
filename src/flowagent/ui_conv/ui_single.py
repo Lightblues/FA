@@ -1,6 +1,5 @@
 import datetime
 import streamlit as st
-from .uid import get_identity
 from .ui_data import (
     get_template_name_list, get_model_name_list, get_workflow_dirs, get_workflow_names_map, 
     refresh_bot, refresh_workflow
@@ -8,20 +7,9 @@ from .ui_data import (
 from ..data import Config, Workflow, DataManager
 
 def init_sidebar():
+    """Init the sidebar of single workflow"""
     config: Config = st.session_state.config
-    if "headers" not in st.session_state:
-        headers = st.context.headers
-        user_identity = get_identity(headers, app_id="MAWYUI3UXKRDVJBLWMQNGUBDRE5SZOBL")
-        # print(f"user_identity: {user_identity}")
-        st.session_state.headers = headers
-        st.session_state.user_identity = user_identity
-        
-        now = datetime.datetime.now()
-        st.session_state.t = now
-        st.session_state.session_id = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
-    
-        st.session_state.user_additional_constraints = None
-    
+
     _model_names = get_model_name_list()
     _template_names = get_template_name_list()
     _workflow_dirs = get_workflow_dirs()
@@ -115,6 +103,7 @@ def init_sidebar():
                 "https://doc.weixin.qq.com/sheet/e3_AcMATAZtAPI6WfByux6S2abI1stST?scode=AJEAIQdfAAolOjFcj8AcMATAZtAPI&tab=dyka3y"
             )
 
+        # show the PDL and template
         st.divider()
         data_manager: DataManager = st.session_state.data_manager
         workflow: Workflow = st.session_state.workflow

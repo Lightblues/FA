@@ -11,7 +11,7 @@ url: http://agent-pdl.woa.com
 @240723 完成V2版本的UI
 - [x] [feat] clearily log and print infos
 
-- [ ] refactor: align with [~master]
+- [x] refactor: align with [~master]
 """
 
 import time, os, json, glob, openai, yaml, datetime, pdb, copy, sys
@@ -23,43 +23,40 @@ from ..data import (
     Conversation, Message, Role, init_loguru_logger,
     BotOutput, UserOutput, BotOutputType, APIOutput
 )
-from .ui import init_sidebar
-from .ui_data import init_all
+from .ui_single import init_sidebar
+from .ui_data import refresh_bot
 
 
-def main_single():
-    # 1] init
-    if "logger" not in st.session_state:
-        st.session_state.logger = init_loguru_logger(DataManager.DIR_ui_log)
-    if "workflow" not in st.session_state:
-        st.session_state.workflow = Workflow(st.session_state.config)
-
-    init_sidebar()
-    init_all()
-    
-    # 2] prepare for session conversation
-    config: Config = st.session_state.config
-    conversation: Conversation = st.session_state.conversation
-    logger: Logger = st.session_state.logger
-    # workflow: Workflow = st.session_state.workflow
-    
-    # curr_role, curr_action_type    # init!!! move to conversation_infos
-    # R skip the API calling message!
+def show_conversations(conversation):
     for message in conversation.msgs:
         if (message.role == Role.SYSTEM) or (message.content.startswith("<")):
             continue  
         with st.chat_message(message.role.rolename, avatar=st.session_state['avatars'][message.role.rolename]):
             st.write(message.content)
 
-    # _with_print = True
-    # _with_print = False
-    # if conversation_infos.curr_action_type == ActionType.START:   # NOTE: 仍然为导致输出两遍!!
+def main_single():
+    # 1. init
+    if "logger" not in st.session_state:
+        st.session_state.logger = init_loguru_logger(DataManager.DIR_ui_log)
+    if "workflow" not in st.session_state:
+        st.session_state.workflow = Workflow(st.session_state.config)
+
+    init_sidebar()
+
+    if "bot" not in st.session_state:
+        refresh_bot()
+    # 2. prepare for session conversation
+    config: Config = st.session_state.config
+    conversation: Conversation = st.session_state.conversation
+    logger: Logger = st.session_state.logger
+    # workflow: Workflow = st.session_state.workflow
+
     # if logger.num_logs == 0:
     #     logger.info(f"{'config'.center(50, '=')}\n{config.to_dict()}\n{'-'*50}", with_print=_with_print)
     #     logger.info(f"available apis: {[t['name'] for t in workflow.toolbox]}\n{'-'*50}", with_print=_with_print)
     #     logger.info(conversation.msgs[0].to_str(), with_print=_with_print)
 
-    # 3] the main loop!
+    # 3. the main loop!
     """ 
     交互逻辑: 
         当用户输入query之后, 用一个while循环来执行ANSWER或者API调用:
@@ -71,16 +68,15 @@ def main_single():
         summary: 类似conversation交互, 可以增加必要信息
         detailed: 记录设计到LLM的详细信息
     """
-    if OBJECTIVE := st.chat_input('Input...'):       # NOTE: initial input!
-        # 3.1] user input
+    show_conversations(conversation)
+    if OBJECTIVE := st.chat_input('Input...'):
         msg_user = Message(Role.USER, OBJECTIVE, conversation_id=conversation.conversation_id, utterance_id=conversation.current_utterance_id)
         conversation.add_message(msg_user)
         with st.chat_message("user", avatar=st.session_state['avatars']['user']):
             st.write(OBJECTIVE)
         logger.info(f"{msg_user.to_str()}")
-
         print(f">> conversation: {json.dumps(str(conversation), ensure_ascii=False)}")
-        # 3.2] loop for bot response!
+
         with st.container():
             num_bot_actions = 0
             while True:
@@ -119,7 +115,7 @@ def main_single():
                 if num_bot_actions > config.bot_action_limit: 
                     break
         
-        # [show] final bot response to screen
+        # show final bot response to screen
         with st.chat_message("assistant", avatar=st.session_state['avatars']['assistant']):
             st.write(conversation.get_last_message().content)
 

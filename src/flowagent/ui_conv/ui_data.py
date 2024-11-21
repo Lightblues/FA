@@ -2,16 +2,39 @@ from typing import List, Dict
 import yaml, os, pdb, datetime
 import streamlit as st
 
+from .uid import get_identity
 from .ui_bot import PDL_UIBot
 from ..data import (
     Conversation, Message, Role,
     Config, DataManager, 
-    FileLogger, Workflow
+    Workflow
 )
 from ..utils import LLM_CFG
 from ..roles import API_NAME2CLASS
 
 def init_resource():
+    st.set_page_config(
+        page_title="PDL Agent",
+        page_icon="🍊",
+        initial_sidebar_state="auto",
+        menu_items={
+            # 'Get Help': 'https://www.extremelycoolapp.com/help',
+            'Report a bug': "mailto:easonsshi@tencent.com",
+            # 'About': "# This is a header. This is an *extremely* cool app!"
+        }
+    )
+    st.title('️🍊 PDL Agent')
+    # 设置sidebar默认width
+    setting_stype = """
+    <style>
+    [data-testid="stSidebar"][aria-expanded="true"]{
+        min-width: 300px;
+        max-width: 1000px;
+        width: 500px;
+    }
+    """
+    st.markdown(setting_stype, unsafe_allow_html=True)
+
     # bot_icon = Image.open('resource/icon.png')
     if 'avatars' not in st.session_state:
         st.session_state['avatars'] = {
@@ -33,6 +56,17 @@ def init_resource():
             "calc_logo": "🧮",
             "code_logo": "💻",
         }
+
+    if "headers" not in st.session_state:
+        headers = st.context.headers
+        user_identity = get_identity(headers, app_id="MAWYUI3UXKRDVJBLWMQNGUBDRE5SZOBL")
+        # print(f"user_identity: {user_identity}")
+        st.session_state.headers = headers
+        st.session_state.user_identity = user_identity
+        
+        now = datetime.datetime.now()
+        st.session_state.t = now
+        st.session_state.session_id = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
 
 @st.cache_data
 def get_template_name_list():
@@ -65,7 +99,6 @@ def refresh_conversation() -> Conversation:
     now = datetime.datetime.now()
     st.session_state.t = now
     st.session_state.session_id = now.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
-    # st.session_state.logger = FileLogger(log_dir=st.session_state.data_manager.DIR_ui_log, t=st.session_state.t)  # note to set the log_dir
     return st.session_state.conversation
 
 def refresh_bot() -> PDL_UIBot:
@@ -83,7 +116,7 @@ def refresh_bot() -> PDL_UIBot:
     return st.session_state.bot
 
 def refresh_workflow():
-    # st.session_state.config.workflow_dataset = ...
+    """refresh workflow -> bot """
     st.session_state.config.bot_pdl_version = st.session_state.selected_workflow_version
     _, name_id_map = get_workflow_names_map()
     st.session_state.config.workflow_id = name_id_map['PDL_zh'][st.session_state.selected_workflow_name]
@@ -91,7 +124,4 @@ def refresh_workflow():
     st.session_state.workflow = Workflow(st.session_state.config)
     refresh_bot()
 
-def init_all():
-    assert "selected_workflow_name" in st.session_state, "workflow_name must be selected! "   # init_sidebar()
-    if "bot" not in st.session_state:
-        refresh_bot()
+
