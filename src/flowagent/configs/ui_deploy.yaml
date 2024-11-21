@@ -3,14 +3,12 @@ ui_available_models:
   - "1.0.2"
   - "0.9.1"
   - "default"
-# ui_default_model: "1.0.2"
-ui_default_model: "default"
 ui_available_templates:
-  - bot_pdl.jinja
-ui_available_workflow_dirs:
-  - PDL_zh
-# ui_available_workflows:
+  - bot_pdl_ui_zh.jinja
+ui_default_model: "1.0.2"
+ui_default_template: "bot_pdl_ui_zh.jinja"
 ui_greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
+bot_pdl_version: "pdl"    # set as default
 
 bot_mode: "pdl_bot"     # dummy_bot, react_bot, pdl_bot, core_bot
 bot_template_fn: "flowagent/bot_pdl.jinja"

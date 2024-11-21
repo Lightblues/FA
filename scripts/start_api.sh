@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cd /mnt/huabu/src/backend/
+cd /mnt/huabu_online/src/backend/
 python main.py
