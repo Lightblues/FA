@@ -1,5 +1,6 @@
 /log/
 /data/
+/dataset/
 *tmp*
 wandb/
 .env
