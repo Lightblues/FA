@@ -7,16 +7,18 @@
 241118
 - [ ] 实现工具: 现有画布转换, JSON -> PDL [可行性]
 - [ ] 验证在更大画布上的流程遵循稳定性
-    - [ ] 在新版本模型 (0.9.2) 上的效果测试
+    - [x] 在新版本模型 (0.9.2) 上的效果测试
 - [ ] 探究多画布上的协作问题 & 通用插件的调用能力 [方案1] swarm 方案 #P1
 - [ ] 调研 MetaGPT 中 multi-agent 的通信方式
 
 misc
-- [ ] 合并 aget-pdl & master 分支 #P2 (part 1)
+- [x] 合并 aget-pdl & master 分支 #P2 (part 1)
 - [ ] 标准化数据处理模块 (JSON -> PDL 的转换)
 - [ ] 合并数据存储
-- [ ] UI: 此前的功能实现: 自定义配置
+- [x] UI: 此前的功能实现: 自定义配置
 
+buds
+- [ ] 点击 "重置对话", DAG controller 状态没有更新. 
 
 see detailed in [feishu](https://v0r8x11vrv.feishu.cn/docx/WaMfdTbqaoH1WTx9ZDicVAB7nM9)
 

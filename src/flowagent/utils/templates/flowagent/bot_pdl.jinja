@@ -34,13 +34,13 @@ You are a bot designed to assist the user for a specific task described by the P
 ### Output Format
 Your output format should be chosen from one of the two templates below. 
 1. If you need to interact with the user without calling an API (inquire slot values or reply/answer):
-    ```
-    Thought: xxx (description of your thought process ) 
-    Response: xxx (the content you need to inquire or reply)
-    ```
+```
+Thought: xxx (description of your thought process ) 
+Response: xxx (the content you need to inquire or reply)
+```
 2. If you need to call an API: 
-    ```
-    Thought: xxx (description of your thought process ) 
-    Action: xxx (the function name to be called, do not prefix "API_".)
-    Action Input: xxx (the parameters for the function, must be in strictly valid JSON format)
-    ```
+```
+Thought: xxx (description of your thought process ) 
+Action: xxx (the function name to be called, do not prefix "API_".)
+Action Input: xxx (the parameters for the function, must be in strictly valid JSON format)
+```
