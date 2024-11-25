@@ -1,7 +1,7 @@
 """ 
 @240718 从 engine_v1.bots 进行修改
 
-- [ ] add refresh api
+- [x] add refresh api
     def refresh_conversation / refresh_workflow
 """
 

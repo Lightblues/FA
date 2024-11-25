@@ -3,15 +3,16 @@
 > streamlit run run_ui.py --server.port 8501 -- --config=ui_dev.yaml
 url: http://agent-pdl.woa.com
 
-@240718 实现基本交互界面
+@240718 implement basic UI for single workflow
 - [ ] [optimize] optimize API output! 
 - [x] [feat] show Huabu meta information in the sidebar
 - [x] [log] add more detailed logs
 - [x] [feat] mofigy template/PDL in the web directly!  -- not good
-@240723 完成V2版本的UI
+@240723 update V2 UI
 - [x] [feat] clearily log and print infos
-
+@241120 merge to master & refresh
 - [x] refactor: align with [~master]
+- [x] for streamlit, implement refresh mechanism: `refresh_config` of workflow, bot, api;  `refresh_pdl` of controller
 """
 
 import time, os, json, glob, openai, yaml, datetime, pdb, copy, sys
