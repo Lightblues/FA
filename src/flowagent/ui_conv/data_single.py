@@ -5,10 +5,10 @@
 
 from typing import List, Dict
 import yaml, os, pdb, datetime
-import streamlit as st; self = st.session_state
+import streamlit as st; ss = st.session_state
 
 from .uid import get_identity
-from .ui_bot import PDL_UIBot
+from .bot_single import PDL_UIBot
 from ..data import (
     Conversation, Message, Role,
     Config, DataManager
@@ -41,16 +41,16 @@ def init_resource():
     st.markdown(setting_stype, unsafe_allow_html=True)
 
     # bot_icon = Image.open('resource/icon.png')
-    if 'avatars' not in self:
-        self['avatars'] = {
+    if 'avatars' not in ss:
+        ss['avatars'] = {
             # 'ian': bot_icon,
             'system': '⚙️', # 🖥️
             'user': '💬',   # 🧑‍💻 👤 🙂 🙋‍♂️ / 🙋‍♀️
             'assistant': '🤖',
             'bot': '🤖',
         }
-    if 'tool_emoji' not in self:
-        self['tool_emoji'] = {
+    if 'tool_emoji' not in ss:
+        ss['tool_emoji'] = {
             "search": "🔍",
             "think": "🤔",
             "web_logo": "🌐",
@@ -62,12 +62,12 @@ def init_resource():
             "code_logo": "💻",
         }
 
-    if "headers" not in self:
+    if "headers" not in ss:
         headers = st.context.headers
         user_identity = get_identity(headers, app_id="MAWYUI3UXKRDVJBLWMQNGUBDRE5SZOBL")
         # print(f"user_identity: {user_identity}")
-        self.headers = headers
-        self.user_identity = user_identity
+        ss.headers = headers
+        ss.user_identity = user_identity
 
 @st.cache_data
 def get_template_name_list():
@@ -87,53 +87,57 @@ def get_workflow_names_map() -> Dict[str, List[str]]:
 
 
 def refresh_conversation() -> Conversation:
-    """Init or refresh the conversation"""
+    """ refresh the conversation (instead of new one) """
     print(f">> Refreshing conversation!")
-    if "conv" not in self:
-        self.conv = Conversation()
+    if "conv" not in ss: ss.conv = Conversation()
     else:
-        self.conv.clear()
-        self.conv.conversation_id = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
-    selected_workflow_name = self.selected_workflow_name.split("-")[-1]
+        ss.conv.clear()
+        ss.conv.conversation_id = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
+    
+    selected_workflow_name = ss.selected_workflow_name.split("-")[-1]
     msg_hello = Message(
-        Role.BOT, self.cfg.ui_greeting_msg.format(name=selected_workflow_name), 
-        conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id)
-    self.conv.add_message(msg_hello)
-    return self.conv
+        Role.BOT, ss.cfg.ui_greeting_msg.format(name=selected_workflow_name), 
+        conversation_id=ss.conv.conversation_id, utterance_id=ss.conv.current_utterance_id)
+    ss.conv.add_message(msg_hello)
+    return ss.conv
 
 def refresh_bot() -> PDL_UIBot:
-    print(f">> Refreshing bot: `{self.selected_template_fn}` with model `{self.selected_model_name}`")
-    cfg:Config = self.cfg
-    cfg.bot_template_fn = f"flowagent/{self.selected_template_fn}"
-    cfg.bot_llm_name = self.selected_model_name
-    if self.user_additional_constraints is not None:
-        cfg.ui_user_additional_constraints = self.user_additional_constraints
-    
+    """refresh the bot and tool
+
+    Returns:
+        PDL_UIBot: bot
+    """
+    print(f">> Refreshing bot: `{ss.selected_template_fn}` with model `{ss.selected_model_name}`")
     conv = refresh_conversation()
-    if 'bot' not in self:
-        self.bot = PDL_UIBot(cfg=cfg, conv=conv, workflow=self.workflow)
-        self.api_handler = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=conv, workflow=self.workflow)
+    
+    cfg:Config = ss.cfg  # update ss.cfg will also update ss.bot?
+    cfg.bot_template_fn = f"flowagent/{ss.selected_template_fn}"
+    cfg.bot_llm_name = ss.selected_model_name
+    
+    if 'bot' not in ss:
+        ss.bot = PDL_UIBot()
+        ss.tool = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=conv, workflow=ss.workflow)
     else:
-        self.bot.refresh_config(cfg)
-        self.api_handler.refresh_config(cfg)
+        ss.bot.refresh_config()
+        ss.tool.refresh_config(cfg)
     refresh_controllers()
-    return self.bot
+    return ss.bot
 
 def refresh_workflow():
     """refresh workflow -> bot """
-    print(f">> Refreshing workflow: `{self.selected_workflow_name}` of ``")
+    print(f">> Refreshing workflow: `{ss.selected_workflow_name}` of ``")
     _, name_id_map = get_workflow_names_map()
-    self.cfg.pdl_version = self.selected_pdl_version
-    self.cfg.workflow_id = name_id_map['PDL_zh'][self.selected_workflow_name]
-    self.workflow.refresh_config(self.cfg)
+    ss.cfg.pdl_version = ss.selected_pdl_version
+    ss.cfg.workflow_id = name_id_map['PDL_zh'][ss.selected_workflow_name]
+    ss.workflow.refresh_config(ss.cfg)
     refresh_bot()
 
 def refresh_controllers():
-    if 'controllers' not in self:
-        self.controllers = {}  # {name: BaseController}
-        for c in self.cfg.bot_pdl_controllers:
-            self.controllers[c['name']] = CONTROLLER_NAME2CLASS[c['name']](self.cfg, self.conv, self.workflow.pdl, c['config'])
-    for c in self.controllers.values():
+    if 'controllers' not in ss:
+        ss.controllers = {}  # {name: BaseController}
+        for c in ss.cfg.bot_pdl_controllers:
+            ss.controllers[c['name']] = CONTROLLER_NAME2CLASS[c['name']](ss.cfg, ss.conv, ss.workflow.pdl, c['config'])
+    for c in ss.controllers.values():
         # NOTE: 仅在更新了pdl的时候,才刷新
-        if self.workflow.pdl is not c.pdl:
-            c.refresh_pdl(self.workflow.pdl)
+        if ss.workflow.pdl is not c.pdl:
+            c.refresh_pdl(ss.workflow.pdl)

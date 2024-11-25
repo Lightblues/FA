@@ -9,7 +9,7 @@ from ..data import (
     Config, DBManager, DataManager, Workflow, LogUtils,
     Role, Message, Conversation, BaseLogger
 )
-from ..roles import InputUser, BaseBot, BaseUser, BaseAPIHandler
+from ..roles import InputUser, BaseBot, BaseUser, BaseTool
 
 class BaseConversationManager:
     """ main loop of a simulated conversation
@@ -20,7 +20,7 @@ class BaseConversationManager:
     cfg: Config = None
     user: BaseUser = None
     bot: BaseBot = None
-    api: BaseAPIHandler = None
+    api: BaseTool = None
     logger: BaseLogger = None
     conv: Conversation = None       # global variable for conversation
     data_manager: DataManager = None        # remove it? 

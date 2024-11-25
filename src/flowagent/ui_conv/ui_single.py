@@ -1,6 +1,6 @@
 import datetime
-import streamlit as st; self = st.session_state
-from .ui_data import (
+import streamlit as st; ss = st.session_state
+from .data_single import (
     get_template_name_list, get_model_name_list, get_workflow_dirs, get_workflow_names_map, 
     refresh_bot, refresh_workflow
 )
@@ -8,7 +8,7 @@ from ..data import Config, Workflow, DataManager
 
 def init_sidebar():
     """Init the sidebar of single workflow"""
-    config: Config = self.cfg
+    config: Config = ss.cfg
 
     _model_names = get_model_name_list()
     _template_names = get_template_name_list()
@@ -97,7 +97,7 @@ def init_sidebar():
                 placeholder="e.g. 当切换医院的时候, 默认科室不变. "
             )
             if st.button("应用"):
-                if not self.user_additional_constraints:
+                if not ss.user_additional_constraints:
                     st.warning("请填写自定义约束")
                 else:
                     refresh_bot()
@@ -106,7 +106,7 @@ def init_sidebar():
 def post_sidebar():
     with st.sidebar:
         cols = st.columns(3)
-        for index, controller in enumerate(self.controllers.values()):
+        for index, controller in enumerate(ss.controllers.values()):
             col = cols[index % 3]
             with col:
                 controller.is_activated = st.checkbox(
@@ -116,9 +116,9 @@ def post_sidebar():
 
         # show the PDL and template
         st.divider()
-        data_manager: DataManager = self.data_manager
-        workflow: Workflow = self.workflow
-        with open(f"{data_manager.DIR_template}/{self.selected_template_fn}", "r") as f:
+        data_manager: DataManager = ss.data_manager
+        workflow: Workflow = ss.workflow
+        with open(f"{data_manager.DIR_template}/{ss.selected_template_fn}", "r") as f:
             template = f.read()
         
         with st.expander(f"🔍 PDL", expanded=False):
@@ -128,4 +128,4 @@ def post_sidebar():
         
         # show the user identity
         st.divider()
-        st.info(f"- sessionid: {self.conv.conversation_id}\n- name: {self.user_identity['staffname']}")
+        st.info(f"- sessionid: {ss.conv.conversation_id}\n- name: {ss.user_identity['staffname']}")

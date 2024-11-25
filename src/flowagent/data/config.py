@@ -45,9 +45,15 @@ class Config:
     ui_default_model: str = "default"
     ui_default_template: str = "bot_pdl_ui.jinja"
     ui_greeting_msg: str = "Hi, I'm HuaBu bot. How can I help you?"
-    ui_bot_template_fn: str = None     # "flowagent/bot_pdl_ui.jinja"
-    ui_user_additional_constraints: str = None
+    # ui_user_additional_constraints: str = None # move to ss.
     
+    mui_available_workflows: List[str] = None  # 可用的工作流列表
+    mui_bot_template_fn: str = "bot_ui_main_agent.jinja"
+    mui_available_models: List[str] = None
+    mui_available_templates: List[str] = None
+    mui_default_model: str = "gpt-4o"
+    mui_default_template: str = "bot_ui_main_agent.jinja"
+
     conversation_turn_limit: int = 20
     log_utterence_time: bool = True
     log_to_db: bool = True

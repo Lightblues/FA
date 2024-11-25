@@ -7,19 +7,29 @@
 
 import datetime, json, re
 from typing import List, Dict, Optional, Tuple
+import streamlit as st; ss = st.session_state
 
 from ..data import Config, Message, Conversation, BotOutput, Role, BotOutputType
-from ..utils import jinja_render, OpenAIClient, Formater
-from ..roles import ReactBot
+from ..utils import jinja_render, OpenAIClient, Formater, init_client, LLM_CFG
+# from ..roles import ReactBot
 
+class PDL_UIBot():
+    """PDL_UIBot
 
-class PDL_UIBot(ReactBot):
-    def __init__(self, **args) -> None:
-        super().__init__(**args)
+    self: llm
+    ss (session_state): cfg, workflow, conv, user_additional_constraints, bot_template_fn
+
+    Usage::
+        bot = PDL_UIBot()
+        prompt, stream = bot.process_stream() # show the stream
+        bot_output: BotOutput = bot.process_LLM_response(prompt, llm_response)
+    """
+    def __init__(self) -> None:
+        # super().__init__(**args)
+        self.llm = init_client(llm_cfg=LLM_CFG[ss.cfg.bot_llm_name])
     
-    def refresh_config(self, cfg: Config):
-        """For UI, only update the config and bot_template_fn"""
-        self.cfg = cfg
+    def refresh_config(self): # bot_template_fn
+        self.__init__()
     
     def process_stream(self):
         prompt = self._gen_prompt()
@@ -32,20 +42,19 @@ class PDL_UIBot(ReactBot):
             "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
         # s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
-        state_infos |= self.workflow.pdl.status_for_prompt # add the status infos from PDL!
+        state_infos |= ss.workflow.pdl.status_for_prompt # add the status infos from PDL!
         prompt = jinja_render(
-            self.bot_template_fn,       # "flowagent/bot_pdl.jinja"
-            PDL=self.workflow.pdl.to_str_wo_api(),  # .to_str()
-            api_infos=self.workflow.toolbox,        # self.workflow.get_toolbox_by_names(valid_api_names),
-            conversation=self.conv.to_str(),
-            user_additional_constraints = self.cfg.ui_user_additional_constraints,
+            ss.cfg.bot_template_fn,       # "flowagent/bot_pdl.jinja"
+            PDL=ss.workflow.pdl.to_str_wo_api(),  # .to_str()
+            api_infos=ss.workflow.toolbox,
+            conversation=ss.conv.to_str(),
+            user_additional_constraints = ss.user_additional_constraints,
             current_state="\n".join(f"{k}: {v}" for k,v in state_infos.items()),
         )
-        # print(f"Current pdl state: {self.workflow.pdl.status_for_prompt}")
         return prompt
 
     def process_LLM_response(self, prompt: str, llm_response:str) -> BotOutput:
-        prediction = self.parse_react_output(llm_response)
+        prediction = self._parse_react_output(llm_response)
         
         if prediction.action_type==BotOutputType.RESPONSE:
             msg_content = prediction.response
@@ -53,13 +62,13 @@ class PDL_UIBot(ReactBot):
             msg_content = f"<Call API> {prediction.action}({prediction.action_input})"
         msg = Message(
             Role.BOT, msg_content, prompt=prompt, llm_response=llm_response,
-            conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
+            conversation_id=ss.conv.conversation_id, utterance_id=ss.conv.current_utterance_id
         )
-        self.conv.add_message(msg)
+        ss.conv.add_message(msg)
         return prediction
 
     @staticmethod
-    def parse_react_output(s: str) -> BotOutput:
+    def _parse_react_output(s: str) -> BotOutput:
         """Parse output with full `Tought, Action, Action Input, Response`."""
         if "```" in s:
             s = Formater.parse_codeblock(s, type="").strip()

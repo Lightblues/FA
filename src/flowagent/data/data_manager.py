@@ -29,6 +29,11 @@ class DataManager:
         self._build_workflow_infos(cfg.workflow_dataset)
         
     def _build_workflow_infos(self, workflow_dataset: str):
+        """Load workflow infors from `task_infos.json`
+
+        Args:
+            workflow_dataset (str): dataset name
+        """
         self.DIR_data_workflow = self.DIR_data_root / workflow_dataset
         self.FN_data_workflow_infos = self.DIR_data_workflow / "task_infos.json"
         infos: dict = json.load(open(self.FN_data_workflow_infos, 'r'))

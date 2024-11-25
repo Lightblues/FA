@@ -1,7 +1,7 @@
 from typing import Dict
 from enum import Enum
-from .base import BaseRole, BaseAPIHandler, BaseBot, BaseUser
-from .tools import DummyAPIHandler, LLMSimulatedAPIHandler, CoREAPIHandler, RequestAPIHandler
+from .base import BaseRole, BaseTool, BaseBot, BaseUser
+from .tools import DummyTool, LLMSimulatedTool, CoREAPIHandler, RequestTool
 from .user import DummyUser, InputUser
 from .bots import DummyBot, PDLBot, ReactBot, CoREBot
 
@@ -16,8 +16,8 @@ USER_NAME2CLASS:Dict[str, BaseUser] = {}
 build_attr_list_map(BaseUser, USER_NAME2CLASS)
 BOT_NAME2CLASS: Dict[str, BaseBot] = {}
 build_attr_list_map(BaseBot, BOT_NAME2CLASS)
-API_NAME2CLASS:Dict[str, BaseAPIHandler] = {}
-build_attr_list_map(BaseAPIHandler, API_NAME2CLASS)
+API_NAME2CLASS:Dict[str, BaseTool] = {}
+build_attr_list_map(BaseTool, API_NAME2CLASS)
 
 def build_attr_map(base_class: BaseRole, name_to_class_dict: Dict[str, BaseRole], attr: str="names"):
     for cls in base_class.__subclasses__():
@@ -29,7 +29,7 @@ build_attr_map(BaseUser, USER_NAME2TEMPLATE, attr="user_template_fn")
 BOT_NAME2TEMPLATE:Dict[str, str] = {}
 build_attr_map(BaseBot, BOT_NAME2TEMPLATE, attr="bot_template_fn")
 API_NAME2TEMPLATE:Dict[str, str] = {}
-build_attr_map(BaseAPIHandler, API_NAME2TEMPLATE, attr="api_template_fn")
+build_attr_map(BaseTool, API_NAME2TEMPLATE, attr="api_template_fn")
 
 # for typer
 def create_enum(name, values):

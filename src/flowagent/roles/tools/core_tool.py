@@ -1,10 +1,10 @@
 
 
 from ...data import APIOutput, BotOutput, Role, Message
-from .llm_simulated_tool import LLMSimulatedAPIHandler
+from .llm_simulated_tool import LLMSimulatedTool
 
 
-class CoREAPIHandler(LLMSimulatedAPIHandler):
+class CoREAPIHandler(LLMSimulatedTool):
     api_template_fn: str = "flowagent/api_llm.jinja"
     names = ["core", "CoREAPIHandler"]
     

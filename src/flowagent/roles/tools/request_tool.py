@@ -6,7 +6,7 @@ from [branch agent-pdl] src/engine/role_api.py
 
 from typing import Dict, Tuple
 import requests, json, traceback
-from ..base import BaseAPIHandler
+from ..base import BaseTool
 from ...data import APIOutput, BotOutput, Role, Message, Config
 
 def handle_exceptions(func):
@@ -22,7 +22,7 @@ def handle_exceptions(func):
     return wrapper
 
 
-class RequestAPIHandler(BaseAPIHandler):
+class RequestTool(BaseTool):
     # entity_linker: EntityLinker = None
     names = ["v01", "request", "RequestAPIHandler"]
     

@@ -4,11 +4,11 @@
 """
 import json, re
 from typing import List
-from ..base import BaseAPIHandler
+from ..base import BaseTool
 from ...data import APIOutput, BotOutput, Role, Message
 from ...utils import jinja_render, retry_wrapper, OpenAIClient, Formater, init_client, LLM_CFG
 
-class LLMSimulatedAPIHandler(BaseAPIHandler):
+class LLMSimulatedTool(BaseTool):
     llm: OpenAIClient = None
     api_template_fn: str = "flowagent/api_llm.jinja"
     names = ["llm", "LLMSimulatedAPIHandler"]
