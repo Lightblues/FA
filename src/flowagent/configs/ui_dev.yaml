@@ -1,7 +1,6 @@
 
 ui_available_models: 
   - "1.0.2"
-  - "0.9.1"
   - "default"
   - "gpt-4o"
 ui_available_templates:

@@ -1,7 +1,7 @@
 
 ui_available_models: 
   - "1.0.2"
-  - "0.9.1"
+  # - "0.9.1"
   - "default"
 ui_available_templates:
   - bot_pdl_ui_zh.jinja
