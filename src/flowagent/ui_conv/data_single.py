@@ -1,8 +1,3 @@
-""" 
-@241121
-- 针对streamlit的形式, 实现了refresh机制: `refresh_config` of workflow, bot, api;  `refresh_pdl` of controller
-"""
-
 from typing import List, Dict
 import yaml, os, pdb, datetime
 import streamlit as st; ss = st.session_state

@@ -1,4 +1,12 @@
-from loguru._logger import Logger
+""" 
+@241125 implement main agent (step 1)
+- [x] main agent
+- [x] seperate single and multi workflow logic (refactor)
+
+- [ ] add tools for main agent
+- [ ] implement workflow agents (refreshing)
+- [ ] testing (debug): inspect prompt and output
+"""
 import streamlit as st; ss = st.session_state
 import json
 from ..data import (
@@ -6,7 +14,7 @@ from ..data import (
     Conversation, Message, Role, init_loguru_logger,
     BotOutput, UserOutput, BotOutputType, APIOutput
 )
-from .ui_multi import init_sidebar
+from .ui_multi import init_sidebar, post_sidebar
 from .data_single import refresh_workflow
 from .data_multi import refresh_conversation, refresh_main_agent
 from .page_single_workflow import show_conversations, step_user_input
@@ -72,6 +80,8 @@ def main_multi():
     if "agent_workflow_map" not in ss: ss.agent_workflow_map = {}  # {name: (bot, tool)}
     
     init_sidebar()
+    
+    post_sidebar()
     
     show_conversations(ss.conv)
     if OBJECTIVE := st.chat_input('Input...'):
