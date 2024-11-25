@@ -26,6 +26,15 @@ def main():
         else: case_workflow()
 ```
 
+UI
+1. 配置项: 选择模型/模板/数据版本/数据
+2. 按钮: 重置对话
+3. 输入: 自定义配置
+4. 勾选: 使用的 workflows
+5. 查看: PDL / template?
+6. 日志: sessionid / name
+
+
 ## single_workflow
 ```python
     """ 
@@ -40,3 +49,12 @@ def main():
         detailed: 记录设计到LLM的详细信息
     """
 ```
+
+
+UI
+1. 配置项: 选择模型/模板/数据版本/数据
+2. 按钮: 重置对话
+3. 输入: 自定义配置
+4. 勾选: controllers
+5. 查看: PDL / template
+6. 日志: sessionid / name

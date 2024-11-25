@@ -29,7 +29,7 @@ class BaseRole:
         raise NotImplementedError
 
 
-class BaseAPIHandler(BaseRole):
+class BaseTool(BaseRole):
     """ 
     API structure: (see apis_v0/apis.json)
     """

@@ -1,4 +1,5 @@
-from flowagent.ui_conv.ui_bot import PDL_UIBot
+""" deprecated! use ss.cfg instead! """
+from flowagent.ui_conv.bot_single import PDL_UIBot
 from flowagent.data import Config, Conversation, Workflow, DataManager, Role, Message
 
 cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))

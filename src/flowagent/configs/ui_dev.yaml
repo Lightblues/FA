@@ -13,6 +13,17 @@ ui_default_model: "1.0.2"   # "gpt-4o"
 ui_default_template: "bot_pdl_ui_zh.jinja"
 ui_greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
 
+# mui_available_workflows: 
+mui_bot_template_fn: "flowagent/bot_ui_main_agent.jinja"
+mui_available_models: 
+  - "gpt-4o"
+  - "1.0.2"
+  - "default"
+mui_available_templates:
+  - bot_ui_main_agent.jinja
+mui_default_template: "bot_ui_main_agent.jinja"
+mui_default_model: "gpt-4o"
+
 api_mode: "request"
 
 pdl_version: "pdl"    # set as default

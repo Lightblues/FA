@@ -1,21 +1,21 @@
 from flowagent import Config, DataManager
 from flowagent.data import Conversation, Workflow, BotOutput, APIOutput
-from flowagent.roles import LLMSimulatedAPIHandler, RequestAPIHandler
+from flowagent.roles import LLMSimulatedTool, RequestTool
 
-def init_llm_api() -> LLMSimulatedAPIHandler:
+def init_llm_api() -> LLMSimulatedTool:
     cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
     conv = Conversation()
     pdl = Workflow(cfg)
-    tool = LLMSimulatedAPIHandler(cfg=cfg, conv=conv, workflow=pdl)
+    tool = LLMSimulatedTool(cfg=cfg, conv=conv, workflow=pdl)
     return tool
 
-def init_request_api() -> RequestAPIHandler:
+def init_request_api() -> RequestTool:
     cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
     cfg.workflow_dataset = "PDL_zh"
     cfg.workflow_id = "000"
     conv = Conversation()
     pdl = Workflow(cfg)
-    tool = RequestAPIHandler(cfg=cfg, conv=conv, workflow=pdl)
+    tool = RequestTool(cfg=cfg, conv=conv, workflow=pdl)
     return tool
 
 # tool = init_llm_api()

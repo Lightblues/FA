@@ -3,11 +3,11 @@ Run::
     cd /mnt/huabu/src
     streamlit run run_flowagent_ui.py --server.port 8501 -- --config=ui_dev.yaml
 """
-import streamlit as st; self = st.session_state
+import streamlit as st; ss = st.session_state
 from ..data import Config, DataManager
 from .page_single_workflow import main_single
 from .page_multi_workflow import main_multi
-from .ui_data import init_resource
+from .data_single import init_resource
 
 # def set_global_exception_handler(f):
 #     from streamlit.runtime.scriptrunner.script_runner import handle_uncaught_app_exception
@@ -23,17 +23,16 @@ from .ui_data import init_resource
 
 
 def main(config_version:str="default.yaml"):
-    # useful infos
     init_resource()
     
     # config and data_manager
-    if "config" not in self:
-        self.cfg = Config.from_yaml(DataManager.normalize_config_name(config_name=config_version))
-        print(f"[INFO] config: {self.cfg}")
-    if "data_manager" not in self:
-        self.data_manager = DataManager(self.cfg)
+    if "config" not in ss:
+        ss.cfg = Config.from_yaml(DataManager.normalize_config_name(config_name=config_version))
+        # print(f"[INFO] config: {ss.cfg}")
+    if "data_manager" not in ss:
+        ss.data_manager = DataManager(ss.cfg)
     
-    page = st.sidebar.selectbox("Select Mode", ["👤 Single", "👥 Multiple", ])
+    page = st.sidebar.selectbox("Select Mode", ["👤 Single", "👥 Multiple", ], index=1)
     st.sidebar.markdown("---")
     
     if page == "👤 Single": main_single()

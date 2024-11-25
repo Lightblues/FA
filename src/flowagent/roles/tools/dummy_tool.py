@@ -1,8 +1,8 @@
 from typing import List
-from ..base import BaseAPIHandler
+from ..base import BaseTool
 from ...data import APIOutput, BotOutput, Role, Message
 
-class DummyAPIHandler(BaseAPIHandler):
+class DummyTool(BaseTool):
     """ 
     API structure: (see apis_v0/apis.json)
     """
