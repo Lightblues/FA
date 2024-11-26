@@ -67,6 +67,12 @@ class Workflow:  # rename -> Data
     
 
     def __init__(self, cfg:Config, data_manager:DataManager=None) -> None:
+        """ Overall data handler
+        1. setup .cfg, .data_manager
+        2. set .type, .id, & .name, .task_description (from data_manager.workflow_infos)
+        3. load .toolbox (f"tools/{self.id}.yaml")
+        4. load .workflow (f"{self.type.subdir}/{self.id}{self.type.suffix}")
+        """
         self.cfg = cfg
         if data_manager is None: data_manager = DataManager(cfg)
         self.data_manager = data_manager

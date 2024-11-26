@@ -48,11 +48,16 @@ class Config:
     # ui_user_additional_constraints: str = None # move to ss.
     
     mui_available_workflows: List[str] = None  # 可用的工作流列表
-    mui_bot_template_fn: str = "bot_ui_main_agent.jinja"
+    mui_agent_main_template_fn: str = "bot_mui_main_agent.jinja"
+    mui_agent_main_llm_name: str = "gpt-4o"
+    mui_agent_workflow_template_fn: str = "bot_mui_workflow_agent.jinja"
+    # mui_agent_workflow_llm_name: str = "gpt-4o" # reuse `mui_agent_main_llm_name`
     mui_available_models: List[str] = None
     mui_available_templates: List[str] = None
     mui_default_model: str = "gpt-4o"
-    mui_default_template: str = "bot_ui_main_agent.jinja"
+    mui_default_template: str = "bot_mui_main_agent.jinja"
+    
+    mui_bot_workflow_template_fn: str = "bot_mui_workflow_agent.jinja"
 
     conversation_turn_limit: int = 20
     log_utterence_time: bool = True

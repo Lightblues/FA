@@ -79,6 +79,11 @@ class DataManager:
         return dirs
     @staticmethod
     def get_workflow_names_map():
+        """ 
+        Return: 
+            names_map: {PDL_zh: ["task1", "task2"]}
+            name_id_map: {PDL_zh: {"task1": "000"}}
+        """
         dirs = DataManager.get_workflow_dirs()
         names_map = {}      # {PDL_zh: ["task1", "task2"]}
         name_id_map = {} # {PDL_zh: {"task1": "000"}}

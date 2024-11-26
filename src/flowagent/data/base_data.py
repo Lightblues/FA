@@ -5,6 +5,16 @@ from dataclasses import dataclass, asdict, field
 from typing import List, Dict, Optional, Tuple, Iterator, Union
 import pandas as pd
 
+class CustomRole:
+    def __init__(self, rolename: str):
+        self.id = -1  # 使用负数ID以区分内置角色
+        self.prefix = f"[{rolename.upper()}] "
+        self.rolename = rolename.lower()
+        self.color = "blue"  # 默认颜色
+
+    def __str__(self):
+        return f"Role(id={self.id}, prefix={self.prefix}, name={self.rolename})"
+
 
 class Role(Enum):
     SYSTEM = (0, "[SYSTEM] ", "system", 'green')
@@ -25,7 +35,8 @@ class Role(Enum):
         for member in cls:
             if member.rolename == rolename.lower():
                 return member
-        raise KeyError(f"{rolename} is not a valid key for {cls.__name__}")
+        return CustomRole(rolename)  # 如果找不到匹配的角色，返回自定义角色
+        # raise KeyError(f"{rolename} is not a valid key for {cls.__name__}")
 
 
 @dataclass
@@ -46,7 +57,7 @@ class APICall:
 
 @dataclass
 class Message:
-    role: Role = None
+    role: Union[Role, CustomRole] = None
     content: str = None
     prompt: str = None
     llm_response: str = None
@@ -59,13 +70,15 @@ class Message:
     content_predict: str = None
 
     def __init__(
-        self, role: Role, content: str, 
+        self, role: Union[Role, str], content: str, 
         conversation_id: str=None, utterance_id: int=None, 
         prompt: str=None, llm_response: str=None, 
         type: str=None, apis: List[APICall]=None, content_predict: str=None,
         **kwargs
     ):
-        self.role = role
+        if isinstance(role, str): self.role = Role.get_by_rolename(role)
+        elif isinstance(role, Role): self.role = role
+        else: raise NotImplementedError
         self.content = content
         if prompt is not None: self.prompt = prompt
         if llm_response is not None: self.llm_response = llm_response

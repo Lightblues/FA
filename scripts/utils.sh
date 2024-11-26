@@ -19,3 +19,7 @@ cd $PROJECT_PATH/src
 python main.py --model_name=gpt-4o
 # 2. UI 
 streamlit run run_flowagent_ui.py --server.port 8501 -- --config=ui_local.yaml
+
+
+# kill dead streamlit
+ps aux | grep 'config=ui_dev.yaml' | grep -v grep | awk '{print $2}' | xargs kill -9

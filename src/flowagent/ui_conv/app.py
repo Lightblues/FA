@@ -27,7 +27,7 @@ def main(config_version:str="default.yaml"):
     
     # config and data_manager
     if "config" not in ss:
-        ss.cfg = Config.from_yaml(DataManager.normalize_config_name(config_name=config_version))
+        ss.cfg = Config.from_yaml(DataManager.normalize_config_name(config_version))
         # print(f"[INFO] config: {ss.cfg}")
     if "data_manager" not in ss:
         ss.data_manager = DataManager(ss.cfg)
