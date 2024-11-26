@@ -6,7 +6,7 @@
 """
 
 import datetime, json, re
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Union
 import streamlit as st; ss = st.session_state
 
 from ..data import Config, Message, Conversation, BotOutput, Role, BotOutputType
@@ -45,6 +45,7 @@ class PDL_UIBot():
         state_infos |= ss.workflow.pdl.status_for_prompt # add the status infos from PDL!
         prompt = jinja_render(
             ss.cfg.bot_template_fn,       # "flowagent/bot_pdl.jinja"
+            workflow_name=ss.curr_status, # TODO: to be fixed
             PDL=ss.workflow.pdl.to_str_wo_api(),  # .to_str()
             api_infos=ss.workflow.toolbox,
             conversation=ss.conv.to_str(),
@@ -58,13 +59,10 @@ class PDL_UIBot():
         
         if prediction.action_type==BotOutputType.RESPONSE:
             msg_content = prediction.response
-        else:
+        elif prediction.action_type==BotOutputType.ACTION:
             msg_content = f"<Call API> {prediction.action}({prediction.action_input})"
-        msg = Message(
-            Role.BOT, msg_content, prompt=prompt, llm_response=llm_response,
-            conversation_id=ss.conv.conversation_id, utterance_id=ss.conv.current_utterance_id
-        )
-        ss.conv.add_message(msg)
+        else: raise NotImplementedError
+        self._add_message(msg_content, prompt=prompt, llm_response=llm_response)
         return prediction
 
     @staticmethod
@@ -72,8 +70,6 @@ class PDL_UIBot():
         """Parse output with full `Tought, Action, Action Input, Response`."""
         if "```" in s:
             s = Formater.parse_codeblock(s, type="").strip()
-        # pattern = r"(?P<field>Thought|Action|Action Input|Response):\s*(?P<value>.*?)(?=\n(?:Thought|Action|Action Input|Response):|\Z)"
-        # result = {match.group('field'): match.group('value').strip() for match in matches}
         pattern = r"(Thought|Action|Action Input|Response):\s*(.*?)\s*(?=Thought:|Action:|Action Input:|Response:|\Z)"
         matches = re.finditer(pattern, s, re.DOTALL)
         result = {match.group(1): match.group(2).strip() for match in matches}
@@ -91,3 +87,10 @@ class PDL_UIBot():
             return BotOutput(action=action, action_input=action_input, response=response, thought=thought)
         except Exception as e:
             raise RuntimeError(f"Parse error: {e}\n[LLM output] {s}\n[Result] {result}")
+
+    def _add_message(self, msg_content: str, prompt: str=None, llm_response:str=None, role:Union[Role, str]=Role.BOT):
+        msg = Message(
+            role, msg_content, prompt=prompt, llm_response=llm_response,
+            conversation_id=ss.conv.conversation_id, utterance_id=ss.conv.current_utterance_id
+        )
+        ss.conv.add_message(msg)

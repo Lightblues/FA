@@ -1,5 +1,5 @@
 from typing import List, Dict
-import yaml, os, pdb, datetime
+import yaml, os, pdb, datetime, collections
 import streamlit as st; ss = st.session_state
 
 from .uid import get_identity
@@ -37,7 +37,8 @@ def init_resource():
 
     # bot_icon = Image.open('resource/icon.png')
     if 'avatars' not in ss:
-        ss['avatars'] = {
+        ss['avatars'] = collections.defaultdict(lambda: "🤖")
+        ss['avatars'] |= {
             # 'ian': bot_icon,
             'system': '⚙️', # 🖥️
             'user': '💬',   # 🧑‍💻 👤 🙂 🙋‍♂️ / 🙋‍♀️
@@ -105,7 +106,7 @@ def refresh_bot() -> PDL_UIBot:
     print(f">> Refreshing bot: `{ss.selected_template_fn}` with model `{ss.selected_model_name}`")
     conv = refresh_conversation()
     
-    cfg:Config = ss.cfg  # update ss.cfg will also update ss.bot?
+    cfg:Config = ss.cfg  # update ss.cfg will also update ss.bot
     cfg.bot_template_fn = f"flowagent/{ss.selected_template_fn}"
     cfg.bot_llm_name = ss.selected_model_name
     
@@ -123,6 +124,7 @@ def refresh_workflow():
     print(f">> Refreshing workflow: `{ss.selected_workflow_name}` of ``")
     _, name_id_map = get_workflow_names_map()
     ss.cfg.pdl_version = ss.selected_pdl_version
+    # TODO: feat, select dataset?
     ss.cfg.workflow_id = name_id_map['PDL_zh'][ss.selected_workflow_name]
     ss.workflow.refresh_config(ss.cfg)
     refresh_bot()
@@ -131,7 +133,7 @@ def refresh_controllers():
     if 'controllers' not in ss:
         ss.controllers = {}  # {name: BaseController}
         for c in ss.cfg.bot_pdl_controllers:
-            ss.controllers[c['name']] = CONTROLLER_NAME2CLASS[c['name']](ss.cfg, ss.conv, ss.workflow.pdl, c['config'])
+            ss.controllers[c['name']] = CONTROLLER_NAME2CLASS[c['name']](ss.conv, ss.workflow.pdl, c['config'])
     for c in ss.controllers.values():
         # NOTE: 仅在更新了pdl的时候,才刷新
         if ss.workflow.pdl is not c.pdl:

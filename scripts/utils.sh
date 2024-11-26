@@ -12,3 +12,6 @@ ln -s /work/huabu/data /work/huabu_online/data
 tmux attach -t huabu # run in tmux
 cd /work/huabu_online/src
 ./start_ui_deploy.sh
+
+# kill dead streamlit
+ps aux | grep 'config=ui_dev.yaml' | grep -v grep | awk '{print $2}' | xargs kill -9

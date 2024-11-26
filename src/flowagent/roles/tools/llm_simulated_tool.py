@@ -9,6 +9,21 @@ from ...data import APIOutput, BotOutput, Role, Message
 from ...utils import jinja_render, retry_wrapper, OpenAIClient, Formater, init_client, LLM_CFG
 
 class LLMSimulatedTool(BaseTool):
+    """LLMSimulatedTool
+
+    Variables: (self)
+        process(): llm, conv
+        _gen_prompt(): api_infos, api_template_fn
+
+    Usage::
+        cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
+        conv = Conversation()
+        pdl = Workflow(cfg)
+        tool = LLMSimulatedTool(cfg=cfg, conv=conv, workflow=pdl)
+        
+        bot_output = BotOutput(thought="...", action="check_hospital", action_input={"hospital_name": "test"}, response=None)
+        api_output: APIOutput = tool.process(bot_output)
+    """
     llm: OpenAIClient = None
     api_template_fn: str = "flowagent/api_llm.jinja"
     names = ["llm", "LLMSimulatedAPIHandler"]
@@ -18,19 +33,19 @@ class LLMSimulatedTool(BaseTool):
         self.llm = init_client(llm_cfg=LLM_CFG[self.cfg.api_llm_name])
     
     def process(self, apicalling_info: BotOutput, *args, **kwargs) -> APIOutput:
-        flag, m = self.check_validation(apicalling_info)
+        flag, m = self._check_validation(apicalling_info)
         if not flag:        # base check error!
             msg = Message(
                 Role.SYSTEM, m,
                 conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
             )
-            prediction = APIOutput(apicalling_info.action, apicalling_info.action_input, m, 400)
+            prediction = APIOutput(name=apicalling_info.action, request=apicalling_info.action_input, response_data=m, response_status_code=404)
         else:
             self.cnt_api_callings[apicalling_info.action] += 1  # stat
             
             prompt = self._gen_prompt(apicalling_info)
             llm_response = self.llm.query_one(prompt)
-            prediction = self.parse_react_output(llm_response, apicalling_info) # parse_json_output
+            prediction = self.parse_react_output(llm_response, apicalling_info)
             if prediction.response_status_code==200:
                 msg_content = f"<API response> {prediction.response_data}"
             else:
@@ -42,7 +57,7 @@ class LLMSimulatedTool(BaseTool):
         self.conv.add_message(msg)
         return prediction
     
-    def check_validation(self, apicalling_info: BotOutput) -> bool:
+    def _check_validation(self, apicalling_info: BotOutput) -> bool:
         # ... match the api by name? check params? 
         api_names = [api["name"] for api in self.api_infos]
         if apicalling_info.action not in api_names: 
@@ -60,7 +75,7 @@ class LLMSimulatedTool(BaseTool):
 
     @staticmethod
     def parse_json_output(s:str, apicalling_info:BotOutput) -> APIOutput:
-        """ 
+        """ DEPRECATED!
         parse the output: status_code, data
         NOTE: can also output in the format of ReAct
         """

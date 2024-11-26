@@ -17,7 +17,7 @@ class BaseController:
     if_post_control = False
     if_response_control = False
     
-    def __init__(self, cfg: Config, conv:Conversation, pdl: PDL, config: Dict, *args, **kwargs) -> None:
+    def __init__(self, conv:Conversation, pdl: PDL, config: Dict, *args, **kwargs) -> None:
         # self.cfg = cfg        # 用不到!
         self.conv = conv        # the conversation! update it when necessary!
         self.pdl = pdl

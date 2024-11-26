@@ -8,6 +8,7 @@ class BotOutputType(Enum):
     RESPONSE = ("RESPONSE", "response to the user")
     ACTION = ("ACTION", "call an API")
     END = ("END", "end the conversation")
+    SWITCH = ("SWITCH", "switch to another workflow")
 
     def __init__(self, actionname, description):
         self.actionname = actionname
