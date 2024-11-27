@@ -34,7 +34,7 @@ def refresh_main_agent() -> Multi_Main_UIBot:
     
     cfg:Config = ss.cfg  # update ss.cfg will also update ss.bot
     cfg.mui_agent_main_llm_name = ss.selected_mui_agent_main_llm_name
-    cfg.mui_agent_main_template_fn = ss.selected_mui_agent_main_template_fn
+    cfg.mui_agent_main_template_fn = f"flowagent/{ss.selected_mui_agent_main_template_fn}"
     
     if 'agent_main' not in ss:
         ss.agent_main = Multi_Main_UIBot()
