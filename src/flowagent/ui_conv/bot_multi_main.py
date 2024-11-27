@@ -37,10 +37,7 @@ class Multi_Main_UIBot(PDL_UIBot):
     def __init__(self) -> None:
         # super().__init__()
         self.llm = init_client(llm_cfg=LLM_CFG[ss.cfg.mui_agent_main_llm_name])
-        self._build_workflows()
-    def _build_workflows(self):
-        self.workflows = ss.data_manager.workflow_infos
-    
+
     def refresh_config(self): # bot_template_fn
         self.__init__()
     
@@ -48,10 +45,10 @@ class Multi_Main_UIBot(PDL_UIBot):
         state_infos = {
             "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
-        # TODO: select available workflows (cfg.mui_available_workflows)
+        workflows = [w for w in ss.workflow_infos if w['is_activated']]
         prompt = jinja_render(
             ss.cfg.mui_agent_main_template_fn,       # "flowagent/bot_mui_main_agent.jinja"
-            workflows=self.workflows,
+            workflows=workflows,
             conversation=ss.conv.to_str(),
             current_state="\n".join(f"{k}: {v}" for k,v in state_infos.items()),
         )

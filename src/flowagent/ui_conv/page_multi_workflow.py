@@ -2,11 +2,17 @@
 @241125 implement main agent (step 1)
 - [x] main agent
 - [x] seperate single and multi workflow logic (refactor)
+@241126
+- [x] implement workflow agents
+- [x] limit # ActionType.SWITCH in single turn (to avoid dead loop)? Maybe not necessary
+@241127
+- [x] add activated workflow in the sidebar (ui_multi.py)
+
 
 - [ ] add tools for main agent (function calling?)
-- [ ] implement workflow agents
 - [ ] testing (debug): inspect prompt and output
-- [ ] limit # ActionType.SWITCH in single turn (to avoid dead loop)? Maybe not necessary
+- [ ] #bug, cannot refresh ss.conv when changing Single/Multi
+- [ ] #bug, repeatly SWITCH workflow
 """
 import streamlit as st; ss = st.session_state
 import json
@@ -70,8 +76,8 @@ def case_main():
         agent_main_output = step_agent_main_prediction()
         print(f"> agent_main_output: {agent_main_output}")
         if agent_main_output.action_type == BotOutputType.SWITCH:
-            # show SWIFT
-            st.markdown(f'<p style="color: blue;">[swift workflow] <code>{ss.conv.get_last_message().to_str()}</code></p>', unsafe_allow_html=True)
+            # show SWITCH
+            st.markdown(f'<p style="color: blue;">[switch workflow] <code>{ss.conv.get_last_message().to_str()}</code></p>', unsafe_allow_html=True)
             ss.logger.info(ss.conv.get_last_message().to_str())
     # out of this container! 
     if agent_main_output.workflow:
@@ -102,7 +108,7 @@ def case_workflow():
                     continue
                 api_output = step_api_process(agent_workflow_output)
             elif agent_workflow_output.workflow:
-                st.markdown(f'<p style="color: blue;">[swift workflow] <code>{ss.conv.get_last_message().to_str()}</code></p>', unsafe_allow_html=True)
+                st.markdown(f'<p style="color: blue;">[switch workflow] <code>{ss.conv.get_last_message().to_str()}</code></p>', unsafe_allow_html=True)
                 ss.logger.info(ss.conv.get_last_message().to_str())
                 break
             # else: raise TypeError(f"Unexpected agent_workflow_output: {agent_workflow_output}")
@@ -120,7 +126,15 @@ def main_multi():
     if "conv" not in ss: ss.conv = refresh_conversation()
     if ("curr_status" not in ss) or ("curr_bot" not in ss): 
         ss.curr_status = "main"
-    
+    if "workflow_infos" not in ss:
+        ss.workflow_infos = ss.data_manager.workflow_infos.values()
+        if ss.cfg.mui_available_workflows:
+            workflow_names = [w['name'] for w in ss.workflow_infos]
+            assert all(w in workflow_names for w in ss.cfg.mui_available_workflows)
+            ss.workflow_infos = [w for w in ss.workflow_infos if w['name'] in ss.cfg.mui_available_workflows]
+        for w in ss.workflow_infos:
+            w['is_activated'] = True
+
     init_sidebar()
     if "agent_main" not in ss: refresh_main_agent()
     if "agent_workflow_map" not in ss: ss.agent_workflow_map = {}  # {name: (bot, tool)}
