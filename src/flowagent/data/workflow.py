@@ -99,26 +99,27 @@ class Workflow:  # rename -> Data
         if self.type == WorkflowType.CORE:
             self.core_flow = CoreFlow.load_from_file(data_manager.DIR_data_workflow / f"core/{self.id}.txt")
         # 3. load the user infos
-        # TODO: load user profiles only when exp!
-        if (self.cfg.exp_mode=="session"): # load_user_profiles:
-            with open(data_manager.DIR_data_workflow / f"user_profile/{self.id}.json", 'r') as f:
-                user_profiles = json.load(f)
-            self.user_profiles = [UserProfile.load_from_dict(profile) for profile in user_profiles]
-            # if user in OOW mode! 
-            if "oow" in self.cfg.user_mode.lower():
-                with open(data_manager.DIR_data_root / f"meta/oow.yaml", 'r') as f:
-                    data = yaml.safe_load(f)
-                self.user_oow_intentions = [OOWIntention.from_dict(d) for d in data]
-        if (self.cfg.exp_mode=="turn"): # load_reference_conversation: 
-            with open(data_manager.DIR_data_workflow / f"user_profile_w_conversation/{self.id}.json", 'r') as f:
-                data = json.load(f)
-            self.reference_conversations = []
-            for d in data:
-                self.reference_conversations.append(
-                    ConversationWithIntention(
-                        d["user_intention"], Conversation.load_from_json(d["conversation"])
+        # load user profiles only when exp!
+        if self.cfg.mode == "exp":
+            if (self.cfg.exp_mode=="session"): # load_user_profiles:
+                with open(data_manager.DIR_data_workflow / f"user_profile/{self.id}.json", 'r') as f:
+                    user_profiles = json.load(f)
+                self.user_profiles = [UserProfile.load_from_dict(profile) for profile in user_profiles]
+                # if user in OOW mode! 
+                if "oow" in self.cfg.user_mode.lower():
+                    with open(data_manager.DIR_data_root / f"meta/oow.yaml", 'r') as f:
+                        data = yaml.safe_load(f)
+                    self.user_oow_intentions = [OOWIntention.from_dict(d) for d in data]
+            if (self.cfg.exp_mode=="turn"): # load_reference_conversation: 
+                with open(data_manager.DIR_data_workflow / f"user_profile_w_conversation/{self.id}.json", 'r') as f:
+                    data = json.load(f)
+                self.reference_conversations = []
+                for d in data:
+                    self.reference_conversations.append(
+                        ConversationWithIntention(
+                            d["user_intention"], Conversation.load_from_json(d["conversation"])
+                        )
                     )
-                )
     
     def refresh_config(self, cfg: Config) -> 'Workflow':
         """used for UI!"""

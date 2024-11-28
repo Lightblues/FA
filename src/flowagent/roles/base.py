@@ -4,7 +4,7 @@ from typing import List, Dict, Optional, Tuple, Union
 from easonsi.llm.openai_client import OpenAIClient
 from ..data import (
     Config, UserOutput, BotOutput, APIOutput, BotOutputType,
-    Conversation, Workflow
+    Conversation, Workflow, Role, Message
 )
 
 
@@ -52,6 +52,13 @@ class BaseTool(BaseRole):
         3. parse the response
         """
         raise NotImplementedError
+
+    def _add_message(self, msg_content: str, prompt: str=None, llm_response:str=None, role:Union[Role, str]=Role.SYSTEM):
+        msg = Message(
+            role, msg_content, prompt=prompt, llm_response=llm_response,
+            conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
+        )
+        self.conv.add_message(msg)
 
 
 class BaseBot(BaseRole):

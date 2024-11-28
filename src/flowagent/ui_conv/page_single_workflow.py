@@ -13,6 +13,10 @@ url: http://agent-pdl.woa.com
 @241120 merge to master & refresh
 - [x] refactor: align with [~master]
 - [x] for streamlit, implement refresh mechanism: `refresh_config` of workflow, bot, api;  `refresh_pdl` of controller
+@20241127
+- [ ] align with test data (https://doc.weixin.qq.com/sheet/e3_AEcAggZ1ACcumx7zFjoQGOBubNd0p?scode=AJEAIQdfAAosxBjyslAcMATAZtAPI&tab=0koe96)
+- [x] dataset: huabu_1127
+- [x] equip EntityLinker! 
 """
 
 import time, os, json, glob, openai, yaml, datetime, pdb, copy, sys
@@ -79,17 +83,17 @@ def case_workflow():
         # ss._pre_control(bot_output)
         # 1. bot predict an action
         bot_output = step_bot_prediction()
+        print(f"> bot_output {bot_output}")
 
         # 2. STOP: break until bot RESPONSE
-        if bot_output.action_type == BotOutputType.RESPONSE:
+        if bot_output.response:
             ss.logger.info(ss.conv.get_last_message().to_str())
             break
-        elif bot_output.action_type == BotOutputType.ACTION:
+        elif bot_output.action:
             if not _post_control(bot_output):
                 ss.logger.warning(ss.conv.get_last_message().to_str())
                 st.markdown(f'<p style="color: red;">[controller error] <code>{ss.conv.get_last_message().to_str()}</code></p>', unsafe_allow_html=True)
                 continue
-            # 3.2 call the API (system)
             api_output = step_api_process(bot_output)
         else: raise TypeError(f"Unexpected BotOutputType: {bot_output.action_type}")
         

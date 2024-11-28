@@ -1,0 +1,25 @@
+{
+    "recommendations": [
+        // basic
+        "ms-vscode-remote.remote-ssh",
+        "ritwickdey.LiveServer",        // for html
+        // git
+        "donjayamanne.githistory",
+        "mhutchie.git-graph",           // status bar
+        "eamodio.gitlens",
+        // Python
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "njpwerner.autodocstring",
+        // copilot
+        "Codeium.codeium",
+        "VisualStudioExptTeam.vscodeintellicode",
+        // jinja
+        "wholroyd.jinja",
+        "noxiz.jinja-snippets",         // j.comm
+        // markdown
+        "yzhang.markdown-all-in-one",
+        // YAML
+        "redhat.vscode-yaml",
+    ]
+}

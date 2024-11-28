@@ -38,14 +38,14 @@ class BotOutput:
     action_input_str = "Action Input"
     response_str = "Response"
     
-    @property
-    def action_type(self) -> BotOutputType:
-        if self.action:
-            return BotOutputType.ACTION
-        elif self.response:
-            return BotOutputType.RESPONSE
-        else:
-            return BotOutputType.END
+    # @property
+    # def action_type(self) -> BotOutputType:
+    #     if self.action:
+    #         return BotOutputType.ACTION
+    #     elif self.response:
+    #         return BotOutputType.RESPONSE
+    #     else:
+    #         return BotOutputType.END
 
 @dataclass
 class APIOutput:
