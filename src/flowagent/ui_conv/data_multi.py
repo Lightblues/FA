@@ -9,6 +9,7 @@ from .data_single import get_workflow_names_map
 
 def debug_print_infos() -> None:
     print(f"[DEBUG] Conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
+    print(f"  > cfg: {ss.cfg}")
     print(f"  > curr_status: {ss.curr_status}")
 
 def refresh_conversation() -> Conversation:

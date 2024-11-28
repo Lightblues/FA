@@ -44,8 +44,8 @@ class PDL_UIBot():
         # s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
         state_infos |= ss.workflow.pdl.status_for_prompt # add the status infos from PDL!
         prompt = jinja_render(
-            ss.cfg.bot_template_fn,       # "flowagent/bot_pdl.jinja"
-            workflow_name=ss.curr_status, # TODO: to be fixed
+            ss.cfg.ui_bot_template_fn,       # "flowagent/bot_pdl.jinja"
+            workflow_name=ss.workflow.pdl.name, # 
             PDL=ss.workflow.pdl.to_str_wo_api(),  # .to_str()
             api_infos=ss.workflow.toolbox,
             conversation=ss.conv.to_str(),
@@ -57,9 +57,9 @@ class PDL_UIBot():
     def process_LLM_response(self, prompt: str, llm_response:str) -> BotOutput:
         prediction = self._parse_react_output(llm_response)
         
-        if prediction.action_type==BotOutputType.RESPONSE:
+        if prediction.response:
             msg_content = prediction.response
-        elif prediction.action_type==BotOutputType.ACTION:
+        elif prediction.action:
             msg_content = f"<Call API> {prediction.action}({prediction.action_input})"
         else: raise NotImplementedError
         self._add_message(msg_content, prompt=prompt, llm_response=llm_response)

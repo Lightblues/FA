@@ -72,9 +72,8 @@ class DataManager:
         dirs = [entry for entry in os.listdir(DataManager.DIR_data_root) if os.path.isdir(os.path.join(DataManager.DIR_data_root, entry))]
         return dirs
     
-    @staticmethod
-    def get_workflow_versions():
-        _dir = DataManager.DIR_data_root / "PDL_zh"
+    def get_workflow_versions(self):
+        _dir = DataManager.DIR_data_root / self.cfg.workflow_dataset  # cfg.workflow_dataset | "PDL_zh"
         dirs = [d for d in os.listdir(_dir) if d.startswith("pdl") and os.path.isdir(os.path.join(_dir, d))]
         return dirs
     @staticmethod

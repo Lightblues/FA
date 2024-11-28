@@ -6,8 +6,10 @@ from typing import List, Dict
 
 @dataclass
 class Config:
+    mode: str = "ui"
+
     workflow_dataset: str = "STAR"
-    workflow_type: str = "text"     # text, code, flowchart
+    workflow_type: str = "pdl"     # text, code, flowchart
     workflow_id: str = "000"
     exp_version: str = "default"
     exp_mode: str = "session"       # turn, session
@@ -37,6 +39,9 @@ class Config:
     api_mode: str = "llm"           # request/v01, llm
     api_template_fn: str = None     # "flowagent/api_llm.jinja"
     api_llm_name: str = "gpt-4o"
+    api_entity_linking: bool = False
+    api_entity_linking_llm: str = "gpt-4o"
+    api_entity_linking_template: str = "flowagent/entity_linking.jinja"
     
     ui_available_models: List[str] = None
     ui_available_templates: List[str] = None
@@ -44,6 +49,8 @@ class Config:
     ui_available_workflows: List[str] = None        # NOTE: 暂未生效
     ui_default_model: str = "default"
     ui_default_template: str = "bot_pdl_ui.jinja"
+    ui_bot_template_fn: str = "flowagent/bot_pdl_ui.jinja"
+    ui_bot_llm_name: str = "gpt-4o"
     ui_greeting_msg: str = "Hi, I'm HuaBu bot. How can I help you?"
     # ui_user_additional_constraints: str = None # move to ss.
     

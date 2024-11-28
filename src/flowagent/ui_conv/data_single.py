@@ -1,5 +1,5 @@
 from typing import List, Dict
-import yaml, os, pdb, datetime, collections
+import yaml, os, pdb, datetime, collections, json
 import streamlit as st; ss = st.session_state
 
 from .uid import get_identity
@@ -11,6 +11,10 @@ from ..data import (
 from ..utils import LLM_CFG
 from ..roles import API_NAME2CLASS
 from ..pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
+
+def debug_print_infos() -> None:
+    print(f"[DEBUG] Conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
+    print(f"  > cfg: {ss.cfg}")
 
 def init_resource():
     st.set_page_config(
@@ -75,7 +79,7 @@ def get_model_name_list():
 
 @st.cache_data
 def get_workflow_dirs() -> List[str]:
-    return DataManager.get_workflow_versions()
+    return ss.data_manager.get_workflow_versions()
 
 @st.cache_data
 def get_workflow_names_map() -> Dict[str, List[str]]:
@@ -107,8 +111,8 @@ def refresh_bot() -> PDL_UIBot:
     conv = refresh_conversation()
     
     cfg:Config = ss.cfg  # update ss.cfg will also update ss.bot
-    cfg.bot_template_fn = f"flowagent/{ss.selected_template_fn}"
-    cfg.bot_llm_name = ss.selected_model_name
+    cfg.ui_bot_template_fn = f"flowagent/{ss.selected_template_fn}"
+    cfg.ui_bot_llm_name = ss.selected_model_name
     
     if 'bot' not in ss:
         ss.bot = PDL_UIBot()

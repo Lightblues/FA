@@ -2,7 +2,7 @@ import datetime
 import streamlit as st; ss = st.session_state
 from .data_single import (
     get_template_name_list, get_model_name_list, get_workflow_dirs, get_workflow_names_map, 
-    refresh_bot, refresh_workflow
+    refresh_bot, refresh_workflow, debug_print_infos
 )
 from ..data import Config, Workflow, DataManager
 
@@ -71,14 +71,14 @@ def init_sidebar():
         with select_col4:
             st.selectbox(
                 '选择画布',
-                options=_workflow_names_map["PDL_zh"],
+                options=_workflow_names_map[ss.cfg.workflow_dataset],
                 key="selected_workflow_name",
                 index=0,        # default to choose the first one
                 on_change=refresh_workflow
             )
         
         # st.divider()
-        button_col1, button_col2 = st.columns(2)
+        button_col1, button_col2, button_col3 = st.columns(3)
         with button_col1:
             st.button(
                 '重置对话',
@@ -89,7 +89,12 @@ def init_sidebar():
                 '问题反馈',
                 "https://doc.weixin.qq.com/sheet/e3_AcMATAZtAPI6WfByux6S2abI1stST?scode=AJEAIQdfAAolOjFcj8AcMATAZtAPI&tab=dyka3y"
             )
-        
+        with button_col3:
+            st.button(
+                'DEBUG',
+                on_click=debug_print_infos,
+            )
+
         with st.expander(f"⚙️ 自定义配置", expanded=False):
             st.text_area(
                 "添加你对于PDL流程的额外约束", height=100, 
