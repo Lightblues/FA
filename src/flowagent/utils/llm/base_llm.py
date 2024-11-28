@@ -40,6 +40,16 @@ def add_openai_models():
             "base_url": os.getenv("OPENAI_PROXY_BASE_URL"),
             "api_key": os.getenv("OPENAI_PROXY_API_KEY"),
         }
+    
+    model_list = [
+        "Vendor-A/Qwen/Qwen2.5-72B-Instruct", "Qwen/Qwen2.5-7B-Instruct", "Qwen/Qwen2.5-72B-Instruct-128K",
+    ]
+    for model in model_list:
+        LLM_CFG[model] = {
+            "model_name": model,
+            "base_url": os.getenv("SILICONFLOW_BASE_URL"),
+            "api_key": os.getenv("SILICONFLOW_API_KEY"),
+        }
 # add models registered in `/apdcephfs_cq8/share_2992827/shennong_5/ianxxu/chatchat/model_server/_run_multi_urls.py`
 # e.g. WizardLM2-8x22b, qwen2_72B
 def add_local_models():

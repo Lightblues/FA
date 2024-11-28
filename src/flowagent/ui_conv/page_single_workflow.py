@@ -86,15 +86,15 @@ def case_workflow():
         print(f"> bot_output {bot_output}")
 
         # 2. STOP: break until bot RESPONSE
-        if bot_output.response:
-            ss.logger.info(ss.conv.get_last_message().to_str())
-            break
-        elif bot_output.action:
+        if bot_output.action:
             if not _post_control(bot_output):
                 ss.logger.warning(ss.conv.get_last_message().to_str())
                 st.markdown(f'<p style="color: red;">[controller error] <code>{ss.conv.get_last_message().to_str()}</code></p>', unsafe_allow_html=True)
                 continue
             api_output = step_api_process(bot_output)
+        elif bot_output.response:
+            ss.logger.info(ss.conv.get_last_message().to_str())
+            break
         else: raise TypeError(f"Unexpected BotOutputType: {bot_output.action_type}")
         
         num_bot_actions += 1
