@@ -56,7 +56,7 @@ def add_local_models():
     global LLM_CFG
     import importlib.util
     from urllib.parse import urlparse
-    _fn = "/apdcephfs_cq8/share_2992827/shennong_5/ianxxu/chatchat/model_server/_run_multi_urls.py"
+    _fn = "/cq8/ianxxu/chatchat/NLP_tools/test_fucking_all/_run_multi_urls.py"
     if not os.path.exists(_fn): return
     spec = importlib.util.spec_from_file_location("model_urls", _fn)
     model_urls = importlib.util.module_from_spec(spec)

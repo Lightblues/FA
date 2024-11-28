@@ -53,7 +53,7 @@ def transform_NL_to_other_format(args, target_format):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset_dir", type=str, default="/mnt/huabu/dataset/PDL")
+    parser.add_argument("--dataset_dir", type=str, default="/cephp/huabu/dataset/PDL")
     parser.add_argument("--workflow_path", type=str, default="NL")
     parser.add_argument("--transformed_workflow_path", type=str, default=".")
     parser.add_argument("--api_path", type=str, default="apis")
