@@ -41,9 +41,9 @@ class NodeDependencyController(BaseController):
         self.graph = self._build_graph(pdl)
     
     def _build_graph(self, pdl:PDL):
-        if (pdl.apis is None) or (not pdl.apis):  # if pdl.apis is None
-            pdl.apis = []
-        apis = pdl.apis
+        if (pdl.APIs is None) or (not pdl.APIs):  # if pdl.apis is None
+            pdl.APIs = []
+        apis = pdl.APIs
         g = PDLGraph()
         for api in apis:
             node = PDLNode(name=api["name"], preconditions=api.get("precondition", None))

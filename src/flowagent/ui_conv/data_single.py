@@ -127,9 +127,9 @@ def refresh_workflow():
     """refresh workflow -> bot """
     print(f">> Refreshing workflow: `{ss.selected_workflow_name}` of ``")
     _, name_id_map = get_workflow_names_map()
-    ss.cfg.pdl_version = ss.selected_pdl_version
     # TODO: feat, select dataset?
-    ss.cfg.workflow_id = name_id_map['PDL_zh'][ss.selected_workflow_name]
+    ss.cfg.pdl_version = ss.selected_pdl_version
+    ss.cfg.workflow_id = name_id_map[ss.cfg.workflow_dataset][ss.selected_workflow_name]
     ss.workflow.refresh_config(ss.cfg)
     refresh_bot()
 

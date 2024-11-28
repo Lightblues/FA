@@ -26,7 +26,7 @@ class PDL_UIBot():
     """
     def __init__(self) -> None:
         # super().__init__(**args)
-        self.llm = init_client(llm_cfg=LLM_CFG[ss.cfg.bot_llm_name])
+        self.llm = init_client(llm_cfg=LLM_CFG[ss.cfg.ui_bot_llm_name])
     
     def refresh_config(self): # bot_template_fn
         self.__init__()
@@ -45,7 +45,7 @@ class PDL_UIBot():
         state_infos |= ss.workflow.pdl.status_for_prompt # add the status infos from PDL!
         prompt = jinja_render(
             ss.cfg.ui_bot_template_fn,       # "flowagent/bot_pdl.jinja"
-            workflow_name=ss.workflow.pdl.name, # 
+            workflow_name=ss.workflow.pdl.Name, # 
             PDL=ss.workflow.pdl.to_str_wo_api(),  # .to_str()
             api_infos=ss.workflow.toolbox,
             conversation=ss.conv.to_str(),

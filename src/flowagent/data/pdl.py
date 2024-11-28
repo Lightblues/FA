@@ -18,13 +18,13 @@ class MyDumper(yaml.SafeDumper):
 class PDL:
     PDL_str: str = None
     
-    name: str = ""
-    desc: str = ""
-    desc_detail: str = ""
-    apis: list = field(default_factory=list)
-    slots: list = field(default_factory=list)
-    answers: list = field(default_factory=list)
-    procedure: str = ""      # the core logic of the taskflow
+    Name: str = ""
+    Desc: str = ""
+    Desc_detail: str = ""
+    APIs: list = field(default_factory=list)
+    SLOTs: list = field(default_factory=list)
+    ANSWERs: list = field(default_factory=list)
+    Procedure: str = ""      # the core logic of the taskflow
     
     invalid_apis: Dict[str, Dict] = field(default_factory=dict)   # {name: {api_name, [invalid_reason]}}
     current_api_status: List[str] = field(default_factory=list)   # strings that descripts api status
@@ -47,13 +47,13 @@ class PDL:
     
     def parse_PDL_str(self):
         ob = yaml.load(self.PDL_str, Loader=yaml.FullLoader)
-        self.name = ob["Name"]
-        self.desc = ob["Desc"]
-        self.desc_detail = ob.get("Detailed_desc", "")
-        self.apis = ob.get("APIs", [])
-        self.slots = ob["SLOTs"]
-        self.answers = ob["ANSWERs"]
-        self.procedure = ob["PDL"]
+        self.Name = ob["Name"]
+        self.Desc = ob["Desc"]
+        self.Desc_detail = ob.get("Detailed_desc", "")
+        self.APIs = ob.get("APIs", [])
+        self.SLOTs = ob["SLOTs"]
+        self.ANSWERs = ob["ANSWERs"]
+        self.Procedure = ob["PDL"]
         
         self.invalid_apis = {}
         self.current_api_status = []
@@ -63,7 +63,7 @@ class PDL:
         return self.PDL_str.strip()
     def to_str_wo_api(self):
         infos = asdict(self)
-        selected_keys = ["name", "desc", "desc_detail", "slots", "answers", "procedure"]
+        selected_keys = ["Name", "Desc", "Desc_detail", "SLOTs", "ANSWERs", "Procedure"]
         infos_selected = {k: infos[k] for k in selected_keys}
         return yaml.dump(infos_selected, sort_keys=False, Dumper=MyDumper, default_flow_style=False, allow_unicode=True).strip()
     
@@ -77,7 +77,7 @@ class PDL:
         if self.invalid_apis:
             self.invalid_apis.clear()
     def get_valid_apis(self):
-        return [api for api in self.apis if api["name"] not in self.invalid_apis]
+        return [api for api in self.APIs if api["name"] not in self.invalid_apis]
     def to_str_wo_invalid_api(self):
         infos = asdict(self)
         selected_keys = ["name", "desc", "desc_detail", "slots", "answers", "procedure"]
