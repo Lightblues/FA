@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /mnt/huabu_online/src
+cd /cephp/huabu_online/src
 streamlit run run_flowagent_ui.py -- --config=ui_deploy.yaml
 # streamlit run run_flowagent_ui.py --server.port=8001  -- --config=ui_deploy.yaml 
 

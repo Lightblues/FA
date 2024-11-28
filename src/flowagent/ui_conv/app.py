@@ -1,6 +1,5 @@
 """ 
 Run::
-    cd /mnt/huabu/src
     streamlit run run_flowagent_ui.py --server.port 8501 -- --config=ui_dev.yaml
 """
 import streamlit as st; ss = st.session_state
