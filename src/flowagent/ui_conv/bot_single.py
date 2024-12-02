@@ -1,8 +1,4 @@
 """ 
-@240718 从 engine_v1.bots 进行修改
-
-- [x] add refresh api
-    def refresh_conversation / refresh_workflow
 """
 
 import datetime, json, re

@@ -6,7 +6,7 @@ from .uid import get_identity
 from .bot_single import PDL_UIBot
 from ..data import (
     Conversation, Message, Role,
-    Config, DataManager
+    Config, DataManager, Workflow
 )
 from ..utils import LLM_CFG
 from ..roles import API_NAME2CLASS
@@ -130,7 +130,10 @@ def refresh_workflow():
     ss.cfg.workflow_dataset = ss.selected_workflow_dataset
     ss.cfg.pdl_version = ss.selected_pdl_version
     ss.cfg.workflow_id = name_id_map[ss.cfg.workflow_dataset][ss.selected_workflow_name]
-    ss.workflow.refresh_config(ss.cfg)
+    if 'workflow' not in ss:
+        ss.workflow = Workflow(ss.cfg)
+    else:
+        ss.workflow.refresh_config()
     refresh_bot()
 
 def refresh_controllers():

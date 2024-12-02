@@ -10,6 +10,7 @@ url: http://agent-pdl.woa.com
 - [x] [feat] mofigy template/PDL in the web directly!  -- not good
 @240723 update V2 UI
 - [x] [feat] clearily log and print infos
+- [x] add refresh api (refresh_conversation / refresh_workflow)
 @241120 merge to master & refresh
 - [x] refactor: align with [~master]
 - [x] for streamlit, implement refresh mechanism: `refresh_config` of workflow, bot, api;  `refresh_pdl` of controller
@@ -33,7 +34,7 @@ from ..data import (
 )
 from ..roles import BaseBot, BaseUser, BaseTool
 from .ui_single import init_sidebar, post_sidebar
-from .data_single import refresh_bot, refresh_conversation
+from .data_single import refresh_bot, refresh_conversation, refresh_workflow
 
 def show_conversations(conversation):
     for message in conversation.msgs:
@@ -106,9 +107,9 @@ def case_workflow():
 def main_single():
     # 1. init
     if "logger" not in ss: ss.logger = init_loguru_logger(DataManager.DIR_ui_log)
-    if "workflow" not in ss: ss.workflow = Workflow(ss.cfg)
     init_sidebar()      # need cfg
 
+    if "workflow" not in ss: refresh_workflow()
     if ("mode" not in ss) or (ss.mode == "multi"):
         ss.mode = "single"
         refresh_bot()  # will also refresh .conv
