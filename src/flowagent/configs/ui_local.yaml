@@ -1,0 +1,22 @@
+ui_available_models: 
+  - "gpt-4o"
+ui_available_templates:
+  - bot_pdl_ui.jinja
+  - bot_pdl_ui_zh.jinja
+# ui_available_workflow_dirs:
+# ui_available_workflows:
+ui_default_model: "gpt-4o" # "1.0.2"
+ui_default_template: "bot_pdl_ui_zh.jinja"
+ui_greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
+
+workflow_dataset: "PDL_zh"
+workflow_type: "pdl"
+
+api_mode: "request"
+
+pdl_version: "pdl"    # set as default
+bot_action_limit: 5
+bot_pdl_controllers: 
+  - {name: "api_duplication", config: {if_pre: true, if_post: true, threshold: 2}}
+  - {name: "node_dependency", config: {if_pre: true, if_post: true}}
+  # - {name: "session_length", config: {if_pre: true, min: 5, max: 15}}
