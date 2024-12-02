@@ -65,10 +65,10 @@ DATA = "SGD"
 print(f"Current data: {DATA}")
 if DATA == "STAR":
     IDIR = pathlib.Path("/apdcephfs_cq8/share_2992827/shennong_5/siqiicai/data/STAR/tasks_transformed")
-    ODIR = pathlib.Path("/mnt/huabu/dataset/STAR")
+    ODIR = pathlib.Path("/cephp/huabu/dataset/STAR")
 elif DATA == "SGD":
     IDIR = pathlib.Path("/apdcephfs_cq8/share_2992827/shennong_5/siqiicai/data/SGD/workflows")
-    ODIR = pathlib.Path("/mnt/huabu/dataset/SGD")
+    ODIR = pathlib.Path("/cephp/huabu/dataset/SGD")
 os.makedirs(ODIR, exist_ok=True)
 
 

@@ -5,12 +5,12 @@ doc: https://doc.weixin.qq.com/slide/p3_AcMATAZtAPIVToQc9ODQIeVMJUBMV?scode=AJEA
 2. LLM convert -> standard Node descripion
 3. LLM convert -> standard procedure description
 """
-import os
+import os, pathlib
 from tqdm import tqdm
 from easonsi import utils
-
-DIR_input = "../../data/v240628/huabu_step0"
-DIR_output = "../../data/v240628/huabu_step1"
+_DROOT = pathlib.Path(__file__).parent.parent.parent.parent / "data"
+DIR_input = _DROOT / "huabu_1127/export-1732628942"
+DIR_output = _DROOT / "huabu_1127/step_1"
 os.makedirs(DIR_output, exist_ok=True)
 
 def preprocess_slotmap(data):
@@ -157,6 +157,7 @@ def get_final(data, processed_nodes):
 
 # data_names = ["114挂号", "查询运单", "标品-开发票画布", "礼金礼卡类案件"]
 data_names = os.listdir(DIR_input)
+data_names = [fn for fn in data_names if fn.endswith(".json")]
 for fn in tqdm(data_names):
     data = utils.LoadJson(f"{DIR_input}/{fn}")
     print(f"Processing {fn}")
