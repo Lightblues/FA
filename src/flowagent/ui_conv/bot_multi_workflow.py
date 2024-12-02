@@ -43,7 +43,11 @@ class Multi_Workflow_UIBot(PDL_UIBot):
     def __init__(self) -> None:
         # super().__init__()
         self.llm = init_client(llm_cfg=LLM_CFG[ss.cfg.mui_agent_main_llm_name]) 
-    
+
+    def refresh_llm(self, llm_name: str):
+        print(f"> refreshing llm to {llm_name}")
+        self.llm = init_client(llm_cfg=LLM_CFG[llm_name])
+
     def refresh_config(self):
         self.__init__()
     

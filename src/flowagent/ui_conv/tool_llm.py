@@ -17,7 +17,7 @@ class LLM_UITool(LLMSimulatedTool):
     
     def __init__(self):
         self.llm = init_client(llm_cfg=LLM_CFG[ss.cfg.api_llm_name])
-    
+
     def process(self, apicalling_info: BotOutput, *args, **kwargs) -> APIOutput:
         flag, m = self._check_validation(apicalling_info)
         if not flag:        # base check error!
