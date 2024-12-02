@@ -5,7 +5,6 @@ from .data_single import get_model_name_list, get_template_name_list, get_workfl
 
 def init_sidebar():
     """Init the sidebar of multi workflow
-    TODO: select used workflows
     """
     config: Config = ss.cfg
     

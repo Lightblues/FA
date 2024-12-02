@@ -123,7 +123,8 @@ class Workflow:  # rename -> Data
     
     def refresh_config(self, cfg: Config) -> 'Workflow':
         """used for UI!"""
-        data_manager = self.data_manager
+        print(f"> [workflow] refresh config: {cfg.workflow_dataset, cfg.pdl_version, cfg.workflow_id}")
+        data_manager = self.data_manager = DataManager(cfg)
         self.cfg = cfg
         self.id = self.cfg.workflow_id
         assert self.id in data_manager.workflow_infos, f"[ERROR] {self.id} not found in {data_manager.workflow_infos.keys()}"
