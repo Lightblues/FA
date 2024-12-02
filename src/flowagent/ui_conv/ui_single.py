@@ -12,8 +12,9 @@ def init_sidebar():
 
     _model_names = get_model_name_list()
     _template_names = get_template_name_list()
-    _workflow_dirs = get_workflow_dirs()
+    # _workflow_dirs = get_workflow_dirs()
     _workflow_names_map, _ = get_workflow_names_map()
+    _workflow_datasets = list(_workflow_names_map.keys())
     
     # set the shown model names
     if config.ui_available_models:
@@ -27,12 +28,11 @@ def init_sidebar():
         LIST_shown_templates = config.ui_available_templates
     else:
         LIST_shown_templates = _template_names
-    # set the shown workflow dirs
-    if config.ui_available_workflow_dirs:
-        assert all(i in _workflow_dirs for i in config.ui_available_workflow_dirs), f"config workflow_dirs: {config.ui_available_workflow_dirs} not in _workflow_dirs: {_workflow_dirs}"
-        LIST_shown_dirs = config.ui_available_workflow_dirs
+    # set the shown workflow datasets
+    if config.ui_available_workflow_datasets:
+        LIST_shown_workflow_datasets = config.ui_available_workflow_datasets
     else:
-        LIST_shown_dirs = _workflow_dirs
+        LIST_shown_workflow_datasets = _workflow_datasets
     # set the shown workflow names
     # if config.ui_available_workflows:
     #     # for d, l in DICT_workflow_info.items():
@@ -59,19 +59,27 @@ def init_sidebar():
                 on_change=refresh_workflow
             )
         
-        select_col3, select_col4 = st.columns(2)
+        select_col3, select_col4, select_col5 = st.columns(3)
         with select_col3:
             st.selectbox(
-                '选择画布版本',
-                options=LIST_shown_dirs,
-                key="selected_pdl_version",
-                format_func=lambda x: x.split("/")[-1],     # NOTE: only show the last subdir
+                '选择数据集',
+                options=LIST_shown_workflow_datasets,
+                key="selected_workflow_dataset",
+                index=LIST_shown_workflow_datasets.index(config.ui_default_workflow_dataset),
                 on_change=refresh_workflow
             )
         with select_col4:
             st.selectbox(
+                '选择画布版本',
+                options=get_workflow_dirs(ss.selected_workflow_dataset),
+                key="selected_pdl_version",
+                format_func=lambda x: x.split("/")[-1],     # NOTE: only show the last subdir
+                on_change=refresh_workflow
+            )
+        with select_col5:
+            st.selectbox(
                 '选择画布',
-                options=_workflow_names_map[ss.cfg.workflow_dataset],
+                options=_workflow_names_map[ss.selected_workflow_dataset],
                 key="selected_workflow_name",
                 index=0,        # default to choose the first one
                 on_change=refresh_workflow

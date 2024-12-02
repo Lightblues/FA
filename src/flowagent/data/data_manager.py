@@ -72,8 +72,9 @@ class DataManager:
         dirs = [entry for entry in os.listdir(DataManager.DIR_data_root) if os.path.isdir(os.path.join(DataManager.DIR_data_root, entry))]
         return dirs
     
-    def get_workflow_versions(self):
-        _dir = DataManager.DIR_data_root / self.cfg.workflow_dataset  # cfg.workflow_dataset | "PDL_zh"
+    @staticmethod
+    def get_workflow_versions(workflow_dataset):
+        _dir = DataManager.DIR_data_root / workflow_dataset  # cfg.workflow_dataset | "PDL_zh"
         dirs = [d for d in os.listdir(_dir) if d.startswith("pdl") and os.path.isdir(os.path.join(_dir, d))]
         return dirs
     @staticmethod
@@ -85,7 +86,7 @@ class DataManager:
         """
         dirs = DataManager.get_workflow_dirs()
         names_map = {}      # {PDL_zh: ["task1", "task2"]}
-        name_id_map = {} # {PDL_zh: {"task1": "000"}}
+        name_id_map = {}    # {PDL_zh: {"task1": "000"}}
         for dir in dirs:
             fn = DataManager.DIR_data_root / dir / "task_infos.json"
             if not os.path.exists(fn): continue
