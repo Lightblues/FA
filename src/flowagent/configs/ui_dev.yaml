@@ -16,6 +16,10 @@ ui_default_model: "1.0.2"   # "gpt-4o"
 ui_default_template: "bot_pdl_ui_zh.jinja"
 ui_bot_template_fn: "flowagent/bot_pdl_ui_zh.jinja"
 ui_greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
+ui_available_workflow_datasets: 
+  - "huabu_1127"
+  - "PDL_zh"
+ui_default_workflow_dataset: "huabu_1127"
 
 # mui_available_workflows: 
 #   - 114挂号
@@ -58,7 +62,7 @@ bot_pdl_controllers:
 # NOTE: the following 5 fields identify one experiment!!!
 # specifically, workflow_dataset & workflow_type should be all same for one exp_version
 # i.e. one `exp_version + workflow_id` identify one experiment
-workflow_dataset: "huabu_1127"  # "PDL_zh"
+workflow_dataset: "PDL_zh" # "huabu_1127"  # "PDL_zh"
 workflow_type: "pdl"            # text, code, flowchart, pdl, core
 workflow_id: "000"
 exp_version: "default"

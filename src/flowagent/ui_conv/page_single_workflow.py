@@ -14,9 +14,11 @@ url: http://agent-pdl.woa.com
 - [x] refactor: align with [~master]
 - [x] for streamlit, implement refresh mechanism: `refresh_config` of workflow, bot, api;  `refresh_pdl` of controller
 @20241127
-- [ ] align with test data (https://doc.weixin.qq.com/sheet/e3_AEcAggZ1ACcumx7zFjoQGOBubNd0p?scode=AJEAIQdfAAosxBjyslAcMATAZtAPI&tab=0koe96)
+- [x] align with test data (https://doc.weixin.qq.com/sheet/e3_AEcAggZ1ACcumx7zFjoQGOBubNd0p?scode=AJEAIQdfAAosxBjyslAcMATAZtAPI&tab=0koe96)
 - [x] dataset: huabu_1127
 - [x] equip EntityLinker! 
+@241202
+- [x] #feat select workflow_dataset in UI
 """
 
 import time, os, json, glob, openai, yaml, datetime, pdb, copy, sys

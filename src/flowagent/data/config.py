@@ -45,7 +45,9 @@ class Config:
     
     ui_available_models: List[str] = None
     ui_available_templates: List[str] = None
-    ui_available_workflow_dirs: List[str] = None
+    ui_available_workflow_datasets: List[str] = None
+    ui_default_workflow_dataset: str = "PDL_zh"
+    ui_available_workflow_dirs: List[str] = None    # subdirs
     ui_available_workflows: List[str] = None        # NOTE: 暂未生效
     ui_default_model: str = "default"
     ui_default_template: str = "bot_pdl_ui.jinja"

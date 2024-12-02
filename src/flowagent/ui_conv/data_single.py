@@ -78,8 +78,8 @@ def get_model_name_list():
     return list(LLM_CFG.keys())
 
 @st.cache_data
-def get_workflow_dirs() -> List[str]:
-    return ss.data_manager.get_workflow_versions()
+def get_workflow_dirs(workflow_dataset) -> List[str]:
+    return DataManager.get_workflow_versions(workflow_dataset)
 
 @st.cache_data
 def get_workflow_names_map() -> Dict[str, List[str]]:
@@ -125,9 +125,9 @@ def refresh_bot() -> PDL_UIBot:
 
 def refresh_workflow():
     """refresh workflow -> bot """
-    print(f">> Refreshing workflow: `{ss.selected_workflow_name}` of ``")
+    print(f">> Refreshing workflow: `{ss.selected_workflow_dataset}` -> `{ss.selected_pdl_version}` -> `{ss.selected_workflow_name}`")
     _, name_id_map = get_workflow_names_map()
-    # TODO: feat, select dataset?
+    ss.cfg.workflow_dataset = ss.selected_workflow_dataset
     ss.cfg.pdl_version = ss.selected_pdl_version
     ss.cfg.workflow_id = name_id_map[ss.cfg.workflow_dataset][ss.selected_workflow_name]
     ss.workflow.refresh_config(ss.cfg)
