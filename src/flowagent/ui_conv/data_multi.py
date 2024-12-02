@@ -58,7 +58,7 @@ def refresh_workflow_agent() -> None:
         cfg:Config = copy.deepcopy(ss.cfg)  # update ss.cfg will also update ss.bot?
         cfg.bot_template_fn = f"flowagent/{ss.selected_mui_workflow_main_template_fn}"
         cfg.bot_llm_name = ss.selected_mui_agent_workflow_llm_name
-        cfg.workflow_id = name_id_map['PDL_zh'][ss.curr_status]
+        cfg.workflow_id = name_id_map[ss.cfg.workflow_dataset][ss.curr_status]
         
         # setup workflow, bot, tool
         # if workflow_name not in 
