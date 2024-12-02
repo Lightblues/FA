@@ -133,7 +133,7 @@ def refresh_workflow():
     if 'workflow' not in ss:
         ss.workflow = Workflow(ss.cfg)
     else:
-        ss.workflow.refresh_config()
+        ss.workflow.refresh_config(ss.cfg)
     refresh_bot()
 
 def refresh_controllers():
