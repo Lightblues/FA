@@ -9,6 +9,8 @@
 - [x] add activated workflow in the sidebar (ui_multi.py)
 @241202
 - [x] #bug, cannot refresh ss.conv when changing Single/Multi
+- [x] #feat refresh main & all workflow agents in [UI]
+- [x] #feat select workflow_dataset in [UI]
 
 
 - [ ] add tools for main agent (function calling?)
@@ -47,7 +49,7 @@ def step_agent_main_prediction() -> MainBotOutput:
     with st.expander(f"Thinking...", expanded=True):
         llm_response = st.write_stream(stream)
     agent_main_output: MainBotOutput = agent_main.process_LLM_response(prompt, llm_response)
-    _debug_msg = f"\n{'[BOT]'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
+    _debug_msg = f"\n{'[BOT]'.center(50, '=')}\n<<lllm prompt>>\nllm {agent_main.llm.model_name}\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
     ss.logger.bind(custom=True).debug(_debug_msg)
     return agent_main_output
 
@@ -58,7 +60,7 @@ def step_agent_workflow_prediction() -> WorkflowBotOutput:
     with st.expander(f"Thinking...", expanded=True):
         llm_response = st.write_stream(stream)
     agent_workflow_output: WorkflowBotOutput = curr_bot.process_LLM_response(prompt, llm_response)
-    _debug_msg = f"\n{'[BOT]'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
+    _debug_msg = f"\n{'[BOT]'.center(50, '=')}\nllm {curr_bot.llm.model_name}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
     ss.logger.bind(custom=True).debug(_debug_msg)
     return agent_workflow_output
 

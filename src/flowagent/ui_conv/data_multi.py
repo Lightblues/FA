@@ -62,11 +62,30 @@ def refresh_workflow_agent() -> None:
         
         # setup workflow, bot, tool
         # if workflow_name not in 
-        ss.curr_workflow = Workflow(cfg) # TODO: refresh workflow
+        ss.curr_workflow = Workflow(cfg)
         ss.curr_bot = Multi_Workflow_UIBot()
         ss.curr_tool = LLM_UITool()
         ss.curr_controllers = {}  # {name: BaseController}
         for c in ss.cfg.bot_pdl_controllers:
             ss.curr_controllers[c['name']] = CONTROLLER_NAME2CLASS[c['name']](ss.conv, ss.curr_workflow.pdl, c['config'])
         print(f"> created a new workflow agent {ss.curr_bot}!")
+        ss.agent_workflow_map[ss.curr_status] = (ss.curr_workflow, ss.curr_bot, ss.curr_tool, ss.curr_controllers)
     return
+
+def update_workflow_agents() -> None:
+    print(f">> Updating workflow agents: {ss.agent_workflow_map.keys()}")
+    for workflow, bot, tool, controllers in ss.agent_workflow_map.values():
+        bot.refresh_llm(ss.selected_mui_agent_workflow_llm_name)
+        # TODO: update ss.cfg.mui_agent_workflow_template_fn | selected_mui_workflow_main_template_fn
+
+def update_workflow_dataset():
+    ss.cfg.workflow_dataset = ss.selected_workflow_dataset
+    ss.data_manager.refresh_config(ss.cfg)
+    
+    ss.workflow_infos = ss.data_manager.workflow_infos.values()
+    if ss.cfg.mui_available_workflows:
+        workflow_names = [w['name'] for w in ss.workflow_infos]
+        assert all(w in workflow_names for w in ss.cfg.mui_available_workflows)
+        ss.workflow_infos = [w for w in ss.workflow_infos if w['name'] in ss.cfg.mui_available_workflows]
+    for w in ss.workflow_infos:
+        w['is_activated'] = True

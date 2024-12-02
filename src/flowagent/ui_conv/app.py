@@ -31,7 +31,7 @@ def main(config_version:str="default.yaml"):
     if "data_manager" not in ss:
         ss.data_manager = DataManager(ss.cfg)
     
-    page = st.sidebar.selectbox("Select Mode", ["👤 Single", "👥 Multiple", ], index=0)
+    page = st.sidebar.selectbox("Select Mode", ["👤 Single", "👥 Multiple", ], index=1)
     st.sidebar.markdown("---")
     
     if page == "👤 Single": main_single()
