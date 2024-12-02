@@ -107,8 +107,9 @@ def main_single():
     if "workflow" not in ss: ss.workflow = Workflow(ss.cfg)
     init_sidebar()      # need cfg
 
-    if "conv" not in ss: ss.conv = Conversation()
-    if "bot" not in ss: refresh_bot()
+    if ("mode" not in ss) or (ss.mode == "multi"):
+        ss.mode = "single"
+        refresh_bot()  # will also refresh .conv
 
     post_sidebar()      # need conv
 

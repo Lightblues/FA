@@ -7,11 +7,12 @@
 - [x] limit # ActionType.SWITCH in single turn (to avoid dead loop)? Maybe not necessary
 @241127
 - [x] add activated workflow in the sidebar (ui_multi.py)
+@241202
+- [x] #bug, cannot refresh ss.conv when changing Single/Multi
 
 
 - [ ] add tools for main agent (function calling?)
 - [ ] testing (debug): inspect prompt and output
-- [ ] #bug, cannot refresh ss.conv when changing Single/Multi
 - [ ] #bug, repeatly SWITCH workflow
 """
 import streamlit as st; ss = st.session_state
@@ -123,9 +124,6 @@ def case_workflow():
 def main_multi():
     """Main loop! see [~ui_conv.md]"""
     if "logger" not in ss: ss.logger = init_loguru_logger(DataManager.DIR_ui_log)
-    if "conv" not in ss: ss.conv = refresh_conversation()
-    if ("curr_status" not in ss) or ("curr_bot" not in ss): 
-        ss.curr_status = "main"
     if "workflow_infos" not in ss:
         ss.workflow_infos = ss.data_manager.workflow_infos.values()
         if ss.cfg.mui_available_workflows:
@@ -136,8 +134,12 @@ def main_multi():
             w['is_activated'] = True
 
     init_sidebar()
-    if "agent_main" not in ss: refresh_main_agent()
-    if "agent_workflow_map" not in ss: ss.agent_workflow_map = {}  # {name: (bot, tool)}
+    if ("mode" not in ss) or (ss.mode == "single"):
+        # init agent_main when session start
+        ss.mode = "multi"
+        refresh_main_agent()
+        ss.curr_status = "main"
+        ss.agent_workflow_map = {}  # {name: (bot, tool)}
     
     post_sidebar()
     
