@@ -7,7 +7,7 @@ ui_available_templates:
   - bot_pdl_ui_zh.jinja
 # ui_available_workflow_dirs:
 # ui_available_workflows:
-ui_default_model: "1.0.2"
+ui_default_model: "default"  # 1.0.2
 ui_default_template: "bot_pdl_ui_zh.jinja"
 ui_bot_template_fn: "flowagent/bot_pdl_ui_zh.jinja"
 ui_greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
@@ -32,7 +32,7 @@ mui_agent_workflow_available_templates:
   - bot_mui_workflow_agent.jinja
 mui_agent_main_default_template: "bot_mui_main_agent.jinja"
 mui_agent_workflow_default_template: "bot_mui_workflow_agent.jinja"
-mui_agent_main_default_model: "1.0.2"
+mui_agent_main_default_model: "default"
 
 api_mode: "request"
 api_entity_linking: true

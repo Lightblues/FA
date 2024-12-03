@@ -78,7 +78,7 @@ def add_local_models():
 add_openai_models()
 add_local_models()
 _name_map = {
-    "default": "qwen2.5_72B",
+    "default": "Vendor-A/Qwen/Qwen2.5-72B-Instruct",
     # "0.9.1": "Qwen1.5-72B-4M-1_0_3-Agent-1_2_KU_woClarify_AllRandom", # 已关闭
     "1.0.2": "Taskformer1.0.2",
 }
