@@ -55,6 +55,7 @@ class Config:
     ui_bot_llm_name: str = "gpt-4o"
     ui_greeting_msg: str = "Hi, I'm HuaBu bot. How can I help you?"
     # ui_user_additional_constraints: str = None # move to ss.
+    ui_tools: List[Dict] = field(default_factory=list)
     
     mui_available_workflows: List[str] = None  # 可用的工作流列表
     # 下面两个为实际会用到的, 后面为UI配置项

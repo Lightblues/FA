@@ -93,8 +93,20 @@ def init_sidebar():
                 'DEBUG',
                 on_click=debug_print_infos,
             )
+
+        # show the tools
+        st.markdown("启用工具")
+        cols = st.columns(3)
+        for index, tool_name in enumerate(ss.tools.keys()):
+            col = cols[index % 3]
+            with col:
+                ss.tools[tool_name]["is_enabled"] = st.toggle(
+                    tool_name,
+                    value=ss.tools[tool_name]["is_enabled"]
+                )
         
         st.divider()
+        # show the workflows
         select_col5, select_col6 = st.columns(2)
         with select_col5:
             st.selectbox(

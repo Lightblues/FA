@@ -6,11 +6,13 @@ from .bot_multi_main import Multi_Main_UIBot
 from .bot_multi_workflow import Multi_Workflow_UIBot
 from .tool_llm import LLM_UITool
 from .data_single import get_workflow_names_map
+from ..tools import TOOLS_MAP
 
 def debug_print_infos() -> None:
     print(f"[DEBUG] Conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
-    print(f"  > cfg: {ss.cfg}")
+    # print(f"  > cfg: {ss.cfg}")
     print(f"  > curr_status: {ss.curr_status}")
+    print(f"  > tools: {ss.tools}")
 
 def refresh_conversation() -> Conversation:
     """Init or refresh the conversation"""
@@ -89,3 +91,13 @@ def update_workflow_dataset():
         ss.workflow_infos = [w for w in ss.workflow_infos if w['name'] in ss.cfg.mui_available_workflows]
     for w in ss.workflow_infos:
         w['is_activated'] = True
+
+def init_tools():
+    if "tools" not in ss:
+        tools = {}
+        for t in ss.cfg.ui_tools:
+            assert t['name'] in TOOLS_MAP, f"{t['name']} not in available tools {TOOLS_MAP.keys()}"
+            tools[t['name']] = {
+                "is_enabled": t.get("is_enabled", True),
+            }
+        ss.tools = tools

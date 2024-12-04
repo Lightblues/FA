@@ -34,12 +34,12 @@ from ..data import (
 )
 from ..roles import BaseBot, BaseUser, BaseTool
 from .ui_single import init_sidebar, post_sidebar
-from .data_single import refresh_bot, refresh_conversation, refresh_workflow
+from .data_single import refresh_bot, refresh_workflow
 
-def show_conversations(conversation):
+def show_conversations(conversation: Conversation):
     for message in conversation.msgs:
         if (message.role == Role.SYSTEM) or (message.content.startswith("<")):
-            continue  
+            continue
         with st.chat_message(message.role.rolename, avatar=ss['avatars'][message.role.rolename]):
             st.write(message.content)
 

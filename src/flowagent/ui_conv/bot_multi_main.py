@@ -7,20 +7,23 @@ from ..data import Config, Message, Conversation, BotOutput, Role, BotOutputType
 from ..utils import jinja_render, OpenAIClient, Formater, init_client, LLM_CFG
 # from ..roles import ReactBot
 from .bot_single import PDL_UIBot
+from ..tools import TOOL_SCHEMAS
 
 @dataclass
 class MainBotOutput:
     thought: str = None
     workflow: str = None # workflow name
     response: str = None
+    action: str = None
+    action_input: Dict = None
     
-    @property
-    def action_type(self) -> BotOutputType:
-        if self.workflow:
-            return BotOutputType.SWITCH
-        elif self.response:
-            return BotOutputType.RESPONSE
-        else: raise NotImplementedError
+    # @property
+    # def action_type(self) -> BotOutputType:
+    #     if self.workflow:
+    #         return BotOutputType.SWITCH
+    #     elif self.response:
+    #         return BotOutputType.RESPONSE
+    #     else: raise NotImplementedError
 
 class Multi_Main_UIBot(PDL_UIBot):
     """Multi_Main_UIBot
@@ -46,9 +49,14 @@ class Multi_Main_UIBot(PDL_UIBot):
             "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
         workflows = [w for w in ss.workflow_infos if w['is_activated']]
+        _shown_keys = ["name", "task_description"]  # remove "task_detailed_description"
+        workflows = [{k:v for k,v in w.items() if k in _shown_keys} for w in workflows]
+        enabled_tools = [k for k,v in ss.tools.items() if v['is_enabled']]
+        tools_info = [s for s in TOOL_SCHEMAS if s['function']['name'] in enabled_tools]
         prompt = jinja_render(
             ss.cfg.mui_agent_main_template_fn,       # "flowagent/bot_mui_main_agent.jinja"
             workflows=workflows,
+            tools_info=tools_info,
             conversation=ss.conv.to_str(),
             current_state="\n".join(f"{k}: {v}" for k,v in state_infos.items()),
         )
@@ -59,26 +67,37 @@ class Multi_Main_UIBot(PDL_UIBot):
         """Parse output with full `Tought, Workflow, Response`."""
         if "```" in s:
             s = Formater.parse_codeblock(s, type="").strip()
-        pattern = r"(Thought|Workflow|Response):\s*(.*?)\s*(?=Thought:|Workflow:|Response:|\Z)"
+        # pattern = r"(Thought|Workflow|Response):\s*(.*?)\s*(?=Thought:|Workflow:|Response:|\Z)"
+        pattern = r"(Thought|Workflow|Action|Action Input|Response):\s*(.*?)\s*(?=Thought:|Workflow:|Action:|Action Input:|Response:|\Z)"
         matches = re.finditer(pattern, s, re.DOTALL)
         result = {match.group(1): match.group(2).strip() for match in matches}
-        
+        print(f"> result: {result}")
+
         # validate result
         try:
             thought = result.get("Thought", "")
             workflow = result.get("Workflow", "")
             response = result.get("Response", "")
-            return MainBotOutput(workflow=workflow, response=response, thought=thought)
+            if ("Action" in result) and result['Action']:
+                action = result['Action']
+                if action.startswith("API_"): action = action[4:]
+                action_input = json.loads(result['Action Input'])
+            else: action, action_input = "", {}
+            # return MainBotOutput(workflow=workflow, response=response, thought=thought)
+            return MainBotOutput(workflow=workflow, response=response, thought=thought, action=action, action_input=action_input)
         except Exception as e:
             raise RuntimeError(f"Parse error: {e}\n[LLM output] {s}\n[Result] {result}")
 
     def process_LLM_response(self, prompt: str, llm_response:str) -> MainBotOutput:
         prediction = self._parse_react_output(llm_response)
-        
-        if prediction.action_type==BotOutputType.RESPONSE:
-            msg_content = prediction.response
-        elif prediction.action_type==BotOutputType.SWITCH:
+
+        if prediction.workflow:
             msg_content = f"<Call workflow> {prediction.workflow}"
-        else: raise NotImplementedError
+        else:
+            if prediction.action:
+                msg_content = f"<Call Tool> {prediction.action}({prediction.action_input})"
+            elif prediction.response:
+                msg_content = prediction.response
+            else: raise NotImplementedError
         self._add_message(msg_content, prompt=prompt, llm_response=llm_response, role="bot_main")
         return prediction

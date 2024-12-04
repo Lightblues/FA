@@ -93,12 +93,13 @@ class Multi_Workflow_UIBot(PDL_UIBot):
     def process_LLM_response(self, prompt: str, llm_response:str) -> WorkflowBotOutput:
         prediction = self._parse_react_output(llm_response)
         
-        if prediction.response:
-            self._add_message(prediction.response, prompt=prompt, llm_response=llm_response, role=f"bot_{ss.curr_status}")
         if prediction.workflow:
             msg_content = f"<Call workflow> {prediction.workflow}"
-            self._add_message(msg_content, prompt=prompt, llm_response=llm_response, role=f"bot_{ss.curr_status}")
-        elif prediction.action:
-            msg_content = f"<Call API> {prediction.action}({prediction.action_input})"
-            self._add_message(msg_content, prompt=prompt, llm_response=llm_response, role=f"bot_{ss.curr_status}")
+        else:
+            if prediction.action:
+                msg_content = f"<Call API> {prediction.action}({prediction.action_input})"
+            elif prediction.response:
+                msg_content = prediction.response
+            else: raise NotImplementedError
+        self._add_message(msg_content, prompt=prompt, llm_response=llm_response, role=f"bot_{ss.curr_status}")
         return prediction

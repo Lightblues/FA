@@ -11,7 +11,8 @@
 - [x] #bug, cannot refresh ss.conv when changing Single/Multi
 - [x] #feat refresh main & all workflow agents in [UI]
 - [x] #feat select workflow_dataset in [UI]
-
+@241204
+- [x] #feat add tools for main agent
 
 - [ ] add tools for main agent (function calling?)
 - [ ] testing (debug): inspect prompt and output
@@ -25,12 +26,12 @@ from ..data import (
     BotOutput, UserOutput, BotOutputType, APIOutput
 )
 from .ui_multi import init_sidebar, post_sidebar
-from .data_multi import refresh_conversation, refresh_main_agent, refresh_workflow_agent
-from .page_single_workflow import show_conversations, step_user_input
+from .data_multi import refresh_main_agent, refresh_workflow_agent, init_tools
+from .page_single_workflow import step_user_input
 from .bot_multi_main import Multi_Main_UIBot, MainBotOutput
 from .bot_multi_workflow import Multi_Workflow_UIBot, WorkflowBotOutput
 from .tool_llm import LLM_UITool
-
+from ..tools import execute_tool_call
 
 
 def step_api_process(agent_workflow_output: BotOutput) -> APIOutput:
@@ -49,7 +50,7 @@ def step_agent_main_prediction() -> MainBotOutput:
     with st.expander(f"Thinking...", expanded=True):
         llm_response = st.write_stream(stream)
     agent_main_output: MainBotOutput = agent_main.process_LLM_response(prompt, llm_response)
-    _debug_msg = f"\n{'[BOT]'.center(50, '=')}\n<<lllm prompt>>\nllm {agent_main.llm.model_name}\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
+    _debug_msg = f"\n{'[BOT]'.center(50, '=')}\nllm {agent_main.llm.model_name}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
     ss.logger.bind(custom=True).debug(_debug_msg)
     return agent_main_output
 
@@ -73,15 +74,34 @@ def _post_control(bot_output: BotOutput, ) -> bool:
         if not controller.post_control(bot_output): return False
     return True
 
+def step_tool(agent_main_output: BotOutput):
+    res = execute_tool_call(agent_main_output.action, agent_main_output.action_input)
+    msg = Message(
+        "tool", res, 
+        conversation_id=ss.conv.conversation_id, utterance_id=ss.conv.current_utterance_id
+    )
+    ss.conv.add_message(msg)
+
 def case_main():
     print(f"> entering case_main `{ss.curr_status}`")
     with st.container():
-        agent_main_output = step_agent_main_prediction()
-        print(f"> agent_main_output: {agent_main_output}")
-        if agent_main_output.action_type == BotOutputType.SWITCH:
-            # show SWITCH
-            st.markdown(f'<p style="color: blue;">[switch workflow] <code>{ss.conv.get_last_message().to_str()}</code></p>', unsafe_allow_html=True)
-            ss.logger.info(ss.conv.get_last_message().to_str())
+        for num_bot_actions in range(3):
+            agent_main_output = step_agent_main_prediction()
+            # print(f"> agent_main_output: {agent_main_output}")
+            if agent_main_output.workflow:
+                # show SWITCH
+                st.markdown(f'<p style="color: blue;">[switch workflow] <code>{ss.conv.get_last_message().to_str()}</code></p>', unsafe_allow_html=True)
+                ss.logger.info(ss.conv.get_last_message().to_str())
+                break
+            else:
+                if agent_main_output.action:
+                    tool_output = step_tool(agent_main_output)
+                elif agent_main_output.response:
+                    ss.logger.info(ss.conv.get_last_message().to_str())
+                    break
+                else: raise NotImplementedError
+        else:
+            pass
     # out of this container! 
     if agent_main_output.workflow:
         ss.curr_status = agent_main_output.workflow
@@ -94,34 +114,39 @@ def case_workflow():
         bot prediction
     """
     print(f"> entering case_workflow `{ss.curr_status}`")
-    num_bot_actions = 0
     refresh_workflow_agent()
     with st.container():
-        while True:
+        for num_bot_actions in range(ss.cfg.bot_action_limit):
             agent_workflow_output = step_agent_workflow_prediction()
             print(f"> agent_workflow_output: {agent_workflow_output}")
-            if agent_workflow_output.response:
-                ss.logger.info(ss.conv.get_last_message().to_str())
-                if not (agent_workflow_output.action or agent_workflow_output.workflow):
-                    break
-            if agent_workflow_output.action:
-                if not _post_control(agent_workflow_output):
-                    ss.logger.warning(ss.conv.get_last_message().to_str())
-                    st.markdown(f'<p style="color: red;">[controller error] <code>{ss.conv.get_last_message().to_str()}</code></p>', unsafe_allow_html=True)
-                    continue
-                api_output = step_api_process(agent_workflow_output)
-            elif agent_workflow_output.workflow:
+            if agent_workflow_output.workflow:
                 st.markdown(f'<p style="color: blue;">[switch workflow] <code>{ss.conv.get_last_message().to_str()}</code></p>', unsafe_allow_html=True)
                 ss.logger.info(ss.conv.get_last_message().to_str())
                 break
-            # else: raise TypeError(f"Unexpected agent_workflow_output: {agent_workflow_output}")
-            
-            num_bot_actions += 1
-            if num_bot_actions > ss.cfg.bot_action_limit: 
-                break
+            else:
+                if agent_workflow_output.action:
+                    if not _post_control(agent_workflow_output):
+                        ss.logger.warning(ss.conv.get_last_message().to_str())
+                        st.markdown(f'<p style="color: red;">[controller error] <code>{ss.conv.get_last_message().to_str()}</code></p>', unsafe_allow_html=True)
+                        continue
+                    api_output = step_api_process(agent_workflow_output)
+                elif agent_workflow_output.response:
+                    ss.logger.info(ss.conv.get_last_message().to_str())
+                    if not (agent_workflow_output.action or agent_workflow_output.workflow):
+                        break
+                else: raise NotImplementedError
+        else:
+            pass
     if agent_workflow_output.workflow:
         ss.curr_status = "main"
         case_main()
+
+def show_conversations(conversation: Conversation):
+    for message in conversation.msgs:
+        if not (message.role.rolename == "user" or message.role.rolename.startswith("bot")): continue
+        elif (message.content.startswith("<")): continue
+        with st.chat_message(message.role.rolename, avatar=ss['avatars'][message.role.rolename]):
+            st.write(message.content)
 
 def main_multi():
     """Main loop! see [~ui_conv.md]"""
@@ -134,6 +159,7 @@ def main_multi():
             ss.workflow_infos = [w for w in ss.workflow_infos if w['name'] in ss.cfg.mui_available_workflows]
         for w in ss.workflow_infos:
             w['is_activated'] = True
+    init_tools()
 
     init_sidebar()
     if ("mode" not in ss) or (ss.mode == "single"):

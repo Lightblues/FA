@@ -6,3 +6,4 @@ tencentcloud-sdk-python
 python-socketio
 streamlit
 pymongo
+langchain_community

@@ -118,6 +118,7 @@ def init_sidebar():
 
 def post_sidebar():
     with st.sidebar:
+        # show the controllers
         cols = st.columns(3)
         for index, controller in enumerate(ss.controllers.values()):
             col = cols[index % 3]

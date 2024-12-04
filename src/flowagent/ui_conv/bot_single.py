@@ -53,10 +53,10 @@ class PDL_UIBot():
     def process_LLM_response(self, prompt: str, llm_response:str) -> BotOutput:
         prediction = self._parse_react_output(llm_response)
         
-        if prediction.response:
-            msg_content = prediction.response
-        elif prediction.action:
+        if prediction.action:
             msg_content = f"<Call API> {prediction.action}({prediction.action_input})"
+        elif prediction.response:
+            msg_content = prediction.response
         else: raise NotImplementedError
         self._add_message(msg_content, prompt=prompt, llm_response=llm_response)
         return prediction
