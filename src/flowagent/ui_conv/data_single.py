@@ -50,8 +50,12 @@ def init_resource():
             'bot': '🤖',
         }
     if 'tool_emoji' not in ss:
-        ss['tool_emoji'] = {
+        ss['tool_emoji'] = collections.defaultdict(lambda: "⚙️")
+        ss['tool_emoji'] |= {
             "search": "🔍",
+            "web_search": "🔍",
+            "search_news": "🔍",
+            "search_images": "🔍",
             "think": "🤔",
             "web_logo": "🌐",
             "warning": "⚠️",
@@ -60,6 +64,8 @@ def init_resource():
             "doc_logo": "📄",
             "calc_logo": "🧮",
             "code_logo": "💻",
+            "code_logo": "python_executor",
+            'default_tool': "⚙️"
         }
 
     if "headers" not in ss:

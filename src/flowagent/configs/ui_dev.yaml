@@ -3,9 +3,9 @@ ui_available_models:
   - "1.0.2"
   - "default"
   - "gpt-4o"
-  - Qwen/Qwen2.5-7B-Instruct
   - Vendor-A/Qwen/Qwen2.5-72B-Instruct
-  - "Qwen/Qwen2.5-72B-Instruct-128K"
+  - Qwen/Qwen2.5-7B-Instruct
+  - "debug"
 ui_available_templates:
   # - bot_pdl.jinja
   - bot_pdl_ui.jinja
@@ -33,9 +33,9 @@ mui_available_models:
   - "1.0.2"
   - "default"
   - "gpt-4o"
-  - Qwen/Qwen2.5-7B-Instruct
   - Vendor-A/Qwen/Qwen2.5-72B-Instruct
-  - "Qwen/Qwen2.5-72B-Instruct-128K"
+  - Qwen/Qwen2.5-7B-Instruct
+  - "debug"
 mui_agent_main_available_templates:
   - bot_mui_main_agent.jinja
 mui_agent_workflow_available_templates:

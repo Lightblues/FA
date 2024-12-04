@@ -1,4 +1,4 @@
-import time, functools
+import time, functools, traceback
 from typing import Callable
 
 
@@ -24,9 +24,10 @@ class Timer:
 
 
 def retry_wrapper(retry: int = 3, step_name: str = "", log_fn: Callable = print):
-    """ 
-    USAGE: 
-        @@retry_wrapper(retry=3, step_name="example_function", log_fn=xxx)
+    """ retry `retry` times for a function
+    
+    USAGE:: 
+        @retry_wrapper(retry=3, step_name="example_function", log_fn=xxx)
         def example_function(xxx):
     """
     def decorator(f):
@@ -37,7 +38,8 @@ def retry_wrapper(retry: int = 3, step_name: str = "", log_fn: Callable = print)
                     res = f(*args, **kwargs)
                     return res
                 except Exception as e:
-                    log_fn(f"  <{step_name}> [retry {_retry}/{retry}] encountered error: {e}")
+                    log_fn(f"<{step_name}> [retry {_retry}/{retry}] encountered error: {e}")
+                    log_fn(f"  >>> traceback\n" + traceback.format_exc())
             else:
                 raise Exception(f"<{step_name}> failed for {retry} times!!! \n  Args: {args}, Kwargs: {kwargs}")
         return wrapped_f

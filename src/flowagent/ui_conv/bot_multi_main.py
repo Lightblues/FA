@@ -81,7 +81,7 @@ class Multi_Main_UIBot(PDL_UIBot):
             if ("Action" in result) and result['Action']:
                 action = result['Action']
                 if action.startswith("API_"): action = action[4:]
-                action_input = json.loads(result['Action Input'])
+                action_input = Formater.parse_json_or_eval(result['Action Input'])
             else: action, action_input = "", {}
             # return MainBotOutput(workflow=workflow, response=response, thought=thought)
             return MainBotOutput(workflow=workflow, response=response, thought=thought, action=action, action_input=action_input)

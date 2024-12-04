@@ -3,7 +3,8 @@ Run::
     streamlit run run_flowagent_ui.py --server.port 8501 -- --config=ui_dev.yaml
 """
 import streamlit as st; ss = st.session_state
-from ..data import Config, DataManager
+from ..data import Config, DataManager, init_loguru_logger
+if "logger" not in ss: ss.logger = init_loguru_logger(DataManager.DIR_ui_log)
 from .page_single_workflow import main_single
 from .page_multi_workflow import main_multi
 from .data_single import init_resource

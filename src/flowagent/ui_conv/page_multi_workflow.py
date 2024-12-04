@@ -1,4 +1,6 @@
 """ 
+cases: https://doc.weixin.qq.com/sheet/e3_AcMATAZtAPIaxl2WshdR0KQkIBZdF?scode=AJEAIQdfAAoAaaG6YXAcMATAZtAPI&tab=BB08J2
+
 @241125 implement main agent (step 1)
 - [x] main agent
 - [x] seperate single and multi workflow logic (refactor)
@@ -12,11 +14,13 @@
 - [x] #feat refresh main & all workflow agents in [UI]
 - [x] #feat select workflow_dataset in [UI]
 @241204
-- [x] #feat add tools for main agent
+- [x] #feat add tools for main agent (Google Search)
+- [x] #feat #robust add error handler -> add retry_wrapper for `step_agent_main_prediction`
 
-- [ ] add tools for main agent (function calling?)
 - [ ] testing (debug): inspect prompt and output
 - [ ] #bug, repeatly SWITCH workflow
+- [ ] #doc add standard test cases in doc [cases]
+- [ ] #feat #log log session infos with sessionid
 """
 import streamlit as st; ss = st.session_state
 import json
@@ -32,6 +36,8 @@ from .bot_multi_main import Multi_Main_UIBot, MainBotOutput
 from .bot_multi_workflow import Multi_Workflow_UIBot, WorkflowBotOutput
 from .tool_llm import LLM_UITool
 from ..tools import execute_tool_call
+from ..utils import retry_wrapper
+
 
 
 def step_api_process(agent_workflow_output: BotOutput) -> APIOutput:
@@ -42,7 +48,7 @@ def step_api_process(agent_workflow_output: BotOutput) -> APIOutput:
     ss.logger.bind(custom=True).debug(_debug_msg)
     return api_output
 
-
+@retry_wrapper(retry=3, step_name="step_agent_main_prediction", log_fn=ss.logger.bind(custom=True).error)
 def step_agent_main_prediction() -> MainBotOutput:
     agent_main: Multi_Main_UIBot = ss.agent_main
     print(f">> conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
@@ -54,6 +60,7 @@ def step_agent_main_prediction() -> MainBotOutput:
     ss.logger.bind(custom=True).debug(_debug_msg)
     return agent_main_output
 
+@retry_wrapper(retry=3, step_name="step_agent_workflow_prediction", log_fn=ss.logger.bind(custom=True).error)
 def step_agent_workflow_prediction() -> WorkflowBotOutput:
     print(f">> conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
     curr_bot: Multi_Workflow_UIBot = ss.curr_bot
@@ -74,13 +81,24 @@ def _post_control(bot_output: BotOutput, ) -> bool:
         if not controller.post_control(bot_output): return False
     return True
 
-def step_tool(agent_main_output: BotOutput):
-    res = execute_tool_call(agent_main_output.action, agent_main_output.action_input)
-    msg = Message(
-        "tool", res, 
-        conversation_id=ss.conv.conversation_id, utterance_id=ss.conv.current_utterance_id
-    )
-    ss.conv.add_message(msg)
+def step_tool(agent_main_output: MainBotOutput):
+    # see @ian /cq8/ianxxu/chatchat/_TaskPlan/UI/v2.1/IanAGI.py 
+    tool_name, tool_args = agent_main_output.action, agent_main_output.action_input
+    if tool_name in ("web_search"):
+        spinner_info = f"Searching for {tool_args['query']}..."
+    else: raise NotImplementedError
+    with st.spinner(f"{ss['tool_emoji'][tool_name]} {spinner_info}"):
+        # execute!
+        res = execute_tool_call(tool_name, tool_args)
+        msg = Message(
+            "tool", res, 
+            conversation_id=ss.conv.conversation_id, utterance_id=ss.conv.current_utterance_id
+        )
+        ss.conv.add_message(msg)
+    if tool_name in ("web_search"):
+        with st.expander(f"{ss['tool_emoji']['web_logo']} Searching results for '{tool_args['query']}'", expanded=False):
+            st.write(res)
+    else: raise NotImplementedError
 
 def case_main():
     print(f"> entering case_main `{ss.curr_status}`")
@@ -150,7 +168,7 @@ def show_conversations(conversation: Conversation):
 
 def main_multi():
     """Main loop! see [~ui_conv.md]"""
-    if "logger" not in ss: ss.logger = init_loguru_logger(DataManager.DIR_ui_log)
+    # if "logger" not in ss: ss.logger = init_loguru_logger(DataManager.DIR_ui_log)
     if "workflow_infos" not in ss:
         ss.workflow_infos = ss.data_manager.workflow_infos.values()
         if ss.cfg.mui_available_workflows:

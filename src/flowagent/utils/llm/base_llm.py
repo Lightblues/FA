@@ -26,6 +26,13 @@ LLM_CFG = {
     #     "base_url": f"http://{_IP_02}/v1/",
     #     "api_key": "xxx",
     # },
+    
+    # for debug! see src/backend/main_mock_llm.py
+    "debug": {
+        "model_name": "debug",
+        "base_url": f"http://localhost:8000/v1/",
+        "api_key": "xxx",
+    }
 }
 def add_openai_models():
     global LLM_CFG

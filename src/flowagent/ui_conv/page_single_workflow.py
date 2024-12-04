@@ -3,6 +3,8 @@
 > streamlit run run_ui.py --server.port 8501 -- --config=ui_dev.yaml
 url: http://agent-pdl.woa.com
 
+cases: https://doc.weixin.qq.com/sheet/e3_AcMATAZtAPIaxl2WshdR0KQkIBZdF?scode=AJEAIQdfAAolrl13UxAcMATAZtAPI&tab=qe4ogl
+
 @240718 implement basic UI for single workflow
 - [ ] [optimize] optimize API output! 
 - [x] [feat] show Huabu meta information in the sidebar
@@ -35,6 +37,7 @@ from ..data import (
 from ..roles import BaseBot, BaseUser, BaseTool
 from .ui_single import init_sidebar, post_sidebar
 from .data_single import refresh_bot, refresh_workflow
+from ..utils import retry_wrapper
 
 def show_conversations(conversation: Conversation):
     for message in conversation.msgs:
@@ -60,6 +63,7 @@ def step_user_input(OBJECTIVE: str):
         st.write(OBJECTIVE)
     # ss.logger.info(f"{msg_user.to_str()}")
 
+@retry_wrapper(retry=3, step_name="step_bot_prediction", log_fn=ss.logger.bind(custom=True).error)
 def step_bot_prediction() -> BotOutput:
     bot:BaseBot = ss.bot
     print(f">> conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
@@ -106,7 +110,7 @@ def case_workflow():
 
 def main_single():
     # 1. init
-    if "logger" not in ss: ss.logger = init_loguru_logger(DataManager.DIR_ui_log)
+    # if "logger" not in ss: ss.logger = init_loguru_logger(DataManager.DIR_ui_log)
     init_sidebar()      # need cfg
 
     if "workflow" not in ss: refresh_workflow()
