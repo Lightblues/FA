@@ -24,7 +24,7 @@ def refresh_conversation() -> Conversation:
         conversation_id=ss.conv.conversation_id, utterance_id=ss.conv.current_utterance_id)
     ss.conv.add_message(msg_hello)
     
-    ss.curr_workflow = "main"  # also reset the status!
+    ss.curr_status = "main"  # also reset the status!
     return ss.conv
 
 def refresh_main_agent() -> Multi_Main_UIBot:

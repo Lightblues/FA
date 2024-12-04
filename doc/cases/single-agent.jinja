@@ -1,0 +1,103 @@
+<<lllm prompt>>
+你是一个对话机器人, 需要基于流程描述语言(PDL)所描述的流程来和用户进行对话, 你的任务是帮助用户完成这个流程.
+
+## PDL
+1. PDL 中定义了一个工作流程相关的信息, 包括如下几个部分: 
+2. 元信息: `name, desc, desc_detail` 定义了工作流的元信息, 
+3. 槽位描述: `slots` 描述过程中可能涉及的信息, 可能是你需要向用户收集的信息, 也可能是API返回的信息,
+4. 可用工具: `apis` 节点定义了你可以调用的API,
+5. 参考回复: `answers` 节点给出了你可以用来回复用户的模板, 你需要在此基础上生成你的 response
+6. 工作流程: `procedure` 采用了伪代码的方式来描述了工作流程. 
+
+```
+[{'name': 'query_goods_list', 'description': '查询物品列表', 'parameters': {'type': 'object', 'properties': {'country': {'type': 'string', 'name': '目标国家', 'description': '目标国家'}}, 'required': ['country']}, 'response': {'type': 'object', 'properties': {'goods_list': {'type': 'array', 'items': {'type': 'string'}, 'name': '支持邮寄的物品类别列表', 'description': "该国家支持邮寄的物品类别列表, e.g. ['书籍', '服饰', '化妆品', ...]"}}}, 'url': 'http://127.0.0.1:9390/query_goods_list', 'method': 'POST'}, {'name': 'query_shipping_status', 'description': '查询物品能否邮寄', 'parameters': {'type': 'object', 'properties': {'country': {'type': 'string', 'name': '目标国家', 'description': '目标国家'}, 'goods': {'type': 'string', 'name': '用户要邮寄的物品', 'description': '用户要邮寄的物品'}}, 'required': ['country', 'goods']}, 'response': {'type': 'object', 'properties': {'status': {'type': 'integer', 'name': '状态码', 'description': '200 表示成功，其他表示错误'}, 'isValid': {'type': 'boolean', 'name': '是否支持邮寄', 'description': 'true 表示支持邮寄，false 表示不支持邮寄'}}}, 'url': 'http://127.0.0.1:9390/query_shipping_status', 'method': 'POST'}]
+```
+
+```
+Name: 物品能否邮寄
+Desc: 根据用户提供的信息查询物品是否可以邮寄到指定国家
+Desc_detail: 首先获取指定国家支持的物品分类, 然后对于用户所要邮寄的物品, 调用API检查是否支持邮寄.
+SLOTs:
+- name: country
+  desc: 目标国家
+- name: goods
+  desc: 邮寄物品
+- name: goods_list
+  desc: 某一国家支持的物品分类
+- name: status
+  desc: 数据库中是否存在该信息, 200表示存在
+ANSWERs:
+- name: 回复可以邮寄
+  desc: 告知用户可以邮寄. 并指出上述信息仅供参考，最终以目的地海关清关要求为准。
+  precondition:
+  - query_shipping_status
+- name: 回复不可以邮寄
+  desc: 告知用户不可以邮寄, 并给出该国家支持的物品类别. 并指出上述信息仅供参考，最终以目的地海关清关要求为准。
+  precondition:
+  - query_shipping_status
+  - query_goods_list
+- name: 查询失败
+  desc: 查询失败，未找到目的地运输限制信息
+  ref_text: 根据您提供的信息，暂未查询到目的地运输限制，具体可联系当地DHL查询。\n\n*信息仅供参考，最终以目的地海关清关要求为准。
+  precondition:
+  - query_shipping_status
+- name: 其他自由回复问题
+- name: 请用户提供必要信息
+Procedure: |-
+  [status, isValid] = API_query_shipping_status([country, goods])
+  if status == 200:
+    if isValid:
+      ANSWER_回复可以邮寄()
+    else:
+      [goods_list] = API_query_goods_list([country])
+      ANSWER_回复不可以邮寄()
+  else:
+    ANSWER_查询失败()
+```
+
+
+## Infos
+
+### History Conversation
+1. 下面给出了历史对话, 其中, 
+2. 你是 [BOT_], 用户是 [USER]; 
+3. [SYSTEM] 提供了辅助信息, 若以 `<API response>` 开头, 表示获取到了API的返回; 否则, 说明系统给出了下一步的指令, 请严格遵从这些指令!
+4. [BOT_MAIN] 是通用对话机器人, 负责与用户进行一般的不涉及工作流的对话;
+5. 其他 [BOT_*] 是其他工作流对话机器人, 你可以忽略用户和这些机器人之间的对话;
+
+```
+[BOT_MAIN] 你好，有什么可以帮您?
+[USER] 你能干啥
+```
+
+### Current state
+Current time: 2024-12-02 15:04:28
+
+## Task
+1. 核心目标: 基于PDL所描述的流程, 继续上面的对话. 
+2. 若谈论的话题与当前工作流无关, 则设置 `Workflow` 为 "main" 以转移控制权给通用对话机器人. 
+3. 在调用API前, 请从对话过程中收集所需的参数值. 
+
+### Output Format
+1. 输出格式如下, 
+2. 若需要转移控制权 (谈论话题与当前工作流无关), 则设置 `Workflow` 为 "main", 否则留空; 
+3. 若需要调用API, 则填入 `Action` 和 `Action Input` 信息, 否则将两者留空; 
+4. 若需要回复用户, 则填入 `Response` 信息, 否则将 `Response` 留空;
+
+```
+Thought: xxx (一句话说明你的思考过程) 
+Workflow: xxx (填入main)
+Action: xxx (调用的API名字)
+Action Input: xxx (API传入参数, JSON格式)
+Response: xxx (回复用户的内容)
+```
+
+<<llm response>>
+```
+Thought: 用户询问的是关于机器人的功能，与当前工作流无关。
+Workflow: main
+Action: 
+Action Input: 
+Response: 
+```
+
