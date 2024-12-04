@@ -1,5 +1,7 @@
 import datetime, copy, json
 import streamlit as st; ss = st.session_state
+from pymongo.database import Database
+
 from ..data import Conversation, Message, Role, Config, Workflow
 from ..pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
 from .bot_multi_main import Multi_Main_UIBot
@@ -101,3 +103,22 @@ def init_tools():
                 "is_enabled": t.get("is_enabled", True),
             }
         ss.tools = tools
+
+def db_upsert_session():
+    """Upsert conversation to `db.ui_multi_sessions`
+    Infos: (sessionid, name, mode[single/multi], infos, conversation, version)...
+    """
+    _session_info = {
+        # model_llm_name, template, etc
+        "session_id": ss.conv.conversation_id,
+        "user": ss.user_identity,
+        "mode": ss.mode,            # "multi"
+        "conversation": ss.conv.to_list(),
+        "config": ss.cfg.to_dict(),
+    }
+    db: Database = ss.db
+    db.ui_multi_sessions.replace_one(
+        {"session_id": ss.conv.conversation_id},
+        _session_info,
+        upsert=True
+    )

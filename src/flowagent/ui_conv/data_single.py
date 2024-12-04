@@ -1,6 +1,7 @@
 from typing import List, Dict
-import yaml, os, pdb, datetime, collections, json
+import yaml, os, pdb, datetime, collections, json, pymongo
 import streamlit as st; ss = st.session_state
+from pymongo.database import Database
 
 from .uid import get_identity
 from .bot_single import PDL_UIBot
@@ -91,6 +92,12 @@ def get_workflow_dirs(workflow_dataset) -> List[str]:
 def get_workflow_names_map() -> Dict[str, List[str]]:
     return DataManager.get_workflow_names_map()
 
+# 参考 app.py 中描述的 BUG
+# @st.cache_resource
+def init_db():
+    if "db" not in ss:
+        ss.db = pymongo.MongoClient(ss.cfg.db_uri)[ss.cfg.db_name]
+        print(f"> db: {ss.db}")
 
 def refresh_conversation() -> Conversation:
     """ refresh the conversation (instead of new one) """
@@ -116,7 +123,7 @@ def refresh_bot() -> PDL_UIBot:
     print(f">> Refreshing bot: `{ss.selected_template_fn}` with model `{ss.selected_model_name}`")
     conv = refresh_conversation()
     
-    cfg:Config = ss.cfg  # update ss.cfg will also update ss.bot
+    cfg:Config = ss.cfg
     cfg.ui_bot_template_fn = f"flowagent/{ss.selected_template_fn}"
     cfg.ui_bot_llm_name = ss.selected_model_name
     
@@ -151,3 +158,22 @@ def refresh_controllers():
         # NOTE: 仅在更新了pdl的时候,才刷新
         if ss.workflow.pdl is not c.pdl:
             c.refresh_pdl(ss.workflow.pdl)
+
+def db_upsert_session():
+    """Upsert conversation to `db.ui_single_sessions`
+    Infos: (sessionid, name, mode[single/multi], infos, conversation, version)...
+    """
+    _session_info = {
+        # model_llm_name, template, etc
+        "session_id": ss.conv.conversation_id,
+        "user": ss.user_identity,
+        "mode": ss.mode,            # "single"
+        "conversation": ss.conv.to_list(),
+        "config": ss.cfg.to_dict(),
+    }
+    db: Database = ss.db
+    db.ui_single_sessions.replace_one(
+        {"session_id": ss.conv.conversation_id},
+        _session_info,
+        upsert=True
+    )

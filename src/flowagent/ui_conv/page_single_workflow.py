@@ -36,7 +36,7 @@ from ..data import (
 )
 from ..roles import BaseBot, BaseUser, BaseTool
 from .ui_single import init_sidebar, post_sidebar
-from .data_single import refresh_bot, refresh_workflow
+from .data_single import refresh_bot, refresh_workflow, db_upsert_session
 from ..utils import retry_wrapper
 
 def show_conversations(conversation: Conversation):
@@ -84,8 +84,12 @@ def step_api_process(bot_output: BotOutput) -> APIOutput:
     return api_output
 
 def case_workflow():
-    num_bot_actions = 0
-    while True:
+    """ 
+    TODO: add to db
+    1. session level: (sessionid, name, mode[single/multi], infos, conversation, version)
+    2. turn level (optional?): (sessionid, turnid, bot_output, prompt, version)
+    """
+    for num_bot_actions in range(ss.cfg.bot_action_limit):
         # 0. pre-control
         # ss._pre_control(bot_output)
         # 1. bot predict an action
@@ -103,14 +107,15 @@ def case_workflow():
             ss.logger.info(ss.conv.get_last_message().to_str())
             break
         else: raise TypeError(f"Unexpected BotOutputType: {bot_output.action_type}")
-        
-        num_bot_actions += 1
-        if num_bot_actions > ss.cfg.bot_action_limit: 
-            break
+    else:
+        pass
+
+    # save to db
+    db_upsert_session()
+
 
 def main_single():
     # 1. init
-    # if "logger" not in ss: ss.logger = init_loguru_logger(DataManager.DIR_ui_log)
     init_sidebar()      # need cfg
 
     if "workflow" not in ss: refresh_workflow()

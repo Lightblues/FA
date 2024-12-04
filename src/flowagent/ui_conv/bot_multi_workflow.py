@@ -3,9 +3,7 @@ from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, field
 import streamlit as st; ss = st.session_state
 
-from ..data import Config, Message, Conversation, BotOutput, Role, BotOutputType, DataManager
 from ..utils import jinja_render, OpenAIClient, Formater, init_client, LLM_CFG
-# from ..roles import ReactBot
 from .bot_single import PDL_UIBot
 
 @dataclass

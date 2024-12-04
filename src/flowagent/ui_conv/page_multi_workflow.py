@@ -16,11 +16,12 @@ cases: https://doc.weixin.qq.com/sheet/e3_AcMATAZtAPIaxl2WshdR0KQkIBZdF?scode=AJ
 @241204
 - [x] #feat add tools for main agent (Google Search)
 - [x] #feat #robust add error handler -> add retry_wrapper for `step_agent_main_prediction`
+- [x] #feat #debug add Mocked LLM (model_name="debug")
 
 - [ ] testing (debug): inspect prompt and output
 - [ ] #bug, repeatly SWITCH workflow
 - [ ] #doc add standard test cases in doc [cases]
-- [ ] #feat #log log session infos with sessionid
+- [ ] #feat #log save session infos with sessionid in db
 """
 import streamlit as st; ss = st.session_state
 import json
@@ -30,7 +31,7 @@ from ..data import (
     BotOutput, UserOutput, BotOutputType, APIOutput
 )
 from .ui_multi import init_sidebar, post_sidebar
-from .data_multi import refresh_main_agent, refresh_workflow_agent, init_tools
+from .data_multi import refresh_main_agent, refresh_workflow_agent, init_tools, db_upsert_session
 from .page_single_workflow import step_user_input
 from .bot_multi_main import Multi_Main_UIBot, MainBotOutput
 from .bot_multi_workflow import Multi_Workflow_UIBot, WorkflowBotOutput
@@ -124,6 +125,8 @@ def case_main():
     if agent_main_output.workflow:
         ss.curr_status = agent_main_output.workflow
         case_workflow()
+    # save to db
+    db_upsert_session()
 
 def case_workflow():
     """ Workflow agent: 
@@ -158,6 +161,8 @@ def case_workflow():
     if agent_workflow_output.workflow:
         ss.curr_status = "main"
         case_main()
+    # save to db
+    db_upsert_session()
 
 def show_conversations(conversation: Conversation):
     for message in conversation.msgs:
@@ -168,7 +173,6 @@ def show_conversations(conversation: Conversation):
 
 def main_multi():
     """Main loop! see [~ui_conv.md]"""
-    # if "logger" not in ss: ss.logger = init_loguru_logger(DataManager.DIR_ui_log)
     if "workflow_infos" not in ss:
         ss.workflow_infos = ss.data_manager.workflow_infos.values()
         if ss.cfg.mui_available_workflows:
