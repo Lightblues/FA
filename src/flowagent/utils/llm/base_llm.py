@@ -32,6 +32,11 @@ LLM_CFG = {
         "model_name": "debug",
         "base_url": f"http://localhost:8000/v1/",
         "api_key": "xxx",
+    },
+    "Qwen2.5-72B-INT8": {
+        "model_name": "Qwen2.5-72B-INT8",
+        "base_url": "https://ms-xfr6fl5w-100034032793-sw.gw.ap-shanghai.ti.tencentcs.com/ms-xfr6fl5w/v1/",
+        "api_key": "shennong5no1",
     }
 }
 def add_openai_models():
@@ -75,7 +80,10 @@ def add_local_models():
         model_info[name] = f"{parsed_url.scheme}://{parsed_url.netloc}"
 
     for model, url in model_info.items():
-        assert model not in LLM_CFG, f"{model} already in LLM_CFG"
+        # assert model not in LLM_CFG, f"{model} already in LLM_CFG"
+        if model in LLM_CFG:
+            print(f"[warning] <add_local_models> {model} already exist! pass!")
+            continue
         LLM_CFG[model] = {
             "model_name": model, "base_url": url, 
             "api_key": "xxx",   # NOTE: api_key 不能为 "" 不然也会报错
@@ -90,6 +98,8 @@ _name_map = {
     "default": "Vendor-A/Qwen/Qwen2.5-72B-Instruct",
     # "0.9.1": "Qwen1.5-72B-4M-1_0_3-Agent-1_2_KU_woClarify_AllRandom", # 已关闭
     "1.0.2": "Taskformer1.0.2",
+    "神农大模型": "Qwen2.5-72B-INT8",
+
 }
 for k,v in _name_map.items():
     if v not in LLM_CFG: continue

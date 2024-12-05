@@ -16,14 +16,7 @@ class MainBotOutput:
     response: str = None
     action: str = None
     action_input: Dict = None
-    
-    # @property
-    # def action_type(self) -> BotOutputType:
-    #     if self.workflow:
-    #         return BotOutputType.SWITCH
-    #     elif self.response:
-    #         return BotOutputType.RESPONSE
-    #     else: raise NotImplementedError
+
 
 class Multi_Main_UIBot(PDL_UIBot):
     """Multi_Main_UIBot

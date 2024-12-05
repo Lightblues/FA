@@ -36,7 +36,7 @@ from ..data import (
 )
 from ..roles import BaseBot, BaseUser, BaseTool
 from .ui_single import init_sidebar, post_sidebar
-from .data_single import refresh_bot, refresh_workflow, db_upsert_session
+from .data_single import refresh_bot, refresh_workflow, db_upsert_session, fake_stream
 from ..utils import retry_wrapper
 
 def show_conversations(conversation: Conversation):
@@ -133,7 +133,8 @@ def main_single():
             case_workflow()
         # show final bot response to screen
         with st.chat_message("assistant", avatar=ss['avatars']['assistant']):
-            st.write(ss.conv.get_last_message().content)
+            # st.write(ss.conv.get_last_message().content)
+            st.write_stream(fake_stream(ss.conv.get_last_message().content))
 
         # DB
         # infos_dict = {

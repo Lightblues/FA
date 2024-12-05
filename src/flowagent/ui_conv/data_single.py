@@ -1,5 +1,5 @@
-from typing import List, Dict
-import yaml, os, pdb, datetime, collections, json, pymongo
+from typing import List, Dict, Iterator
+import yaml, os, pdb, datetime, collections, json, pymongo, time
 import streamlit as st; ss = st.session_state
 from pymongo.database import Database
 
@@ -16,6 +16,11 @@ from ..pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
 def debug_print_infos() -> None:
     print(f"[DEBUG] Conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
     print(f"  > cfg: {ss.cfg}")
+
+def fake_stream(response: str) -> Iterator[str]:
+    for chunk in response:
+        yield chunk
+        time.sleep(0.02)
 
 def init_resource():
     st.set_page_config(

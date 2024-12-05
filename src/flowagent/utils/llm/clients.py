@@ -14,7 +14,10 @@ from concurrent.futures import ThreadPoolExecutor
 def stream_generator(response, is_openai=True):
     if is_openai:
         for chunk in response:
-            yield chunk.choices[0].delta.content or ""
+            # yield chunk.choices[0].delta.content or ""
+            text = chunk.choices[0].delta.content or ""
+            text = text.replace("\n", "  \n")
+            yield text
     else:
         ret = ""
         for chunk in response.iter_lines():

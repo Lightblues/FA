@@ -5,6 +5,7 @@ ui_available_models:
   - "gpt-4o"
   - Vendor-A/Qwen/Qwen2.5-72B-Instruct
   - Qwen/Qwen2.5-7B-Instruct
+  - Qwen2.5-72B-INT8
   - "debug"
 ui_available_templates:
   # - bot_pdl.jinja
@@ -35,6 +36,7 @@ mui_available_models:
   - "gpt-4o"
   - Vendor-A/Qwen/Qwen2.5-72B-Instruct
   - Qwen/Qwen2.5-7B-Instruct
+  - Qwen2.5-72B-INT8
   - "debug"
 mui_agent_main_available_templates:
   - bot_mui_main_agent.jinja

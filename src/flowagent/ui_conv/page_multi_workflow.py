@@ -19,11 +19,13 @@ cases: https://doc.weixin.qq.com/sheet/e3_AcMATAZtAPIaxl2WshdR0KQkIBZdF?scode=AJ
 - [x] #feat #debug add Mocked LLM (model_name="debug")
 @241205
 - [x] #feat #log save session infos to db
-
+- [x] optimize visualization: modify `stream_generator` & `fake_stream` @ian
+- [x] #feat mock tool output
 
 - [ ] testing (debug): inspect prompt and output
 - [ ] #bug, repeatly SWITCH workflow
 - [ ] #doc add standard test cases in doc [cases]
+- [ ] #tune set LLM parameters
 """
 import streamlit as st; ss = st.session_state
 import json
@@ -34,6 +36,7 @@ from ..data import (
 )
 from .ui_multi import init_sidebar, post_sidebar
 from .data_multi import refresh_main_agent, refresh_workflow_agent, init_tools, db_upsert_session
+from .data_single import fake_stream
 from .page_single_workflow import step_user_input
 from .bot_multi_main import Multi_Main_UIBot, MainBotOutput
 from .bot_multi_workflow import Multi_Workflow_UIBot, WorkflowBotOutput
@@ -194,4 +197,6 @@ def main_multi():
         else: case_workflow()
 
         with st.chat_message("assistant", avatar=ss['avatars']['assistant']):
-            st.write(ss.conv.get_last_message().content)
+            # st.write(ss.conv.get_last_message().content)
+            st.write_stream(fake_stream(ss.conv.get_last_message().content))
+
