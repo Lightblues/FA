@@ -70,6 +70,7 @@ class Config:
     mui_agent_workflow_template_fn: str = "flowagent/bot_mui_workflow_agent.jinja"
     mui_agent_workflow_default_template: str = "bot_mui_workflow_agent.jinja"
     mui_agent_workflow_available_templates: List[str] = None
+    mui_default_workflow_dataset: str = "PDL_zh"
 
     conversation_turn_limit: int = 20
     log_utterence_time: bool = True

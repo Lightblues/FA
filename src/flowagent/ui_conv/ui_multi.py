@@ -113,7 +113,7 @@ def init_sidebar():
                 '选择数据集',
                 options=LIST_shown_workflow_datasets,
                 key="selected_workflow_dataset",
-                index=LIST_shown_workflow_datasets.index(config.workflow_dataset),
+                index=LIST_shown_workflow_datasets.index(config.mui_default_workflow_dataset),
                 on_change=update_workflow_dataset,
             )
         

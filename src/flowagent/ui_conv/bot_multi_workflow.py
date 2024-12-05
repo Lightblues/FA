@@ -92,7 +92,8 @@ class Multi_Workflow_UIBot(PDL_UIBot):
         prediction = self._parse_react_output(llm_response)
         
         if prediction.workflow:
-            msg_content = f"<Call workflow> {prediction.workflow}"
+            msg_content = prediction.response or ""
+            msg_content += f"<Call workflow> {prediction.workflow}"
         else:
             if prediction.action:
                 msg_content = f"<Call API> {prediction.action}({prediction.action_input})"
