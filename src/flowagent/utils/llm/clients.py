@@ -9,9 +9,7 @@ import openai
 from openai.types.chat import ChatCompletion
 from tqdm import tqdm
 import numpy as np
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import sys, os, json, re, time, requests, yaml, traceback
-from typing import List, Dict, Optional, Tuple, Union
+from concurrent.futures import ThreadPoolExecutor
 
 def stream_generator(response, is_openai=True):
     if is_openai:
@@ -29,7 +27,7 @@ class OpenAIClient:
     base_url: str = "https://api.openai.com/v1"
     model_name: str = "gpt-4o"
     client: openai.OpenAI = None
-    temperature: float = 0
+    temperature: float = 0.5
     max_tokens: int = 4096
 
     retries: int = 3
