@@ -1,7 +1,7 @@
 # init_client, LLM_CFG
 import os, datetime, traceback, functools
 from typing import List, Dict, Optional, Union
-from easonsi.llm.openai_client import OpenAIClient
+from .clients import OpenAIClient
 
 _IP_01 = "9.91.12.44:8000"
 _IP_02 = "9.91.0.28:13000"
@@ -81,9 +81,11 @@ def add_local_models():
             "api_key": "xxx",   # NOTE: api_key 不能为 "" 不然也会报错
             "is_sn": True
         }
-# set model alias!!
+
 add_openai_models()
 add_local_models()
+
+# set model alias!!
 _name_map = {
     "default": "Vendor-A/Qwen/Qwen2.5-72B-Instruct",
     # "0.9.1": "Qwen1.5-72B-4M-1_0_3-Agent-1_2_KU_woClarify_AllRandom", # 已关闭

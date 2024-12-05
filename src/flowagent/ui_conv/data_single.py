@@ -92,8 +92,6 @@ def get_workflow_dirs(workflow_dataset) -> List[str]:
 def get_workflow_names_map() -> Dict[str, List[str]]:
     return DataManager.get_workflow_names_map()
 
-# 参考 app.py 中描述的 BUG
-# @st.cache_resource
 def init_db():
     if "db" not in ss:
         ss.db = pymongo.MongoClient(ss.cfg.db_uri)[ss.cfg.db_name]

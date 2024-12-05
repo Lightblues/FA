@@ -17,11 +17,13 @@ cases: https://doc.weixin.qq.com/sheet/e3_AcMATAZtAPIaxl2WshdR0KQkIBZdF?scode=AJ
 - [x] #feat add tools for main agent (Google Search)
 - [x] #feat #robust add error handler -> add retry_wrapper for `step_agent_main_prediction`
 - [x] #feat #debug add Mocked LLM (model_name="debug")
+@241205
+- [x] #feat #log save session infos to db
+
 
 - [ ] testing (debug): inspect prompt and output
 - [ ] #bug, repeatly SWITCH workflow
 - [ ] #doc add standard test cases in doc [cases]
-- [ ] #feat #log save session infos with sessionid in db
 """
 import streamlit as st; ss = st.session_state
 import json
