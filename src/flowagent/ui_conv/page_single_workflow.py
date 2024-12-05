@@ -85,7 +85,7 @@ def step_api_process(bot_output: BotOutput) -> APIOutput:
 
 def case_workflow():
     """ 
-    TODO: add to db
+    add to db
     1. session level: (sessionid, name, mode[single/multi], infos, conversation, version)
     2. turn level (optional?): (sessionid, turnid, bot_output, prompt, version)
     """

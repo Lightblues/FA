@@ -51,7 +51,7 @@ class Workflow:  # rename -> Data
     id: str = None              # 000
     name: str = None
     task_description: str = None
-    task_detailed_description: str = None
+    # task_detailed_description: str = None
     
     workflow: str = None
     toolbox: List[Dict] = field(default_factory=list)   # apis
@@ -84,7 +84,7 @@ class Workflow:  # rename -> Data
         infos = data_manager.workflow_infos[self.id]
         self.name = infos['name']
         self.task_description = infos['task_description']
-        self.task_detailed_description = infos['task_detailed_description']
+        # self.task_detailed_description = infos['task_detailed_description']
         # 2. load the workflow & toolbox
         # TODO: update toolbox
         with open(data_manager.DIR_data_workflow / f"tools/{self.id}.yaml", 'r') as f:
@@ -147,7 +147,7 @@ class Workflow:  # rename -> Data
             "ID": f"{self.type}-{self.id}",
             "Name": self.name,
             "Task": self.task_description,
-            "Workflow": self.task_detailed_description # just use natural language-format workflow? 
+            "Workflow": self.task_description # just use natural language-format workflow? 
         }
         return "".join([f"{k}: {v}\n" for k, v in info_dict.items()])
     

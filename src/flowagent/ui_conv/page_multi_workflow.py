@@ -175,14 +175,6 @@ def show_conversations(conversation: Conversation):
 
 def main_multi():
     """Main loop! see [~ui_conv.md]"""
-    if "workflow_infos" not in ss:
-        ss.workflow_infos = ss.data_manager.workflow_infos.values()
-        if ss.cfg.mui_available_workflows:
-            workflow_names = [w['name'] for w in ss.workflow_infos]
-            assert all(w in workflow_names for w in ss.cfg.mui_available_workflows)
-            ss.workflow_infos = [w for w in ss.workflow_infos if w['name'] in ss.cfg.mui_available_workflows]
-        for w in ss.workflow_infos:
-            w['is_activated'] = True
     init_tools()
 
     init_sidebar()

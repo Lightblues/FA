@@ -33,7 +33,7 @@ class PDL_UIBot():
         return prompt, llm_response_stream
 
     def _gen_prompt(self) -> str:
-        # TODO: format apis
+        # TODO: format apis. 1) remove URL; 2) add preconditions
         state_infos = {
             "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }

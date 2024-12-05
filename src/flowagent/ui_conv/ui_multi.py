@@ -117,6 +117,7 @@ def init_sidebar():
                 on_change=update_workflow_dataset,
             )
         
+        update_workflow_dataset()
         cols = st.columns(3)
         for index, w in enumerate(ss.workflow_infos):   # [{name, description}]
             col = cols[index % 3]
