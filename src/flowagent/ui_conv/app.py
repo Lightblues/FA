@@ -7,6 +7,7 @@ from ..data import Config, DataManager, init_loguru_logger
 if "logger" not in ss: ss.logger = init_loguru_logger(DataManager.DIR_ui_log)
 from .page_single_workflow import main_single
 from .page_multi_workflow import main_multi
+from .page_inspect import main_inspect
 from .data_single import init_resource, init_db
 
 # def set_global_exception_handler(f):
@@ -35,8 +36,11 @@ def main(config_version:str="default.yaml"):
         ss.data_manager = DataManager(ss.cfg)
     init_db()
     
-    page = st.sidebar.selectbox("Select Mode", ["👤 Single", "👥 Multiple", ], index=0)
+    page = st.sidebar.selectbox("Select Mode", ["👤 Single", "👥 Multiple", "🔍 Inspect"], index=0)
     st.sidebar.markdown("---")
     
-    if page == "👤 Single": main_single()
-    elif page == "👥 Multiple": main_multi()
+    match page:
+        case "👤 Single": main_single()
+        case "👥 Multiple": main_multi()
+        case "🔍 Inspect": main_inspect()
+        case _: raise NotImplementedError

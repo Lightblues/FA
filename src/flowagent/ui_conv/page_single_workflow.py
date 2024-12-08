@@ -6,7 +6,6 @@ url: http://agent-pdl.woa.com
 cases: https://doc.weixin.qq.com/sheet/e3_AcMATAZtAPIaxl2WshdR0KQkIBZdF?scode=AJEAIQdfAAolrl13UxAcMATAZtAPI&tab=qe4ogl
 
 @240718 implement basic UI for single workflow
-- [ ] [optimize] optimize API output! 
 - [x] [feat] show Huabu meta information in the sidebar
 - [x] [log] add more detailed logs
 - [x] [feat] mofigy template/PDL in the web directly!  -- not good
@@ -55,6 +54,16 @@ def _post_control(bot_output: BotOutput, ) -> bool:
         if not controller.post_control(bot_output): return False
     return True
 
+def _pre_control(bot_output: BotOutput) -> None:
+    """ Make pre-control on the bot's action
+    will change the PDLBot's prompt! 
+    """
+    # if not (self.cfg.exp_mode == "session" and isinstance(self.bot, PDLBot)):  return
+    for controller in ss.controllers.values():
+        print(f"> [pre_control] {controller.name}")
+        if not controller.if_pre_control: continue
+        controller.pre_control(bot_output)
+
 def step_user_input(OBJECTIVE: str):
     conv: Conversation = ss.conv
     msg_user = Message(Role.USER, OBJECTIVE, conversation_id=conv.conversation_id, utterance_id=conv.current_utterance_id)
@@ -87,11 +96,12 @@ def case_workflow():
     """ 
     add to db
     1. session level: (sessionid, name, mode[single/multi], infos, conversation, version)
-    2. turn level (optional?): (sessionid, turnid, bot_output, prompt, version)
+    2. turn level (optional?): (sessionid, turnid, bot_output, prompt, version) TODO:
     """
+    bot_output: BotOutput = None
     for num_bot_actions in range(ss.cfg.bot_action_limit):
         # 0. pre-control
-        # ss._pre_control(bot_output)
+        _pre_control(bot_output)
         # 1. bot predict an action
         bot_output = step_bot_prediction()
         print(f"> bot_output {bot_output}")
@@ -104,6 +114,7 @@ def case_workflow():
                 continue
             api_output = step_api_process(bot_output)
         elif bot_output.response:
+            # TODO: add `_response_control` in FlowagentConversationManager
             ss.logger.info(ss.conv.get_last_message().to_str())
             break
         else: raise TypeError(f"Unexpected BotOutputType: {bot_output.action_type}")
