@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Tuple, List, Union
 from .base_controller import BaseController
 from ..data import PDL, Conversation, Role, Message, Config, BotOutput, BotOutputType
 
@@ -13,9 +13,10 @@ class APIDuplicationController(BaseController):
         msg = "Check success!" if res else f"Too many duplicated API calls! try another action instead."
         return res, msg
     
-    def _pre_control(self, prev_bot_output: BotOutput):
-        if not isinstance(prev_bot_output, BotOutput): return
-        if prev_bot_output.action_type != BotOutputType.ACTION: return
+    def _pre_control(self, prev_bot_output: Union[BotOutput, None]):
+        # if not isinstance(prev_bot_output, BotOutput): return  # TODO:
+        if prev_bot_output is None: return
+        if not (prev_bot_output.action): return
         if not self.check_validation():
             content = f"you have called {prev_bot_output.action} with the same parameters too many times! Please obtain the information from the previous calls."
             self.pdl.status_for_prompt["Invalid API due to duplicated call"] = content

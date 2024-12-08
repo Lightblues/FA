@@ -1,15 +1,16 @@
 ## TODOs
-1. PDL 是否可以自动转? 需要兼容新的节点定义 [待验证]
 
-
-
-
-241118
 - [ ] 实现工具: 现有画布转换, JSON -> PDL [可行性]
+    - [ ] 需要兼容新的节点定义 [待验证]
 - [ ] 验证在更大画布上的流程遵循稳定性
     - [x] 在新版本模型 (0.9.2) 上的效果测试
-- [ ] 探究多画布上的协作问题 & 通用插件的调用能力 [方案1] swarm 方案 #P1
-- [ ] 调研 MetaGPT 中 multi-agent 的通信方式
+- [x] 探究多画布上的协作问题 & 通用插件的调用能力 [方案1] swarm 方案 #P1
+- [ ] 调研 MetaGPT/Coze 中 multi-agent 的通信方式
+- [ ] 前后端分离, 支持批量测试
+- [ ] 数据构造, 支持模型训练 (DPO 量化后效果下降?)
+- [ ] log & debug -> (page_inspect.py)
+- [ ] 语法优化
+    - [ ] API_check_hospital_exist -> `API.check_hospital_exist`
 
 misc
 - [x] 合并 aget-pdl & master 分支 #P2 (part 1)
