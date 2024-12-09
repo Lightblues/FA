@@ -1,3 +1,48 @@
+## 前后端分离
+
+前端: streamlit
+```python
+# app.py | general
+ss.logger
+ss.conv
+ss.data_manager: DataManager
+ss.cfg: Config
+ss.mode: "single" | "multi"
+ss.headers: st.context.headers
+ss.user_identity: Dict
+ss.db: mongodb.Database
+
+# page_single_workflow.py
+ss.tool
+ss.bot: PDL_UIBot
+    .process_stream()
+    .process_LLM_response(prompt, llm_response)
+ss.controllers
+ss.workflow
+```
+
+Bot
+```python
+# 原本的依赖
+class PDL_UIBot():
+    ss.cfg: ui_bot_llm_name | ui_bot_template_fn
+    ss.workflow: pdl.status_for_prompt | pdl.to_str_wo_api() | toolbox
+    ss.conv: .to_str()
+    ss.user_additional_constraints
+# 使用 (logger 放到后端)
+@retry_wrapper(retry=3, step_name="step_bot_prediction", log_fn=ss.logger.bind(custom=True).error)
+def step_bot_prediction() -> BotOutput:
+    prompt, stream = bot.process_stream()
+    bot_output = bot.process_LLM_response(prompt, llm_response)
+
+# 修改后
+def step_bot_prediction() -> StreamingResponse:
+    stream = bot.process_stream()
+    return bot.process_LLM_response(prompt, llm_response)
+```
+
+
+
 
 ## multi_workflow
 ```python

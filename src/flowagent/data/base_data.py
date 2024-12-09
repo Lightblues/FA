@@ -3,100 +3,124 @@ import datetime, os, re, yaml, copy, pathlib, time
 from enum import Enum, auto
 from dataclasses import dataclass, asdict, field
 from typing import List, Dict, Optional, Tuple, Iterator, Union
+from pydantic import BaseModel, Field
 import pandas as pd
 
-class CustomRole:
-    def __init__(self, rolename: str):
-        self.id = -1  # 使用负数ID以区分内置角色
-        self.prefix = f"[{rolename.upper()}] "
-        self.rolename = rolename.lower()
-        self.color = "blue"  # 默认颜色
+class CustomRole(BaseModel):
+    id: int = -1  # 使用负数ID以区分内置角色
+    prefix: str
+    rolename: str
+    color: str = "blue"  # 默认颜色
+
+    def model_post_init(self, __context):
+        self.prefix = f"[{self.rolename.upper()}] "
+        self.rolename = self.rolename.lower()
 
     def __str__(self):
         return f"Role(id={self.id}, prefix={self.prefix}, name={self.rolename})"
 
 
-class Role(Enum):
-    SYSTEM = (0, "[SYSTEM] ", "system", 'green')
-    USER = (1, "[USER] ", "user", "red")
-    BOT = (2, "[BOT] ", "bot", "orange")
+# class Role(Enum):
+#     SYSTEM = (0, "[SYSTEM] ", "system", 'green')
+#     USER = (1, "[USER] ", "user", "red")
+#     BOT = (2, "[BOT] ", "bot", "orange")
 
-    def __init__(self, id, prefix, rolename, color):
-        self.id = id
-        self.prefix = prefix
-        self.rolename = rolename
-        self.color = color
+#     def __init__(self, id, prefix, rolename, color):
+#         self.id = id
+#         self.prefix = prefix
+#         self.rolename = rolename
+#         self.color = color
+
+class RoleBase(BaseModel):
+    id: int
+    prefix: str
+    rolename: str
+    color: str
+
+
+class Role(str, Enum):
+    SYSTEM = "system"
+    USER = "user"
+    BOT = "bot"
+
+    @property
+    def id(self) -> int:
+        return {
+            self.SYSTEM: 0,
+            self.USER: 1,
+            self.BOT: 2
+        }[self]
     
+    @property
+    def prefix(self) -> str:
+        return f"[{self.value.upper()}] "
+    
+    @property
+    def rolename(self) -> str:
+        return self.value
+    
+    @property
+    def color(self) -> str:
+        return {
+            self.SYSTEM: "green",
+            self.USER: "red",
+            self.BOT: "orange"
+        }[self]
+
     def __str__(self):
         return f"Role(id={self.id}, prefix={self.prefix}, name={self.rolename})"
 
     @classmethod
     def get_by_rolename(cls, rolename: str):
-        for member in cls:
-            if member.rolename == rolename.lower():
-                return member
-        return CustomRole(rolename)  # 如果找不到匹配的角色，返回自定义角色
-        # raise KeyError(f"{rolename} is not a valid key for {cls.__name__}")
+        try:
+            return cls(rolename.lower())
+        except ValueError:
+            return CustomRole(rolename=rolename)
 
 
-@dataclass
-class APICall:
+class APICall(BaseModel):
     name: str
     params: Dict
-    
+
     @classmethod
-    def from_dict(cls, d:Dict):
+    def from_dict(cls, d: Dict):
         if "name" not in d:
             data = {
                 "name": d.get("API"),
-                "params": { i['name']: i['value'] for i in d["params"] }
+                "params": {i['name']: i['value'] for i in d["params"]}
             }
-        else: data = d
+        else:
+            data = d
         return cls(**data)
 
 
-@dataclass
-class Message:
-    role: Union[Role, CustomRole] = None
-    content: str = None
-    prompt: str = None
-    llm_response: str = None
-    conversation_id: str = None
-    utterance_id: int = None
-    
-    type: str = None
-    apis: List[APICall] = None      # whether contain api calls
-    
-    content_predict: str = None
+class Message(BaseModel):
+    role: Union[Role, CustomRole]
+    content: str
+    prompt: Optional[str] = None
+    llm_response: Optional[str] = None
+    conversation_id: Optional[str] = None
+    utterance_id: Optional[int] = None
+    type: Optional[str] = None
+    apis: Optional[List[APICall]] = None
+    content_predict: Optional[str] = None
 
-    def __init__(
-        self, role: Union[Role, str], content: str, 
-        conversation_id: str=None, utterance_id: int=None, 
-        prompt: str=None, llm_response: str=None, 
-        type: str=None, apis: List[APICall]=None, content_predict: str=None,
-        **kwargs
-    ):
-        if isinstance(role, str): self.role = Role.get_by_rolename(role)
-        elif isinstance(role, Role): self.role = role
-        else: raise NotImplementedError
-        self.content = content
-        if prompt is not None: self.prompt = prompt
-        if llm_response is not None: self.llm_response = llm_response
-        if conversation_id is not None: self.conversation_id = conversation_id
-        if utterance_id is not None: self.utterance_id = utterance_id
-        if type is not None: self.type = type
-        if apis: 
-            if not isinstance(apis[0], APICall):
-                apis = [APICall.from_dict(i) for i in apis]
-            self.apis = apis
-        if content_predict is not None: self.content_predict = content_predict
-    
+    def model_post_init(self, __context):
+        if isinstance(self.role, str):
+            self.role = Role.get_by_rolename(self.role)
+        # if self.apis: 
+        #     if not isinstance(apis[0], APICall):
+        #         apis = [APICall.from_dict(i) for i in apis]
+        #     self.apis = apis
+
     def to_str(self):
         return f"{self.role.prefix}{self.content}"
+    
     def to_dict(self):
-        res = asdict(self)
-        res["role"] = self.role.rolename
-        return res
+        data = self.model_dump()
+        data["role"] = self.role.rolename
+        return data
+    
     def __str__(self):
         return self.to_str()
     def __repr__(self):
@@ -128,15 +152,18 @@ class Message:
     #     self.content, self.content_predict = GT_content, self.content
 
 
-class Conversation():
-    msgs: List[Message] = []
-    conversation_id: str = None
-    
-    def __init__(self, conversation_id: str = None):
-        self.msgs = []
+class Conversation(BaseModel):
+    msgs: List[Message] = Field(default_factory=list)
+    conversation_id: Optional[str] = None
+
+    @classmethod
+    def create(cls, conversation_id: Optional[str] = None) -> 'Conversation':
         if not conversation_id:
             conversation_id = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-        self.conversation_id = conversation_id
+        return cls(conversation_id=conversation_id)
+
+    # class Config:
+    #     arbitrary_types_allowed = True
 
     def add_message(self, msg: Message):
         # assert isinstance(msg, Message), f"Must be Message! But got {type(msg)}"

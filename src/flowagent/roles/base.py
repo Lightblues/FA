@@ -79,6 +79,12 @@ class BaseBot(BaseRole):
         """
         raise NotImplementedError
 
+    def _add_message(self, msg_content: str, prompt: str=None, llm_response:str=None, role:Union[Role, str]=Role.BOT):
+        msg = Message(
+            role=role, content=msg_content, prompt=prompt, llm_response=llm_response,
+            conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
+        )
+        self.conv.add_message(msg)
 
 class BaseUser(BaseRole):
     names: List[str] = None     # for convert name2role

@@ -1,32 +1,29 @@
 """ 
+from `PDL_UIBot`, replace streamlit 
 """
 
-import datetime, json, re
-from typing import List, Dict, Optional, Tuple, Union
-import streamlit as st; ss = st.session_state
+import re, datetime, json
+from typing import List, Tuple
+from .react_bot import ReactBot
+from ...data import BotOutput, BotOutputType
+from ...utils import jinja_render, OpenAIClient, Formater
 
-from ..data import Config, Message, Conversation, BotOutput, Role, BotOutputType
-from ..utils import jinja_render, OpenAIClient, Formater, init_client, LLM_CFG
-# from ..roles import ReactBot
-
-class PDL_UIBot():
-    """PDL_UIBot
-
-    self: llm
-    ss (session_state): cfg, workflow, conv, user_additional_constraints, bot_template_fn
-
+class UISingleBot(ReactBot):
+    """ 
     Usage::
-        bot = PDL_UIBot()
-        prompt, stream = bot.process_stream() # show the stream
-        bot_output: BotOutput = bot.process_LLM_response(prompt, llm_response)
+
+        bot = UISingleBot(cfg=cfg, conv=conv, workflow=workflow)
+        prompt, stream = bot.process_stream()
+        llm_response = _process_stream(stream)
+        bot_output = bot.process_LLM_response(prompt, llm_response)
     """
-    def __init__(self) -> None:
-        # super().__init__(**args)
-        self.llm = init_client(llm_cfg=LLM_CFG[ss.cfg.ui_bot_llm_name])
-    
-    def refresh_config(self): # bot_template_fn
-        self.__init__()
-    
+    llm: OpenAIClient = None
+    bot_template_fn: str = "flowagent/bot_pdl.jinja"
+    names = ["PDLBot", "pdl_bot"]
+
+    def __init__(self, **args):
+        super().__init__(**args)
+
     def process_stream(self):
         prompt = self._gen_prompt()
         llm_response_stream = self.llm.query_one_stream_generator(prompt)
@@ -38,18 +35,18 @@ class PDL_UIBot():
             "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
         # s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
-        state_infos |= ss.workflow.pdl.status_for_prompt # add the status infos from PDL!
+        state_infos |= self.workflow.pdl.status_for_prompt # add the status infos from PDL!
         prompt = jinja_render(
-            ss.cfg.ui_bot_template_fn,       # "flowagent/bot_pdl.jinja"
-            workflow_name=ss.workflow.pdl.Name, # 
-            PDL=ss.workflow.pdl.to_str_wo_api(),  # .to_str()
-            api_infos=ss.workflow.toolbox,
-            conversation=ss.conv.to_str(),
-            user_additional_constraints = ss.user_additional_constraints,
+            self.cfg.ui_bot_template_fn,       # "flowagent/bot_pdl.jinja"
+            workflow_name=self.workflow.pdl.Name, # 
+            PDL=self.workflow.pdl.to_str_wo_api(),  # .to_str()
+            api_infos=self.workflow.toolbox,
+            conversation=self.conv.to_str(),
+            # user_additional_constraints = ss.user_additional_constraints,  # TODO: 
             current_state="\n".join(f"{k}: {v}" for k,v in state_infos.items()),
         )
         return prompt
-
+    
     def process_LLM_response(self, prompt: str, llm_response:str) -> BotOutput:
         prediction = self._parse_react_output(llm_response)
         
@@ -73,20 +70,13 @@ class PDL_UIBot():
         # validate result
         try:
             thought = result.get("Thought", "")
-            action = action_input = ""
+            action = action_input = None
             if "Action" in result:        # Action
                 action = result["Action"]
                 if action:
                     if action.startswith("API_"): action = action[4:]
                     action_input = json.loads(result["Action Input"]) # eval: NameError: name 'null' is not defined
-            response = result.get("", "")
+            response = result.get("Response", "")
             return BotOutput(action=action, action_input=action_input, response=response, thought=thought)
         except Exception as e:
             raise RuntimeError(f"Parse error: {e}\n[LLM output] {s}\n[Result] {result}")
-
-    def _add_message(self, msg_content: str, prompt: str=None, llm_response:str=None, role:Union[Role, str]=Role.BOT):
-        msg = Message(
-            role, msg_content, prompt=prompt, llm_response=llm_response,
-            conversation_id=ss.conv.conversation_id, utterance_id=ss.conv.current_utterance_id
-        )
-        ss.conv.add_message(msg)

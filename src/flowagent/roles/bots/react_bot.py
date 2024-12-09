@@ -34,15 +34,11 @@ class ReactBot(BaseBot):
             return llm_response, prediction
         llm_response, prediction = process_with_retry(prompt)  # prediction: BotOutput
         # 3. add message to conversation
-        if prediction.action_type==BotOutputType.RESPONSE:
+        if prediction.response:
             msg_content = prediction.response
         else:
             msg_content = f"<Call API> {prediction.action}({prediction.action_input})"
-        msg = Message(
-            Role.BOT, msg_content, prompt=prompt, llm_response=llm_response,
-            conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
-        )
-        self.conv.add_message(msg)
+        self._add_message(msg_content, prompt=prompt, llm_response=llm_response)
         self.cnt_bot_actions += 1  # stat
         return prediction
 
@@ -71,18 +67,18 @@ class ReactBot(BaseBot):
         result = {match.group('field'): match.group('value').strip() for match in matches}
         
         # validate result
-        # assert BotOutput.thought_str in result, f"Thought not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
-        thought = result.get(BotOutput.thought_str, "")
-        if BotOutput.action_str in result:        # Action
-            assert BotOutput.action_input_str in result, f"Action Input not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
+        # assert "Thought" in result, f"Thought not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
+        thought = result.get("Thought", "")
+        if "Action" in result:        # Action
+            assert "Action Input" in result, f"Action Input not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
             try: # NOTE: ensure the input is in json format! 
-                result[BotOutput.action_input_str] = json.loads(result[BotOutput.action_input_str]) # eval: NameError: name 'null' is not defined
+                result["Action Input"] = json.loads(result["Action Input"]) # eval: NameError: name 'null' is not defined
             except Exception as e:
                 raise RuntimeError(f"Action Input not in json format! LLM output:\n" + LogUtils.format_infos_basic(s))
-            if result[BotOutput.action_str].startswith("API_"):
-                result[BotOutput.action_str] = result[BotOutput.action_str][4:]
-            output = BotOutput(action=result[BotOutput.action_str], action_input=result[BotOutput.action_input_str], thought=thought)
+            if result["Action"].startswith("API_"):
+                result["Action"] = result["Action"][4:]
+            output = BotOutput(action=result["Action"], action_input=result["Action Input"], thought=thought)
         else:
-            assert BotOutput.response_str in result, f"Response not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
-            output = BotOutput(response=result[BotOutput.response_str], thought=thought)
+            assert "Response" in result, f"Response not in prediction! LLM output:\n" + LogUtils.format_infos_basic(s)
+            output = BotOutput(response=result["Response"], thought=thought)
         return output

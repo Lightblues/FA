@@ -35,6 +35,7 @@ from ..data import (
 )
 from ..roles import BaseBot, BaseUser, BaseTool
 from .ui_single import init_sidebar, post_sidebar
+from .bot_single import PDL_UIBot
 from .data_single import refresh_bot, refresh_workflow, db_upsert_session, fake_stream
 from ..utils import retry_wrapper
 
@@ -74,7 +75,7 @@ def step_user_input(OBJECTIVE: str):
 
 @retry_wrapper(retry=3, step_name="step_bot_prediction", log_fn=ss.logger.bind(custom=True).error)
 def step_bot_prediction() -> BotOutput:
-    bot:BaseBot = ss.bot
+    bot:PDL_UIBot = ss.bot
     print(f">> conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
     prompt, stream = bot.process_stream()
     with st.expander(f"Thinking...", expanded=True):
@@ -146,8 +147,3 @@ def main_single():
         with st.chat_message("assistant", avatar=ss['avatars']['assistant']):
             # st.write(ss.conv.get_last_message().content)
             st.write_stream(fake_stream(ss.conv.get_last_message().content))
-
-        # DB
-        # infos_dict = {
-        #     "conversation_id": conversation.conversation_id, **config.to_dict()
-        # }

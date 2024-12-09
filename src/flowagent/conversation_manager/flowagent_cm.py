@@ -31,7 +31,7 @@ class FlowagentConversationManager(BaseConversationManager):
             if isinstance(self.bot, PDLBot):    # for PDLBot, build the controllers
                 self.controllers: List[BaseController] = []
                 for c in self.cfg.bot_pdl_controllers:
-                    controller = CONTROLLER_NAME2CLASS[c['name']](cfg, self.conv, self.workflow.pdl, c['config'])
+                    controller = CONTROLLER_NAME2CLASS[c['name']](self.conv, self.workflow.pdl, c['config'])
                     self.controllers.append(controller)
     
     def conversation(self, verbose:bool=True) -> Conversation:
@@ -66,13 +66,13 @@ class FlowagentConversationManager(BaseConversationManager):
                         bot_output: BotOutput = self.bot.process()
                     self.log_msg(self.conv.get_last_message(), verbose=verbose)
                     # 2. STOP: break until bot RESPONSE
-                    if bot_output.action_type == BotOutputType.END: break
-                    elif bot_output.action_type == BotOutputType.RESPONSE:
+                    if not (bot_output.action or bot_output.response): break
+                    elif bot_output.response:
                         if not self._response_control(bot_output):
                             self.log_msg(self.conv.get_last_message(), verbose=verbose)  # log the error info!
                             continue
                         break
-                    elif bot_output.action_type == BotOutputType.ACTION:
+                    elif bot_output.action:
                         # 3. ACTION loop: call the API, append results to conversation
                         # 3.1. post-check the action! (will be ignored for non-PDLBot)
                         if not self._post_control(bot_output):
@@ -82,14 +82,14 @@ class FlowagentConversationManager(BaseConversationManager):
                         with Timer("api process", print=self.cfg.log_utterence_time):
                             api_output: APIOutput = self.api.process(bot_output)
                         self.log_msg(self.conv.get_last_message(), verbose=verbose)
-                    else: raise TypeError(f"Unexpected BotOutputType: {bot_output.action_type}")
+                    else: raise TypeError(f"Unexpected BotOutputType: {bot_output}")
                     
                     num_bot_actions += 1
                     if num_bot_actions > self.cfg.bot_action_limit: 
                         # ... the default response
                         self.logger.log(f"  <main> bot retried actions reach limit!", with_print=verbose)
                         break
-                if bot_output.action_type == BotOutputType.END:
+                if not (bot_output.action or bot_output.response):
                     self.logger.log(f"  <main> ended by bot!", with_print=verbose)
                     break
                 role = Role.USER
