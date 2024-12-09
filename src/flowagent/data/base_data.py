@@ -222,12 +222,14 @@ class Conversation(BaseModel):
         return pd.DataFrame([m.to_dict() for m in self.msgs])
 
     @classmethod
-    def load_from_json(cls, o:List[Dict]):
-        instance = cls()
-        for msg in o:
+    def load_from_json(cls, data: Union[Dict, List[Dict]]):
+        conversation_id = data['conversation_id'] if isinstance(data, dict) else "0000"
+        conv = data["msgs"] if isinstance(data, dict) else data
+        instance = cls(conversation_id=conversation_id)
+        for msg in conv:
             _role = Role.get_by_rolename(msg["role"])
             instance.add_message(Message(
-                _role, msg["content"], 
+                role=_role, content=msg["content"], 
                 type=msg.get("type", None), apis=msg.get("apis", None)
             ))
         return instance

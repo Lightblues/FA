@@ -75,13 +75,13 @@ class LLMSimulatedTool(BaseTool):
         if "```" in s:
             s = Formater.parse_codeblock(s, type="json")
         response = json.loads(s) # eval | NameError: name 'null' is not defined
-        assert all(key in response for key in [APIOutput.response_status_str, APIOutput.response_data_str]), f"Response not in prediction: {s}"
+        assert all(key in response for key in ["status_code", "data"]), f"Response not in prediction: {s}"
         # parse the "data"?
         return APIOutput(
             name=apicalling_info.action,
             request=apicalling_info.action_input,
-            response_data=response[APIOutput.response_data_str],
-            response_status_code=int(response[APIOutput.response_status_str]),
+            response_data=response["data"],
+            response_status_code=int(response["data"]),
         )
     
     @staticmethod
@@ -93,10 +93,10 @@ class LLMSimulatedTool(BaseTool):
         result = {match.group('field'): match.group('value').strip() for match in matches}
         
         # validate result
-        assert all(key in result for key in [APIOutput.response_status_str_react, APIOutput.response_data_str_react]), f"Data/Status Code not in prediction: {s}"
+        assert all(key in result for key in ["Status Code", "Data"]), f"Data/Status Code not in prediction: {s}"
         return APIOutput(
             name=apicalling_info.action,
             request=apicalling_info.action_input,
-            response_data=json.dumps(result[APIOutput.response_data_str_react], ensure_ascii=False),
-            response_status_code=int(result[APIOutput.response_status_str_react]),
+            response_data=json.dumps(result["Data"], ensure_ascii=False),
+            response_status_code=int(result["Status Code"]),
         )

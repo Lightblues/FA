@@ -86,7 +86,7 @@ class Config(BaseModel):
     
     judge_max_workers: int = 10
     judge_model_name: str = "gpt-4o"
-    judge_conversation_id: str = None   # the conversation to be judged
+    judge_conversation_id: Optional[str] = None   # the conversation to be judged
     # judge_passrate_threshold: int = 3
     judge_log_to: str = "wandb"
     judge_force_rejudge: bool = False

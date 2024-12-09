@@ -116,6 +116,9 @@ def init_sidebar():
 
 
 def post_sidebar():
+    """
+    Need: ss.controllers, ss.workflow
+    """
     with st.sidebar:
         # show the controllers
         cols = st.columns(3)

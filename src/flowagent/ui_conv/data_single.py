@@ -15,7 +15,7 @@ from ..pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
 
 def debug_print_infos() -> None:
     print(f"[DEBUG] Conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
-    print(f"  > cfg: {ss.cfg}")
+    # print(f"  > cfg: {ss.cfg}")
 
 def fake_stream(response: str) -> Iterator[str]:
     for chunk in response:
@@ -112,7 +112,7 @@ def refresh_conversation() -> Conversation:
     
     selected_workflow_name = ss.selected_workflow_name.split("-")[-1]
     msg_hello = Message(
-        Role.BOT, ss.cfg.ui_greeting_msg.format(name=selected_workflow_name), 
+        role=Role.BOT, content=ss.cfg.ui_greeting_msg.format(name=selected_workflow_name), 
         conversation_id=ss.conv.conversation_id, utterance_id=ss.conv.current_utterance_id)
     ss.conv.add_message(msg_hello)
     return ss.conv
@@ -130,14 +130,14 @@ def refresh_bot() -> PDL_UIBot:
     cfg.ui_bot_template_fn = f"flowagent/{ss.selected_template_fn}"
     cfg.ui_bot_llm_name = ss.selected_model_name
     
-    if 'bot' not in ss:
-        ss.bot = PDL_UIBot()
-        ss.tool = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=conv, workflow=ss.workflow)
-    else:
-        ss.bot.refresh_config()
-        ss.tool.refresh_config(cfg)
-    refresh_controllers()
-    return ss.bot
+    # if 'bot' not in ss:
+    #     ss.bot = PDL_UIBot()
+    #     ss.tool = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=conv, workflow=ss.workflow)
+    # else:
+    #     ss.bot.refresh_config()
+    #     ss.tool.refresh_config(cfg)
+    # refresh_controllers()
+    # return ss.bot
 
 def refresh_workflow():
     """refresh workflow -> bot """

@@ -47,15 +47,8 @@ class BotOutput(BaseModel):
     #     else:
     #         return BotOutputType.END
 
-@dataclass
-class APIOutput:
-    name: str = None
-    request: Union[str, Dict] = None
-    response_status_code: bool = None
-    response_data: Union[str, Dict] = None
-    
-    response_status_str = "status_code"
-    response_data_str = "data"
-    
-    response_status_str_react = "Status Code"
-    response_data_str_react = "Data"
+class APIOutput(BaseModel):
+    name: Optional[str] = None
+    request: Optional[Union[str, Dict]] = None
+    response_status_code: Optional[int] = None
+    response_data: Optional[Union[str, Dict]] = None

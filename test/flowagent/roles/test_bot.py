@@ -41,6 +41,6 @@ if __name__ == '__main__':
     conv = bot.conv
     
     query = "hello"
-    conv.add_message(Message(Role.USER, query, conversation_id=conv.conversation_id, utterance_id=conv.current_utterance_id))
+    conv.add_message(Message(role=Role.USER, content=query, conversation_id=conv.conversation_id, utterance_id=conv.current_utterance_id))
     bot.process()
     print(conv)

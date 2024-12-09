@@ -22,25 +22,6 @@ from openai.types.chat.chat_completion_chunk import ChatCompletionChunk, Choice 
 
 app = FastAPI()
 
-# class ChatMessage(BaseModel):
-#     role: str
-#     content: str
-
-# class ChatCompletionRequest(BaseModel):
-#     model: str
-#     messages: List[ChatMessage]
-#     temperature: Optional[float] = 1.0
-#     stream: Optional[bool] = False
-
-# class ChatCompletionResponse(BaseModel):
-#     id: str = "mock-response"
-#     object: str = "chat.completion"
-#     created: int = 1234567890
-#     model: str
-#     choices: List[Dict[str, Any]]
-#     usage: Dict[str, int] = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
-
-
 async def generate_stream_response(content: str, model: str):
     # 将响应内容按字符切分，模拟流式输出
     for char in content:
