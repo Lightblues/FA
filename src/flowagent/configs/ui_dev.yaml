@@ -55,9 +55,9 @@ api_entity_linking_template: "flowagent/entity_linking.jinja"
 pdl_version: "pdl"    # set as default
 bot_action_limit: 5
 bot_pdl_controllers: 
-  - {name: "api_duplication", config: {if_pre: true, if_post: true, threshold: 2}}
-  - {name: "node_dependency", config: {if_pre: true, if_post: true}}
-  # - {name: "session_length", config: {if_pre: true, min: 5, max: 15}}
+  - {name: "api_duplication", config: {if_pre: true, if_post: true, threshold: 2}, is_activated: true}
+  - {name: "node_dependency", config: {if_pre: true, if_post: true}, is_activated: true}
+  # - {name: "session_length", config: {if_pre: true, min: 5, max: 15}, is_activated: true}
 
 # bot_mode: "pdl_bot"     # dummy_bot, react_bot, pdl_bot, core_bot
 # bot_template_fn: "flowagent/bot_pdl.jinja"

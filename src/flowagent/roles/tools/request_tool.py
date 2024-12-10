@@ -25,6 +25,11 @@ def handle_exceptions(func):
 
 
 class RequestTool(BaseTool):
+    """ 
+    Used config:
+        api_entity_linking
+        (EntityLinker) api_entity_linking_llm, api_entity_linking_template
+    """
     entity_linker: EntityLinker = None
     names = ["v01", "request", "RequestAPIHandler"]
     

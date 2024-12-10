@@ -7,9 +7,15 @@ from ...utils import jinja_render, retry_wrapper, OpenAIClient, Formater, init_c
 
 class ReactBot(BaseBot):
     """ ReactBot
+    
     prediction format: 
-        (Thought, Response) for response node
+        (Thought, Response) for response node 
         (Thought, Action, Action Input) for call api node
+
+    Used config:
+        bot_llm_name
+        bot_template_fn
+        bot_retry_limit
     """
     llm: OpenAIClient = None
     bot_template_fn: str = "flowagent/bot_flowbench.jinja"  # using the prompt from FlowBench

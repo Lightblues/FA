@@ -12,9 +12,8 @@ Usage::
     https://cookbook.openai.com/examples/how_to_stream_completions
 """
 from fastapi import FastAPI
-from pydantic import BaseModel
 
-from .routers.single_agent import router as single_agent_router
+from .routers.router_single_agent import router as single_agent_router
 
 app = FastAPI()
 

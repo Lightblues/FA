@@ -15,5 +15,11 @@ class SinglePostControlResponse(BaseModel):
     content: str
 
 SingleRegisterRequest = Config
-SingleToolResponse = APIOutput
-SingleBotPredictResponse = BotOutput
+
+class SingleToolResponse(BaseModel):
+    api_output: APIOutput
+    msg: str
+
+class SingleBotPredictResponse(BaseModel):
+    bot_output: BotOutput
+    msg: str

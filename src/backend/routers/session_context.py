@@ -23,11 +23,31 @@ class SessionContext(BaseModel):
 
     @classmethod
     def from_config(cls, conversation_id: str, cfg: Config):
+        """init a new session with session_id & config
+
+        Args:
+            conversation_id (str): session_id
+            cfg (Config): config. 
+                Used config:
+                    ``Workflow``: workflow_type, workflow_id, pdl_version
+                        mode | exp_mode | user_mode
+                    ``UISingleBot``: ui_bot_template_fn, bot_llm_name, bot_retry_limit
+                    ``RequestTool``: api_entity_linking
+                        ``EntityLinker``: api_entity_linking_llm, api_entity_linking_template
+                    ``controllers``: bot_pdl_controllers
+
+        Returns:
+            SessionContext: session context
+        """
         workflow = Workflow(cfg)
         conv = Conversation.create(conversation_id)
+        conv.add_message(msg=cfg.ui_greeting_msg.format(name=workflow.pdl.Name), role=Role.BOT)
         bot = UISingleBot(cfg=cfg, conv=conv, workflow=workflow)
         tool = RequestTool(cfg=cfg, conv=conv, workflow=workflow)
-        controllers = {c['name']: CONTROLLER_NAME2CLASS[c['name']](conv, workflow.pdl, c['config']) for c in cfg.bot_pdl_controllers}
+        controllers = {}
+        for c in cfg.bot_pdl_controllers:
+            if c['is_activated']:
+                controllers[c['name']] = CONTROLLER_NAME2CLASS[c['name']](conv, workflow.pdl, c['config'])
         return cls(conversation_id=conversation_id, cfg=cfg, conv=conv, workflow=workflow, bot=bot, tool=tool, controllers=controllers)
 
     def merge_conversation(self, new_conv: Conversation):

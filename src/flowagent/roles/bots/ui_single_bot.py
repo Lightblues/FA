@@ -16,6 +16,11 @@ class UISingleBot(ReactBot):
         prompt, stream = bot.process_stream()
         llm_response = _process_stream(stream)
         bot_output = bot.process_LLM_response(prompt, llm_response)
+
+    Used config:
+        bot_llm_name
+        ui_bot_template_fn <- bot_template_fn
+        bot_retry_limit
     """
     llm: OpenAIClient = None
     bot_template_fn: str = "flowagent/bot_pdl.jinja"

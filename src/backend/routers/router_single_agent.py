@@ -11,18 +11,20 @@ Test: see `test/backend/test_ui_backend.py`
     - [x] single_tool
 - [x] pre_control
 
-- [ ] add logging to db! 
+- [ ] add record to db! 
+- [ ] add log / debug
 """
 import json
 from typing import Iterator
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from .session_context import get_session_context, SessionContext
+from flowagent.data import Role, Message
 from ..typings import (
     SingleRegisterRequest, SingleRegisterResponse, 
     SingleBotPredictRequest, SingleBotPredictResponse, 
     SinglePostControlResponse, 
-    SingleToolResponse
+    SingleToolResponse, BotOutput
 )
 
 router = APIRouter()
@@ -30,6 +32,15 @@ router = APIRouter()
 
 @router.post("/single_register/{conversation_id}")
 async def single_register(conversation_id: str, config: SingleRegisterRequest) -> SingleRegisterResponse:
+    """init a new session with session_id & config
+
+    Args:
+        conversation_id (str): session_id
+        config (SingleRegisterRequest): config
+
+    Returns:
+        SingleRegisterResponse: with conversation
+    """
     print(f"> [single_register] {conversation_id}")
     session_context = get_session_context(conversation_id, cfg=config)
     return SingleRegisterResponse(
@@ -75,11 +86,15 @@ def generate_response(session_context: SessionContext) -> Iterator[str]:
     # yield f"data: {json.dumps(final_output, ensure_ascii=False)}\n\n"
     session_context.last_bot_output = bot_output
 
+@router.post("/single_add_message/{conversation_id}")
+def single_add_message(conversation_id: str, message: Message) -> None:
+    session_context = get_session_context(conversation_id)
+    session_context.conv.add_message(message)
+
 @router.post("/single_bot_predict/{conversation_id}")
 async def single_bot_predict(conversation_id: str, request: SingleBotPredictRequest) -> StreamingResponse:
     print(f"> [single_bot_predict] {conversation_id} with query: {request.query}")
     session_context = get_session_context(conversation_id)
-    session_context._add_message(request.query)     # add user query
     return StreamingResponse(
         generate_response(session_context),
         media_type="text/event-stream"
@@ -88,10 +103,13 @@ async def single_bot_predict(conversation_id: str, request: SingleBotPredictRequ
 @router.get("/single_bot_predict_output/{conversation_id}")
 def single_bot_predict_output(conversation_id: str) -> SingleBotPredictResponse:
     session_context = get_session_context(conversation_id)
-    return session_context.last_bot_output
+    return SingleBotPredictResponse(
+        bot_output=session_context.last_bot_output,
+        msg=session_context.conv.get_last_message().content
+    )
 
 @router.post("/single_post_control/{conversation_id}")
-def single_post_control(conversation_id: str, bot_output: SingleBotPredictResponse) -> SinglePostControlResponse:
+def single_post_control(conversation_id: str, bot_output: BotOutput) -> SinglePostControlResponse:
     """ Check the validation of bot's action
     NOTE: if not validated, the error infomation will be added to ss.conv!
     """
@@ -104,11 +122,15 @@ def single_post_control(conversation_id: str, bot_output: SingleBotPredictRespon
             break
     return SinglePostControlResponse(
         success=success,
-        content=session_context.conv.get_last_message().to_str() # TODO: format the error message
+        content="" if success else session_context.conv.get_last_message().content # TODO: format the error message
     )
 
 @router.post("/single_tool/{conversation_id}")
-def single_tool(conversation_id: str, bot_output: SingleBotPredictResponse) -> SingleToolResponse:
+def single_tool(conversation_id: str, bot_output: BotOutput) -> SingleToolResponse:
     print(f"> [single_tool] {conversation_id} with bot_output: {bot_output}")
     session_context = get_session_context(conversation_id)
-    return session_context.tool.process(bot_output)
+    api_output = session_context.tool.process(bot_output)
+    return SingleToolResponse(
+        api_output=api_output,
+        msg=session_context.conv.get_last_message().content
+    )

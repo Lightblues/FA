@@ -34,7 +34,6 @@ class BaseTool(BaseRole):
     API structure: (see apis_v0/apis.json)
     """
     names: List[str] = None
-    api_template_fn: str = ""
     api_infos: List[Dict] = None
     cnt_api_callings: Dict[str, int] = None
     
@@ -42,8 +41,6 @@ class BaseTool(BaseRole):
         super().__init__(**args)
         self.api_infos = self.workflow.toolbox
         self.cnt_api_callings = collections.defaultdict(int)
-        # overwrite the default template
-        if self.cfg.api_template_fn is not None: self.api_template_fn = self.cfg.api_template_fn
         
     def process(self, *args, **kwargs) -> APIOutput:
         """ 

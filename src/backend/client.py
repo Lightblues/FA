@@ -8,7 +8,7 @@
 """
 import requests, json, asyncio, aiohttp
 from typing import Union, Iterator, Tuple, AsyncIterator
-from flowagent.data import Config, DataManager, Conversation, BotOutput, APIOutput
+from flowagent.data import Config, DataManager, Conversation, BotOutput, Role, Message
 from .typings import (
     SingleRegisterResponse, 
     SingleBotPredictRequest, SingleBotPredictResponse, 
@@ -28,6 +28,8 @@ class FrontendClient:
         # process the Iterator
         bot_output = client.single_bot_predict_output(conversation_id)
     """
+    url: str = "http://localhost:8100"
+    conv: Conversation = None
     def __init__(self, url: str="http://localhost:8100"):
         self.url = url
 
@@ -38,10 +40,20 @@ class FrontendClient:
             result = response.json()
             conv = result["conversation"]
             conv = Conversation.load_from_json(conv)
-            return conv
+            self.conv = conv
+            return self.conv
         else: 
             print(f"Error: {response.text}")
             raise NotImplementedError
+    
+    def single_user_input(self, conversation_id: str, query: str):
+        self.conv.add_message(query, role=Role.USER)
+
+        url = f"{self.url}/single_add_message/{conversation_id}"
+        response = requests.post(url, json=self.conv.get_last_message().model_dump())
+        if response.status_code == 200:
+            return response.json()
+        else: raise NotImplementedError
 
     def single_bot_predict(self, conversation_id: str, query: str) -> Iterator[str]:
         url = f"{self.url}/single_bot_predict/{conversation_id}"
@@ -68,7 +80,10 @@ class FrontendClient:
         url = f"{self.url}/single_bot_predict_output/{conversation_id}"
         response = requests.get(url)
         if response.status_code == 200:
-            return SingleBotPredictResponse(**response.json())
+            res = SingleBotPredictResponse(**response.json())
+            # add message to sync with backend!
+            self.conv.add_message(res.msg, role=Role.BOT)
+            return res
         else: 
             print(f"Error: {response.text}")
             raise NotImplementedError
@@ -84,8 +99,11 @@ class FrontendClient:
         url = f"{self.url}/single_tool/{conversation_id}"
         response = requests.post(url, json=bot_output.model_dump())
         if response.status_code == 200:
-            return SingleToolResponse(**response.json())
-        else: raise NotImplementedError
+            res = SingleToolResponse(**response.json())
+            self.conv.add_message(res.msg, role=Role.SYSTEM)
+            return res
+        else: 
+            raise NotImplementedError
 
 
 if __name__ == '__main__':

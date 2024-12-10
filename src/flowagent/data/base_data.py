@@ -2,7 +2,7 @@
 import datetime, os, re, yaml, copy, pathlib, time
 from enum import Enum, auto
 from dataclasses import dataclass, asdict, field
-from typing import List, Dict, Optional, Tuple, Iterator, Union
+from typing import List, Dict, Optional, Tuple, Iterator, Union, overload
 from pydantic import BaseModel, Field
 import pandas as pd
 
@@ -165,12 +165,32 @@ class Conversation(BaseModel):
     # class Config:
     #     arbitrary_types_allowed = True
 
-    def add_message(self, msg: Message):
-        # assert isinstance(msg, Message), f"Must be Message! But got {type(msg)}"
-        msg.conversation_id = self.conversation_id
-        msg.utterance_id = self.current_utterance_id
-        self.msgs.append(msg)
-    
+    def add_message(self, msg: Union[Message, str], prompt: str=None, llm_response:str=None, role:Union[Role, str]=Role.USER):
+        """Add a message to the conversation, accepting either a Message object or message parameters.
+        
+        Args:
+            msg: Either a Message object or a string containing the message content
+            prompt: Optional prompt string (only used if msg is str)
+            llm_response: Optional LLM response string (only used if msg is str)
+            role: Optional role (only used if msg is str)
+        """
+        if isinstance(msg, Message):
+            # Handle Message object input
+            msg.conversation_id = self.conversation_id
+            msg.utterance_id = self.current_utterance_id
+            self.msgs.append(msg)
+        else:
+            # Handle string input with optional parameters
+            message = Message(
+                role=role,
+                content=msg,  # msg is treated as content string
+                prompt=prompt,
+                llm_response=llm_response,
+                conversation_id=self.conversation_id,
+                utterance_id=self.current_utterance_id
+            )
+            self.msgs.append(message)
+
     def substitue_message(self, new_msg: Message, idx: int=-1, old_to_prediction: bool=True):
         new_msg.conversation_id = self.conversation_id
         new_msg.utterance_id = self.msgs[idx].utterance_id

@@ -15,6 +15,10 @@ class LLMSimulatedTool(BaseTool):
         process(): llm, conv
         _gen_prompt(): api_infos, api_template_fn
 
+    Used config:
+        api_llm_name
+        api_template_fn
+
     Usage::
         cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
         conv = Conversation()
@@ -31,6 +35,8 @@ class LLMSimulatedTool(BaseTool):
     def __init__(self, **args) -> None:
         super().__init__(**args)
         self.llm = init_client(llm_cfg=LLM_CFG[self.cfg.api_llm_name])
+        # overwrite the default template
+        if self.cfg.api_template_fn is not None: self.api_template_fn = self.cfg.api_template_fn
     
     def process(self, apicalling_info: BotOutput, *args, **kwargs) -> APIOutput:
         flag, m = self._check_validation(apicalling_info)
