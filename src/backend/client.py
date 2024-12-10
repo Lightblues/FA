@@ -9,7 +9,13 @@
 import requests, json, asyncio, aiohttp
 from typing import Union, Iterator, Tuple, AsyncIterator
 from flowagent.data import Config, DataManager, Conversation, BotOutput, APIOutput
-from backend.ui_backend.typings import SingleBotPredictRequest, SinglePostControlResponse
+from .typings import (
+    SingleRegisterResponse, 
+    SingleBotPredictRequest, SingleBotPredictResponse, 
+    SinglePostControlResponse, 
+    SingleToolResponse
+)
+# SingleBotPredictRequest, SinglePostControlResponse
 
 class FrontendClient:
     """Wrapper of `ui_backend.single_agent`
@@ -25,7 +31,7 @@ class FrontendClient:
     def __init__(self, url: str="http://localhost:8100"):
         self.url = url
 
-    def single_register(self, conversation_id: str, config: Config) -> Conversation:
+    def single_register(self, conversation_id: str, config: Config) -> SingleRegisterResponse:
         url = f"{self.url}/single_register/{conversation_id}"
         response = requests.post(url, json=config.model_dump())
         if response.status_code == 200:
@@ -58,11 +64,11 @@ class FrontendClient:
                     except json.JSONDecodeError as e:
                         print(f"JSON decode error: {e}")
 
-    def single_bot_predict_output(self, conversation_id: str) -> BotOutput:
+    def single_bot_predict_output(self, conversation_id: str) -> SingleBotPredictResponse:
         url = f"{self.url}/single_bot_predict_output/{conversation_id}"
         response = requests.get(url)
         if response.status_code == 200:
-            return BotOutput(**response.json())
+            return SingleBotPredictResponse(**response.json())
         else: 
             print(f"Error: {response.text}")
             raise NotImplementedError
@@ -74,11 +80,11 @@ class FrontendClient:
             return SinglePostControlResponse(**response.json())
         else: raise NotImplementedError
 
-    def single_tool(self, conversation_id: str, bot_output: BotOutput) -> APIOutput:
+    def single_tool(self, conversation_id: str, bot_output: BotOutput) -> SingleToolResponse:
         url = f"{self.url}/single_tool/{conversation_id}"
         response = requests.post(url, json=bot_output.model_dump())
         if response.status_code == 200:
-            return APIOutput(**response.json())
+            return SingleToolResponse(**response.json())
         else: raise NotImplementedError
 
 

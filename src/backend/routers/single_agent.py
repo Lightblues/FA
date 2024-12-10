@@ -17,7 +17,7 @@ import json
 from typing import Iterator
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
-from ..session_context import get_session_context, SessionContext
+from .session_context import get_session_context, SessionContext
 from ..typings import (
     SingleRegisterRequest, SingleRegisterResponse, 
     SingleBotPredictRequest, SingleBotPredictResponse, 

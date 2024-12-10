@@ -14,7 +14,7 @@ Usage::
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from ui_backend.single_agent import router as single_agent_router
+from .routers.single_agent import router as single_agent_router
 
 app = FastAPI()
 

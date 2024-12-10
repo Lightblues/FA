@@ -3,9 +3,9 @@ align with `test/backend/test_ui_backend.py` & `src/flowagent/ui_conv/page_singl
 
 @241209 
 - [x] basic UI implement from [ui_conv] -> Front-Backend Separation
-    - [x] `step_bot_prediction` with `FrontendClient`
-    - [ ] `step_api_process`
+    -> see `backend/client.py`
 
+- [ ] align with `src/flowagent/ui_conv/page_single_workflow.py`
 - [ ] refresh sessionId when session is changed; submit `single_disconnect` to clear backend cache (with `single_register`)
 """
 import streamlit as st; ss = st.session_state

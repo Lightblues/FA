@@ -25,9 +25,12 @@ bot_pdl_controllers:
   - {name: "node_dependency", config: {if_pre: true, if_post: true}}
   - {name: "session_length", config: {if_pre: true, min: 5, max: 15}}
 
-api_mode: "llm"           # dummy_api, llm, core
+api_mode: "request"           # dummy_api, llm, core, request
 api_template_fn: null     # "flowagent/api_llm.jinja"
 api_llm_name: "gpt-4o-mini"
+api_entity_linking: true
+api_entity_linking_llm: "gpt-4o"
+api_entity_linking_template: "flowagent/entity_linking.jinja"
 
 conversation_turn_limit: 20
 log_utterence_time: false
