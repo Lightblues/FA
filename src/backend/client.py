@@ -3,11 +3,13 @@
 - [x] basic implement
 
 - [ ] add log (to db)
+- [ ] post_control
+- [ ] multi-agent
 """
 import requests, json, asyncio, aiohttp
 from typing import Union, Iterator, Tuple, AsyncIterator
 from flowagent.data import Config, DataManager, Conversation, BotOutput, APIOutput
-from backend.ui_backend.typings import SingleBotPredictRequest
+from backend.ui_backend.typings import SingleBotPredictRequest, SinglePostControlResponse
 
 class FrontendClient:
     """Wrapper of `ui_backend.single_agent`
@@ -64,6 +66,13 @@ class FrontendClient:
         else: 
             print(f"Error: {response.text}")
             raise NotImplementedError
+
+    def single_post_control(self, conversation_id: str, bot_output: BotOutput) -> SinglePostControlResponse:
+        url = f"{self.url}/single_post_control/{conversation_id}"
+        response = requests.post(url, json=bot_output.model_dump())
+        if response.status_code == 200:
+            return SinglePostControlResponse(**response.json())
+        else: raise NotImplementedError
 
     def single_tool(self, conversation_id: str, bot_output: BotOutput) -> APIOutput:
         url = f"{self.url}/single_tool/{conversation_id}"

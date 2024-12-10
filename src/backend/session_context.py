@@ -1,6 +1,7 @@
 from pydantic import BaseModel
-from typing import Optional, Union
+from typing import Optional, Union, Dict
 from flowagent.roles import UISingleBot, RequestTool
+from flowagent.pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
 from flowagent.data import Workflow, Config, Conversation, BotOutput, Message, Role
 
 class SessionContext(BaseModel):
@@ -16,6 +17,7 @@ class SessionContext(BaseModel):
     workflow: Workflow
     bot: UISingleBot
     tool: RequestTool
+    controllers: Dict[str, BaseController]
     # user
     last_bot_output: Optional[BotOutput] = None
 
@@ -25,7 +27,8 @@ class SessionContext(BaseModel):
         conv = Conversation.create(conversation_id)
         bot = UISingleBot(cfg=cfg, conv=conv, workflow=workflow)
         tool = RequestTool(cfg=cfg, conv=conv, workflow=workflow)
-        return cls(conversation_id=conversation_id, cfg=cfg, conv=conv, workflow=workflow, bot=bot, tool=tool)
+        controllers = {c['name']: CONTROLLER_NAME2CLASS[c['name']](conv, workflow.pdl, c['config']) for c in cfg.bot_pdl_controllers}
+        return cls(conversation_id=conversation_id, cfg=cfg, conv=conv, workflow=workflow, bot=bot, tool=tool, controllers=controllers)
 
     def merge_conversation(self, new_conv: Conversation):
         self.conv.msgs = new_conv.msgs

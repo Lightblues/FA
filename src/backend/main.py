@@ -1,7 +1,8 @@
 """ 
 Usage::
 
-    uvicorn main_ui_backend:app --host 0.0.0.0 --port 8100 --reload
+    cd src/backend
+    uvicorn main:app --host 0.0.0.0 --port 8100 --reload
 
 @241208
 - [x] basic implement with FastAPI

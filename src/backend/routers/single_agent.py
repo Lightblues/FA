@@ -1,19 +1,35 @@
 
 
-# 新增接口定义
+""" APIs for single-agent
+Test: see `test/backend/test_ui_backend.py`
+
+@241210
+- [x] implement single-agent APIs:
+    - [x] single_register
+    - [x] single_bot_predict
+    - [x] single_post_control
+    - [x] single_tool
+- [x] pre_control
+
+- [ ] add logging to db! 
+"""
 import json
 from typing import Iterator
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
-from .session_context import get_session_context, SessionContext
-from .typings import SingleRegisterResponse, SingleBotPredictRequest
-from flowagent.data import Conversation, BotOutput, Config, APIOutput
+from ..session_context import get_session_context, SessionContext
+from ..typings import (
+    SingleRegisterRequest, SingleRegisterResponse, 
+    SingleBotPredictRequest, SingleBotPredictResponse, 
+    SinglePostControlResponse, 
+    SingleToolResponse
+)
 
 router = APIRouter()
 
 
 @router.post("/single_register/{conversation_id}")
-async def single_register(conversation_id: str, config: Config) -> SingleRegisterResponse:
+async def single_register(conversation_id: str, config: SingleRegisterRequest) -> SingleRegisterResponse:
     print(f"> [single_register] {conversation_id}")
     session_context = get_session_context(conversation_id, cfg=config)
     return SingleRegisterResponse(
@@ -23,21 +39,21 @@ async def single_register(conversation_id: str, config: Config) -> SingleRegiste
     )
 
 
-def _pre_control(bot_output: BotOutput) -> None:
+# TODO: wrap the pre_control to a API?
+def _pre_control(session_context: SessionContext) -> None:
     """ Make pre-control on the bot's action
     will change the PDLBot's prompt! 
     """
     # if not (self.cfg.exp_mode == "session" and isinstance(self.bot, PDLBot)):  return
-    for controller in ss.controllers.values():
-        print(f"> [pre_control] {controller.name}")
+    for controller in session_context.controllers.values():
         if not controller.if_pre_control: continue
-        controller.pre_control(bot_output)
+        print(f"> [pre_control] {controller.name}")
+        controller.pre_control(session_context.last_bot_output)
 
 
 def generate_response(session_context: SessionContext) -> Iterator[str]:
     print(f">> generate_response with conversation: {json.dumps(str(session_context.conv), ensure_ascii=False)}")
-    # TODO: pre_control
-    # _pre_control(bot_output)
+    _pre_control(session_context)
     
     prompt, stream = session_context.bot.process_stream()  # TODO: ReactBot -> PDL_UIBot
     llm_response = []
@@ -70,22 +86,29 @@ async def single_bot_predict(conversation_id: str, request: SingleBotPredictRequ
     )
 
 @router.get("/single_bot_predict_output/{conversation_id}")
-def single_bot_predict_output(conversation_id: str) -> BotOutput:
+def single_bot_predict_output(conversation_id: str) -> SingleBotPredictResponse:
     session_context = get_session_context(conversation_id)
     return session_context.last_bot_output
 
 @router.post("/single_post_control/{conversation_id}")
-def single_post_control(bot_output: BotOutput) -> bool:
+def single_post_control(conversation_id: str, bot_output: SingleBotPredictResponse) -> SinglePostControlResponse:
     """ Check the validation of bot's action
     NOTE: if not validated, the error infomation will be added to ss.conv!
     """
-    for controller in ss.controllers.values():
+    session_context = get_session_context(conversation_id)
+    success = True
+    for controller in session_context.controllers.values():
         if not controller.if_post_control: continue
-        if not controller.post_control(bot_output): return False
-    return True
+        if not controller.post_control(bot_output):
+            success = False
+            break
+    return SinglePostControlResponse(
+        success=success,
+        content=session_context.conv.get_last_message().to_str() # TODO: format the error message
+    )
 
 @router.post("/single_tool/{conversation_id}")
-def single_tool(conversation_id: str, bot_output: BotOutput) -> APIOutput:
-    print(f">> single_tool {bot_output}")
+def single_tool(conversation_id: str, bot_output: SingleBotPredictResponse) -> SingleToolResponse:
+    print(f"> [single_tool] {conversation_id} with bot_output: {bot_output}")
     session_context = get_session_context(conversation_id)
     return session_context.tool.process(bot_output)

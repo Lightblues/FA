@@ -41,6 +41,9 @@ def step_bot_prediction() -> StreamingResponse:
     return bot.process_LLM_response(prompt, llm_response)
 ```
 
+Q: 如何去维护 conversation? 
+see `test/backend/test_ui_backend.py`
+
 
 
 

@@ -1,7 +1,7 @@
 # NOTE: the following 5 fields identify one experiment!!!
 # specifically, workflow_dataset & workflow_type should be all same for one exp_version
 # i.e. one `exp_version + workflow_id` identify one experiment
-workflow_dataset: "PDL_zh"
+workflow_dataset: "huabu_1127"
 workflow_type: "pdl"      # text, code, flowchart, pdl, core
 workflow_id: "000"
 exp_version: "default"

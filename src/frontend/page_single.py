@@ -1,4 +1,6 @@
 """ 
+align with `test/backend/test_ui_backend.py` & `src/flowagent/ui_conv/page_single_workflow.py`
+
 @241209 
 - [x] basic UI implement from [ui_conv] -> Front-Backend Separation
     - [x] `step_bot_prediction` with `FrontendClient`
@@ -12,7 +14,7 @@ from flowagent.data import Conversation, Message, Role, BotOutput, APIOutput
 from flowagent.utils import retry_wrapper
 from flowagent.ui_conv.ui_single import init_sidebar, post_sidebar
 from .util_frontend import fake_stream
-from .frontend_client import FrontendClient
+from backend import FrontendClient
 
 def show_conversations(conversation: Conversation):
     for message in conversation.msgs:
