@@ -21,7 +21,7 @@ from flowagent.data import Conversation, Message, Role, BotOutput, APIOutput
 from flowagent.utils import retry_wrapper
 from .ui.ui_single import init_sidebar, post_sidebar
 from .ui.data_single import refresh_session
-from .util_frontend import fake_stream
+from .common.util_frontend import fake_stream
 from backend import FrontendClient
 
 def insert_disconnect_js():

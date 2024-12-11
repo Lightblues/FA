@@ -132,6 +132,7 @@ def post_sidebar():
         with open(f"{data_manager.DIR_template}/{ss.selected_template_fn}", "r") as f:
             template = f.read()
         
+        # TODO: show the PDL, can be got with single_register
         # with st.expander(f"🔍 PDL", expanded=False):
         #     st.code(f"{workflow.pdl.to_str()}", language="plaintext")
         with st.expander(f"🔍 Template", expanded=False):

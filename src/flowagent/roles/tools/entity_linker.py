@@ -25,7 +25,7 @@ class EntityLinker(BaseRole):
         self.cfg = cfg
         self.conv = conv
         self.llm = init_client(llm_cfg=LLM_CFG[cfg.api_entity_linking_llm])
-        print(f">> [api] init EL model `{cfg.api_entity_linking_llm}`")
+        # print(f">> [api] init EL model `{cfg.api_entity_linking_llm}`")
 
     def entity_linking(self, query:str, eneity_list: List[str]) -> Dict:
         """ Given a list of candidate entities, use llm to determine which one is most similor to the input

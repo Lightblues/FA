@@ -22,7 +22,7 @@ import json, pymongo
 from typing import Iterator
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
-from .session_context import get_session_context, clear_session_context, SessionContext, SESSION_CONTEXT_MAP
+from .session_context import create_session_context, get_session_context, clear_session_context, SessionContext, SESSION_CONTEXT_MAP
 from flowagent.data import Role, Message
 from ..typings import (
     SingleRegisterRequest, SingleRegisterResponse, 
@@ -42,15 +42,18 @@ def db_upsert_session(ss: SessionContext):
     - ideal upsert time? -> single_disconnect
     - save the conversation to db when user exit the page
     """
+    # only save conversation when user has queried
+    if (not ss) or (len(ss.conv) <= 1):
+        return
+    logger.info(f"[db_upsert_session] {ss.session_id}")
     _session_info = {
         # model_llm_name, template, etc
         "session_id": ss.session_id,
         "user": ss.user_identity,
         "mode": "single",
-        "conversation": ss.conv.model_dump(), # TODO: only save messages? polish it!
+        "conversation": ss.conv.to_list(), # TODO: only save messages? polish it!
         "config": ss.cfg.model_dump(),      # to_list -> model_dump
     }
-    logger.info(f"[db_upsert_session] {ss.session_id}")
     db.backend_single_sessions.replace_one(
         {"session_id": ss.session_id},
         _session_info,
@@ -62,10 +65,15 @@ def clear_session_contexts():
     - save the conversation to db
     - clear the session context cache
     """
-    logger.warning(f"[clear_session_contexts] cleard session_ids: {SESSION_CONTEXT_MAP.keys()}")
-    for session_id in SESSION_CONTEXT_MAP.keys():
-        db_upsert_session(get_session_context(session_id))
-        clear_session_context(session_id)
+    # Create a list of session IDs first to avoid modifying dict during iteration
+    session_ids = list(SESSION_CONTEXT_MAP.keys())
+    logger.warning(f"[clear_session_contexts] clearing session_ids: {session_ids}")
+    
+    for session_id in session_ids:
+        session_context = SESSION_CONTEXT_MAP.get(session_id)
+        if session_context:
+            db_upsert_session(session_context)
+            clear_session_context(session_id)
 
 router_single = APIRouter()
 
@@ -81,7 +89,7 @@ async def single_register(conversation_id: str, request: SingleRegisterRequest) 
         SingleRegisterResponse: with conversation
     """
     logger.info(f"[single_register] {conversation_id}")
-    session_context = get_session_context(conversation_id, cfg=request.config)
+    session_context = create_session_context(conversation_id, cfg=request.config)
     session_context.user_identity = request.user_identity
     return SingleRegisterResponse(
         conversation_id=conversation_id,
@@ -94,10 +102,7 @@ def single_disconnect(conversation_id: str) -> None:
     """Disconnect the session
     """
     logger.info(f"[single_disconnect] {conversation_id}")
-    session_context = get_session_context(conversation_id)
-    # only save conversation when user has queried
-    if len(session_context.conv) > 1:
-        db_upsert_session(session_context)
+    db_upsert_session(get_session_context(conversation_id))
     clear_session_context(conversation_id)
 
 # TODO: wrap the pre_control to a API?

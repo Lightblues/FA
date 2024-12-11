@@ -57,11 +57,14 @@ class SessionContext(BaseModel):
 
 
 SESSION_CONTEXT_MAP = {}
-def get_session_context(session_id: str, cfg: Config=None) -> SessionContext:
-    if session_id not in SESSION_CONTEXT_MAP:
-        assert cfg is not None, "cfg is required when creating a new session context"
-        session_context = SessionContext.from_config(session_id, cfg)
-        SESSION_CONTEXT_MAP[session_id] = session_context
+def create_session_context(session_id: str, cfg: Config) -> SessionContext:
+    assert session_id not in SESSION_CONTEXT_MAP, "session_id already exists"
+    session_context = SessionContext.from_config(session_id, cfg)
+    SESSION_CONTEXT_MAP[session_id] = session_context
+    return session_context
+
+def get_session_context(session_id: str) -> Union[SessionContext, None]:
+    if session_id not in SESSION_CONTEXT_MAP: return None
     return SESSION_CONTEXT_MAP[session_id]
 
 def clear_session_context(session_id: str):

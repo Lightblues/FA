@@ -234,7 +234,7 @@ class Conversation(BaseModel):
     def from_messages(cls, msgs: List[Message]):
         assert len(msgs) > 0, f"Must have at least one message!"
         conv_id = msgs[0].conversation_id
-        instance = cls(conv_id)
+        instance = cls(conversation_id=conv_id)
         instance.msgs = msgs
         return instance
     
