@@ -3,22 +3,25 @@
 - [x] basic implement
 @241210
 - [x] post_control
+@241211
+- [x] add log (to db) -> backend
+- [x] multi-agent
 
-- [ ] add log (to db)
-- [ ] multi-agent
+todos
 - [ ] 
 """
 import requests, json, asyncio, aiohttp
 from typing import Union, Iterator, Tuple, AsyncIterator, Dict
 from flowagent.data import Config, DataManager, Conversation, BotOutput, Role, Message
-from .typings import (
+from ..typings import (
     SingleRegisterResponse, SingleRegisterRequest,
     SingleBotPredictResponse, 
     SinglePostControlResponse, 
     SingleToolResponse
 )
+from .client_base import BaseClient
 
-class FrontendClient:
+class SingleAgentMixin(BaseClient):
     """Wrapper of `backend/routers/router_single_agent.py`
 
     NOTE:
@@ -45,13 +48,7 @@ class FrontendClient:
         # 3. disconnect
         client.single_disconnect(conversation_id)
     """
-    
-    url: str = "http://9.134.230.111:8100"
-    conv: Conversation = None       # the conversation that sync with backend
-    pdl_str: str = None            # the pdl that sync with backend
 
-    def __init__(self, url: str="http://9.134.230.111:8100"):
-        self.url = url
 
     def single_register(self, conversation_id: str, config: Config, user_identity: Dict=None) -> Conversation:
         """Register a new conversation
@@ -102,24 +99,7 @@ class FrontendClient:
             Iterator[str]: the response of the bot
         """
         url = f"{self.url}/single_bot_predict/{conversation_id}"
-        headers = {'Accept': 'text/event-stream'}
-        # NOTE: only use streaming, no async!
-        response = requests.post(url, headers=headers, stream=True)
-        
-        if response.status_code != 200:
-            print(f"Error: {response.text}")
-            raise NotImplementedError
-        for line in response.iter_lines():
-            if line:
-                # Decode the line and strip the prefix
-                decoded_line = line.decode('utf-8').strip()
-                if decoded_line.startswith("data:"):
-                    json_data = decoded_line[len("data:"):].strip()
-                    try:
-                        data = json.loads(json_data)  # Parse the JSON
-                        yield data['chunk']
-                    except json.JSONDecodeError as e:
-                        print(f"JSON decode error: {e}")
+        return self.process_stream_url(url)
 
     def single_bot_predict_output(self, conversation_id: str) -> SingleBotPredictResponse:
         """Get the response of the bot (step 2)

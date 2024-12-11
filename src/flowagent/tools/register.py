@@ -1,6 +1,6 @@
 import json
 from functools import wraps
-from typing import Union, Dict
+from typing import Union, Dict, Any
 from .schema import function_to_schema
 
 TOOL_SCHEMAS = []
@@ -30,7 +30,7 @@ def register_tool():
     return decorator
 
 
-def execute_tool_call(name: str, args: Union[str, Dict]):
+def execute_tool_call(name: str, args: Union[str, Dict]) -> Any:
     """
     Execute a tool by name and arguments
     

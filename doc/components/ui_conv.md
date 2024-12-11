@@ -72,6 +72,28 @@ DB
     - `session_id, user, mode, conversation, config`
 - backend_single_messages (need?)
 
+从 single 到 multi
+
+1. `test_ui_backend_multi.py` 设计client功能实现 (如何使用), 反推 client 接口;
+    ```python
+    Client
+        .multi_register(conversation_id, cfg)
+        .multi_disconnect(conversation_id)
+        .multi_user_input(conversation_id, user_input)
+
+        .multi_bot_main_predict(conversation_id)
+        .multi_bot_main_predict_output(conversation_id)
+        .multi_tool_main(conversation_id, agent_main_output)
+        .multi_bot_workflow_predict(conversation_id)
+        .multi_bot_workflow_predict_output(conversation_id)
+        .multi_post_control(conversation_id, bot_output)
+        .multi_tool_workflow(conversation_id, bot_output)
+    ```
+2. 规范接口: `backend/` 中的 client/router/typings;
+3. 对照 page_multi_workflow.py 实现逻辑, 重构 `Multi_Main_UIBot` 等组件;
+4. 继续用 `test_ui_backend_multi.py` 来测试 client;
+
+
 
 ## multi_workflow
 ```python

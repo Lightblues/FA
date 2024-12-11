@@ -3,7 +3,7 @@ align with `src/flowagent/ui_conv/page_single_workflow.py`
 
 USAGE::
     # 1. run the backend firsy
-    uvicorn main_ui_backend:app --host 0.0.0.0 --port 8100 --reload
+    uvicorn main:app --host 0.0.0.0 --port 8100 --reload
     # 2. test
     python test_ui_backend.py
 
@@ -17,7 +17,7 @@ from flowagent.data import Config, DataManager, LogUtils
 from backend import FrontendClient
 
 client = FrontendClient()
-conversation_id = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+conversation_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
 def main():
     # 1. init the conversation

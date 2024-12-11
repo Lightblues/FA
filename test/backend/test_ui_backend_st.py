@@ -1,5 +1,5 @@
 from flowagent.data import Config, DataManager, Conversation, Message, Role
-from frontend.frontend_client import FrontendClient
+from backend import FrontendClient
 import streamlit as st
 
 client = FrontendClient()

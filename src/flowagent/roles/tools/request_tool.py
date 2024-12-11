@@ -29,6 +29,12 @@ class RequestTool(BaseTool):
     Used config:
         api_entity_linking
         (EntityLinker) api_entity_linking_llm, api_entity_linking_template
+
+    Usage:
+        request_tool = RequestTool(cfg=cfg, conv=conv, workflow=workflow)
+        bot_output = BotOutput(thought="...", action="check_hospital_exist", action_input={"hos_name": "test"}, response=None)
+        api_output = request_tool.process(bot_output)
+        print(api_output)
     """
     entity_linker: EntityLinker = None
     names = ["v01", "request", "RequestAPIHandler"]

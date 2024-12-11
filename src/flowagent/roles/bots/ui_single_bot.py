@@ -1,9 +1,11 @@
 """ 
-from `PDL_UIBot`, replace streamlit 
+@241211
+- [x] #feat implement UISingleBot
+    modify from `ui_con/bot_single.py`.
+    - replace streamlit with class properties
 """
 
 import re, datetime, json
-from typing import List, Tuple
 from .react_bot import ReactBot
 from ...data import BotOutput, BotOutputType
 from ...utils import jinja_render, OpenAIClient, Formater
@@ -22,17 +24,12 @@ class UISingleBot(ReactBot):
         ui_bot_template_fn <- bot_template_fn
         bot_retry_limit
     """
-    llm: OpenAIClient = None
-    bot_template_fn: str = "flowagent/bot_pdl.jinja"
-    names = ["PDLBot", "pdl_bot"]
+    # llm: OpenAIClient = None
+    # bot_template_fn: str = "flowagent/bot_pdl.jinja"
+    names = ["UISingleBot", "ui_single_bot"]
 
     def __init__(self, **args):
         super().__init__(**args)
-
-    def process_stream(self):
-        prompt = self._gen_prompt()
-        llm_response_stream = self.llm.query_one_stream_generator(prompt)
-        return prompt, llm_response_stream
 
     def _gen_prompt(self) -> str:
         # TODO: format apis. 1) remove URL; 2) add preconditions

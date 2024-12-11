@@ -70,6 +70,7 @@ class Config(BaseModel):
     mui_agent_workflow_default_template: str = "bot_mui_workflow_agent.jinja"
     mui_agent_workflow_available_templates: Optional[List[str]] = None
     mui_default_workflow_dataset: str = "PDL_zh"
+    mui_greeting_msg: str = "你好，有什么可以帮您?"
 
     conversation_turn_limit: int = 20
     log_utterence_time: bool = True

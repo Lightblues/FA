@@ -10,6 +10,9 @@ Usage::
 - [x] mimic OpenAI stream API
     https://platform.openai.com/docs/api-reference/chat
     https://cookbook.openai.com/examples/how_to_stream_completions
+@241211
+- [x] #feat add the `lifespan` feature with `asynccontextmanager`
+- [x] #structure seperate the `setup_router()`
 """
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
@@ -32,8 +35,10 @@ def init_app() -> FastAPI:
     return app
 
 def setup_router(app: FastAPI):
-    from .routers.router_single_agent import router_single
+    from .routers.router_single import router_single
+    from .routers.router_multi import router_multi
     app.include_router(router_single)
+    app.include_router(router_multi)
     return app
 
 
@@ -43,8 +48,8 @@ async def lifespan(app: FastAPI):
     yield
     print("Shutting down...")
 
-    from .routers.router_single_agent import clear_session_contexts
-    clear_session_contexts()
+    from .routers.session_context_single import clear_session_contexts_single
+    clear_session_contexts_single()
 
 app = init_app()
 setup_router(app)

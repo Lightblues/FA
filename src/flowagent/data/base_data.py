@@ -7,76 +7,35 @@ from pydantic import BaseModel, Field
 import pandas as pd
 
 class CustomRole(BaseModel):
-    id: int = -1  # 使用负数ID以区分内置角色
-    prefix: str
+    id: int = -1  # use negative id to distinguish built-in roles
     rolename: str
-    color: str = "blue"  # 默认颜色
+    prefix: str = Field(default="")
+    color: str = Field(default="blue")
 
     def model_post_init(self, __context):
-        self.prefix = f"[{self.rolename.upper()}] "
+        if not self.prefix:  # set prefix only when it is empty
+            self.prefix = f"[{self.rolename.upper()}] "
         self.rolename = self.rolename.lower()
 
     def __str__(self):
         return f"Role(id={self.id}, prefix={self.prefix}, name={self.rolename})"
 
 
-# class Role(Enum):
-#     SYSTEM = (0, "[SYSTEM] ", "system", 'green')
-#     USER = (1, "[USER] ", "user", "red")
-#     BOT = (2, "[BOT] ", "bot", "orange")
-
-#     def __init__(self, id, prefix, rolename, color):
-#         self.id = id
-#         self.prefix = prefix
-#         self.rolename = rolename
-#         self.color = color
-
-class RoleBase(BaseModel):
-    id: int
-    prefix: str
-    rolename: str
-    color: str
-
-
-class Role(str, Enum):
-    SYSTEM = "system"
-    USER = "user"
-    BOT = "bot"
-
-    @property
-    def id(self) -> int:
-        return {
-            self.SYSTEM: 0,
-            self.USER: 1,
-            self.BOT: 2
-        }[self]
-    
-    @property
-    def prefix(self) -> str:
-        return f"[{self.value.upper()}] "
-    
-    @property
-    def rolename(self) -> str:
-        return self.value
-    
-    @property
-    def color(self) -> str:
-        return {
-            self.SYSTEM: "green",
-            self.USER: "red",
-            self.BOT: "orange"
-        }[self]
-
-    def __str__(self):
-        return f"Role(id={self.id}, prefix={self.prefix}, name={self.rolename})"
+class Role:
+    """ 
+    NOTE: 
+    - to use requests/pydantic, do not set Role as Enum
+    """
+    SYSTEM = CustomRole(id=0, rolename="system", prefix="[SYSTEM] ", color="green")
+    USER = CustomRole(id=1, rolename="user", prefix="[USER] ", color="red")
+    BOT = CustomRole(id=2, rolename="bot", prefix="[BOT] ", color="orange")
 
     @classmethod
-    def get_by_rolename(cls, rolename: str):
-        try:
-            return cls(rolename.lower())
-        except ValueError:
-            return CustomRole(rolename=rolename)
-
+    def get_by_rolename(cls, rolename: str) -> CustomRole:
+        rolename = rolename.upper()
+        if hasattr(cls, rolename):
+            return getattr(cls, rolename)
+        return CustomRole(rolename=rolename)
 
 class APICall(BaseModel):
     name: str
@@ -95,15 +54,15 @@ class APICall(BaseModel):
 
 
 class Message(BaseModel):
-    role: Union[Role, CustomRole]
-    content: str
-    prompt: Optional[str] = None
-    llm_response: Optional[str] = None
-    conversation_id: Optional[str] = None
-    utterance_id: Optional[int] = None
-    type: Optional[str] = None
-    apis: Optional[List[APICall]] = None
-    content_predict: Optional[str] = None
+    role: Union[str, CustomRole] = Field(..., description="The role of the message sender")
+    content: str = Field(..., description="The content of the message")
+    prompt: Optional[str] = Field(None, description="Optional prompt associated with the message")
+    llm_response: Optional[str] = Field(None, description="Response from the language model")
+    conversation_id: Optional[str] = Field(None, description="ID of the conversation")
+    utterance_id: Optional[int] = Field(None, description="ID of the utterance")
+    type: Optional[str] = Field(None, description="Type of the message")
+    apis: Optional[List[APICall]] = Field(None, description="List of API calls associated with the message")
+    content_predict: Optional[str] = Field(None, description="Predicted content of the message")
 
     def model_post_init(self, __context):
         if isinstance(self.role, str):
@@ -150,7 +109,12 @@ class Message(BaseModel):
     
     # def substitue_with_GT_content(self, GT_content: str):
     #     self.content, self.content_predict = GT_content, self.content
-
+    
+    def model_dump(self, **kwargs):
+        data = super().model_dump(**kwargs)
+        if isinstance(self.role, (Role, CustomRole)):
+            data['role'] = self.role.rolename
+        return data
 
 class Conversation(BaseModel):
     msgs: List[Message] = Field(default_factory=list)

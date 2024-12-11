@@ -17,15 +17,12 @@ class ReactBot(BaseBot):
         bot_template_fn
         bot_retry_limit
     """
-    llm: OpenAIClient = None
     bot_template_fn: str = "flowagent/bot_flowbench.jinja"  # using the prompt from FlowBench
     names = ["ReactBot", "react_bot"]
     
     def __init__(self, **args) -> None:
         super().__init__(**args)
-        self.llm = init_client(llm_cfg=LLM_CFG[self.cfg.bot_llm_name])
-        if self.cfg.bot_template_fn is not None: self.bot_template_fn = self.cfg.bot_template_fn
-        
+
     def process(self, *args, **kwargs) -> BotOutput:
         """ mian process logic.
         gen prompt -> query & process -> gen message

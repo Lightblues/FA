@@ -52,3 +52,18 @@ class APIOutput(BaseModel):
     request: Optional[Union[str, Dict]] = None
     response_status_code: Optional[int] = None
     response_data: Optional[Union[str, Dict]] = None
+
+class MainBotOutput(BaseModel):
+    thought: Optional[str] = None
+    workflow: Optional[str] = None # workflow name
+    response: Optional[str] = None
+    action: Optional[str] = None
+    action_input: Optional[Dict] = None
+
+class WorkflowBotOutput(BaseModel):
+    thought: Optional[str] = None
+    workflow: Optional[str] = None # workflow name
+    response: Optional[str] = None
+    action: Optional[str] = None                      # api name
+    action_input: Optional[Dict] = None               # api paras. deprecated: Union[str, Dict]
+    
