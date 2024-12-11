@@ -170,6 +170,11 @@ def init_loguru_logger(log_dir="logs") -> "Logger":
         logger = init_loguru_logger()
         logger.info("logging to main log")
         logger.bind(custom=True).debug("logging to custom log")
+
+        # in other file, can directly import logger
+        from loguru import logger
+        logger.info("xxx")
+        
     """
     os.makedirs(log_dir, exist_ok=True)
     

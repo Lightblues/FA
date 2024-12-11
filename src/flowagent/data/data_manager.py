@@ -15,6 +15,7 @@ class DataManager:
     DIR_template = DIR_root / "src/flowagent/utils/templates/flowagent"
     DIR_wandb = DIR_root / "_wandb"
     DIR_ui_log = DIR_root / "log/ui"
+    DIR_backend_log = DIR_root / "log/backend"
     
     DIR_data_root = DIR_root / "dataset"
     

@@ -3,7 +3,7 @@ from .data_single import (
     get_template_name_list, get_model_name_list, get_workflow_dirs, get_workflow_names_map, 
     refresh_session, debug_print_infos
 )
-from flowagent.data import Config, Workflow, DataManager
+from flowagent.data import Config, DataManager
 
 def init_sidebar():
     """Init the sidebar of single workflow"""
@@ -32,12 +32,6 @@ def init_sidebar():
         LIST_shown_workflow_datasets = config.ui_available_workflow_datasets
     else:
         LIST_shown_workflow_datasets = _workflow_datasets
-    # set the shown workflow names
-    # if config.ui_available_workflows:
-    #     # for d, l in DICT_workflow_info.items():
-    #     #     assert all(i in l for i in config.ui_available_workflows), f"config workflows: {config.ui_available_workflows} not in workflow_list: {l}"
-    #     #     DICT_workflow_info[d] = config.ui_available_workflows
-    #     pass
     
     with st.sidebar:
         select_col1, select_col2 = st.columns(2)

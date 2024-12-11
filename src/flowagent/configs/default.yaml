@@ -37,7 +37,7 @@ log_utterence_time: false
 log_to_db: true
 
 db_uri: 'mongodb://9.134.230.111:27017'
-db_name: "pdl"
+db_name: "agent-pdl"
 db_message_collection_name: "messages"
 db_meta_collection_name: "config"
 

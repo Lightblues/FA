@@ -1,6 +1,6 @@
 ## 前后端分离
 
-### 原本那块
+### 原本
 前端: streamlit
 ```python
 # app.py | general
@@ -42,13 +42,7 @@ def step_bot_prediction() -> StreamingResponse:
     return bot.process_LLM_response(prompt, llm_response)
 ```
 
-### 修改后
-- Q: 如何去维护 conversation? 
-    see `test/backend/test_ui_backend.py`
-- Q: 如何去维护 session? (何时更新 session_id)
-    通过 refresh_session() 来收集UI中的配置, 并初始化 session
-
-UI of single
+### UI of single
 - 选择模型
 - 选择模板
 - 选择数据集
@@ -61,7 +55,22 @@ UI of single
 - 查看 PDL / template
 - 日志: sessionid / name
 
+### 修改思路
+- Q: 如何去维护 conversation? 
+    see `test/backend/test_ui_backend.py`
+- Q: 如何去维护 session? (何时更新 session_id)
+    - 通过 refresh_session() 来收集UI中的配置, 并初始化 session, see `src/frontend/page_single.py`
+    - 通过 single_disconnect() 来清除 session; 
+    - 在页面关闭时, 通过 JavaScript 来清除 session
+- Q: 接口设计? 
+    see `src/backend/client.py` 实现一个标准化的client来匹配逻辑
+- Q: DB & log
+    - log: 复用原本的 loguru 方案;
 
+DB
+- backend_single_sessions
+    - `session_id, user, mode, conversation, config`
+- backend_single_messages (need?)
 
 
 ## multi_workflow

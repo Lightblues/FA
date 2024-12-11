@@ -9,7 +9,7 @@ import yaml, os, pdb, datetime, collections, json, pymongo, time
 import streamlit as st; ss = st.session_state
 from pymongo.database import Database
 
-from ..uitl.util_uid import get_identity
+from ..common.util_uid import get_identity
 from flowagent.data import (
     Config, DataManager, Workflow
 )
@@ -100,18 +100,9 @@ def get_workflow_dirs(workflow_dataset) -> List[str]:
 def get_workflow_names_map() -> Dict[str, List[str]]:
     return DataManager.get_workflow_names_map()
 
-# def init_db():
-#     if "db" not in ss:
-#         ss.db = pymongo.MongoClient(ss.cfg.db_uri)[ss.cfg.db_name]
-#         print(f"> db: {ss.db}")
-
 def get_session_id():
     # "%Y-%m-%d %H:%M:%S.%f"
     return datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-
-# def init_session():
-#     ss.session_id = get_session_id()
-#     ss.conv = ss.client.single_register(ss.session_id, ss.cfg)
 
 def refresh_session():
     """ Refresh the config and init new session
@@ -135,35 +126,9 @@ def refresh_session():
     cfg.ui_bot_llm_name = ss.selected_model_name
 
     # 2. init session!
+    if "session_id" in ss and ss.session_id:
+        # NOTE: disconnect the old session!
+        ss.client.single_disconnect(ss.session_id)
     ss.session_id = get_session_id()
-    ss.conv = ss.client.single_register(ss.session_id, ss.cfg)
+    ss.conv = ss.client.single_register(ss.session_id, ss.cfg, ss.user_identity)
 
-
-# def refresh_workflow():
-#     """refresh workflow -> bot """
-#     print(f">> Refreshing workflow: `{ss.selected_workflow_dataset}` -> `{ss.selected_pdl_version}` -> `{ss.selected_workflow_name}`")
-#     _, name_id_map = get_workflow_names_map()
-#     ss.cfg.workflow_dataset = ss.selected_workflow_dataset
-#     ss.cfg.pdl_version = ss.selected_pdl_version
-#     ss.cfg.workflow_id = name_id_map[ss.cfg.workflow_dataset][ss.selected_workflow_name]
-
-
-
-def db_upsert_session():
-    """Upsert conversation to `db.ui_single_sessions`
-    Infos: (sessionid, name, mode[single/multi], infos, conversation, version)...
-    """
-    _session_info = {
-        # model_llm_name, template, etc
-        "session_id": ss.conv.conversation_id,
-        "user": ss.user_identity,
-        "mode": ss.mode,            # "single"
-        "conversation": ss.conv.to_list(),
-        "config": ss.cfg.to_dict(),
-    }
-    db: Database = ss.db
-    db.ui_single_sessions.replace_one(
-        {"session_id": ss.conv.conversation_id},
-        _session_info,
-        upsert=True
-    )

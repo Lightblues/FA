@@ -76,7 +76,7 @@ class Config(BaseModel):
     log_to_db: bool = True
 
     db_uri: str = 'mongodb://localhost:27017/'
-    db_name: str = "pdl"
+    db_name: str = "agent-pdl"
     db_message_collection_name: str = "messages"
     db_meta_collection_name: str = "config"
     

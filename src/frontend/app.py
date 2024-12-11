@@ -34,7 +34,6 @@ def main(config_version:str="default.yaml"):
         # print(f"[INFO] config: {ss.cfg}")
     if "data_manager" not in ss:
         ss.data_manager = DataManager(ss.cfg)
-    # init_db()
     
     page = st.sidebar.selectbox("Select Mode", ["👤 Single", "👥 Multiple", "🔍 Inspect"], index=0)
     st.sidebar.markdown("---")

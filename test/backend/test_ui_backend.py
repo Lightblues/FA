@@ -5,7 +5,7 @@ USAGE::
     # 1. run the backend firsy
     uvicorn main_ui_backend:app --host 0.0.0.0 --port 8100 --reload
     # 2. test
-    python -m test.backend.test_ui_backend
+    python test_ui_backend.py
 
 @241209
 - [x] test UI backend logic with CLI. 
@@ -24,29 +24,32 @@ def main():
     conv = client.single_register(conversation_id, cfg)
     while True:
         user_input = LogUtils.format_user_input("[USER] ")
-        if user_input == "END": break
-        # conv.add_message(Message(role=Role.USER, content=user_input, conversation_id=conv.conversation_id, utterance_id=conv.current_utterance_id))
+        if user_input == "END": 
+            client.single_disconnect(conversation_id)
+            break
+        client.single_user_input(conversation_id, user_input)
 
         for i in range(3):
             # 1.0. pre_control
             # 1.1. bot predict. (stream). Stream out the bot's response, and get the final bot_output. 
-            stream = client.single_bot_predict(conversation_id, user_input)
+            stream = client.single_bot_predict(conversation_id)
             for chunk in stream: print(chunk, end="")
             print()
-            bot_output = client.single_bot_predict_output(conversation_id)
+            res_bot_predict = client.single_bot_predict_output(conversation_id)
+            bot_output = res_bot_predict.bot_output
             print(f"> bot_output: {bot_output}")
             if bot_output.action:
                 # 2. tool
                 # 2.0. post_control. Request the action and show the result
-                post_control_response = client.single_post_control(conversation_id, bot_output)
-                if not post_control_response.success:
-                    print(LogUtils.format_str_with_color(f"[controller error] {post_control_response.content}", "red"))
+                print(LogUtils.format_str_with_color(f"[BOT] {res_bot_predict.msg}", "orange"))
+                res_post_control = client.single_post_control(conversation_id, bot_output)
+                if not res_post_control.success:
+                    print(LogUtils.format_str_with_color(f"[controller error] {res_post_control.msg}", "red"))
                     continue
                 # 2.1 (entity linking). TODO: seperate EL from RequestTool
                 # 2.2. Get the API response and show
-                print(LogUtils.format_str_with_color(f"[BOT] {bot_output.action}({bot_output.action_input})", "orange"))
-                res = client.single_tool(conversation_id, bot_output)
-                print(LogUtils.format_str_with_color(f"[API] {res.api_output.response_data}", "green"))
+                res_tool = client.single_tool(conversation_id, bot_output)
+                print(LogUtils.format_str_with_color(f"[API] {res_tool.msg}", "green"))
             elif bot_output.response:
                 # 3. response. Show the response
                 print(LogUtils.format_str_with_color(f"[BOT] {bot_output.response}", "orange"))

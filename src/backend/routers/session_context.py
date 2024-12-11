@@ -11,7 +11,9 @@ class SessionContext(BaseModel):
     }
     
     # session context, include all the necessary information
-    conversation_id: str
+    session_id: str
+    user_identity: Optional[Dict] = None
+
     cfg: Config
     conv: Conversation
     workflow: Workflow
@@ -22,11 +24,11 @@ class SessionContext(BaseModel):
     last_bot_output: Optional[BotOutput] = None
 
     @classmethod
-    def from_config(cls, conversation_id: str, cfg: Config):
+    def from_config(cls, session_id: str, cfg: Config):
         """init a new session with session_id & config
 
         Args:
-            conversation_id (str): session_id
+            session_id (str): session_id
             cfg (Config): config. 
                 Used config:
                     ``Workflow``: workflow_type, workflow_id, pdl_version
@@ -40,7 +42,7 @@ class SessionContext(BaseModel):
             SessionContext: session context
         """
         workflow = Workflow(cfg)
-        conv = Conversation.create(conversation_id)
+        conv = Conversation.create(session_id)
         conv.add_message(msg=cfg.ui_greeting_msg.format(name=workflow.pdl.Name), role=Role.BOT)
         bot = UISingleBot(cfg=cfg, conv=conv, workflow=workflow)
         tool = RequestTool(cfg=cfg, conv=conv, workflow=workflow)
@@ -48,21 +50,22 @@ class SessionContext(BaseModel):
         for c in cfg.bot_pdl_controllers:
             if c['is_activated']:
                 controllers[c['name']] = CONTROLLER_NAME2CLASS[c['name']](conv, workflow.pdl, c['config'])
-        return cls(conversation_id=conversation_id, cfg=cfg, conv=conv, workflow=workflow, bot=bot, tool=tool, controllers=controllers)
+        return cls(session_id=session_id, cfg=cfg, conv=conv, workflow=workflow, bot=bot, tool=tool, controllers=controllers)
 
     def merge_conversation(self, new_conv: Conversation):
         self.conv.msgs = new_conv.msgs
 
-    def _add_message(self, msg_content: str, prompt: str=None, llm_response:str=None, role:Union[Role, str]=Role.USER):
-        msg = Message(
-            role=role, content=msg_content, prompt=prompt, llm_response=llm_response,
-            conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
-        )
-        self.conv.add_message(msg)
 
 SESSION_CONTEXT_MAP = {}
-def get_session_context(conversation_id: str, cfg: Config=None) -> SessionContext:
-    if conversation_id not in SESSION_CONTEXT_MAP:
+def get_session_context(session_id: str, cfg: Config=None) -> SessionContext:
+    if session_id not in SESSION_CONTEXT_MAP:
         assert cfg is not None, "cfg is required when creating a new session context"
-        SESSION_CONTEXT_MAP[conversation_id] = SessionContext.from_config(conversation_id, cfg)
-    return SESSION_CONTEXT_MAP[conversation_id]
+        session_context = SessionContext.from_config(session_id, cfg)
+        SESSION_CONTEXT_MAP[session_id] = session_context
+    return SESSION_CONTEXT_MAP[session_id]
+
+def clear_session_context(session_id: str):
+    """Clear the session context
+    """
+    if session_id in SESSION_CONTEXT_MAP:
+        del SESSION_CONTEXT_MAP[session_id]
