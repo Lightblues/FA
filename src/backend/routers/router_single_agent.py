@@ -94,7 +94,8 @@ async def single_register(conversation_id: str, request: SingleRegisterRequest) 
     return SingleRegisterResponse(
         conversation_id=conversation_id,
         success=True,
-        conversation=session_context.conv
+        conversation=session_context.conv,
+        pdl_str=session_context.workflow.pdl.to_str()
     )
 
 @router_single.post("/single_disconnect/{conversation_id}")

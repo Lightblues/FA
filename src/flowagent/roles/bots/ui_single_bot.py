@@ -47,7 +47,7 @@ class UISingleBot(ReactBot):
             PDL=self.workflow.pdl.to_str_wo_api(),  # .to_str()
             api_infos=self.workflow.toolbox,
             conversation=self.conv.to_str(),
-            # user_additional_constraints = ss.user_additional_constraints,  # TODO: 
+            user_additional_constraints = self.cfg.ui_user_additional_constraints,
             current_state="\n".join(f"{k}: {v}" for k,v in state_infos.items()),
         )
         return prompt

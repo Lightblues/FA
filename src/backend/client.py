@@ -48,30 +48,24 @@ class FrontendClient:
     
     url: str = "http://9.134.230.111:8100"
     conv: Conversation = None       # the conversation that sync with backend
+    pdl_str: str = None            # the pdl that sync with backend
 
     def __init__(self, url: str="http://9.134.230.111:8100"):
         self.url = url
 
-    def single_register(self, conversation_id: str, config: Config, user_identity: Dict=None) -> SingleRegisterResponse:
+    def single_register(self, conversation_id: str, config: Config, user_identity: Dict=None) -> Conversation:
         """Register a new conversation
 
         Args:
             conversation_id (str): the id of the conversation
             config (Config): the config of the conversation
-
-        Raises:
-            NotImplementedError: if the conversation is not registered successfully
-
-        Returns:
-            SingleRegisterResponse: the response of the conversation
         """
         url = f"{self.url}/single_register/{conversation_id}"
         response = requests.post(url, json=SingleRegisterRequest(user_identity=user_identity, config=config).model_dump())
         if response.status_code == 200:
-            result = response.json()
-            conv = result["conversation"]
-            conv = Conversation.load_from_json(conv)
-            self.conv = conv
+            result = SingleRegisterResponse(**response.json())
+            self.pdl_str = result.pdl_str
+            self.conv = result.conversation
             return self.conv
         else: 
             print(f"Error: {response.text}")

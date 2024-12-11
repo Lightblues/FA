@@ -1,3 +1,12 @@
+""" 
+@241210
+- [x] merge from conv_ui
+@241211
+- [x] #bug model the dependncy between select_col3~5 (selected_workflow_dataset, selected_pdl_version, selected_workflow_name)
+- [x] #feat user_additional_constraints
+
+todos
+"""
 import streamlit as st; ss = st.session_state
 from .data_single import (
     get_template_name_list, get_model_name_list, get_workflow_dirs, get_workflow_names_map, 
@@ -59,7 +68,7 @@ def init_sidebar():
                 options=LIST_shown_workflow_datasets,
                 key="selected_workflow_dataset",
                 index=LIST_shown_workflow_datasets.index(config.ui_default_workflow_dataset),
-                on_change=refresh_session
+                on_change=update_workflow_dependencies
             )
         with select_col4:
             st.selectbox(
@@ -67,7 +76,7 @@ def init_sidebar():
                 options=get_workflow_dirs(ss.selected_workflow_dataset),
                 key="selected_pdl_version",
                 format_func=lambda x: x.split("/")[-1],     # NOTE: only show the last subdir
-                on_change=refresh_session
+                on_change=update_version_dependencies
             )
         with select_col5:
             st.selectbox(
@@ -93,11 +102,10 @@ def init_sidebar():
         with button_col3:
             st.button(
                 'DEBUG',
-                on_click=debug_print_infos,  # TODO:
+                on_click=debug_print_infos,
             )
 
         with st.expander(f"⚙️ 自定义配置", expanded=False):
-            # TODO: move user_additional_constraints to config
             st.text_area(
                 "添加你对于PDL流程的额外约束", height=100, 
                 key="user_additional_constraints", 
@@ -107,8 +115,21 @@ def init_sidebar():
                 if not ss.user_additional_constraints:
                     st.warning("请填写自定义约束")
                 else:
+                    config.ui_user_additional_constraints = ss.user_additional_constraints
                     refresh_session()
 
+def update_workflow_dependencies():
+    """Update dependencies when selected_workflow_dataset changes."""
+    _workflow_names_map, _ = get_workflow_names_map()
+    ss.selected_pdl_version = get_workflow_dirs(ss.selected_workflow_dataset)[0]  # Set to first version
+    ss.selected_workflow_name = _workflow_names_map[ss.selected_workflow_dataset][0]  # Set to first workflow
+    refresh_session()
+
+def update_version_dependencies():
+    """Update dependencies when selected_pdl_version changes."""
+    _workflow_names_map, _ = get_workflow_names_map()
+    ss.selected_workflow_name = _workflow_names_map[ss.selected_workflow_dataset][0]  # Set to first workflow
+    refresh_session()
 
 def post_sidebar():
     """
@@ -132,9 +153,9 @@ def post_sidebar():
         with open(f"{data_manager.DIR_template}/{ss.selected_template_fn}", "r") as f:
             template = f.read()
         
-        # TODO: show the PDL, can be got with single_register
-        # with st.expander(f"🔍 PDL", expanded=False):
-        #     st.code(f"{workflow.pdl.to_str()}", language="plaintext")
+        # show the PDL, can be got with single_register
+        with st.expander(f"🔍 PDL", expanded=False):
+            st.code(f"{ss.client.pdl_str}", language="plaintext")
         with st.expander(f"🔍 Template", expanded=False):
             st.code(f"{template}", language="plaintext")
         

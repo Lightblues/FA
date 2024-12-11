@@ -22,7 +22,7 @@ class Multi_Main_UIBot(PDL_UIBot):
     """Multi_Main_UIBot
 
     self: llm
-    ss (session_state): cfg.[mui_agent_main_template_fn, mui_agent_main_llm_name], workflow, conv, user_additional_constraints
+    ss (session_state): cfg.[mui_agent_main_template_fn, mui_agent_main_llm_name], workflow, conv
 
     Usage::
         bot = Multi_Main_UIBot()

@@ -11,6 +11,7 @@ class SingleRegisterResponse(BaseModel):
     conversation_id: str
     success: bool
     conversation: Conversation
+    pdl_str: str
 
 class SinglePostControlResponse(BaseModel):
     success: bool

@@ -53,7 +53,7 @@ class Config(BaseModel):
     ui_bot_template_fn: str = "flowagent/bot_pdl_ui.jinja"
     ui_bot_llm_name: str = "gpt-4o"
     ui_greeting_msg: str = "Hi, I'm HuaBu bot. How can I help you?"
-    # ui_user_additional_constraints: str = None # move to ss.
+    ui_user_additional_constraints: Optional[str] = None
     ui_tools: List[Dict] = []
     
     mui_available_workflows: Optional[List[str]] = None  # 可用的工作流列表
