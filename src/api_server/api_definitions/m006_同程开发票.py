@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Literal, Union
 
-from api_registry import register_api
+from ..api_registry import register_api
 
 
 # Request and Response Models

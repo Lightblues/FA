@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import List, Literal
 
-from api_registry import register_api
+from ..api_registry import register_api
 
 class NewsQueryRequest(BaseModel):
     news_location: Literal["北京", "上海", "广州", "深圳", "杭州", "成都", "武汉", "重庆"]

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import List, Literal
 
-from api_registry import register_api
+from ..api_registry import register_api
 
 class Slot(BaseModel):
     hospital_name: str
