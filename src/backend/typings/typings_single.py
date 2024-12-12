@@ -2,26 +2,27 @@
 from typing import Dict, Optional
 from pydantic import BaseModel
 from flowagent.data import Conversation, APIOutput, BotOutput, Config
+from .typings_base import BaseResponse
 
 class SingleRegisterRequest(BaseModel):
     user_identity: Optional[Dict] = None
     config: Config
 
-class SingleRegisterResponse(BaseModel):
+class SingleRegisterResponse(BaseResponse):
     conversation_id: str
     success: bool
     conversation: Conversation
     pdl_str: str
 
-class SinglePostControlResponse(BaseModel):
+class SinglePostControlResponse(BaseResponse):
     success: bool
     msg: str
 
 
-class SingleToolResponse(BaseModel):
+class SingleToolResponse(BaseResponse):
     api_output: APIOutput
     msg: str
 
-class SingleBotPredictResponse(BaseModel):
+class SingleBotPredictResponse(BaseResponse):
     bot_output: BotOutput
     msg: str

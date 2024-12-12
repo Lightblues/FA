@@ -5,33 +5,34 @@ from flowagent.data import (
     Message, Conversation, APIOutput, Config,
     MainBotOutput, WorkflowBotOutput
 )
+from .typings_base import BaseResponse
 
 class MultiRegisterRequest(BaseModel):
     user_identity: Optional[Dict] = None
     config: Config
 
-class MultiRegisterResponse(BaseModel):
+class MultiRegisterResponse(BaseResponse):
     conversation_id: str
     success: bool
     conversation: Conversation
 
-class MultiPostControlResponse(BaseModel):
+class MultiPostControlResponse(BaseResponse):
     success: bool
     msg: Optional[Message] = None
 
 
-class MultiToolWorkflowResponse(BaseModel):
+class MultiToolWorkflowResponse(BaseResponse):
     api_output: APIOutput
     msg: Message
 
-class MultiBotWorkflowPredictResponse(BaseModel):
+class MultiBotWorkflowPredictResponse(BaseResponse):
     bot_output: WorkflowBotOutput
     msg: Message
 
-class MultiToolMainResponse(BaseModel):
+class MultiToolMainResponse(BaseResponse):
     tool_output: Optional[str] = None
     msg: Message
 
-class MultiBotMainPredictResponse(BaseModel):
+class MultiBotMainPredictResponse(BaseResponse):
     bot_output: MainBotOutput
     msg: Message

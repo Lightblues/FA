@@ -40,27 +40,11 @@ mui_agent_workflow_available_templates:
 mui_agent_main_default_template: "bot_mui_main_agent.jinja"
 mui_agent_workflow_default_template: "bot_mui_workflow_agent.jinja"
 mui_agent_main_default_model: "神农大模型"
-mui_default_workflow_dataset: "PDL_zh"
-
-api_mode: "request"
-api_entity_linking: true
-api_entity_linking_llm: "gpt-4o"
-api_entity_linking_template: "flowagent/entity_linking.jinja"
+mui_default_workflow_dataset: "huabu_1127"
+mui_greeting_msg: "你好，有什么可以帮您?"
 
 pdl_version: "pdl"    # set as default
-bot_action_limit: 5
-bot_pdl_controllers: 
-  - {name: "api_duplication", config: {if_pre: true, if_post: true, threshold: 2}, is_activated: true}
-  - {name: "node_dependency", config: {if_pre: true, if_post: true}, is_activated: true}
-  # - {name: "session_length", config: {if_pre: true, min: 5, max: 15}, is_activated: true}
 
-# bot_mode: "pdl_bot"     # dummy_bot, react_bot, pdl_bot, core_bot
-# bot_template_fn: "flowagent/bot_pdl.jinja"
-# bot_llm_name: "gpt-4o"
-
-# api_mode: "request"           # dummy_api, llm, core, request
-# api_template_fn: null     # "flowagent/api_llm.jinja"
-# api_llm_name: "gpt-4o-mini"
 
 # NOTE: the following 5 fields identify one experiment!!!
 # specifically, workflow_dataset & workflow_type should be all same for one exp_version
@@ -80,11 +64,26 @@ user_template_fn: null    # "flowagent/user_llm.jinja"
 user_profile_id: 0
 user_oow_ratio: 0.2
 
+bot_mode: "pdl_bot"       # dummy_bot, react_bot, pdl_bot, core_bot
+bot_template_fn: null     # "flowagent/bot_flowbench.jinja"
+bot_llm_name: "gpt-4o"
+bot_action_limit: 5
+bot_pdl_controllers: 
+  - {name: "api_duplication", config: {if_pre: true, if_post: true, threshold: 2}, is_activated: true}
+  - {name: "node_dependency", config: {if_pre: true, if_post: true}, is_activated: true}
+  # - {name: "session_length", config: {if_pre: true, min: 5, max: 15}, is_activated: true}
 
 
-# conversation_turn_limit: 20
-# log_utterence_time: false
-# log_to_db: true
+api_mode: "request"           # dummy_api, llm, core, request
+api_template_fn: null         # "flowagent/api_llm.jinja"
+api_llm_name: "gpt-4o-mini"
+api_entity_linking: true
+api_entity_linking_llm: "gpt-4o"
+api_entity_linking_template: "flowagent/entity_linking.jinja"
+
+conversation_turn_limit: 20
+log_utterence_time: false
+log_to_db: true
 
 db_uri: 'mongodb://9.134.230.111:27017'
 db_name: "agent-pdl"
