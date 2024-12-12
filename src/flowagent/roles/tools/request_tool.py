@@ -72,6 +72,7 @@ class RequestTool(BaseTool):
             api_output = request_tool.process(bot_output)
             print(api_output)
         """
+        logger.info(f"process api calling info: {apicalling_info}")
         # 1. match the api
         try:
             api_info, api_params_dict = self._match_and_check_api(apicalling_info)   # match the standard API
@@ -160,12 +161,20 @@ class RequestTool(BaseTool):
     @staticmethod
     def _call_api(api_info: Dict, api_params_dict: Dict):
         # assert "Method" in api_info and "URL" in api_info, f"API should provide Method and URL!"
-        if api_info["method"] == "POST":
-            # if DEBUG: print(f">> calling [{api_info['name']}] -- {api_info['URL']} with params {api_params_dict}")
-            response = requests.post(api_info["url"], data=json.dumps(api_params_dict))
-        elif api_info["method"] == "GET":
-            response = requests.get(api_info["url"], params=api_params_dict)
-        else:
-            raise ValueError(f"Method {api_info['Method']} not supported.")
-        response = json.loads(response.content)
-        return response
+        try:
+            if api_info["method"] == "POST":
+                # if DEBUG: print(f">> calling [{api_info['name']}] -- {api_info['URL']} with params {api_params_dict}")
+                response = requests.post(api_info["url"], data=json.dumps(api_params_dict))
+            elif api_info["method"] == "GET":
+                response = requests.get(api_info["url"], params=api_params_dict)
+            else:
+                raise ValueError(f"Method {api_info['Method']} not supported.")
+            # check the status code
+            response.raise_for_status()
+            try:
+                return response.json()      # instead of json.loads(response.content)
+            except json.JSONDecodeError:
+                # return the raw response when failed to decode! 
+                return {"raw_response": response.text}
+        except requests.exceptions.RequestException as e:
+            return {"status": "error", "message": str(e)}

@@ -80,7 +80,7 @@ class UIMultiWorkflowBot(ReactBot):
         prediction = self._parse_react_output(llm_response)
         
         if prediction.workflow:
-            msg_content = prediction.response or ""
+            msg_content = prediction.response or ""  # TODO: add the response before <call workflow>?
             msg_content += f"<Call workflow> {prediction.workflow}"
         else:
             if prediction.action:

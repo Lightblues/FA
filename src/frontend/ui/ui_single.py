@@ -10,7 +10,7 @@ todos
 import streamlit as st; ss = st.session_state
 from .data_single import (
     get_template_name_list, get_model_name_list, get_workflow_dirs, get_workflow_names_map, 
-    refresh_session, debug_print_infos
+    refresh_session_single, debug_print_infos_single
 )
 from flowagent.data import Config, DataManager
 
@@ -49,7 +49,7 @@ def init_sidebar():
                 '选择模型',
                 options=LIST_shown_models,
                 key="selected_model_name",
-                on_change=refresh_session,
+                on_change=refresh_session_single,
                 index=LIST_shown_models.index(config.ui_default_model)  # "default"
             )
         with select_col2:
@@ -58,7 +58,7 @@ def init_sidebar():
                 options=LIST_shown_templates,
                 key="selected_template_fn",
                 index=LIST_shown_templates.index(config.ui_default_template),
-                on_change=refresh_session
+                on_change=refresh_session_single
             )
         
         select_col3, select_col4, select_col5 = st.columns(3)
@@ -84,7 +84,7 @@ def init_sidebar():
                 options=_workflow_names_map[ss.selected_workflow_dataset],
                 key="selected_workflow_name",
                 index=0,        # default to choose the first one
-                on_change=refresh_session
+                on_change=refresh_session_single
             )
         
         # st.divider()
@@ -92,7 +92,7 @@ def init_sidebar():
         with button_col1:
             st.button(
                 '重置对话',
-                on_click=refresh_session
+                on_click=refresh_session_single
             )
         with button_col2:
             st.link_button(
@@ -102,7 +102,7 @@ def init_sidebar():
         with button_col3:
             st.button(
                 'DEBUG',
-                on_click=debug_print_infos,
+                on_click=debug_print_infos_single,
             )
 
         with st.expander(f"⚙️ 自定义配置", expanded=False):
@@ -116,20 +116,20 @@ def init_sidebar():
                     st.warning("请填写自定义约束")
                 else:
                     config.ui_user_additional_constraints = ss.user_additional_constraints
-                    refresh_session()
+                    refresh_session_single()
 
 def update_workflow_dependencies():
     """Update dependencies when selected_workflow_dataset changes."""
     _workflow_names_map, _ = get_workflow_names_map()
     ss.selected_pdl_version = get_workflow_dirs(ss.selected_workflow_dataset)[0]  # Set to first version
     ss.selected_workflow_name = _workflow_names_map[ss.selected_workflow_dataset][0]  # Set to first workflow
-    refresh_session()
+    refresh_session_single()
 
 def update_version_dependencies():
     """Update dependencies when selected_pdl_version changes."""
     _workflow_names_map, _ = get_workflow_names_map()
     ss.selected_workflow_name = _workflow_names_map[ss.selected_workflow_dataset][0]  # Set to first workflow
-    refresh_session()
+    refresh_session_single()
 
 def post_sidebar():
     """
@@ -144,7 +144,7 @@ def post_sidebar():
                 controller['is_activated'] = st.checkbox(
                     controller['name'],
                     value=controller.get('is_activated', True),
-                    on_change=refresh_session
+                    on_change=refresh_session_single
                 )
 
         # show the PDL and template

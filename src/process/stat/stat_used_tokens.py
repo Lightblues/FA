@@ -1,14 +1,13 @@
 """ stat the used tokens
 updated @240924
 """
-from flowagent.data import Config, DBManager, BaseLogger, DataManager
+from flowagent.data import Config, DBManager, DataManager
 from collections import defaultdict
 
 class Stat:
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
         self.db = DBManager(cfg.db_uri, cfg.db_name, cfg.db_message_collection_name)
-        self.logger = BaseLogger()
     
     def stat(self, exp_version: str):
         configs = self.db.query_run_experiments({"exp_version": exp_version})

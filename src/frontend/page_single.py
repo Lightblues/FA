@@ -20,9 +20,10 @@ import json, datetime
 from flowagent.data import Conversation, Message, Role, BotOutput, APIOutput
 from flowagent.utils import retry_wrapper
 from .ui.ui_single import init_sidebar, post_sidebar
-from .ui.data_single import refresh_session
-from .common.util_frontend import fake_stream
+from .ui.data_single import refresh_session_single
+from .common import fake_stream, StreamlitUtils
 from backend import FrontendClient
+st_utils = StreamlitUtils()
 
 def insert_disconnect_js():
     # JavaScript to notify server on page unload
@@ -67,37 +68,38 @@ def step_bot_prediction() -> BotOutput:
 def step_api_process(bot_output: BotOutput) -> APIOutput:
     client: FrontendClient = ss.client
     res = client.single_tool(ss.session_id, bot_output)
-    st.markdown(f'<p style="color: green;">[API call] Got <code>{res.api_output.response_data}</code> from <code>{res.api_output.request}</code></p>', unsafe_allow_html=True)
+    st_utils.show_api_call(res.api_output)
     return res
 
-def case_workflow(query: str):
+def case_workflow():
     """ 
     add to db
     1. session level: (sessionid, name, mode[single/multi], infos, conversation, version)
     2. turn level (optional?): (sessionid, turnid, bot_output, prompt, version) TODO:
     """
     client: FrontendClient = ss.client
-    bot_output: BotOutput = None
-    for num_bot_actions in range(ss.cfg.bot_action_limit):
-        # 0. pre-control -> backend
-        # 1. bot predict an action. (with retry)
-        bot_output = step_bot_prediction()
+    with st.container():
+        for num_bot_actions in range(ss.cfg.bot_action_limit):
+            # 0. pre-control -> backend
+            # 1. bot predict an action. (with retry)
+            bot_output = step_bot_prediction()
 
-        # 2. STOP: break until bot RESPONSE
-        if bot_output.action:
-            res_post_control = client.single_post_control(ss.session_id, bot_output)
-            if not res_post_control.success:
-                st.markdown(f'<p style="color: red;">[controller error] <code>{res_post_control.msg}</code></p>', unsafe_allow_html=True)
-                # ss.logger.warning(f"<case_workflow> controller error: {res_post_control.msg}")
-                continue
-            _ = step_api_process(bot_output)
-        elif bot_output.response:
-            # TODO: add `_response_control` in FlowagentConversationManager
-            # ss.logger.info(f"<case_workflow> bot response: {bot_output.response}")
-            break
-        else: raise TypeError(f"Unexpected BotOutputType: {bot_output.action_type}")
-    else:
-        pass # TODO: 
+            # 2. STOP: break until bot RESPONSE
+            if bot_output.action:
+                res_post_control = client.single_post_control(ss.session_id, bot_output)
+                if not res_post_control.success:
+                    st_utils.show_controller_error(res_post_control.msg)
+                    # ss.logger.warning(f"<case_workflow> controller error: {res_post_control.msg}")
+                    continue
+                _ = step_api_process(bot_output)
+            elif bot_output.response:
+                # TODO: add `_response_control` in FlowagentConversationManager
+                # ss.logger.info(f"<case_workflow> bot response: {bot_output.response}")
+                break
+            else: raise TypeError(f"Unexpected BotOutputType: {bot_output.action_type}")
+        else:
+            st.logger.warning(f"<case_workflow> bot actions exceed the limit: {ss.cfg.bot_action_limit}")
+            pass # TODO: 
 
 
 def main_single():
@@ -107,7 +109,7 @@ def main_single():
     if "client" not in ss: ss.client = FrontendClient()
     if ("mode" not in ss) or (ss.mode == "multi") or ("session_id" not in ss):
         ss.mode = "single"
-        refresh_session()  # single_register
+        refresh_session_single()  # single_register
 
     insert_disconnect_js()
     post_sidebar()      # need conv
@@ -116,8 +118,7 @@ def main_single():
     show_conversations(ss.conv)
     if query := st.chat_input('Input...'):
         step_user_input(query)
-        with st.container():
-            case_workflow(query)
+        case_workflow()
         # show final bot response to screen
         with st.chat_message("assistant", avatar=ss['avatars']['assistant']):
             st.write_stream(fake_stream(ss.conv.get_last_message().content))

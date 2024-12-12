@@ -63,7 +63,7 @@ def generate_response(session_context: SingleSessionContext) -> Iterator[str]:
         yield f"data: {json.dumps(chunk_output, ensure_ascii=False)}\n\n"
     llm_response = "".join(llm_response)
     bot_output = session_context.bot.process_LLM_response(prompt, llm_response)
-    _debug_msg = f"\n{'({session_context.session_id}) [BOT]'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
+    _debug_msg = f"\n{f'({session_context.session_id}) [BOT]'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
     logger.bind(custom=True).debug(_debug_msg)
     session_context.last_bot_output = bot_output
 
@@ -151,7 +151,7 @@ def single_tool(conversation_id: str, bot_output: BotOutput) -> SingleToolRespon
     logger.info(f"[single_tool] {conversation_id} with bot_output: {bot_output}")
     session_context = get_session_context_single(conversation_id)
     api_output = session_context.tool.process(bot_output)
-    _debug_msg = f"\n{'({session_context.session_id}) [API]'.center(50, '=')}\n<<calling api>>\n{api_output.request}\n\n<< api response>>\n{api_output.response_data}\n"
+    _debug_msg = f"\n{f'({session_context.session_id}) [API]'.center(50, '=')}\n<<calling api>>\n{api_output.request}\n\n<< api response>>\n{api_output.response_data}\n"
     logger.bind(custom=True).debug(_debug_msg)
     # db_upsert_session(session_context)
     return SingleToolResponse(

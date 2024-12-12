@@ -13,7 +13,7 @@ from flowagent.data import (
 )
 from flowagent.utils import LLM_CFG
 
-def debug_print_infos() -> None:
+def debug_print_infos_single() -> None:
     print(f"[DEBUG] Conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
     print(f"  > cfg.bot_pdl_controllers: {ss.cfg.bot_pdl_controllers}")
 
@@ -37,7 +37,7 @@ def get_session_id():
     # "%Y-%m-%d %H:%M:%S.%f"
     return datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 
-def refresh_session():
+def refresh_session_single():
     """ Refresh the config and init new session
     NOTE: will reset a new session!
 

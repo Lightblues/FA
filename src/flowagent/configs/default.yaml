@@ -45,7 +45,7 @@ mui_agent_workflow_available_templates:
 mui_agent_main_default_template: "bot_mui_main_agent.jinja"
 mui_agent_workflow_default_template: "bot_mui_workflow_agent.jinja"
 mui_agent_main_default_model: "default"
-mui_default_workflow_dataset: "PDL_zh"
+mui_default_workflow_dataset: "huabu_1127"
 mui_greeting_msg: "你好，有什么可以帮您?"
 
 pdl_version: "pdl"    # set as default

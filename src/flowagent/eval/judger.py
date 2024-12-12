@@ -7,12 +7,12 @@ updated @240918
 import re, yaml
 import pandas as pd
 from typing import List, Dict, Optional, Tuple, Any
-from easonsi.llm.openai_client import OpenAIClient, Formater
-
+from ..utils import Formater
+from loguru import logger
 from ..data import (
     Config, Role, Message, Conversation, 
     Workflow, DBManager, DataManager, UserProfile,
-    BaseLogger, LogUtils
+    LogUtils
 )
 from ..utils import jinja_render, retry_wrapper, LLM_CFG, init_client
 
@@ -25,12 +25,10 @@ class Judger:
     """
     cfg: Config = None
     db: DBManager = None
-    logger: BaseLogger = None
     
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
         self.db = DBManager(cfg.db_uri, cfg.db_name, cfg.db_message_collection_name)
-        self.logger = BaseLogger()
         self.llm = init_client(llm_cfg=LLM_CFG[self.cfg.judge_model_name])
 
     def judge(self, mode: str="session", verbose=True) -> Dict:
@@ -48,7 +46,7 @@ class Judger:
         else:
             query_res = self.db.query_evaluations({ "conversation_id": self.cfg.judge_conversation_id }) # donot need {"exp_version"} becased conversaion_id 1:1 map to exp_version
             if len(query_res) > 0:
-                self.logger.log(f"  <judge> {self.cfg.judge_conversation_id} has already been judged", with_print=verbose)
+                logger.log(f"  <judge> {self.cfg.judge_conversation_id} has already been judged")
                 return query_res[0] # out_dict
 
         # 1.1. get the simultead conversation
@@ -59,7 +57,7 @@ class Judger:
         workflow = Workflow(self.cfg)
         
         # 2. judge: call the judge model & parse the output
-        self.logger.log(f"  <judge> start to judge {self.cfg.judge_conversation_id}", with_print=verbose)
+        logger.log(f"  <judge> start to judge {self.cfg.judge_conversation_id}")
 
         out_dict = {
             "conversation_id": self.cfg.judge_conversation_id,
@@ -80,7 +78,7 @@ class Judger:
         
         # 2.2. save the judge result to db
         self.db.insert_evaluation(out_dict)
-        self.logger.log(f"  <judge> {self.cfg.judge_conversation_id} has been judged", with_print=verbose)
+        logger.log(f"  <judge> {self.cfg.judge_conversation_id} has been judged")
         return out_dict
     
     def _judge_session(
@@ -215,10 +213,10 @@ class Judger:
             **{ k:v for k,v in self.cfg.to_dict().items() if k.startswith("workflow") },
             "config": self.cfg.to_dict(),
         }
-        self.logger.log(LogUtils.format_infos_with_tabulate(infos), with_print=verbose)
+        logger.log(LogUtils.format_infos_with_tabulate(infos))
         
         res = self.judge(verbose=verbose, mode=mode)
         
-        self.logger.log(LogUtils.format_infos_with_tabulate(res), with_print=verbose)
+        logger.log(LogUtils.format_infos_with_tabulate(res))
         return res
     

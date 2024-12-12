@@ -5,8 +5,9 @@
 """
 import re, datetime, json
 from typing import List, Tuple, Dict
+from loguru import logger
 from .react_bot import ReactBot
-from ...data import BotOutput, BotOutputType, MainBotOutput, Config, Conversation
+from ...data import BotOutput, BotOutputType, MainBotOutput, Config, Conversation, DataManager
 from ...utils import jinja_render, OpenAIClient, Formater, init_client, LLM_CFG
 from flowagent.tools import TOOL_SCHEMAS, TOOLS_MAP
 
@@ -26,24 +27,28 @@ class UIMultiMainBot(ReactBot):
     # conv: Conversation = None
     # llm: OpenAIClient = None
     tools: Dict[str, Dict] = {}
-    workflow_infos: List[Dict] = [] # [{name, task_description, task_detailed_description}]
+    bot_main_workflow_infos: List[Dict] = [] # [{name, task_description, task_detailed_description}]
     names = ["UIMultiMainBot", "ui_multi_main_bot"]
 
     def __init__(self, workflow_infos: List[Dict]=None, **args):
+        # logger.info(f"init UIMultiMainBot with workflow_infos: {workflow_infos}")
         super().__init__(**args)
         # use `config.mui_agent_main_llm_name`
         self.llm = init_client(llm_cfg=LLM_CFG[self.cfg.mui_agent_main_llm_name])
         self._init_workflow_infos(workflow_infos)
         self._init_tools()
 
-    def _init_workflow_infos(self, workflow_infos):
+    def _init_workflow_infos(self, workflow_infos: List[Dict] = []): # config.workflow_infos
+        # 1. set default workflow_infos
+        if not workflow_infos:
+            workflow_infos = DataManager(self.cfg).workflow_infos.values()
+            for w in workflow_infos:
+                w['is_activated'] = True
         # if ss.cfg.mui_available_workflows:
         #     workflow_names = [w['name'] for w in ss.workflow_infos]
         #     assert all(w in workflow_names for w in ss.cfg.mui_available_workflows)
         #     ss.workflow_infos = [w for w in ss.workflow_infos if w['name'] in ss.cfg.mui_available_workflows]
-        for w in workflow_infos:
-            w['is_activated'] = True
-        self.workflow_infos = workflow_infos
+        self.bot_main_workflow_infos = workflow_infos
 
     def _init_tools(self):
         tools = {}
@@ -58,7 +63,7 @@ class UIMultiMainBot(ReactBot):
         state_infos = {
             "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
-        workflows = [w for w in self.workflow_infos if w['is_activated']]
+        workflows = [w for w in self.bot_main_workflow_infos if w['is_activated']]
         _shown_keys = ["name", "task_description"]  # remove "task_detailed_description"
         workflows = [{k:v for k,v in w.items() if k in _shown_keys} for w in workflows]
         enabled_tools = [k for k,v in self.tools.items() if v['is_enabled']]

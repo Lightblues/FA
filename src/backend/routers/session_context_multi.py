@@ -12,13 +12,18 @@ from pydantic import BaseModel
 from typing import Optional, Union, Dict
 from flowagent.roles import UIMultiMainBot, UIMultiWorkflowBot, RequestTool
 from flowagent.pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
-from flowagent.data import Workflow, Config, Conversation, BotOutput, Message, Role, DataManager
+from flowagent.data import Workflow, Config, Conversation, BotOutput
 
 from ..common.shared import get_db, get_logger
 logger = get_logger()
 db = get_db()
 
 class MultiSessionContext(BaseModel):
+    # Add this configuration to allow arbitrary types
+    model_config = {
+        "arbitrary_types_allowed": True
+    }
+
     # session context, include all the necessary information
     session_id: str
     user_identity: Optional[Dict] = None
@@ -54,10 +59,9 @@ class MultiSessionContext(BaseModel):
             SessionContext: session context
         """
         workflow = Workflow(cfg)
-        data_manager = DataManager(cfg)
         conv = Conversation.create(session_id)
         conv.add_message(msg=cfg.mui_greeting_msg, role="bot_main")
-        agent_main = UIMultiMainBot(cfg=cfg, conv=conv, workflow_infos=data_manager.workflow_infos.values())
+        agent_main = UIMultiMainBot(cfg=cfg, conv=conv, workflow_infos=cfg.mui_workflow_infos)
         tool = RequestTool(cfg=cfg, conv=conv, workflow=workflow)
         controllers = {}
         for c in cfg.bot_pdl_controllers:
@@ -71,7 +75,7 @@ class MultiSessionContext(BaseModel):
             return
         else:
             assert not any(workflow_name in m for m in (self._workflow_agent_map, self._workflow_tool_map, self._workflow_controllers_map)), "workflow_name already exists"
-            workflow=Workflow(self.cfg)
+            workflow=Workflow(self.cfg, id_or_name=workflow_name)
             self._workflow_agent_map[workflow_name] = UIMultiWorkflowBot(cfg=self.cfg, conv=self.conv, workflow=workflow)
             self._workflow_tool_map[workflow_name] = RequestTool(cfg=self.cfg, conv=self.conv, workflow=workflow)
             self._workflow_controllers_map[workflow_name] = {}

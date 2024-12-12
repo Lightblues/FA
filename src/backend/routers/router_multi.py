@@ -47,7 +47,7 @@ def generate_response_main(session_context: MultiSessionContext) -> Iterator[str
         yield f"data: {json.dumps(chunk_output, ensure_ascii=False)}\n\n"
     llm_response = "".join(llm_response)
     bot_output = session_context.agent_main.process_LLM_response(prompt, llm_response)
-    _debug_msg = f"\n{'({session_context.session_id}) [BOT]'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
+    _debug_msg = f"\n{f'({session_context.session_id}) [BOT]'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
     logger.bind(custom=True).debug(_debug_msg)
     session_context.last_bot_output = bot_output
     # NOTE: if switched to a workflow, set curr_status & init the workflow agent!
@@ -81,7 +81,7 @@ def generate_response_workflow(session_context: MultiSessionContext) -> Iterator
         yield f"data: {json.dumps(chunk_output, ensure_ascii=False)}\n\n"
     llm_response = "".join(llm_response)
     bot_output = session_context.workflow_agent.process_LLM_response(prompt, llm_response)
-    _debug_msg = f"\n{'({session_context.session_id}) [BOT]'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
+    _debug_msg = f"\n{f'({session_context.session_id}) [BOT]'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
     logger.bind(custom=True).debug(_debug_msg)
     session_context.last_bot_output = bot_output
     # NOTE: set curr_status if switched
@@ -120,13 +120,14 @@ def multi_disconnect(conversation_id: str) -> None:
     db_upsert_session_multi(get_session_context_multi(conversation_id))
     clear_session_context_multi(conversation_id)
 
-# ---
 @router_multi.post("/multi_add_message/{conversation_id}")
 def multi_add_message(conversation_id: str, message: Message) -> None:
     logger.info(f"[multi_add_message] {conversation_id} with message: {message}")
     session_context = get_session_context_multi(conversation_id)
     session_context.conv.add_message(message)
 
+
+# ---
 @router_multi.post("/multi_bot_main_predict/{conversation_id}")
 async def multi_bot_main_predict(conversation_id: str) -> StreamingResponse:
     logger.info(f"[multi_bot_main_predict] {conversation_id}")
@@ -135,6 +136,16 @@ async def multi_bot_main_predict(conversation_id: str) -> StreamingResponse:
     return StreamingResponse(
         generate_response_main(session_context),
         media_type="text/event-stream"
+    )
+
+@router_multi.get("/multi_bot_main_predict_output/{conversation_id}")
+def multi_bot_main_predict_output(conversation_id: str) -> MultiBotMainPredictResponse:
+    logger.info(f"[multi_bot_main_predict_output] {conversation_id}")
+    session_context = get_session_context_multi(conversation_id)
+    # db_upsert_session(session_context)
+    return MultiBotMainPredictResponse(
+        bot_output=session_context.last_bot_output,
+        msg=session_context.conv.get_last_message()
     )
 
 # ---
@@ -152,16 +163,6 @@ def multi_tool_main(conversation_id: str, bot_output: MainBotOutput) -> MultiToo
 
 
 # ---
-@router_multi.get("/multi_bot_main_predict_output/{conversation_id}")
-def multi_bot_main_predict_output(conversation_id: str) -> MultiBotMainPredictResponse:
-    logger.info(f"[multi_bot_main_predict_output] {conversation_id}")
-    session_context = get_session_context_multi(conversation_id)
-    # db_upsert_session(session_context)
-    return MultiBotMainPredictResponse(
-        bot_output=session_context.last_bot_output,
-        msg=session_context.conv.get_last_message()
-    )
-
 @router_multi.post("/multi_bot_workflow_predict/{conversation_id}")
 async def multi_bot_workflow_predict(conversation_id: str) -> StreamingResponse:
     logger.info(f"[multi_bot_workflow_predict] {conversation_id}")

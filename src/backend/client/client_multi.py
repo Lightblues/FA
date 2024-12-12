@@ -20,7 +20,12 @@ class MultiAgentMixin(BaseClient):
         Args:
             conversation_id (str): the id of the conversation
             config (Config): the config of the conversation
+        
+        Notes:
+            - reset the curr_status to "main"
         """
+        self.curr_status = "main"
+        
         url = f"{self.url}/multi_register/{conversation_id}"
         response = requests.post(url, json=MultiRegisterRequest(user_identity=user_identity, config=config).model_dump())
         if response.status_code == 200:

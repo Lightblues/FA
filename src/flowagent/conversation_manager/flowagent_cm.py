@@ -1,6 +1,7 @@
 """ updated @240919
 """
 from typing import List
+from loguru import logger
 from ..data import (
     Config, Workflow, 
     BotOutput, UserOutput, BotOutputType, APIOutput,
@@ -53,7 +54,7 @@ class FlowagentConversationManager(BaseConversationManager):
                 self.log_msg(self.conv.get_last_message(), verbose=verbose)
                 role = Role.BOT
                 if user_output.is_end:
-                    self.logger.log(f"  <main> ended by user!", with_print=verbose)
+                    logger.log(f"  <main> ended by user!")
                     break
             elif role == Role.BOT:
                 num_bot_actions = 0
@@ -87,15 +88,15 @@ class FlowagentConversationManager(BaseConversationManager):
                     num_bot_actions += 1
                     if num_bot_actions > self.cfg.bot_action_limit: 
                         # ... the default response
-                        self.logger.log(f"  <main> bot retried actions reach limit!", with_print=verbose)
+                        logger.log(f"  <main> bot retried actions reach limit!")
                         break
                 if not (bot_output.action or bot_output.response):
-                    self.logger.log(f"  <main> ended by bot!", with_print=verbose)
+                    logger.log(f"  <main> ended by bot!")
                     break
                 role = Role.USER
             num_UB_turns += 1
             if (num_UB_turns > self.cfg.conversation_turn_limit): 
-                self.logger.log("  <main> end due to conversation turn limit!", with_print=verbose)
+                logger.log("  <main> end due to conversation turn limit!")
                 break
         
         return self.conv
@@ -143,5 +144,5 @@ class FlowagentConversationManager(BaseConversationManager):
                     bot_output: BotOutput = self.bot.process()
                 # 2. convert the msg! 
                 self.conv.substitue_message(msg.copy(), old_to_prediction=True, idx=-1)
-                self.logger.log(f"<teacher_forcing> gt: {self.conv.get_last_message().content}\n  predicted: {self.conv.get_last_message().content_predict}", with_print=verbose)
+                logger.log(f"<teacher_forcing> gt: {self.conv.get_last_message().content}\n  predicted: {self.conv.get_last_message().content_predict}")
         return self.conv

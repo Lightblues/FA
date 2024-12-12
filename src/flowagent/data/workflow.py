@@ -63,28 +63,38 @@ class Workflow:  # rename -> Data
     user_oow_intentions: List[OOWIntention] = None
     
     cfg: Config = None
-    data_manager: DataManager = None
-    
+    # data_manager: DataManager = None
 
-    def __init__(self, cfg:Config, data_manager:DataManager=None) -> None:
+    def _get_workflow_id(self, id_or_name: str, workflow_infos: dict):
+        if id_or_name in workflow_infos: return id_or_name
+        for id, info in workflow_infos.items():
+            if info['name'] == id_or_name: return id
+        raise ValueError(f"[ERROR] {id_or_name} not found in {workflow_infos.keys()}")
+
+    def __init__(self, cfg:Config, data_manager:DataManager=None, id_or_name: str=None) -> None:
         """ Overall data handler
+
+        Args:
+            cfg (Config): config
+            data_manager (DataManager): data manager
+            id_or_name (str): workflow id or name -> replace cfg.workflow_id
+
         1. setup .cfg, .data_manager
         2. set .type, .id, & .name, .task_description (from data_manager.workflow_infos)
         3. load .toolbox (f"tools/{self.id}.yaml")
         4. load .workflow (f"{self.type.subdir}/{self.id}{self.type.suffix}")
         """
         self.cfg = cfg
-        if data_manager is None: data_manager = DataManager(cfg)
-        self.data_manager = data_manager
-        
+        data_manager = data_manager or DataManager(cfg)
         self.type = WorkflowType[self.cfg.workflow_type.upper()]
+        self.id = self._get_workflow_id(id_or_name or cfg.workflow_id, data_manager.workflow_infos)
+        
         # 1. load basic info
-        self.id = self.cfg.workflow_id
-        assert self.id in data_manager.workflow_infos, f"[ERROR] {self.id} not found in {data_manager.workflow_infos.keys()}"
         infos = data_manager.workflow_infos[self.id]
         self.name = infos['name']
         self.task_description = infos['task_description']
         # self.task_detailed_description = infos['task_detailed_description']
+
         # 2. load the workflow & toolbox
         # TODO: update toolbox
         with open(data_manager.DIR_data_workflow / f"tools/{self.id}.yaml", 'r') as f:
@@ -122,9 +132,11 @@ class Workflow:  # rename -> Data
                     )
     
     def refresh_config(self, cfg: Config) -> 'Workflow':
-        """used for UI!"""
+        """used for UI!
+        TODO: check if is used!
+        """
         print(f"> [workflow] refresh config: {cfg.workflow_dataset, cfg.pdl_version, cfg.workflow_id}")
-        data_manager = self.data_manager = DataManager(cfg)
+        data_manager = DataManager(cfg)
         self.cfg = cfg
         self.id = self.cfg.workflow_id
         assert self.id in data_manager.workflow_infos, f"[ERROR] {self.id} not found in {data_manager.workflow_infos.keys()}"

@@ -97,63 +97,10 @@ class LogUtils:
     def format_str_with_color(text: str, color: str = 'blue') -> str:
         return COLOR_DICT[color] + text + Style.RESET_ALL
 
-
-class BaseLogger:
-    """ Base logger without dumping to file """
-    def __init__(self):
-        pass
-    def log(self, message:str, with_print=False, *args, **kwargs):
-        if with_print:
-            print(message)
-    def debug(self, message:str, *args, **kwargs):
-        print(message)
-
-    def log_to_stdout(self, message:str, color=None):
+    @staticmethod
+    def log_to_stdout(message:str, color=None):
         colored_message = COLOR_DICT[color] + message + Style.RESET_ALL
         print(colored_message)
-
-
-class FileLogger(BaseLogger):
-    """ Local file logger """
-    log_dir: Union[str, Path] = None
-    log_fn: Union[str, Path] = None
-    log_detail_fn: Union[str, Path] = None
-    
-    num_logs = 0
-    logger_id: str = "tmp"
-    def __init__(self, log_dir:str, t:datetime.datetime=None):
-        """ 
-        args:
-            log_dir: str, the directory to save the log files
-        """
-        super().__init__()
-        if not t:
-            t = datetime.datetime.now()
-        s_day = t.strftime("%Y-%m-%d")
-        s_second = t.strftime("%Y-%m-%d_%H-%M-%S")
-        s_millisecond = t.strftime("%Y-%m-%d_%H-%M-%S-%f")[:-3]
-        self.logger_id = s_millisecond
-        
-        self.log_dir = log_dir
-        _log_subdir = f"{log_dir}/{s_day}"
-        os.makedirs(_log_subdir, exist_ok=True)
-        self.log_fn = f"{_log_subdir}/{s_millisecond}.log"
-        self.log_detail_fn = f"{_log_subdir}/{s_millisecond}_detail.log"
-        
-        self.num_logs = 0
-
-    def log(self, message:str, add_line=True, with_print=False):
-        self.num_logs += 1
-        with open(self.log_fn, 'a') as f:
-            f.write(message + "\n" if add_line else "")
-            f.flush()
-        if with_print:
-            print(message)
-    
-    def debug(self, message:str):
-        with open(self.log_detail_fn, 'a') as f:
-            f.write(f"{message}\n\n")
-            f.flush()
 
 
 def init_loguru_logger(log_dir="logs") -> "Logger":

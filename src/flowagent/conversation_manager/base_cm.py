@@ -3,11 +3,12 @@
 
 from abc import abstractmethod
 from typing import List
+from loguru import logger
 import datetime
 import pandas as pd
 from ..data import (
     Config, DBManager, DataManager, Workflow, LogUtils,
-    Role, Message, Conversation, BaseLogger
+    Role, Message, Conversation
 )
 from ..roles import InputUser, BaseBot, BaseUser, BaseTool
 
@@ -21,7 +22,6 @@ class BaseConversationManager:
     user: BaseUser = None
     bot: BaseBot = None
     api: BaseTool = None
-    logger: BaseLogger = None
     conv: Conversation = None       # global variable for conversation
     data_manager: DataManager = None        # remove it? 
     workflow: Workflow = None
@@ -30,7 +30,6 @@ class BaseConversationManager:
     def __init__(self, cfg:Config) -> None:
         self.cfg = cfg
         self.data_manager = DataManager(cfg)
-        self.logger = BaseLogger()
         self.conversation_id = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         self.conv = Conversation(conversation_id=self.conversation_id)
     
@@ -51,11 +50,11 @@ class BaseConversationManager:
             "exp_version": self.cfg.exp_version,
             "config": self.cfg.to_dict(),
         }
-        self.logger.log(LogUtils.format_infos_with_tabulate(infos), with_print=verbose)
+        logger.log(LogUtils.format_infos_with_tabulate(infos))
 
         # 1. check if has been run!
         if self._check_if_already_run():
-            self.logger.log(f"NOTE: the experiment {self.cfg.exp_version} has already been run!", with_print=verbose)
+            logger.log(f"NOTE: the experiment {self.cfg.exp_version} has already been run!")
             return infos, None  # the returned results haven't been used
         # 2. run the conversation
         conversation = self.conversation(verbose=verbose)
@@ -63,7 +62,7 @@ class BaseConversationManager:
         self._record_to_db(conversation, verbose=verbose)
 
         conversation_df = pd.DataFrame(conversation.to_list())[['role', 'content']].set_index('role')
-        self.logger.log(LogUtils.format_infos_with_tabulate(conversation_df), with_print=verbose)
+        logger.log(LogUtils.format_infos_with_tabulate(conversation_df))
         return infos, conversation
     
     def start_conversation_teacher_forcing(self, verbose=True):
@@ -72,11 +71,11 @@ class BaseConversationManager:
             "exp_version": self.cfg.exp_version,
             "config": self.cfg.to_dict(),
         }
-        self.logger.log(LogUtils.format_infos_with_tabulate(infos), with_print=verbose)
+        logger.log(LogUtils.format_infos_with_tabulate(infos))
 
         # 1. check if has been run!
         if self._check_if_already_run():
-            self.logger.log(f"NOTE: the experiment {self.cfg.exp_version} has already been run!", with_print=verbose)
+            logger.log(f"NOTE: the experiment {self.cfg.exp_version} has already been run!")
             return infos, None  # the returned results haven't been used
         # 2. run the conversation
         conversation = self.conversation_teacher_forcing(verbose=verbose)
@@ -84,7 +83,7 @@ class BaseConversationManager:
         self._record_to_db(conversation, verbose=verbose)
         
         conversation_df = pd.DataFrame(conversation.to_list())[['role', 'content']].set_index('role')
-        self.logger.log(LogUtils.format_infos_with_tabulate(conversation_df), with_print=verbose)
+        logger.log(LogUtils.format_infos_with_tabulate(conversation_df))
         return infos, conversation
     
     def _check_if_already_run(self) -> bool:
@@ -107,7 +106,7 @@ class BaseConversationManager:
         
         # 1. insert conversation
         res = self.db.insert_conversation(conversation)
-        self.logger.log(f"  <db> Inserted conversation with {len(res.inserted_ids)} messages", with_print=verbose)
+        logger.log(f"  <db> Inserted conversation with {len(res.inserted_ids)} messages")
         
         # 2. insert configuration
         infos_dict = {
@@ -115,14 +114,14 @@ class BaseConversationManager:
             **self.cfg.to_dict()
         }
         res = self.db.insert_config(infos_dict)
-        self.logger.log(f"  <db> Inserted config", with_print=verbose)
+        logger.log(f"  <db> Inserted config")
     
     
     def log_msg(self, msg:Message, verbose=True):
         """ log message to logger and stdout """
         _content = msg.to_str()      # or msg is str?
-        self.logger.log(_content, with_print=False)
+        logger.log(_content)
         if verbose and not (    # for InputUser, no need to print
             isinstance(self.user, InputUser) and (msg.role == Role.USER)
         ): 
-            self.logger.log_to_stdout(_content, color=msg.role.color)
+            LogUtils.log_to_stdout(_content, color=msg.role.color)

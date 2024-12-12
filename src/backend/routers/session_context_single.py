@@ -18,6 +18,11 @@ logger = get_logger()
 db = get_db()
 
 class SingleSessionContext(BaseModel):
+    # Add this configuration to allow arbitrary types
+    model_config = {
+        "arbitrary_types_allowed": True
+    }
+
     # session context, include all the necessary information
     session_id: str
     user_identity: Optional[Dict] = None
