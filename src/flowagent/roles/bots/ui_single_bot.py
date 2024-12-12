@@ -8,7 +8,7 @@
 import re, datetime, json
 from .react_bot import ReactBot
 from ...data import BotOutput, BotOutputType
-from ...utils import jinja_render, OpenAIClient, Formater
+from ...utils import jinja_render, OpenAIClient, Formater, PromptUtils
 
 class UISingleBot(ReactBot):
     """ 
@@ -34,7 +34,7 @@ class UISingleBot(ReactBot):
     def _gen_prompt(self) -> str:
         # TODO: format apis. 1) remove URL; 2) add preconditions
         state_infos = {
-            "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "Current time": PromptUtils.get_formated_time(),
         }
         # s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
         state_infos |= self.workflow.pdl.status_for_prompt # add the status infos from PDL!

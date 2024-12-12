@@ -7,7 +7,7 @@ import re, datetime, json
 from typing import List, Tuple, Dict
 from .react_bot import ReactBot
 from ...data import WorkflowBotOutput
-from ...utils import jinja_render, OpenAIClient, Formater, init_client, LLM_CFG
+from ...utils import jinja_render, OpenAIClient, Formater, init_client, LLM_CFG, PromptUtils
 
 class UIMultiWorkflowBot(ReactBot):
     """UIMultiWorkflowBot
@@ -39,7 +39,7 @@ class UIMultiWorkflowBot(ReactBot):
     
     def _gen_prompt(self) -> str:
         state_infos = {
-            "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "Current time": PromptUtils.get_formated_time(),
         }
         state_infos |= self.workflow.pdl.status_for_prompt # add the status infos from PDL!
         prompt = jinja_render(

@@ -7,8 +7,8 @@ import re, datetime, json
 from typing import List, Tuple, Dict
 from loguru import logger
 from .react_bot import ReactBot
-from ...data import BotOutput, BotOutputType, MainBotOutput, Config, Conversation, DataManager
-from ...utils import jinja_render, OpenAIClient, Formater, init_client, LLM_CFG
+from ...data import MainBotOutput, DataManager
+from ...utils import jinja_render, OpenAIClient, Formater, init_client, LLM_CFG, PromptUtils
 from flowagent.tools import TOOL_SCHEMAS, TOOLS_MAP
 
 class UIMultiMainBot(ReactBot):
@@ -61,7 +61,7 @@ class UIMultiMainBot(ReactBot):
 
     def _gen_prompt(self) -> str:
         state_infos = {
-            "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "Current time": PromptUtils.get_formated_time(),
         }
         workflows = [w for w in self.bot_main_workflow_infos if w['is_activated']]
         _shown_keys = ["name", "task_description"]  # remove "task_detailed_description"

@@ -2,7 +2,7 @@ import re, datetime, json
 from typing import List, Tuple
 from .react_bot import ReactBot
 from ...data import BotOutput, BotOutputType
-from ...utils import jinja_render, OpenAIClient
+from ...utils import jinja_render, OpenAIClient, PromptUtils
 
 class PDLBot(ReactBot):
     """ 
@@ -17,7 +17,7 @@ class PDLBot(ReactBot):
     
     def _gen_prompt(self) -> str:
         state_infos = {
-            "Current time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "Current time": PromptUtils.get_formated_time(),
         }
         state_infos |= self.workflow.pdl.status_for_prompt # NOTE: add the status infos from PDL!
         # TODO: format apis
