@@ -1,4 +1,4 @@
-import collections
+import collections, sys
 import streamlit as st; ss = st.session_state
 from .util_uid import get_identity
 
@@ -60,3 +60,24 @@ def init_resource():
         # print(f"user_identity: {user_identity}")
         ss.headers = headers
         ss.user_identity = user_identity
+
+def set_global_exception_handler():
+    """ Set global exception handler for Streamlit. 
+    NOTE: only work for streamlit of low version.
+    from: /apdcephfs_cq8/share_2992827/shennong_5/ianxxu/chatchat/_TaskPlan/UI/v2.1/IanAGI.py
+    """
+    def exception_handler(e):
+        import traceback
+        # Custom error handling
+        st.image("https://media1.tenor.com/m/t7_iTN0iYekAAAAd/sad-sad-cat.gif")
+        st.error(f"Oops, something funny happened with a {type(e).__name__}", icon="😿")
+        print(traceback.format_exc())
+        st.warning(traceback.format_exc())
+
+    from streamlit.runtime.scriptrunner.script_runner import handle_uncaught_app_exception
+    handle_uncaught_app_exception.__code__ = exception_handler.__code__
+
+
+def set_streamlit():
+    # set_global_exception_handler()
+    pass
