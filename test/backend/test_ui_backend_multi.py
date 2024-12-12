@@ -94,7 +94,7 @@ def case_workflow():
 def main():
     # 1. init the conversation
     conv = client.multi_register(conversation_id, cfg)
-    print(LogUtils.format_str_with_color(f"{conv.conv.get_last_message()}", "orange"))
+    print(LogUtils.format_str_with_color(f"{conv.get_last_message()}", "orange"))
     while True:
         user_input = LogUtils.format_user_input("[USER] ")
         if user_input == "END": 

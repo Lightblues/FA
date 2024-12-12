@@ -80,7 +80,7 @@ def step_agent_main_prediction() -> Union[MainBotOutput, Message]:
     print(f">> conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
     client: FrontendClient = ss.client
     with st.expander(f"Thinking...", expanded=True):
-        llm_response = st.write_stream(client.multi_bot_main_predict(ss.session_id))
+        _ = st.write_stream(client.multi_bot_main_predict(ss.session_id))
     res = client.multi_bot_main_predict_output(ss.session_id)
     return res.bot_output, res.msg
 
@@ -90,22 +90,22 @@ def step_api_process(bot_output: BotOutput) -> APIOutput:
     st_utils.show_api_call(res.api_output)
     return res.api_output
 
-def step_tool(agent_main_output: MainBotOutput) -> Any:
+def step_tool(agent_main_output: MainBotOutput) -> str:
     client: FrontendClient = ss.client
     # see @ian /cq8/ianxxu/chatchat/_TaskPlan/UI/v2.1/IanAGI.py 
     tool_name, tool_args = agent_main_output.action, agent_main_output.action_input
-    if tool_name in ("web_search"):
-        spinner_info = f"Searching for {tool_args['query']}..."
+    if tool_name in ("web_search"): spinner_info = f"Google searching for {tool_args['query']}..."
+    elif tool_name in ("hunyuan_search"): spinner_info = f"Hunyuan searching for {tool_args['query']}..."
     else: raise NotImplementedError
-    with st.spinner(f"{ss['tool_emoji'][tool_name]} {spinner_info}"):
-        # execute!
-        res = client.multi_tool_main(ss.session_id, agent_main_output)
-    if tool_name in ("web_search"):
-        with st.expander(f"{ss['tool_emoji']['web_logo']} Searching results for '{tool_args['query']}'", expanded=False):
-            st.write(res.tool_output)
-    else: raise NotImplementedError
-    return res.tool_output
 
+    with st.spinner(f"{ss['tool_emoji'][tool_name]} {spinner_info}"):
+        expander_msg = ""
+        if tool_name in ("web_search", "hunyuan_search"): expander_msg = f"{ss['tool_emoji']['web_logo']} Searching results for '{tool_args['query']}'"
+        else: raise NotImplementedError
+        with st.expander(expander_msg, expanded=True):
+            _ = st.write_stream(client.multi_tool_main_stream(ss.session_id, agent_main_output))
+        res = client.multi_tool_main_output(ss.session_id)
+        return res.tool_output
 
 def case_workflow():
     client: FrontendClient = ss.client
@@ -146,7 +146,7 @@ def case_main():
                 break
             else:
                 if bot_output.action:
-                    tool_output = step_tool(bot_output)
+                    _ = step_tool(bot_output)
                 elif bot_output.response:
                     break
                 else: raise NotImplementedError

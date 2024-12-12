@@ -1,5 +1,5 @@
-import requests, json, asyncio, aiohttp
-from typing import Union, Iterator, Tuple, AsyncIterator, Dict
+import requests
+from typing import Iterator, Dict
 from flowagent.data import Config, Conversation, BotOutput, Role
 from ..typings import (
     MultiRegisterResponse, MultiRegisterRequest,
@@ -7,7 +7,6 @@ from ..typings import (
     MultiBotWorkflowPredictResponse, 
     MultiPostControlResponse, 
     MultiToolWorkflowResponse,
-    MultiToolMainResponse
 )
 from .client_base import BaseClient
 
@@ -71,15 +70,6 @@ class MultiAgentMixin(BaseClient):
             # NOTE to change the curr_status if switched to a workflow!
             if res.bot_output.workflow:
                 self.curr_status = res.bot_output.workflow
-            return res
-        else: raise NotImplementedError
-
-    def multi_tool_main(self, conversation_id: str, bot_output: BotOutput) -> MultiToolMainResponse:
-        url = f"{self.url}/multi_tool_main/{conversation_id}"
-        response = requests.post(url, json=bot_output.model_dump())
-        if response.status_code == 200:
-            res = MultiToolMainResponse(**response.json())
-            self.conv.add_message(res.msg)
             return res
         else: raise NotImplementedError
 

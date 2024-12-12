@@ -39,8 +39,10 @@ def init_app() -> FastAPI:
 def setup_router(app: FastAPI):
     from .routers.router_single import router_single
     from .routers.router_multi import router_multi
+    from .routers.router_tool import router_tool
     app.include_router(router_single)  # add the prefix `/single`?
     app.include_router(router_multi)
+    app.include_router(router_tool)
     return app
 
 

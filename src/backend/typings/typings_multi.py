@@ -29,7 +29,7 @@ class MultiBotWorkflowPredictResponse(BaseModel):
     msg: Message
 
 class MultiToolMainResponse(BaseModel):
-    tool_output: Any
+    tool_output: Optional[str] = None
     msg: Message
 
 class MultiBotMainPredictResponse(BaseModel):

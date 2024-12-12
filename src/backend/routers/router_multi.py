@@ -16,15 +16,14 @@ from typing import Iterator
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from .session_context_multi import (
-    create_session_context, get_session_context_multi, clear_session_context_multi, MultiSessionContext, MULTI_SESSION_CONTEXT_MAP,
+    create_session_context, get_session_context_multi, clear_session_context_multi, 
+    MultiSessionContext, 
     db_upsert_session_multi
 )
 from flowagent.data import Message
-from flowagent.tools import execute_tool_call
 from ..typings import (
     MultiRegisterRequest, MultiRegisterResponse,
     MultiBotMainPredictResponse, MainBotOutput, 
-    MultiToolMainResponse, 
     MultiBotWorkflowPredictResponse, MultiPostControlResponse, MultiToolWorkflowResponse,
     BotOutput
 )
@@ -145,19 +144,6 @@ def multi_bot_main_predict_output(conversation_id: str) -> MultiBotMainPredictRe
     # db_upsert_session(session_context)
     return MultiBotMainPredictResponse(
         bot_output=session_context.last_bot_output,
-        msg=session_context.conv.get_last_message()
-    )
-
-# ---
-@router_multi.post("/multi_tool_main/{conversation_id}")
-def multi_tool_main(conversation_id: str, bot_output: MainBotOutput) -> MultiToolMainResponse:
-    logger.info(f"[multi_tool_main] {conversation_id} with bot_output: {bot_output}")
-    session_context = get_session_context_multi(conversation_id)
-    # simply exec 
-    res = execute_tool_call(bot_output.action, bot_output.action_input)
-    session_context.conv.add_message(res, role="tool")  # TODO: manage the rolename with config
-    return MultiToolMainResponse(
-        tool_output=res,
         msg=session_context.conv.get_last_message()
     )
 

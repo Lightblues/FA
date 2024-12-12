@@ -39,6 +39,7 @@ class MultiSessionContext(BaseModel):
     _workflow_controllers_map: Dict[str, Dict[str, BaseController]] = {}
     
     last_bot_output: Optional[BotOutput] = None
+    last_tool_output: Optional[str] = None
 
     @classmethod
     def from_config(cls, session_id: str, cfg: Config):

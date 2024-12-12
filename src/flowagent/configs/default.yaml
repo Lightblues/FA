@@ -22,7 +22,8 @@ ui_available_workflow_datasets:
   - "PDL_zh"
 ui_default_workflow_dataset: "huabu_1127"
 ui_tools:
-  - {name: web_search, is_enabled: true}
+  - {name: web_search, is_enabled: false}
+  - {name: hunyuan_search, is_enabled: true}
 
 # mui_available_workflows: 
 #   - 114挂号

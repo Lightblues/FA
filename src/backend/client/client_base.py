@@ -13,10 +13,17 @@ class BaseClient:
     def __init__(self, url: str="http://9.134.230.111:8100"):
         self.url = url
 
-    def process_stream_url(self, url: str) -> Iterator[str]:
+    def process_stream_url(self, url: str, data: dict = None) -> Iterator[str]:
+        """Process the stream url and return the iterator of the stream
+        
+        Args:
+            url (str): The stream URL to process
+            data (dict, optional): The data to send in POST request. Defaults to None.
+        
+        NOTE: only use streaming, no async!
+        """
         headers = {'Accept': 'text/event-stream'}
-        # NOTE: only use streaming, no async!
-        response = requests.post(url, headers=headers, stream=True)
+        response = requests.post(url, headers=headers, json=data, stream=True)
         if response.status_code != 200:
             print(f"Error: {response.text}")
             raise NotImplementedError
