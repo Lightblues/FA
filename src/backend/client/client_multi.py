@@ -1,6 +1,6 @@
 import requests, json, asyncio, aiohttp
 from typing import Union, Iterator, Tuple, AsyncIterator, Dict
-from flowagent.data import Config, DataManager, Conversation, BotOutput, Role, Message
+from flowagent.data import Config, Conversation, BotOutput, Role
 from ..typings import (
     MultiRegisterResponse, MultiRegisterRequest,
     MultiBotMainPredictResponse,
@@ -25,7 +25,7 @@ class MultiAgentMixin(BaseClient):
             - reset the curr_status to "main"
         """
         self.curr_status = "main"
-        
+
         url = f"{self.url}/multi_register/{conversation_id}"
         response = requests.post(url, json=MultiRegisterRequest(user_identity=user_identity, config=config).model_dump())
         if response.status_code == 200:

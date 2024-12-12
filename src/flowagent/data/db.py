@@ -33,6 +33,7 @@ class DBManager:
         results = [res for res in results]
         if len(results)==0:
             return Conversation()
+        # TODO: fix it
         messages = [Message(**{**res, "role": Role.get_by_rolename(res["role"])}) for res in results]
         return Conversation.from_messages(messages)
     

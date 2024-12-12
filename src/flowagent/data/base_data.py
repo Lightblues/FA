@@ -56,7 +56,8 @@ class APICall(BaseModel):
 class Message(BaseModel):
     role: Union[str, CustomRole] = Field(..., description="The role of the message sender")
     content: str = Field(..., description="The content of the message")
-    prompt: Optional[str] = Field(None, description="Optional prompt associated with the message")
+    llm_name: Optional[str] = Field(None, description="Name of the language model")
+    llm_prompt: Optional[str] = Field(None, description="Optional prompt associated with the message")
     llm_response: Optional[str] = Field(None, description="Response from the language model")
     conversation_id: Optional[str] = Field(None, description="ID of the conversation")
     utterance_id: Optional[int] = Field(None, description="ID of the utterance")
@@ -129,7 +130,7 @@ class Conversation(BaseModel):
     # class Config:
     #     arbitrary_types_allowed = True
 
-    def add_message(self, msg: Union[Message, str], prompt: str=None, llm_response:str=None, role:Union[Role, str]=Role.USER):
+    def add_message(self, msg: Union[Message, str], llm_name: str=None, llm_prompt: str=None, llm_response:str=None, role:Union[Role, str]=Role.USER):
         """Add a message to the conversation, accepting either a Message object or message parameters.
         
         Args:
@@ -147,8 +148,9 @@ class Conversation(BaseModel):
             # Handle string input with optional parameters
             message = Message(
                 role=role,
-                content=msg,  # msg is treated as content string
-                prompt=prompt,
+                content=msg,
+                llm_name=llm_name,
+                llm_prompt=llm_prompt,
                 llm_response=llm_response,
                 conversation_id=self.conversation_id,
                 utterance_id=self.current_utterance_id

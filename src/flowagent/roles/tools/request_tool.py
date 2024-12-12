@@ -77,7 +77,7 @@ class RequestTool(BaseTool):
         try:
             api_info, api_params_dict = self._match_and_check_api(apicalling_info)   # match the standard API
         except Exception as e:
-            self._add_message(f"<API response> {str(e)}", role=Role.SYSTEM)
+            self.conv.add_message(f"<API response> {str(e)}", role=Role.SYSTEM)
             return APIOutput(name=apicalling_info.action, request=apicalling_info.action_input, response_status_code=500, response_data=str(e))
         # 2. call the api
         prediction = self._process_api(api_info, api_params_dict, apicalling_info)
@@ -86,7 +86,7 @@ class RequestTool(BaseTool):
             msg_content = f"<API response> {prediction.response_data}"
         else:
             msg_content = f"<API response> {prediction.response_status_code} {prediction.response_data}"
-        self._add_message(msg_content, role=Role.SYSTEM)
+        self.conv.add_message(msg_content, role=Role.SYSTEM)
         return prediction
 
 
@@ -124,7 +124,7 @@ class RequestTool(BaseTool):
                         api_arguments[k] = res["matched_entity"]
             # info the entity linking result
             if _api_arguments != api_arguments:
-                self._add_message(f"entity linked from {json.dumps(_api_arguments, ensure_ascii=False)} to {json.dumps(api_arguments, ensure_ascii=False)}", role=Role.SYSTEM)
+                self.conv.add_message(f"entity linked from {json.dumps(_api_arguments, ensure_ascii=False)} to {json.dumps(api_arguments, ensure_ascii=False)}", role=Role.SYSTEM)
             logger.info(f"entity linked from {json.dumps(_api_arguments, ensure_ascii=False)} to {json.dumps(api_arguments, ensure_ascii=False)}")
         return api_info, api_arguments
 

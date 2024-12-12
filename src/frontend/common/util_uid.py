@@ -14,8 +14,6 @@ from datetime import datetime, timedelta
 import pytz
 import hashlib
 
-
-
 # 解密 jwe头
 def decode_authorization_header(authorization_header, token):
     payload = {}

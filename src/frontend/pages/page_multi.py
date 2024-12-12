@@ -1,14 +1,43 @@
 """ 
+cases: https://doc.weixin.qq.com/sheet/e3_AcMATAZtAPIaxl2WshdR0KQkIBZdF?scode=AJEAIQdfAAoAaaG6YXAcMATAZtAPI&tab=BB08J2
+
+@241125 implement main agent (step 1)
+- [x] #feat main agent
+- [x] seperate single and multi workflow logic (refactor)
+@241126
+- [x] #feat implement workflow agents
+- [x] limit # ActionType.SWITCH in single turn (to avoid dead loop)? Maybe not necessary
+@241127
+- [x] #feat add activated workflow in the sidebar (ui_multi.py)
+@241202
+- [x] #bug, cannot refresh ss.conv when changing Single/Multi
+- [x] #feat refresh main & all workflow agents in [UI]
+- [x] #feat select workflow_dataset in [UI]
+@241204
+- [x] #feat add tools for main agent (Google Search)
+- [x] #feat #robust add error handler -> add retry_wrapper for `step_agent_main_prediction`
+- [x] #feat #debug add Mocked LLM (model_name="debug")
+@241205
+- [x] #feat #log save session infos to db
+- [x] #feat optimize visualization: modify `stream_generator` & `fake_stream` @ian
+- [x] #feat mock tool output
 @241211
+- [x] #structure refactor from `ui_conv`
+- [x] testing (debug): inspect prompt and output -> `page_inspect.py`
+
+todos
+- [ ] #bug, repeatly SWITCH workflow
+- [ ] #doc add standard test cases in doc [cases]
+- [ ] #tune set LLM parameters
 """
 import streamlit as st; ss = st.session_state
 import json, datetime
 from typing import Any, Union
 from flowagent.data import Conversation, Message, Role, BotOutput, APIOutput, MainBotOutput
 from flowagent.utils import retry_wrapper
-from .ui.ui_multi import init_sidebar, post_sidebar
-from .ui.data_multi import refresh_session_multi, init_tools
-from .common import fake_stream, StreamlitUtils
+from ..ui.ui_multi import init_sidebar, post_sidebar
+from ..ui.data_multi import refresh_session_multi, init_tools
+from ..common import fake_stream, StreamlitUtils
 from backend import FrontendClient
 st_utils = StreamlitUtils()
 

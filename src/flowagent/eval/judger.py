@@ -10,8 +10,8 @@ from typing import List, Dict, Optional, Tuple, Any
 from ..utils import Formater
 from loguru import logger
 from ..data import (
-    Config, Role, Message, Conversation, 
-    Workflow, DBManager, DataManager, UserProfile,
+    Config, Role, Conversation, 
+    Workflow, DBManager, 
     LogUtils
 )
 from ..utils import jinja_render, retry_wrapper, LLM_CFG, init_client

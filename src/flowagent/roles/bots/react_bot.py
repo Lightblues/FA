@@ -41,7 +41,7 @@ class ReactBot(BaseBot):
             msg_content = prediction.response
         else:
             msg_content = f"<Call API> {prediction.action}({prediction.action_input})"
-        self._add_message(msg_content, prompt=prompt, llm_response=llm_response)
+        self.conv.add_message(msg_content, llm_name=self.cfg.bot_llm_name, llm_prompt=prompt, llm_response=llm_response, role="bot_main")
         self.cnt_bot_actions += 1  # stat
         return prediction
 

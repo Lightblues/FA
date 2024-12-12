@@ -1,6 +1,6 @@
 import collections
 import streamlit as st; ss = st.session_state
-from flowagent.ui_conv.uid import get_identity
+from .util_uid import get_identity
 
 def init_resource():
     st.set_page_config(

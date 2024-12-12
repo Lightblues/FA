@@ -21,7 +21,6 @@ class DummyTool(BaseTool):
         """
         # raise NotImplementedError
         self.cnt_api_callings += 1
-        
-        self._add_message("api calling...")
+        self.conv.add_message("api calling...", role=Role.SYSTEM)
         api_output = APIOutput()
         return api_output

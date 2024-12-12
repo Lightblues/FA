@@ -25,7 +25,7 @@ from .session_context_single import (
     create_session_context_single, get_session_context_single, clear_session_context_single, 
     db_upsert_session_single, SingleSessionContext
 )
-from flowagent.data import Role, Message
+from flowagent.data import Message
 from ..typings import (
     SingleRegisterRequest, SingleRegisterResponse, 
     SingleBotPredictResponse, 
@@ -132,8 +132,8 @@ def single_post_control(conversation_id: str, bot_output: BotOutput) -> SinglePo
     """ Check the validation of bot's action
     NOTE: if not validated, the error infomation will be added to ss.conv!
     """
-    logger.info(f"[single_post_control] {conversation_id} with bot_output: {bot_output}")
     session_context = get_session_context_single(conversation_id)
+    logger.info(f"[single_post_control] {conversation_id} with `{list(session_context.controllers.keys())}`")
     success = True
     for controller in session_context.controllers.values():
         if not controller.if_post_control: continue

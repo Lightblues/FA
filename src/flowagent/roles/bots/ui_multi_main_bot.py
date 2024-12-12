@@ -114,5 +114,5 @@ class UIMultiMainBot(ReactBot):
             elif prediction.response:
                 msg_content = prediction.response
             else: raise NotImplementedError
-        self._add_message(msg_content, prompt=prompt, llm_response=llm_response, role="bot_main")
+        self.conv.add_message(msg_content, llm_name=self.cfg.mui_agent_main_llm_name, llm_prompt=prompt, llm_response=llm_response, role="bot_main")
         return prediction

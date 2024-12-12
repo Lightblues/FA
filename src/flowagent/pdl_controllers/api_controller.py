@@ -1,6 +1,6 @@
 from typing import Tuple, List, Union
 from .base_controller import BaseController
-from ..data import PDL, Conversation, Role, Message, Config, BotOutput, BotOutputType
+from ..data import PDL, Conversation, Role, BotOutput, BotOutputType
 
 
 class APIDuplicationController(BaseController):

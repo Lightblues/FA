@@ -3,9 +3,7 @@ st.set_page_config(
     page_title="Exp Analysis",
     page_icon=":bar_chart:",  # 💬📊 https://streamlit-emoji-shortcodes-streamlit-app-gwckff.streamlit.app
 )
-import pandas as pd
-from ..data import DBManager, Config, DataManager
-from .show_conversation import show_conversation_page
+from ..data import Config, DataManager
 from .show_data import show_data_page
 
 
@@ -20,8 +18,8 @@ def main(cfg_name: str):
     # add splitter
     st.sidebar.markdown("---")
 
-    if page == "🔍 Conversation":
-        show_conversation_page()
-    elif page == "📊 Data":
-        show_data_page()
-
+    match page:
+        case "📊 Data":
+            show_data_page()
+        case _: 
+            raise ValueError(f"Invalid page: {page}")

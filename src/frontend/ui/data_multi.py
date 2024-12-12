@@ -4,7 +4,7 @@
 
 """
 
-import yaml, os, pdb, datetime, collections, json, pymongo, time
+import json
 import streamlit as st; ss = st.session_state
 from flowagent.tools import TOOLS_MAP
 from flowagent.data import Config
@@ -28,13 +28,13 @@ def init_tools():
         ss.tools = ss.cfg.ui_tools
 
 def _collect_ui_config_tools():
-    """Collect tool configs from ss.tool_toggle_<tool_name>"""
+    """Collect `cfg.ui_tools` from ss.tool_toggle_<tool_name>"""
     for t in ss.cfg.ui_tools:
         t['is_enabled'] = ss.get(f"tool_toggle_{t['name']}", True)
     return ss.cfg.ui_tools
 
 def _collect_ui_config_workflows():
-    """Collect workflow configs from ss.workflow_checkbox_<workflow_name>"""
+    """Collect `cfg.mui_workflow_infos` from ss.workflow_checkbox_<workflow_name>"""
     for w in ss.cfg.mui_workflow_infos:
         # NOTE: use `get` to avoid KeyError. see `update_workflow_dependencies` in ui_multi.py
         w['is_activated'] = ss.get(f"workflow_checkbox_{w['name']}", True)
@@ -64,6 +64,7 @@ def refresh_session_multi():
 
     _collect_ui_config_tools()
     _collect_ui_config_workflows()
+
     # 2. init session!
     if "session_id" in ss and ss.session_id:
         # NOTE: disconnect the old session!

@@ -141,10 +141,11 @@ def post_sidebar():
         for index, controller in enumerate(ss.cfg.bot_pdl_controllers):
             col = cols[index % 3]
             with col:
-                controller['is_activated'] = st.checkbox(
+                st.checkbox(
                     controller['name'],
                     value=controller.get('is_activated', True),
-                    on_change=refresh_session_single
+                    key=f"controller_checkbox_{controller['name']}",
+                    on_change=refresh_session_single,
                 )
 
         # show the PDL and template

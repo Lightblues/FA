@@ -19,7 +19,7 @@ from .session_context_multi import (
     create_session_context, get_session_context_multi, clear_session_context_multi, MultiSessionContext, MULTI_SESSION_CONTEXT_MAP,
     db_upsert_session_multi
 )
-from flowagent.data import Role, Message
+from flowagent.data import Message
 from flowagent.tools import execute_tool_call
 from ..typings import (
     MultiRegisterRequest, MultiRegisterResponse,
@@ -188,8 +188,8 @@ def multi_post_control(conversation_id: str, bot_output: BotOutput) -> MultiPost
     """ Check the validation of bot's action
     NOTE: if not validated, the error infomation will be added to ss.conv!
     """
-    logger.info(f"[multi_post_control] {conversation_id} with bot_output: {bot_output}")
     session_context = get_session_context_multi(conversation_id)
+    logger.info(f"[multi_post_control] {conversation_id} with `{list(session_context.workflow_controllers.keys())}`")
     success = True
     for controller in session_context.workflow_controllers.values():
         if not controller.if_post_control: continue

@@ -12,7 +12,7 @@ todos
 """
 import requests, json, asyncio, aiohttp
 from typing import Union, Iterator, Tuple, AsyncIterator, Dict
-from flowagent.data import Config, DataManager, Conversation, BotOutput, Role, Message
+from flowagent.data import Config, Conversation, BotOutput, Role
 from ..typings import (
     SingleRegisterResponse, SingleRegisterRequest,
     SingleBotPredictResponse, 

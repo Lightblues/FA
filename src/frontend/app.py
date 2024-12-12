@@ -5,9 +5,9 @@ Run::
 import streamlit as st; ss = st.session_state
 from flowagent.data import Config, DataManager, init_loguru_logger
 if "logger" not in ss: ss.logger = init_loguru_logger(DataManager.DIR_ui_log)
-from .page_single import main_single
-from .page_multi import main_multi
-from .page_inspect import main_inspect
+from .pages.page_single import main_single
+from .pages.page_multi import main_multi
+from .pages.page_inspect import main_inspect
 from .common.util_st import init_resource
 
 # def set_global_exception_handler(f):

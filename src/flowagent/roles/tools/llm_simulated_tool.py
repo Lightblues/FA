@@ -41,7 +41,7 @@ class LLMSimulatedTool(BaseTool):
     def process(self, apicalling_info: BotOutput, *args, **kwargs) -> APIOutput:
         flag, m = self._check_validation(apicalling_info)
         if not flag:        # base check error!
-            self._add_message(m, role=Role.SYSTEM)
+            self.conv.add_message(m, role=Role.SYSTEM)
             prediction = APIOutput(name=apicalling_info.action, request=apicalling_info.action_input, response_data=m, response_status_code=404)
         else:
             self.cnt_api_callings[apicalling_info.action] += 1  # stat
@@ -53,7 +53,7 @@ class LLMSimulatedTool(BaseTool):
                 msg_content = f"<API response> {prediction.response_data}"
             else:
                 msg_content = f"<API response> {prediction.response_status_code} {prediction.response_data}"
-            self._add_message(msg_content, prompt=prompt, llm_response=llm_response, role=Role.SYSTEM)
+            self.conv.add_message(msg_content, llm_name=self.cfg.api_llm_name, llm_prompt=prompt, llm_response=llm_response, role=Role.SYSTEM)
         return prediction
     
     def _check_validation(self, apicalling_info: BotOutput) -> bool:

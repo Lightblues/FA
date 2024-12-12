@@ -7,12 +7,12 @@ def test_get_recent_conversation_ids():
     print(f"most_recent_conv_ids: {most_recent_conv_ids}")
 
 def test_message():
-    message = Message(role=Role.USER, content="Hello", prompt="prompt", llm_response="response", conversation_id="conv1", utterance_id=1)
+    message = Message(role=Role.USER, content="Hello", llm_prompt="prompt", llm_response="response", conversation_id="conv1", utterance_id=1)
     db_manager.insert_message(message)
 
     conversation = Conversation()
     conversation.msgs.append(message)
-    conversation.msgs.append(Message(role=Role.SYSTEM, content="Hi there!", prompt="prompt", llm_response="response", conversation_id="conv1", utterance_id=2))
+    conversation.msgs.append(Message(role=Role.SYSTEM, content="Hi there!", llm_prompt="prompt", llm_response="response", conversation_id="conv1", utterance_id=2))
     db_manager.insert_conversation(conversation)
 
     messages = db_manager.query_messages_by_conversation_id("conv1")

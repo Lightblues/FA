@@ -11,6 +11,6 @@ class CoREAPIHandler(LLMSimulatedTool):
     def process(self, apicalling_info: BotOutput, *args, **kwargs) -> APIOutput:
         # special jump process!
         if apicalling_info.action == "binary_choice":
-            self._add_message("<jump> success", role=Role.SYSTEM)
+            self.conv.add_message("<jump> success", role=Role.SYSTEM)
             return APIOutput(apicalling_info.action, apicalling_info.action_input, "success", 200)
         return super().process(apicalling_info, *args, **kwargs)

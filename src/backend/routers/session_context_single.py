@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from typing import Optional, Union, Dict
 from flowagent.roles import UISingleBot, RequestTool
 from flowagent.pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
-from flowagent.data import Workflow, Config, Conversation, BotOutput, Message, Role
+from flowagent.data import Workflow, Config, Conversation, BotOutput, Role
 
 from ..common.shared import get_db, get_logger
 logger = get_logger()
@@ -54,6 +54,7 @@ class SingleSessionContext(BaseModel):
         Returns:
             SessionContext: session context
         """
+        # logger.info(f"cfg.bot_pdl_controllers: {cfg.bot_pdl_controllers}")
         workflow = Workflow(cfg)
         conv = Conversation.create(session_id)
         conv.add_message(msg=cfg.ui_greeting_msg.format(name=workflow.pdl.Name), role=Role.BOT)

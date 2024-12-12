@@ -95,7 +95,8 @@ add_local_models()
 
 # set model alias!!
 _name_map = {
-    "default": "Vendor-A/Qwen/Qwen2.5-72B-Instruct",
+    # "default": "Vendor-A/Qwen/Qwen2.5-72B-Instruct",
+    "default": "Qwen2.5-72B-INT8",
     # "0.9.1": "Qwen1.5-72B-4M-1_0_3-Agent-1_2_KU_woClarify_AllRandom", # 已关闭
     "1.0.2": "Taskformer1.0.2",
     "神农大模型": "Qwen2.5-72B-INT8",

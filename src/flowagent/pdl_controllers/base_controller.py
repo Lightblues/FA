@@ -1,6 +1,6 @@
 import abc
 from typing import Tuple, List, Dict
-from ..data import PDL, Conversation, Role, Message, Config, BotOutput
+from ..data import PDL, Conversation, Role, Config, BotOutput
 
 
 class BaseController:
@@ -47,11 +47,7 @@ class BaseController:
         res, msg_content = self._post_check_with_message(bot_output)
         # print(f">>> {self.name} post_control: {res} {msg_content}")
         if not res:
-            msg = Message(
-                Role.SYSTEM, msg_content, prompt="", llm_response="",
-                conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
-            )
-            self.conv.add_message(msg)
+            self.conv.add_message(msg_content, role=Role.SYSTEM)
         return res
     
     def response_control(self, bot_output: BotOutput) -> bool:
@@ -59,12 +55,9 @@ class BaseController:
         assert self.if_response_control, "if_response_control should be True"
         res, msg_content = self._response_check_with_message(bot_output)
         if not res:
-            msg = Message(
-                Role.SYSTEM, msg_content, prompt="", llm_response="",
-                conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
-            )
-            self.conv.add_message(msg)
+            self.conv.add_message(msg_content, role=Role.SYSTEM)
         return res
+
 
     @abc.abstractmethod
     def _pre_control(self, prev_bot_output: BotOutput):

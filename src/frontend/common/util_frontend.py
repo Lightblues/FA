@@ -6,7 +6,7 @@ from flowagent.data import APIOutput, Message
 def fake_stream(response: str) -> Iterator[str]:
     for chunk in response:
         yield chunk
-        time.sleep(0.02)
+        time.sleep(0.002)
 
 class StreamlitUtils:
     def show_api_call(self, api_output: APIOutput):

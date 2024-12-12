@@ -50,13 +50,6 @@ class BaseTool(BaseRole):
         """
         raise NotImplementedError
 
-    def _add_message(self, msg_content: str, prompt: str=None, llm_response:str=None, role:Union[Role, str]=Role.SYSTEM):
-        msg = Message(
-            role=role, content=msg_content, prompt=prompt, llm_response=llm_response,
-            conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
-        )
-        self.conv.add_message(msg)
-
 
 class BaseBot(BaseRole):
     names: List[str] = None
@@ -83,12 +76,6 @@ class BaseBot(BaseRole):
         llm_response_stream = self.llm.query_one_stream_generator(prompt)
         return prompt, llm_response_stream
 
-    def _add_message(self, msg_content: str, prompt: str=None, llm_response:str=None, role:Union[Role, str]=Role.BOT):
-        msg = Message(
-            role=role, content=msg_content, prompt=prompt, llm_response=llm_response,
-            conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
-        )
-        self.conv.add_message(msg)
 
 class BaseUser(BaseRole):
     names: List[str] = None     # for convert name2role

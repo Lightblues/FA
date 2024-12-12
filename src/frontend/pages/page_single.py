@@ -1,5 +1,23 @@
 """ 
+url: http://agent-pdl.woa.com
+cases: https://doc.weixin.qq.com/sheet/e3_AcMATAZtAPIaxl2WshdR0KQkIBZdF?scode=AJEAIQdfAAolrl13UxAcMATAZtAPI&tab=qe4ogl
 
+@240718 implement basic UI for single workflow
+- [x] [feat] show Huabu meta information in the sidebar
+- [x] [log] add more detailed logs
+- [x] [feat] mofigy template/PDL in the web directly!  -- not good
+@240723 update V2 UI
+- [x] [feat] clearily log and print infos
+- [x] add refresh api (refresh_conversation / refresh_workflow)
+@241120 merge to master & refresh
+- [x] refactor: align with [~master]
+- [x] for streamlit, implement refresh mechanism: `refresh_config` of workflow, bot, api;  `refresh_pdl` of controller
+@20241127
+- [x] align with test data (https://doc.weixin.qq.com/sheet/e3_AEcAggZ1ACcumx7zFjoQGOBubNd0p?scode=AJEAIQdfAAosxBjyslAcMATAZtAPI&tab=0koe96)
+- [x] dataset: huabu_1127
+- [x] equip EntityLinker! 
+@241202
+- [x] #feat select workflow_dataset in UI
 @241209 
 - [x] basic UI implement from [ui_conv] -> Front-Backend Separation
     -> see `backend/client.py`
@@ -11,17 +29,16 @@
     check the time to `refresh_session()`!
 - [x] submit `single_disconnect` to clear backend cache (with `single_register`)
 - [x] #feat add `single_disconnect` to clear the session context when user exit the page
-
-todos
-- [ ] #bug check the controllers
+@241212
+- [x] #bug check the controllers
 """
 import streamlit as st; ss = st.session_state
 import json, datetime
-from flowagent.data import Conversation, Message, Role, BotOutput, APIOutput
+from flowagent.data import Conversation, Role, BotOutput, APIOutput
 from flowagent.utils import retry_wrapper
-from .ui.ui_single import init_sidebar, post_sidebar
-from .ui.data_single import refresh_session_single
-from .common import fake_stream, StreamlitUtils
+from ..ui.ui_single import init_sidebar, post_sidebar
+from ..ui.data_single import refresh_session_single
+from ..common import fake_stream, StreamlitUtils
 from backend import FrontendClient
 st_utils = StreamlitUtils()
 

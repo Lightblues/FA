@@ -11,7 +11,6 @@ _session_info = {
 """
 from typing import *
 import pymongo, pymongo.results
-from pymongo.database import Database
 from flowagent.data import Conversation, Message, Config
 
 

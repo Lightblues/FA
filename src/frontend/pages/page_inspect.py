@@ -12,7 +12,7 @@ Display logic:
 
 from typing import List
 import streamlit as st; ss = st.session_state
-from .common.util_db import DBUtils
+from ..common.util_db import DBUtils
 
 COLLECTION_NAMES = {
     "single": "backend_single_sessions",
@@ -33,6 +33,7 @@ def get_latest_sessionids(refresh: bool=False) -> List[str]:
 
 def main_inspect():
     if "db_utils" not in ss: ss.db_utils = DBUtils()
+    # if "inspect_mode" not in ss: ss.inspect_mode = "single"  # NOTE: set default mode to single
     db_utils: DBUtils = ss.db_utils
 
     with st.sidebar:
@@ -94,7 +95,7 @@ def main_inspect():
                 "3️⃣ Select utterance_id", options=utterance_ids)
     
         st.markdown(f"### Details of `utterance_id={selected_utterance_id}`")
-        with st.expander("Details"):
+        with st.expander("Details", expanded=True):
             if selected_utterance_id is not None:
                 selected_row = df[df['utterance_id'] == selected_utterance_id].iloc[0]
                 st.write(selected_row.to_dict())

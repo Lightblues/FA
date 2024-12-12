@@ -57,7 +57,7 @@ class UISingleBot(ReactBot):
         elif prediction.response:
             msg_content = prediction.response
         else: raise NotImplementedError
-        self._add_message(msg_content, prompt=prompt, llm_response=llm_response)
+        self.conv.add_message(msg_content, llm_name=self.cfg.ui_bot_llm_name, llm_prompt=prompt, llm_response=llm_response, role="bot_main")
         return prediction
 
     @staticmethod

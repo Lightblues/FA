@@ -62,7 +62,7 @@ class LLMSimulatedUserWithProfile(BaseUser):
             return llm_response, prediction
         llm_response, prediction = process_with_retry(prompt)
         msg = Message(
-            Role.USER, prediction.response_content, prompt=prompt, llm_response=llm_response,
+            Role.USER, prediction.response_content, llm_prompt=prompt, llm_response=llm_response,
             conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id
         )
         self.conv.add_message(msg)
@@ -132,7 +132,7 @@ class LLMSimulatedUserWithOOW(LLMSimulatedUserWithProfile):
         llm_response, prediction = process_with_retry(prompt)
         # 3. note to add type! 
         msg = Message(
-            Role.USER, prediction.response_content, prompt=prompt, llm_response=llm_response,
+            Role.USER, prediction.response_content, llm_prompt=prompt, llm_response=llm_response,
             conversation_id=self.conv.conversation_id, utterance_id=self.conv.current_utterance_id,
             type="" if not if_oow else oow_intention.name   # TODO the detailed OOW type? 
         )

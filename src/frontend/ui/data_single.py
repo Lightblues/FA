@@ -8,13 +8,12 @@ from typing import List, Dict, Iterator
 import yaml, os, pdb, datetime, collections, json, pymongo, time
 import streamlit as st; ss = st.session_state
 
-from flowagent.data import (
-    Config, DataManager, Workflow
-)
+from flowagent.data import Config, DataManager
 from flowagent.utils import LLM_CFG
 
 def debug_print_infos_single() -> None:
     print(f"[DEBUG] Conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
+    print(f"  > mode: {ss.mode}")
     print(f"  > cfg.bot_pdl_controllers: {ss.cfg.bot_pdl_controllers}")
 
 @st.cache_data
@@ -37,6 +36,12 @@ def get_session_id():
     # "%Y-%m-%d %H:%M:%S.%f"
     return datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 
+def _collect_ui_config_controllers():
+    """Collect `cfg.bot_pdl_controllers` from ss.controller_checkbox_<controller_name>"""
+    for c in ss.cfg.bot_pdl_controllers:
+        c['is_activated'] = ss.get(f"controller_checkbox_{c['name']}", True)
+    return ss.cfg.bot_pdl_controllers
+
 def refresh_session_single():
     """ Refresh the config and init new session
     NOTE: will reset a new session!
@@ -57,6 +62,8 @@ def refresh_session_single():
     cfg.pdl_version = ss.selected_pdl_version
     cfg.ui_bot_template_fn = f"flowagent/{ss.selected_template_fn}"
     cfg.ui_bot_llm_name = ss.selected_model_name
+
+    _collect_ui_config_controllers()
 
     # 2. init session!
     if "session_id" in ss and ss.session_id:
