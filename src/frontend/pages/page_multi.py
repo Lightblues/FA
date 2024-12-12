@@ -70,7 +70,7 @@ def step_user_input(query: str):
 def step_agent_workflow_prediction() -> BotOutput:
     print(f">> conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
     client: FrontendClient = ss.client
-    with st.expander(f"Thinking...", expanded=True):
+    with st.expander(f"{ss['tool_emoji']['think']} Thinking...", expanded=True):
         llm_response = st.write_stream(client.multi_bot_workflow_predict(ss.session_id))
     res = client.multi_bot_workflow_predict_output(ss.session_id)
     return res.bot_output
@@ -79,7 +79,7 @@ def step_agent_workflow_prediction() -> BotOutput:
 def step_agent_main_prediction() -> Union[MainBotOutput, Message]:
     print(f">> conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
     client: FrontendClient = ss.client
-    with st.expander(f"Thinking...", expanded=True):
+    with st.expander(f"{ss['tool_emoji']['think']} Thinking...", expanded=True):
         _ = st.write_stream(client.multi_bot_main_predict(ss.session_id))
     res = client.multi_bot_main_predict_output(ss.session_id)
     return res.bot_output, res.msg

@@ -77,7 +77,7 @@ def step_bot_prediction() -> BotOutput:
     print(f">> conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
     client: FrontendClient = ss.client
     
-    with st.expander(f"Thinking...", expanded=True):
+    with st.expander(f"{ss['tool_emoji']['think']} Thinking...", expanded=True):
         llm_response = st.write_stream(client.single_bot_predict(ss.session_id))
     res = client.single_bot_predict_output(ss.session_id)
     return res.bot_output
