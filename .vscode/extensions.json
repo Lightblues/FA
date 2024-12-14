@@ -19,6 +19,7 @@
         "noxiz.jinja-snippets",         // j.comm
         // markdown
         "yzhang.markdown-all-in-one",
+        "kortina.vscode-markdown-notes",
         // YAML
         "redhat.vscode-yaml",
     ]

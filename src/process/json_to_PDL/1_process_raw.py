@@ -1,5 +1,5 @@
 """ 
-doc: https://doc.weixin.qq.com/slide/p3_AcMATAZtAPIVToQc9ODQIeVMJUBMV?scode=AJEAIQdfAAoaJOY0L7AcMATAZtAPI
+doc: [画布转换&执行方案](https://doc.weixin.qq.com/slide/p3_AcMATAZtAPIVToQc9ODQIeVMJUBMV?scode=AJEAIQdfAAoaJOY0L7AcMATAZtAPI)
 
 1. raw JSON, with "Edges" -> concise JSON
 2. LLM convert -> standard Node descripion
