@@ -6,7 +6,7 @@ from .nodes import WorkflowNodeBase
 class WorkflowEdge(BaseModel):
     """Workflow edge"""
     source: str
-    sourceHandle: str
+    sourceHandle: Optional[str] = None
     target: str
     type: str
     data: dict

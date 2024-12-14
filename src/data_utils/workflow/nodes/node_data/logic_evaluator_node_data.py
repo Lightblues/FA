@@ -5,15 +5,14 @@ from .base import NodeDataBase
 class _LogicComparison(BaseModel):
     Left: Any
     LeftType: str
-    Operator: str  # TODO: to enum
+    Operator: str  # TODO: to enum. 
     Right: Any     # TODO: to enum | USER_INPUT (固定值) | REFERENCE_OUTPUT
     MatchType: str  # TODO: to enum | SEMANTIC
 
 class _LogicLogical(BaseModel):
     LogicalOperator: str  # TODO: to enum
-    LogicalOperator: str  # TODO: to enum
-    Compound: List[Any]
-    Comparison: _LogicComparison
+    Compound: List[Any]     # OR | 
+    Comparison: _LogicComparison = None
 
 class _LogicCondition(BaseModel):
     NextNodeIDs: List[str]

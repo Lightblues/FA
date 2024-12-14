@@ -48,6 +48,7 @@ import pandas as pd
 from typing import *
 
 from .common import *
+from .workflow import Workflow
 
 class DataManager:
     DIR_root = pathlib.Path(__file__).resolve().parent.parent.parent.parent
@@ -100,12 +101,14 @@ class DataManager:
         return res
 
     def get_standard_workflow_id(self, workflow_id: Union[str, int]):
+        """Convert the workflow id to the standard format"""
         if isinstance(workflow_id, int):
             workflow_id = f"{workflow_id:03d}"
         assert workflow_id in self.workflow_infos, f"workflow_id {workflow_id} not found"
         return workflow_id
 
-    def get_workflow_by_id(self, workflow_id: Union[str, int], verbose: bool = False):
+    def get_workflow_by_id(self, workflow_id: Union[str, int], return_dict: bool = False, verbose: bool = False) -> Workflow:
+        """Get the workflow by id"""
         workflow_id = self.get_standard_workflow_id(workflow_id)
         fn = self.DIR_data / self.data_version / self.export_version / self.workflow_infos[workflow_id]["workflow_fn"]
         workflow = json.load(open(fn, "r", encoding="utf-8"))
@@ -115,80 +118,18 @@ class DataManager:
         workflow["Edges"] = json.loads(workflow.pop("Edge"))
         if verbose:
             print(f"--- Loaded [{workflow_id}] {workflow['WorkflowName']} {workflow['WorkflowID']} ---")
-        return workflow
+        if return_dict:
+            return workflow
+        else:
+            return Workflow(**workflow)
 
-    def build_edge_graph(self, nodes: List[Dict], edges: List[Dict]):
-        """Build the edge graph from the nodes and edges.
-        - [ ] use LLM to summarize each node?
-        - [ ] generate node dependency graph? 
-        """
-        node_id_to_name = {node["NodeID"]: node["NodeName"] for node in nodes}
-        g_edges = []
-        for edge in edges:
-            g_edges.append((node_id_to_name[edge["source"]], node_id_to_name[edge["target"]]))
-        print(g_edges)
-        print(len(g_edges))
-        return g_edges
-    
-
-    def check_all_node_types(self):
-        """ check the possible node types """
-        # NoteType: {'CODE_EXECUTOR', 'PARAMETER_EXTRACTOR', 'LLM', 'LLM_KNOWLEDGE_QA', 'LOGIC_EVALUATOR', 'ANSWER', 'KNOWLEDGE_RETRIEVER', 'START', 'TOOL'}
-        node_types = set()
-        for workflow_id, workflow_info in self.workflow_infos.items():
-            nodes = self.get_workflow_by_id(workflow_id)
-            for node in nodes:
-                node_types.add(node["NodeType"])
-        print(f"> all node types: {node_types}")
-        return node_types
-    
-    def get_nodes_by_type(self, node_type: str, workflow_id: Union[str, int] = None):
-        workflow_ids = list(self.workflow_infos.keys()) if workflow_id is None else [self.get_standard_workflow_id(workflow_id)]
-        nodes_all = []
-        for workflow_id in workflow_ids:
-            nodes, _ = self.get_workflow_by_id(workflow_id)
-            for node in nodes:
-                if node["NodeType"] == node_type:
-                    nodes_all.append(node)
-        return nodes_all
-
-    def print_node_properties(self, node: Dict):
-        # CODE_EXECUTOR -> CodeExecutorNodeData
-        # node_type_camel = node['NodeType'].title().replace("_", "") + "NodeData"  # NOTE: error, because LLM -> LLMNodeData
-        node_data = node[NODE_TYPE_KEY_MAP[node['NodeType']]]
-        s = f"--- {node['NodeType']} ---\n [{node['NodeName']}] {node['NodeID']}\n  desc: {node['NodeDesc']}\n  node_data: {node_data}"
-        print(s)
-        return list(node_data.keys())
 
     def stat_node_type(self):
+        """Stat the node type distribution of the dataset"""
         print(f"--- workflow node type stat ---")
         for workflow_id, workflow_info in self.workflow_infos.items():
-            nodes, _ = self.get_workflow_by_id(workflow_id)
-            cnt = collections.Counter([node["NodeType"] for node in nodes])
+            workflow = self.get_workflow_by_id(workflow_id)
+            cnt = collections.Counter([node.NodeType for node in workflow.Nodes])
             print(f"{workflow_id} [{workflow_info['workflow_name']}]: {cnt}")
 
-
-if __name__ == "__main__":
-    data_manager = DataManager()
-    # nodes, edges = data_manager.get_workflow_by_id(4)
-    # g_edges = data_manager.build_edge_graph(nodes, edges)
-    
-    # 1. check all node types
-    def check_all_node_types():
-        data_manager.check_all_node_types()
-    # 2. check each node type
-    def check_node_type():
-        for node_type in WORKFLOW_NODE_TYPES:
-            nodes = data_manager.get_nodes_by_type(node_type)
-            properties = data_manager.print_node_properties(nodes[0])
-            print(f"> {node_type}: {properties}")
-    # nodes_tool = data_manager.get_nodes_by_type("TOOL")
-    # print(nodes_tool[0])
-    # 3.9 stat node type
-    def stat_node_type():
-        data_manager.stat_node_type()
-    # stat_node_type()
-
-
-    print()
 
