@@ -1,6 +1,11 @@
+"""Workflow
+
+NOTE: 
+1. edge: `source, target` is -> NodeID
+"""
+
 from pydantic import BaseModel
 from typing import *
-from .common import NODE_TYPE_KEY_MAP
 from .nodes import WorkflowNodeBase
 
 class WorkflowEdge(BaseModel):
@@ -47,11 +52,14 @@ class Workflow(BaseModel):
             s += f"{edge}\n"
         return s
 
-    def check_edges(self) -> bool:
+    def check_validation(self) -> bool:
         """Check the edge infos for PDL conversion
-        1. check that the source and target are valid node ids
-        2. is it ture that only `source, target` are needed for PDL conversion?
+        NOTE: only used in EDA
+
+        - [x] edges: check that the source and target are valid node ids
+        - [ ] node.LogicEvaluator...Reference: check JsonPath
         """
+        # 1. edges
         for edge in self.Edges:
             if (edge.source not in self.node_id_to_node) or (edge.target not in self.node_id_to_node):
                 raise ValueError(f"Invalid edge: {edge}")

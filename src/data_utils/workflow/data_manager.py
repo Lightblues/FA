@@ -49,6 +49,8 @@ from typing import *
 
 from .common import *
 from .workflow import Workflow
+from .parameter import Parameter
+
 
 class DataManager:
     DIR_root = pathlib.Path(__file__).resolve().parent.parent.parent.parent
@@ -86,7 +88,7 @@ class DataManager:
                 print(f"  {id}: {info['workflow_name']}")
         return res
 
-    def load_parameter_infos(self, verbose: bool = False):
+    def load_parameter_infos(self, verbose: bool = False) -> Dict[str, Parameter]:
         """ Load parameter infos
         Output: { id: {infos} }
         """
@@ -97,7 +99,10 @@ class DataManager:
         df.rename(columns=dict(zip(columns_old, columns_new)), inplace=True)
         res = {}
         for idx, row in df.iterrows():
-            res[row["parameter_id"]] = row
+            data = row.to_dict()
+            # NOTE: remove values with NaN
+            data = {k: v for k, v in data.items() if not pd.isna(v)}
+            res[row["parameter_id"]] = Parameter(**data)
         return res
 
     def get_standard_workflow_id(self, workflow_id: Union[str, int]):

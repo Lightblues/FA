@@ -5,14 +5,13 @@
 - [x] implement to_pdl() for node: ANSWER, TOOL
 """
 from typing import *
-from enum import Enum
 from pydantic import BaseModel
 
 from ..common import *
 from .node_data.base import NodeDataBase
 from .node_data.tool_node_data import _TOOL_QUERY
 from pdl.typings import *
-
+from .node_input import NodeOutput
 # ---------------------------------------------------
 # NodeData
 # ---------------------------------------------------
@@ -28,30 +27,6 @@ class NodeTypeRegistry:
         return cls._node_types.get(node_type)
 
 # ---------------------------------------------------
-# Inputs & Outputs
-# ---------------------------------------------------
-class _InputType(Enum):
-    REFERENCE_OUTPUT = "REFERENCE_OUTPUT"
-    REFERENCE_INPUT = "REFERENCE_INPUT"
-    REFERENCE_PARAMETER = "REFERENCE_PARAMETER"
-
-class _InputData(BaseModel):
-    InputType: str
-    Reference: Dict[str, Any]  # TODO: reference node representation
-
-    def __str__(self):
-        return f"{self.InputType} {self.Reference}"
-
-class NodeInput(BaseModel):
-    Name: str
-    Type: str           # STRING
-    Input: _InputData
-    Desc: str
-
-    def __str__(self):
-        return f"[{self.Name}] ({self.Type}) {self.Input}"
-
-# ---------------------------------------------------
 # WorkflowNode
 # ---------------------------------------------------
 class WorkflowNodeBase(BaseModel):
@@ -60,8 +35,8 @@ class WorkflowNodeBase(BaseModel):
     NodeName: str
     NodeDesc: str
     NodeType: str
-    Inputs: List[NodeInput]
-    Outputs: List[Dict[str, Any]]
+    Inputs: List[Any]           # ...
+    Outputs: List[NodeOutput]
     NextNodeIDs: List[str]
     # NodeUI: Union[_NodeUI, str]
     NodeUI: str                     # NOTE do not need NodeUI for now

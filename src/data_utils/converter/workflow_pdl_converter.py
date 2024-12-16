@@ -1,22 +1,25 @@
 """ 
-TODO:
+@241214
 - [ ] buld typing for workflow
     - [x] nodes (node data)
     - [ ] input / output (reference)
+@241216
 - [ ] implement to_pdl() for each node
     - [ ] params
     - [x] ANSWER
     - [x] TOOL
     - [ ] LOGIC_EVALUATOR
+
+TODO:
 - [ ] use LLM to generate summary for each node
 - [ ] draw node graph (e.g. with graphviz | pyecharts)
-- [ ] implement WorkflowPDLConverter
 
 - [ ] finish convert for `001: 同程开发票`!
     nodes: ANSWER, PARAMETER_EXTRACTOR, TOOL, LOGIC_EVALUATOR
 """
 
-from ..workflow import DataManager, Workflow
+from typing import List
+from ..workflow import DataManager, Workflow, Parameter
 from pdl.typings import PDL
 
 VALID_NODE_TYPES = ("START", "ANSWER", "PARAMETER_EXTRACTOR", "TOOL", "LOGIC_EVALUATOR")
@@ -32,12 +35,14 @@ class WorkflowPDLConverter:
         workflow = self.data_manager.get_workflow_by_id(workflow_id)
         assert all(node.NodeType in VALID_NODE_TYPES for node in workflow.Nodes), f"Invalid node type found in workflow, valid types: {VALID_NODE_TYPES}"
         # 2. convert the nodes
-        APIS = []; SLOTs = []; ANSWERs = []
+        APIs = []; ANSWERs = []
         for node in workflow.Nodes:
             if node.NodeType == "TOOL":
-                APIS.append(node.to_pdl())
+                APIs.append(node.to_pdl())
             elif node.NodeType == "ANSWER":
                 ANSWERs.append(node.to_pdl())
+        params = [p for p in self.data_manager.parameter_infos.values() if p.workflow_id == workflow.WorkflowID]
+        SLOTs = [p.to_pdl() for p in params]
         # 3. convert the workflow procedure
         procedure = ""
         ...
@@ -45,13 +50,14 @@ class WorkflowPDLConverter:
         pdl = PDL(
             Name=workflow.WorkflowName,
             Desc=workflow.WorkflowDesc,
-            APIs=APIS,
+            APIs=APIs,
             SLOTs=SLOTs,
             ANSWERs=ANSWERs,
             Procedure=procedure
         )
         return pdl
     
+
     def build_edge_graph(self, workflow: Workflow):
         """Build the edge graph from the nodes and edges.
         - [ ] use LLM to summarize each node?
