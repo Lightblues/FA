@@ -1,14 +1,25 @@
 """ 
 TODO:
 - [ ] buld typing for workflow
-    - [ ] nodes (node data)
+    - [x] nodes (node data)
     - [ ] input / output (reference)
+- [ ] implement to_pdl() for each node
+    - [ ] params
+    - [x] ANSWER
+    - [x] TOOL
+    - [ ] LOGIC_EVALUATOR
 - [ ] use LLM to generate summary for each node
 - [ ] draw node graph (e.g. with graphviz | pyecharts)
 - [ ] implement WorkflowPDLConverter
+
+- [ ] finish convert for `001: 同程开发票`!
+    nodes: ANSWER, PARAMETER_EXTRACTOR, TOOL, LOGIC_EVALUATOR
 """
 
 from ..workflow import DataManager, Workflow
+from pdl.typings import PDL
+
+VALID_NODE_TYPES = ("START", "ANSWER", "PARAMETER_EXTRACTOR", "TOOL", "LOGIC_EVALUATOR")
 
 class WorkflowPDLConverter:
     def __init__(self, data_version: str="huabu_1127", export_version: str="export-1732628942") -> None:
@@ -17,9 +28,29 @@ class WorkflowPDLConverter:
         self.data_manager = DataManager(data_version, export_version)
 
     def convert(self, workflow_id: str):
+        # 1. load the workflow
         workflow = self.data_manager.get_workflow_by_id(workflow_id)
-        g = self.build_edge_graph(workflow)
-        print(g)
+        assert all(node.NodeType in VALID_NODE_TYPES for node in workflow.Nodes), f"Invalid node type found in workflow, valid types: {VALID_NODE_TYPES}"
+        # 2. convert the nodes
+        APIS = []; SLOTs = []; ANSWERs = []
+        for node in workflow.Nodes:
+            if node.NodeType == "TOOL":
+                APIS.append(node.to_pdl())
+            elif node.NodeType == "ANSWER":
+                ANSWERs.append(node.to_pdl())
+        # 3. convert the workflow procedure
+        procedure = ""
+        ...
+        # 4. build the PDL
+        pdl = PDL(
+            Name=workflow.WorkflowName,
+            Desc=workflow.WorkflowDesc,
+            APIs=APIS,
+            SLOTs=SLOTs,
+            ANSWERs=ANSWERs,
+            Procedure=procedure
+        )
+        return pdl
     
     def build_edge_graph(self, workflow: Workflow):
         """Build the edge graph from the nodes and edges.
