@@ -2,7 +2,7 @@
 Usage::
 
     cd src
-    uvicorn backend.main:app --host 0.0.0.0 --port 8100 --reload --reload-dir ./backend
+    CONFIG_NAME=default.yaml uvicorn backend.main:app --host 0.0.0.0 --port 8100 --reload --reload-dir ./backend
 
 @241208
 - [x] basic implement with FastAPI
@@ -18,14 +18,19 @@ Usage::
 """
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from flowagent.data import Config
+from flowagent.data import Config, init_loguru_logger, DataManager
+import os
 
 from .common.shared import SharedResources
 
 
 def init_app() -> FastAPI:
+    # Get config name from environment variable, default to 'default.yaml'
+    config_name = os.environ.get('CONFIG_NAME', 'default.yaml')
+    
     # Initialize configuration
-    cfg = Config()
+    cfg = Config.from_yaml(DataManager.normalize_config_name(config_name))
+    init_loguru_logger(DataManager.DIR_backend_log)
     SharedResources.initialize(cfg)
 
     app = FastAPI(

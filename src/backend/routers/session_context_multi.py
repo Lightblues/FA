@@ -13,9 +13,9 @@ from typing import Optional, Union, Dict
 from flowagent.roles import UIMultiMainBot, UIMultiWorkflowBot, RequestTool
 from flowagent.pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
 from flowagent.data import Workflow, Config, Conversation, BotOutput
+from loguru import logger
 
-from ..common.shared import get_db, get_logger
-logger = get_logger()
+from ..common.shared import get_db
 db = get_db()
 
 class MultiSessionContext(BaseModel):
@@ -133,11 +133,17 @@ def db_upsert_session_multi(ss: MultiSessionContext):
         "conversation": ss.conv.to_list(), # TODO: only save messages? polish it!
         "config": ss.cfg.model_dump(),      # to_list -> model_dump
     }
-    db.backend_multi_sessions.replace_one(
-        {"session_id": ss.session_id},
-        _session_info,
-        upsert=True
-    )
+    if not db:
+        logger.warning(f"Skipping database operation for session {ss.session_id} due to connection failure")
+        return
+    try:
+        db.backend_multi_sessions.replace_one(
+            {"session_id": ss.session_id},
+            _session_info,
+            upsert=True
+        )
+    except Exception as e:
+        logger.error(f"Failed to save session {ss.session_id}: {e}")
 
 def clear_session_contexts_multi():
     """Clear all the session contexts:

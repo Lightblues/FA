@@ -13,6 +13,7 @@ Test: see `test/backend/test_ui_backend_multi.py`
 """
 import json
 from typing import Iterator
+from loguru import logger
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from .session_context_multi import (
@@ -27,8 +28,6 @@ from ..typings import (
     MultiBotWorkflowPredictResponse, MultiPostControlResponse, MultiToolWorkflowResponse,
     BotOutput
 )
-from ..common.shared import get_logger
-logger = get_logger()
 
 
 def generate_response_main(session_context: MultiSessionContext) -> Iterator[str]:
@@ -46,7 +45,7 @@ def generate_response_main(session_context: MultiSessionContext) -> Iterator[str
         yield f"data: {json.dumps(chunk_output, ensure_ascii=False)}\n\n"
     llm_response = "".join(llm_response)
     bot_output = session_context.agent_main.process_LLM_response(prompt, llm_response)
-    _debug_msg = f"\n{f'({session_context.session_id}) [BOT]'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
+    _debug_msg = f"\n{f'({session_context.session_id}) [BOT_MAIN] ({session_context.agent_main.llm.model_name})'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
     logger.bind(custom=True).debug(_debug_msg)
     session_context.last_bot_output = bot_output
     # NOTE: if switched to a workflow, set curr_status & init the workflow agent!
@@ -80,7 +79,7 @@ def generate_response_workflow(session_context: MultiSessionContext) -> Iterator
         yield f"data: {json.dumps(chunk_output, ensure_ascii=False)}\n\n"
     llm_response = "".join(llm_response)
     bot_output = session_context.workflow_agent.process_LLM_response(prompt, llm_response)
-    _debug_msg = f"\n{f'({session_context.session_id}) [BOT]'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
+    _debug_msg = f"\n{f'({session_context.session_id}) [BOT_{session_context.workflow_agent.workflow.name}] ({session_context.workflow_agent.llm.model_name})'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
     logger.bind(custom=True).debug(_debug_msg)
     session_context.last_bot_output = bot_output
     # NOTE: set curr_status if switched

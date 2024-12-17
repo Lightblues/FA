@@ -12,8 +12,7 @@ from fastapi.responses import StreamingResponse
 from .session_context_multi import get_session_context_multi
 from flowagent.tools import execute_tool_call
 from ..typings import MultiToolMainResponse, MainBotOutput
-from ..common.shared import get_logger
-logger = get_logger()
+from loguru import logger
 
 router_tool = APIRouter()
 

@@ -2,6 +2,7 @@
 ui_available_models: 
   - "1.0.2"
   - "default"
+  - "gpt-4o-mini"
   - "gpt-4o"
   - Vendor-A/Qwen/Qwen2.5-72B-Instruct
   - Qwen/Qwen2.5-7B-Instruct
@@ -34,6 +35,7 @@ mui_agent_workflow_template_fn: "flowagent/bot_mui_workflow_agent.jinja"
 mui_available_models: 
   - "1.0.2"
   - "default"
+  - "gpt-4o-mini"
   - "gpt-4o"
   - Vendor-A/Qwen/Qwen2.5-72B-Instruct
   - Qwen/Qwen2.5-7B-Instruct
@@ -95,6 +97,8 @@ db_uri: 'mongodb://localhost:27017'
 db_name: "agent-pdl"
 # db_message_collection_name: "messages"
 # db_meta_collection_name: "config"
+
+backend_url: "http://localhost:8100"
 
 # simulate_num_persona: 5
 # simulate_max_workers: 10

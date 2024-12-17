@@ -28,7 +28,8 @@ class UIMultiWorkflowBot(ReactBot):
 
     def __init__(self, **args):
         super().__init__(**args)
-        self.llm = init_client(llm_cfg=LLM_CFG[self.cfg.mui_agent_main_llm_name]) 
+        self.llm = init_client(llm_cfg=LLM_CFG[self.cfg.mui_agent_main_llm_name])
+        
 
     def refresh_llm(self, llm_name: str):
         print(f"> refreshing llm to {llm_name}")

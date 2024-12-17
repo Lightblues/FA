@@ -1,14 +1,45 @@
-import pymongo, loguru
-from loguru._logger import Logger
-from flowagent.data import Config, init_loguru_logger, DataManager
+""" 
+- [ ] #debug skip `db` operations for debuging
+"""
+
+from typing import Union
+import pymongo
+from pymongo.database import Database
+from pymongo.mongo_client import MongoClient
+from flowagent.data import Config
+from loguru import logger
+
+
+def check_db_connection(client: MongoClient) -> bool:
+    """Check if MongoDB client connection is available
+    
+    Args:
+        client: MongoDB client instance
+    Returns:
+        bool: True if connected, False otherwise
+    """
+    try:
+        # Ping the database
+        client.admin.command('ping')
+        return True
+    except Exception as e:
+        logger.warning(f"MongoDB client {client} connection failed: {e}")
+        return False
+
 
 class SharedResources:
     _instance = None
-    
+    db_client: MongoClient = None
+    db: Database = None
+
     def __init__(self, config: Config):
         self.config = config
-        self.db = pymongo.MongoClient(config.db_uri)[config.db_name]
-        self.logger = init_loguru_logger(DataManager.DIR_backend_log)
+        self.db_client = pymongo.MongoClient(config.db_uri)
+        if not check_db_connection(self.db_client):
+            logger.error(f"Failed to connect to MongoDB with URI: {config.db_uri}")
+            self.db_client = None
+        else:
+            self.db = self.db_client[config.db_name]
     
     @classmethod
     def initialize(cls, config: Config):
@@ -22,9 +53,7 @@ class SharedResources:
             raise RuntimeError("SharedResources not initialized")
         return cls._instance
 
-# 创建便捷的访问方法
-def get_db() -> pymongo.MongoClient:
+
+def get_db() -> Union[Database, None]:
     return SharedResources.get_instance().db
 
-def get_logger() -> Logger:
-    return SharedResources.get_instance().logger

@@ -12,10 +12,11 @@ from typing import Optional, Union, Dict
 from flowagent.roles import UISingleBot, RequestTool
 from flowagent.pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
 from flowagent.data import Workflow, Config, Conversation, BotOutput, Role
+from loguru import logger
 
-from ..common.shared import get_db, get_logger
-logger = get_logger()
+from ..common.shared import get_db
 db = get_db()
+
 
 class SingleSessionContext(BaseModel):
     # Add this configuration to allow arbitrary types
@@ -97,7 +98,7 @@ def db_upsert_session_single(ss: SingleSessionContext):
     # only save conversation when user has queried
     if (not ss) or (len(ss.conv) <= 1):
         return
-    logger.info(f"[db_upsert_session] {ss.session_id}")
+    logger.info(f"[db_upsert_session] {ss.session_id} into {db}")
     _session_info = {
         # model_llm_name, template, etc
         "session_id": ss.session_id,
@@ -106,11 +107,17 @@ def db_upsert_session_single(ss: SingleSessionContext):
         "conversation": ss.conv.to_list(), # TODO: only save messages? polish it!
         "config": ss.cfg.model_dump(),      # to_list -> model_dump
     }
-    db.backend_single_sessions.replace_one(
-        {"session_id": ss.session_id},
-        _session_info,
-        upsert=True
-    )
+    if not db:
+        logger.warning(f"Skipping database operation for session {ss.session_id} due to connection failure")
+        return
+    try:
+        db.backend_single_sessions.replace_one(
+            {"session_id": ss.session_id},
+            _session_info,
+            upsert=True
+        )
+    except Exception as e:
+        logger.error(f"Failed to save session {ss.session_id}: {e}")
 
 def clear_session_contexts_single():
     """Clear all the session contexts:

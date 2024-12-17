@@ -18,6 +18,7 @@ Test: see `test/backend/test_ui_backend.py`
 """
 
 import json
+from loguru import logger
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from typing import Iterator
@@ -32,8 +33,6 @@ from ..typings import (
     SinglePostControlResponse, 
     SingleToolResponse, BotOutput
 )
-from ..common.shared import get_logger
-logger = get_logger()
 
 # TODO: wrap the pre_control to a API?
 def _pre_control(session_context: SingleSessionContext) -> None:
@@ -51,7 +50,7 @@ def generate_response(session_context: SingleSessionContext) -> Iterator[str]:
     logger.info(f">> generate_response with conversation: {json.dumps(str(session_context.conv), ensure_ascii=False)}")
     _pre_control(session_context)
     
-    prompt, stream = session_context.bot.process_stream()  # TODO: ReactBot -> PDL_UIBot
+    prompt, stream = session_context.bot.process_stream()
     llm_response = []
     for chunk in stream:
         llm_response.append(chunk)
@@ -63,7 +62,7 @@ def generate_response(session_context: SingleSessionContext) -> Iterator[str]:
         yield f"data: {json.dumps(chunk_output, ensure_ascii=False)}\n\n"
     llm_response = "".join(llm_response)
     bot_output = session_context.bot.process_LLM_response(prompt, llm_response)
-    _debug_msg = f"\n{f'({session_context.session_id}) [BOT]'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
+    _debug_msg = f"\n{f'({session_context.session_id}) [BOT] ({session_context.bot.workflow.name}) ({session_context.bot.llm.model_name})'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
     logger.bind(custom=True).debug(_debug_msg)
     session_context.last_bot_output = bot_output
 
