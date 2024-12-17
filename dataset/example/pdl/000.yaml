@@ -1,0 +1,36 @@
+Name: 新闻查询
+Desc: 根据特定需求查询新闻
+
+SLOTs:
+- name: news_location
+  desc: 新闻发生地
+- name: news_type
+  desc: 新闻类型
+- name: news_time
+  desc: 新闻时间
+
+APIs:
+- name: check_location
+  precondition: []
+- name: query_news
+  precondition: [check_location]
+
+ANSWERs:
+- name: 获取新闻成功
+  desc: 查询成功，返回查询到的新闻列表
+- name: 获取新闻失败
+  desc: 查询失败，转为播报当日头条新闻
+- name: 其他自由回复问题
+- name: 请用户提供必要信息
+
+PDL: |
+  while True:
+      [news_location] = ANSWER.请用户提供必要信息()
+      if API.check_location([news_location]) == True:
+          break
+  [news_type, news_time] = ANSWER.请用户提供必要信息()
+  [news_list] = API.query_news([news_location, news_type, news_time])
+  if news_list is not None:
+      ANSWER.获取新闻成功()
+  else:
+      ANSWER.获取新闻失败()
