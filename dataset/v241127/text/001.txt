@@ -1,0 +1,13 @@
+1. 询问用户订单号 (order_id), 并调用 `get_invoicing_method([order_id])` 获取发票信息 (invoicing_method);
+2. 若发票信息为 "酒店开具", 则调用 `ANSWER_酒店开具` 以回复用户;
+3. 否则, 询问用户姓名 (name), 并调用 `search_invoicing_progress([name])` 获取用户开票进度 (invoicing_progress);
+4. 若开票进度为 "null", 则调用 `ANSWER_开票信息未找到` 回复用户;
+5. 否则, 询问用户会员卡号 (card_id) 和 开票方式 (invoicing_type), 并调用 `get_member_status([card_id])` 获取用户会员卡类别 (card_type);
+    a. 若会员卡类别为 "白金卡":
+        1) 若开票类别为 "电子普票", 回复 `ANSWER_白金电子普票开具`;
+        2) 若开票类别为 "纸质普票", 回复 `ANSWER_白金纸质普票开具`;
+        3) 若开票类别为 "纸质专票", 回复 `ANSWER_白金纸质专票开具`;
+    b. 若会员卡类别为 "非白金卡":
+        1) 若开票类别为 "电子普票", 回复 `ANSWER_非白金电子普票开具`;
+        2) 若开票类别为 "纸质普票", 回复 `ANSWER_非白金纸质普票开具`;
+        3) 若开票类别为 "纸质专票", 回复 `ANSWER_非白金纸质专票开具`;

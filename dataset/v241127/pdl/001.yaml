@@ -1,0 +1,76 @@
+Name: 同程开发票
+Desc: 同程服务, 查询开具发票的方法和进度
+# Detailed_desc: 首先根据用户提供的订单信息查询该订单的开票方式. 对于平台开具的情况, 根据用户会员卡的不同等级执行不同的开发票方式.
+
+SLOTs:
+  - name: order_id
+    desc: 订单编号, 需要询问
+  - name: name
+    desc: 用户姓名, 一般为中文
+  - name: card_id
+    desc: 用户的会员卡号, 需要询问
+  - name: invoicing_method
+    desc: 开票方式, 包括 ["平台开具", "酒店开具"]
+  - name: invoicing_progress
+    desc: 后端数据库中是否有开票信息
+  - name: card_type
+  - name: invoicing_type
+    desc: 用户想要开的发票类型, 包括 ["电子普票", "纸质普票", "纸质专票"]
+
+APIs:
+  - name: get_invoicing_method
+    # request: [order_id]
+    # response: [invoicing_method]
+  - name: search_invoicing_progress
+    # request: [name]
+    # response: [invoicing_progress]
+  - name: get_card_type
+    # request: [card_id]
+    # response: [card_type]
+
+ANSWERs:
+  - name: 酒店开具
+    desc: 您的同程开发票操作已成功执行，开票方式为 酒店开具。
+  - name: 开票信息未找到
+    desc: 您的同程开发票信息未找到，请前往mis售后地图查看详细进度。
+  - name: 白金电子普票开具
+    desc: 电子普票支持的开票内容为代订住宿费或者代订房费。\n\n可提交开通电子普票的申请，跳转对应订单开发票页面；提交后，离店日24小时内发送至您的邮箱。
+  - name: 白金纸质发票开具
+    desc: 纸质普票支持的开票内容为代订住宿费或者代订房费。\n\n可提交开通纸质普票的申请，跳转对应订单开发票页面；提交后，离店后5个工作日内送达。
+  - name: 白金纸质专票开具
+    desc: ①纸质专票烦您提供：发票抬头、纳税人识别号、注册地址、公司电话、开户银行、银行账号、发票金额  \n②是否需要备注订单信息（酒店名称、入住日期、离店日期）呢？  \n③请您提供下收件人、联系电话、地址（省市区）哦
+  - name: 非白金电子票开具
+    desc: 电子普票支持的开票内容为代订住宿费或者代订房费。 \n\n可提交开通电子普票的申请，跳转对应订单开发票页面；提交后，离店日24小时内发送至您的邮箱。
+  - name: 非白金纸质普票
+    desc: 纸质普票支持的开票内容为代订住宿费或者代订房费。\n\n可提交开通纸质普票的申请，跳转对应订单开发票页面；提交后，离店后5个工作日内送达。\n\n根据您的会员等级，您申请纸质发票邮寄需要10元邮费哦，申请成功后会给您订单手机号发送支付短链，您可点开短链支付。
+  - name: 非白金纸质专票
+    desc: 纸质专票支持的开票内容为代订住宿费或者代订房费。\n\n可提交开通纸质专票的申请，跳转对应订单开发票页面；提交后，离店后5个工作日内送达。\n\n根据您的会员等级，您申请纸质发票邮寄需要10元邮费哦，申请成功后会给您订单手机号发送支付短链，您可点开短链支付。
+  - name: 其他自由回复问题
+  - name: 请用户提供必要信息
+
+PDL: |
+  order_id = ANSWER_请用户提供必要信息()
+  [invoicing_method] = API_get_invoicing_method([order_id])
+  if invoicing_method == "酒店开具":
+      ANSWER_酒店开具()
+  name = ANSWER_请用户提供必要信息()
+  [invoicing_progress] = API_search_invoicing_progress([name])
+  if invoicing_progress == "null":
+      ANSWER_开票信息未找到()
+  card_id = ANSWER_请用户提供必要信息()
+  [card_type] = API_get_card_type([card_id])
+  invoicing_type = ANSWER_请用户提供必要信息()
+  if card_type == "白金卡":
+      if invoicing_type == "电子普票":
+          ANSWER_白金电子普票开具()
+      elif invoicing_type == "纸质普票":
+          ANSWER_白金纸质发票开具()
+      elif invoicing_type == "纸质专票":
+          ANSWER_白金纸质专票开具()
+  elif card_type == "非白金卡":
+      if invoicing_type == "电子普票":
+          ANSWER_非白金电子票开具()
+      elif invoicing_type == "纸质普票":
+          ANSWER_非白金纸质普票()
+      elif invoicing_type == "纸质专票":
+          ANSWER_非白金纸质专票()
