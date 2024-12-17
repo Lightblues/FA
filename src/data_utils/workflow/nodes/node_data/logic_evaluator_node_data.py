@@ -2,87 +2,71 @@ from pydantic import BaseModel
 from typing import *
 from enum import Enum
 from .base import NodeDataBase
+from ...variable import Variable
 
-class _Reference(BaseModel):
-    NodeID: str
-    JsonPath: str
-
-class _UserInput(BaseModel):
-    UserInputValue: List[str]
-
-class _InputTypeEnum(Enum):
-    REFERENCE_OUTPUT = "REFERENCE_OUTPUT"       # Reference -> _Reference
-    USER_INPUT = "USER_INPUT"                   # Fixed value -> _UserInput
-
-class _LogicOperatorEnum(Enum):
-    UNSPECIFIED = "UNSPECIFIED"
-    EQ = "EQ"
-    NE = "NE"
-    GT = "GT"
-    LT = "LT"
-    GE = "GE"
-    LE = "LE"
+class _LogicalOperatorEnum(Enum):
+    UNSPECIFIED = "UNSPECIFIED" # Comparison
+    AND = "AND"                 # Compound
+    OR = "OR"
 
     def __str__(self):
         return self.value
 
-class _LogicLeftRight(BaseModel):
-    """ 
-    {
-        "InputType": "USER_INPUT",
-        "UserInputValue": {
-            "Values": ["白金卡"]
-        }
-    },
-    {
-        "InputType": "REFERENCE_OUTPUT",
-        "Reference": {
-            "NodeID": "0fa5e5a6-95fb-016e-8d08-50901034a8ea",
-            "JsonPath": "Output.invoicing_progress"
-        }
-    }
-    """
-    InputType: _InputTypeEnum
-    Reference: _Reference = None
-    UserInput: Union[_UserInput, None] = None # NOTE that UserInput can be None whetn InputType="USER_INPUT" (default branch)
+
+class _LogicOperatorEnum(Enum):
+    UNSPECIFIED = "UNSPECIFIED"
+    EQ = "EQ"       # Equal
+    NE = "NE"       # Not Equal
+    LT = "LT"       # Less Than
+    LE = "LE"       # Less Than or Equal
+    GT = "GT"       # Greater Than
+    GE = "GE"       # Greater Than or Equal
+
+    IS_SET = "IS_SET"               # Has Value
+    NOT_SET = "NOT_SET"             # No Value
+    CONTAINS = "CONTAINS"           # Contains
+    NOT_CONTAINS = "NOT_CONTAINS"   # Not Contains
+    IN = "IN"                       # In
+    NOT_IN = "NOT_IN"               # Not In
 
     def __str__(self):
-        if self.InputType == _InputTypeEnum.REFERENCE_OUTPUT:
-            return f"Reference({self.Reference.NodeID}.{self.Reference.JsonPath})"
-        elif self.InputType == _InputTypeEnum.USER_INPUT:
-            return 'Default' if self.UserInput is None else  f"UserInput({self.UserInput.UserInputValue})"
-        else:
-            raise ValueError(f"Invalid input type: {self.InputType}")
+        return self.value
 
+class _LogicMatchTypeEnum(Enum):
+    SEMANTIC = "SEMANTIC"
+    PRECISE = "PRECISE"
 
-class _LogicComparison(BaseModel):
-    Left: _LogicLeftRight
+    def __str__(self):
+        return self.value
+
+class _ComparisonExpression(BaseModel):
+    Left: Variable
     LeftType: str
     Operator: _LogicOperatorEnum
-    Right: _LogicLeftRight
-    MatchType: str  # TODO: to enum | SEMANTIC
+    Right: Variable
+    MatchType: _LogicMatchTypeEnum
 
     def __str__(self):
         return f"{self.Left} {self.Operator} {self.Right}"
 
-class _LogicLogical(BaseModel):
-    LogicalOperator: _LogicOperatorEnum
-    Compound: List[Any] = []     # OR | AND TODO: what does it mean?
-    Comparison: _LogicComparison = None
+class _LogicalExpression(BaseModel):
+    LogicalOperator: _LogicalOperatorEnum
+    Compound: List['_LogicalExpression'] = []
+    Comparison: _ComparisonExpression = None
 
     def __str__(self):
         return f"(LogicalOperator={self.LogicalOperator}, Compound={self.Compound}, Comparison={self.Comparison})"
 
-class _LogicCondition(BaseModel):
+class _LogicalGroup(BaseModel):
     NextNodeIDs: List[str]
-    Logical: _LogicLogical = None  # NOTE for the default condition, cannot None!
+    Logical: _LogicalExpression = None  # NOTE for the default condition, cannot None!
 
     def __str__(self):
         return f"{self.Logical} -> {self.NextNodeIDs}"
 
 
 class LogicEvaluatorNodeData(NodeDataBase):
-    Group: List[_LogicCondition]
+    Group: List[_LogicalGroup]
 
     def __str__(self):
         return "[LOGIC] " + " | ".join(f"({c})" for c in self.Group)

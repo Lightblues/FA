@@ -14,9 +14,9 @@ ui_default_template: "bot_pdl_ui_zh.jinja"
 ui_bot_template_fn: "flowagent/bot_pdl_ui_zh.jinja"
 ui_greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
 ui_available_workflow_datasets: 
-  - "huabu_1127"
+  - "v241127"
   # - "PDL_zh"
-ui_default_workflow_dataset: "huabu_1127"
+ui_default_workflow_dataset: "v241127"
 ui_tools:
   - {name: web_search, is_enabled: false}
   - {name: hunyuan_search, is_enabled: true}
@@ -40,7 +40,7 @@ mui_agent_workflow_available_templates:
 mui_agent_main_default_template: "bot_mui_main_agent.jinja"
 mui_agent_workflow_default_template: "bot_mui_workflow_agent.jinja"
 mui_agent_main_default_model: "神农大模型"
-mui_default_workflow_dataset: "huabu_1127"
+mui_default_workflow_dataset: "v241127"
 mui_greeting_msg: "你好，有什么可以帮您?"
 
 pdl_version: "pdl"    # set as default
@@ -49,7 +49,7 @@ pdl_version: "pdl"    # set as default
 # NOTE: the following 5 fields identify one experiment!!!
 # specifically, workflow_dataset & workflow_type should be all same for one exp_version
 # i.e. one `exp_version + workflow_id` identify one experiment
-workflow_dataset: "huabu_1127" # "huabu_1127"
+workflow_dataset: "v241127" # "v241127"
 workflow_type: "pdl"       # text, code, flowchart, pdl, core
 workflow_id: "000"
 exp_version: "default"
@@ -85,7 +85,7 @@ conversation_turn_limit: 20
 log_utterence_time: false
 log_to_db: true
 
-db_uri: 'mongodb://9.134.230.111:27017'
+db_uri: 'mongodb://localhost:27017'
 db_name: "agent-pdl"
 # db_message_collection_name: "messages"
 # db_meta_collection_name: "config"

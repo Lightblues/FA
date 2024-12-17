@@ -22,7 +22,7 @@
 - TOOL: 工具节点, 使用工具
     NOTE: 简单转换以支持
 
---- huabu_1127 export-1732628942 ---
+--- v241127 export-1732628942 ---
 000: 快递费用和到达时间是多少
 001: 同程开发票
 002: 订餐流程
@@ -58,7 +58,7 @@ class DataManager:
     DIR_data = DIR_root / "data"
     DIR_dataset = DIR_data / "dataset"
     
-    def __init__(self, data_version: str="huabu_1127", export_version: str="export-1732628942") -> None:
+    def __init__(self, data_version: str="v241127", export_version: str="export-1732628942") -> None:
         self.data_version = data_version
         self.export_version = export_version
         self.workflow_infos = self.load_workflow_infos()

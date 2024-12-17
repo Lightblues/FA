@@ -18,16 +18,17 @@ TODO:
     nodes: ANSWER, PARAMETER_EXTRACTOR, TOOL, LOGIC_EVALUATOR
 """
 
-from typing import List
+import json
+from typing import List, Dict
 from . import prompts
 from ..workflow import DataManager, Workflow, Parameter
 from pdl.typings import PDL
 from flowagent.utils import init_client, LLM_CFG, Formater
 
-VALID_NODE_TYPES = ("START", "ANSWER", "PARAMETER_EXTRACTOR", "TOOL", "LOGIC_EVALUATOR")
+VALID_NODE_TYPES = ("START", "ANSWER", "PARAMETER_EXTRACTOR", "TOOL", "LOGIC_EVALUATOR", "LLM", "CODE_EXECUTOR")
 
 class WorkflowPDLConverter:
-    def __init__(self, data_version: str="huabu_1127", export_version: str="export-1732628942", llm_name: str="gpt-4o") -> None:
+    def __init__(self, data_version: str="v241127", export_version: str="export-1732628942", llm_name: str="gpt-4o") -> None:
         self.data_version = data_version
         self.export_version = export_version
         self.data_manager = DataManager(data_version, export_version)
@@ -47,7 +48,7 @@ class WorkflowPDLConverter:
         params = [p for p in self.data_manager.parameter_infos.values() if p.workflow_id == workflow.WorkflowID]
         SLOTs = [p.to_pdl() for p in params]
         # 3. convert the workflow procedure
-        procedure = self._convert_procedure(workflow, params)
+        res = self._convert_procedure(workflow, params)
         # 4. build the PDL
         pdl = PDL(
             Name=workflow.WorkflowName,
@@ -55,20 +56,30 @@ class WorkflowPDLConverter:
             APIs=APIs,
             SLOTs=SLOTs,
             ANSWERs=ANSWERs,
-            Procedure=procedure
+            Procedure=res["procedure"]
         )
-        return pdl
+        return {
+            "pdl": pdl,
+            "llm_prompt": res["llm_prompt"],
+            "llm_response": res["llm_response"]
+        }
     
-    def _convert_procedure(self, workflow: Workflow, params: List[Parameter]) -> str:
+    def _convert_procedure(self, workflow: Workflow, params: List[Parameter]) -> Dict[str, str]:
         """Convert the workflow procedure to a string"""
         meta = f"Name: {workflow.WorkflowName}\nDesc: {workflow.WorkflowDesc}"
         nodes = "\n".join([str(node) for node in workflow.Nodes])
         edges = "\n".join([f"{edge.source} -> {edge.target}" for edge in workflow.Edges])
         params = "\n".join([str(p) for p in params])
-        input_prompt = prompts.template_procudure.format(meta=meta, nodes=nodes, edges=edges, params=params)
-        llm_response = self.llm.query_one(input_prompt)
-        res = Formater.parse_codeblock(llm_response, "python")
-        return res
+        llm_prompt = prompts.template_procudure.format(meta=meta, nodes=nodes, edges=edges, params=params)
+        print(f"> querying llm for workflow {workflow.WorkflowID}...")
+        llm_response = self.llm.query_one(llm_prompt)
+        print(f">   done, llm_response: {json.dumps(llm_response[:50], ensure_ascii=False)}...")
+        procedure = Formater.parse_codeblock(llm_response, "python")
+        return {
+            "llm_prompt": llm_prompt,
+            "llm_response": llm_response,
+            "procedure": procedure
+        }
 
     def build_edge_graph(self, workflow: Workflow):
         """Build the edge graph from the nodes and edges.

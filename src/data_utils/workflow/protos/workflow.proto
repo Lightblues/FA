@@ -1,0 +1,652 @@
+syntax = "proto3";
+
+import "google/protobuf/descriptor.proto";
+import "trpc.proto";
+import "swagger.proto";
+//import "google/protobuf/any.proto";
+
+
+package trpc.KEP.bot_task_config_wf_server;
+option go_package = "git.woa.com/dialogue-platform/lke_proto/pb-protocol/KEP_WF";
+
+// 生成文档，参考信息：
+// https://git.woa.com/trpc-go/trpc-go-cmdline/tree/main/docs/examples/example-3
+// $ trpc apidocs -p thirds-pb/bot-task-config-server/workflow.proto --openapi
+// 生成出来的json粘贴到 https://editor.swagger.io/ 查看
+// apidocs 更多参数： https://git.woa.com/trpc-go/trpc-go-cmdline/blob/main/cmd/apidocs/apidocs.go
+
+
+// ------------ 注意：未来协议有不兼容变更时使用  ------------
+// 工作流的协议版本号
+// 数据库中使用的是这里的数字，字符串仅用于log
+enum WorkflowProtoVersion {
+  UNSPECIFIED = 0;    // 未指定
+  V2_6 = 101;          // 前端忽略，填写字符串为[V2_6]； 代表[v2.6迭代]的第一个"工作流"版本；为了区分TaskFlow，从101开始
+}
+// ------------ 注意：未来协议有不兼容变更时使用  ------------
+
+//TODO(xinghui)
+
+// 1. 循环节点： 有公共的input
+//    1. 引用的工作流的输入：可以引用 当前节点的"输入变量“
+//    2. 循环体内：
+//      1. 左值：
+//        1. 当前节点定义的“输入变量”
+//        2. 当前节点内置的loop、  loop.index， loop.err 等
+//        3. 引用的工作流的 END 节点的输出
+//      2. 右值： 可以引用 当前节点的"输入变量“
+// 2. 引用工作流节点：无公共的input；
+// 3. 插件-工具节点： 无公共的input
+
+// 节点类型
+enum NodeType {
+//  option allow_alias = true;
+  UNKNOWN = 0;              // 未指定
+  START = 1 ;               // 开始节点, StartNodeData
+  PARAMETER_EXTRACTOR = 2;  // 参数提取节点, ParameterExtractorNodeData
+  LLM = 3;                  // 大模型节点, LLMNodeData
+  LLM_KNOWLEDGE_QA = 4;     // 知识问答节点, LLMKnowledgeQANodeData
+  KNOWLEDGE_RETRIEVER = 5;  // 知识检索节点, KnowledgeRetrieverNodeData
+  TAG_EXTRACTOR = 6;        // 标签提取节点, TagExtractorNodeData
+  CODE_EXECUTOR = 7;        // 代码执行节点, CodeExecutorNodeData
+  TOOL = 8;                 // 工具节点, ToolNodeData
+  LOGIC_EVALUATOR = 9;      // 逻辑判断节点, LogicEvaluatorNodeData
+  ANSWER = 10;              // 回复节点 → 消息节点, AnswerNodeData
+
+  OPTION_CARD = 11;         // 选项卡节点， OptionCardNodeData
+  ITERATION = 12;           // 循环节点， IterationNodeData
+  INTENT_RECOGNITION = 13;  // 意图识别节点， IntentRecognitionNodeData
+  WORKFLOW_REF = 14;        // 工作流节点， WorkflowRefNodeData
+  PLUGIN = 15;              // 插件节点， PluginNodeData
+  END = 16;                 // 结束节点, EndNodeData  // FIXME [v2.7]
+}
+
+// 工作流
+message Workflow {
+  WorkflowProtoVersion ProtoVersion = 1;  // 协议版本号；前端忽略，如果要填写，应该是字符串为[V2_6]
+  string WorkflowID = 2;                  // 工作流ID, 创建时后端生成
+  string WorkflowName = 3;                // 工作流名称, 用户输入
+  string WorkflowDesc = 4;                // 工作流(意图)描述
+  repeated WorkflowNode Nodes = 5;        // 节点数据
+  string Edge = 6;                         // 前端边相关数据
+}
+
+// 工作流节点
+message WorkflowNode {
+  string NodeID = 1;          // 节点ID uuid, 前端生成唯一的uuid
+  string NodeName = 2;        // 节点名称, 前端生成默认，用户可修改（名称画布内唯一）
+  string NodeDesc = 3;        // 节点描述
+  NodeType NodeType = 4;      // 节点类型；字符串
+  // NodeData 使用处理多种类型的节点数据
+  // 同一个 WorkflowNode 里只能存在一种NodeData，包括json字符串中的key
+  oneof NodeData {
+    StartNodeData StartNodeData                           = 1001; // 开始节点 NodeType.START                    (不同NodeData之间互斥，同一个 WorkflowNode 里只能存在一种NodeData，包括json字符串中的key）
+    ParameterExtractorNodeData ParameterExtractorNodeData = 1002; // 参数提取节点 NodeType.PARAMETER_EXTRACTOR   (不同NodeData之间互斥，同一个 WorkflowNode 里只能存在一种NodeData，包括json字符串中的key）
+    LLMNodeData LLMNodeData                               = 1003; // 大模型节点 NodeType.LLM                     (不同NodeData之间互斥，同一个 WorkflowNode 里只能存在一种NodeData，包括json字符串中的key）
+    LLMKnowledgeQANodeData LLMKnowledgeQANodeData         = 1004; // 知识问答节点 NodeType.LLM_KNOWLEDGE_QA      (不同NodeData之间互斥，同一个 WorkflowNode 里只能存在一种NodeData，包括json字符串中的key）
+    KnowledgeRetrieverNodeData KnowledgeRetrieverNodeData = 1005; // 知识检索节点 NodeType.KNOWLEDGE_RETRIEVER   (不同NodeData之间互斥，同一个 WorkflowNode 里只能存在一种NodeData，包括json字符串中的key）
+    TagExtractorNodeData TagExtractorNodeData             = 1006; // 标签提取节点 NodeType.TAG_EXTRACTOR         (不同NodeData之间互斥，同一个 WorkflowNode 里只能存在一种NodeData，包括json字符串中的key）
+    CodeExecutorNodeData CodeExecutorNodeData             = 1007; // 代码执行节点 NodeType.CODE_EXECUTOR         (不同NodeData之间互斥，同一个 WorkflowNode 里只能存在一种NodeData，包括json字符串中的key）
+    ToolNodeData ToolNodeData                             = 1008; // 工具节点 NodeType.TOOL                     (不同NodeData之间互斥，同一个 WorkflowNode 里只能存在一种NodeData，包括json字符串中的key）
+    LogicEvaluatorNodeData LogicEvaluatorNodeData         = 1009; // 逻辑判断节点 NodeType.LOGIC_EVALUATOR       (不同NodeData之间互斥，同一个 WorkflowNode 里只能存在一种NodeData，包括json字符串中的key）
+    AnswerNodeData AnswerNodeData                         = 1010; // 答案节点 NodeType.ANSWER                   (不同NodeData之间互斥，同一个 WorkflowNode 里只能存在一种NodeData，包括json字符串中的key）
+    OptionCardNodeData OptionCardNodeData                 = 1011; // 选项卡节点 NodeType.OPTION_CARD             (不同NodeData之间互斥，同一个 WorkflowNode 里只能存在一种NodeData，包括json字符串中的key）
+    IterationNodeData IterationNodeData                   = 1012; // 循环节点 NodeType.ITERATION                 (不同NodeData之间互斥，同一个 WorkflowNode 里只能存在一种NodeData，包括json字符串中的key）
+    IntentRecognitionNodeData IntentRecognitionNodeData   = 1013; // 意图识别节点 NodeType.INTENT_RECOGNITION     (不同NodeData之间互斥，同一个 WorkflowNode 里只能存在一种NodeData，包括json字符串中的key）
+    WorkflowRefNodeData WorkflowRefNodeData               = 1014; // 工作流节点 NodeType.WORKFLOW_REF            (不同NodeData之间互斥，同一个 WorkflowNode 里只能存在一种NodeData，包括json字符串中的key）
+    PluginNodeData PluginNodeData                         = 1015; // 工作流节点 NodeType.PLUGIN                  (不同NodeData之间互斥，同一个 WorkflowNode 里只能存在一种NodeData，包括json字符串中的key）
+    EndNodeData EndNodeData                               = 1016; // 结束节点 NodeType.END                       (不同NodeData之间互斥，同一个 WorkflowNode 里只能存在一种NodeData，包括json字符串中的key）
+  }
+  repeated InputParam Inputs = 5;               // 输入参数 (在 LOGIC_EVALUATOR, TOOL 类型的节点忽略) // FIXME [v2.7]
+  repeated OutputParam Outputs = 6;             // 输出；  （在 CODE_EXECUTOR, TOOL, END 类型的节点使用) // FIXME [v2.7]
+  repeated string NextNodeIDs = 7;              // 只有在 非 NodeType.LOGIC_EVALUATOR, OPTION_CARD,INTENT_RECOGNITION 时生效，NodeType.LOGIC_EVALUATOR在 LogicEvaluatorNodeData 里; OptionCardNodeData 在Option里 // TODO(xinghui) 业务代码影响评估
+  string NodeUI = 8;                            // 前端UI相关数据
+}
+
+// Outputs是 repeated 的背景说明： （最终结论选1b）
+// # 1. 如果 WorkflowNode 中的 OutputParam是对象（而不是数组）
+//      那运行时节点的输出结果有两种处理方式：
+//   ## a. 运行时产生的数据是
+//      {
+//         "output": {
+//              "answer": "大模型结果",
+//              "score": 1 // 大模型分数 (举例)
+//          }
+//      }
+//      在使用 jsonpath时，直接使用前端在 ReferenceFromNode.JsonPath里填充的内容，如【output.answer】
+//
+//   ## b. 运行时产生的数据是
+//      {
+//         "answer": "大模型结果",
+//         "score": 1 // 大模型分数 (举例)
+//      }
+//      在使用 jsonpath时，需要把前端在 ReferenceFromNode.JsonPath里填充的内容做处理：
+//      去掉【output.】字样，只用剩余的字符串作为标准jsonpath使用；
+//
+//
+// # 2、如果 WorkflowNode 中的 OutputParam是数组
+//   同上面的1b
+//
+
+
+// ------------------------------------------------ 基础结构体定义 start  ------------------------------------------------
+
+enum TypeEnum {
+  STRING = 0; // 默认值是string，如果不填就按string处理
+  INT = 1;
+  FLOAT = 2;
+  BOOL = 3;
+  OBJECT = 4;
+  ARRAY_STRING = 5;
+  ARRAY_INT = 6;
+  ARRAY_FLOAT = 7;
+  ARRAY_BOOL = 8;
+  ARRAY_OBJECT = 9;
+}
+
+message UserInputContent {
+  repeated string Values = 1;
+  // DynamicValue Value = 2; // 未来扩展
+}
+
+// 引用其他节点的输出
+//
+// 共性规则： Output为object类型，不同的节点结构不同，JsonPath是相对节点来说，取值"Output"的时候，对应的值为整个输出对象。
+// (调试信息Output： 使用json格式展示Output的结果)
+//
+// case1: 引用的是"参数提取节点"
+//        Output的结果格式： {"<参数名称>": <参数的值>}   (参数的值的数据类型可能是string,int等)
+//        Output的结果示例： {"出发地": "上海", "目的地": "北京"}
+//        JsonPath示例1:  "Output"
+//        JsonPath示例2:  "Output.出发地"
+// case2: 引用的是 "知识检索节点"
+//        Output的结果格式： {
+//          "KnowledgeList": [
+//            {
+//              "KnowledgeType": "<检索片段类型，QA:问答对，DOC:文档段	string>",
+//              "KnowledgeId": "<检索数据ID string>",  (关联的文档ID	string)
+//              "Content": "<检索到内容，QA：问题的答案，DOC：为检索文档片段，	string>",
+//              "Question": "<检索到的问题，当文档类型为QA时有效	string>",
+//              "Title": "<文档标题，当文档类型为DOC时有效，	string>",
+//              "RelatedDocId": "<关联文档ID，	string>"
+//            }
+//          ]
+//        }
+//        Output的结果示例：{
+//          "KnowledgeList": [
+//            {
+//              "KnowledgeType": "QA",
+//              "KnowledgeId": "eealklbaalzfsdfefsa",
+//              "Content": "我是智能客服小助手。",
+//              "Question": "你是谁？",
+//              "Title": "",
+//              "RelatedDocId": ""
+//            }
+//          ]
+//        }
+//        JsonPath示例1:  "Output"
+//        JsonPath示例2:  "Output.KnowledgeList"
+//        JsonPath示例3:  "Output.KnowledgeList[0]"  （2.6不支持选下标）
+//        JsonPath示例4:  "Output.KnowledgeList[0].Content"    （第一个检索的结果的内容）
+//        JsonPath示例4:  "Output.KnowledgeList[*].Content"    （全部的检索结果的内容数组）
+// case3: 引用的是"大模型节点"
+//        Output的结果格式： {"Content": "<大模型返回的结果内容>"}   (值的数据类型为string)
+//        Output的结果示例： {"Content": "今天的气温是20度"}
+//        JsonPath示例1:  "Output"
+//        JsonPath示例2:  "Output.Content"
+// case4: 引用的是"大模型知识问答节点数据"
+//        Output的结果格式： {"Answer": "<大模型返回的答案内容>"}   (值的数据类型为string)
+//        Output的结果示例： {"Answer": "今天的气温是20度"}
+//        JsonPath示例1:  "Output"
+//        JsonPath示例2:  "Output.Answer"
+// case5: 引用的是"大模型标签提取节点"
+//        Output的结果格式： {"<标签名称>": <标签的值>}  (参数的值的数据类型可能是string,int等)
+//        Output的结果示例： {"用户偏好": "篮球", "用户地区": "华南"}
+//        JsonPath示例1:  "Output"
+//        JsonPath示例2:  "Output.用户偏好"
+// case6: 引用的是"代码节点", "工具节点"
+//        Output的结果格式： {"<变量名称>": <变量的值>}   (变量的值的数据类型可能是string,int,object等)
+//        Output的结果示例： {"student": {"age": 18}}
+//        JsonPath示例1:  "Output"
+//        JsonPath示例2:  "Output.student"
+//        JsonPath示例3:  "Output.student.age"
+// case7: 引用的是"逻辑判断节点"
+//        Output的结果格式： {"ConditionIndex": <分支序号，从1开始>}   (值的数据类型为int)
+//        Output的结果示例： {"ConditionIndex": 1}
+//        JsonPath示例1:  "Output"
+//        JsonPath示例2:  "Output.ConditionIndex"
+// case8: 引用的是"回复节点"
+//        Output的结果格式： {"Answer": "<大模型返回的回复内容>"}    (值的数据类型为string)
+//        Output的结果示例： {"Answer": "今天的气温是20度"}
+//        JsonPath示例1:  "Output"
+//        JsonPath示例2:  "Output.Answer"
+// case9: 引用的是"选项卡节点"
+//        Output的结果格式： {"OptionIndex": <命中选项序号，从1开始，类型为int>, "OptionContent": "<命中的选项卡的值>"}
+//        Output的结果示例： {"OptionIndex": 1, "OptionContent": "深圳"}
+//        JsonPath示例1:  "Output"
+//        JsonPath示例2:  "Output.OptionContent"
+// case10: 引用的是"开始节点"
+//        Output的结果格式： {"<输入变量的名称>": <输入变量的值>}  (输入变量的值的数据类型可能是string,int等)
+//        Output的结果示例： {"City": "深圳"}
+//        JsonPath示例1:  "Output"
+//        JsonPath示例2:  "Output.City"
+// case11: 引用的是"循环节点"
+//        Output的结果格式： {"Results": <每一轮循环的执行结果数组>, LoopCount: <执行的次数>}
+//        Output的结果示例： {"Results": [{"Result": "success"}, {"Result": "success"}], LoopCount: 2}
+//        JsonPath示例1:  "Output"
+//        JsonPath示例2:  "Output.LoopCount"
+// case12: 引用的是"消息节点"
+//        Output的结果格式： {"Answer": "<回复的内容>", "<添加的变量的名称>": <添加的变量的值>}
+//        Output的结果示例： {"Answer": "今天的气温是20度", "Temperature": 20, "Time": "今天"}
+//        JsonPath示例1:  "Output"
+//        JsonPath示例2:  "Output.Answer"
+// case13: 引用的是"大模型意图识别节点"
+//        Output的结果格式： {"IntentIndex": <命中的意图序号，从1开始，类型为int>, "IntentName": "<命中的意图值>"}
+//        Output的结果示例： {"IntentIndex": 1, "IntentName": "挂号"}
+//        JsonPath示例1:  "Output"
+//        JsonPath示例2:  "Output.IntentName"
+message ReferenceFromNode {
+  string NodeID = 1;              // 引用某个节点ID
+  string JsonPath = 3;            // JSONPATH
+}
+
+
+enum InputSourceEnum {
+  USER_INPUT = 0;         // 用户输入： InputCardContent
+  REFERENCE_OUTPUT = 1;   // 引用其他节点的输出： ReferenceContent
+  SYSTEM_VARIABLE = 2;    // 系统变量
+  CUSTOM_VARIABLE = 3;    // 自定义变量（API参数）
+  NODE_INPUT_PARAM = 5;   // 当前节点内定义的输入变量的名称(比如循环节点的引用的工作流的输入变量的右值 或 循环节点循环体条件中的右值）
+}
+
+message SystemVariable {
+  string Name = 1;                // 系统参数名
+  int32 DialogHistoryLimit = 2;   // 对话历史轮数的配置；如果Input是系统变量中的“对话历史”时才使用；
+}
+
+message Input {
+  InputSourceEnum InputType = 1;
+  oneof Source {
+    UserInputContent UserInputValue = 1001;   // 用户手写输入
+    ReferenceFromNode Reference = 1002;       // 引用其他节点的输出
+    SystemVariable SystemVariable = 1003;     // 系统参数
+    string CustomVarID = 1004;                // 自定义变量（API参数）
+    string NodeInputParamName = 1005;         // 当前节点内定义的输入变量的名称
+  }
+}
+
+// 公共的输入参数
+message InputParam {
+  string Name = 1;    // 输入参数名称
+  TypeEnum Type = 2;  // 参数类型 输入的值是固定值时，只能是string
+  Input Input = 3;    // 输入的值
+  string Desc = 4;    // 输入参数描述
+}
+
+// ------------------------------------------------- 基础结构体定义 end  -------------------------------------------------
+
+
+// 开始节点数据
+message StartNodeData {
+  // 这里为空，因为开始节点不需要特定数据
+}
+
+// 参数提取节点数据
+message ParameterExtractorNodeData {
+  message Parameter {
+    string RefParameterID = 1;           // 从自定义参数管理页引用
+    bool Required = 2;                  // 是否必选；默认可选
+  }
+  repeated Parameter Parameters = 1;    // 待提取参数
+  string UserConstraint = 2;            // 前端交互上是提示词，本质上是提示词的一部分
+}
+
+// 大模型节点数据
+message LLMNodeData {
+  string ModelName = 1;           // 模型名； 模型列表复用App配置的模型列表拉取接口
+  float Temperature = 2;          // 温度
+  float TopP = 3;                 // Top P (topProbabilityMass, topPMass)
+  int32 MaxTokens = 4;            // 最大回复Token (针对该模型的可用区间同模型列表拉取接口，也要带上这个模型是否支持"最大回复token"的字段)
+  string Prompt = 5;              // 提示词
+}
+
+enum KnowledgeFilter {
+  ALL = 0;          // 全部知识
+  DOC_AND_QA = 1;   // 按文档和问答
+  TAG = 2;          // 按标签
+}
+
+// 属性标签引用信息
+message KnowledgeAttrLabelRefer {
+  enum LabelSourceEnum {
+    LABEL_BIZ_ID = 0;             // （默认）标签ID， 使用 LabelBizIDs
+    INPUT_PARAM = 1;              // 引用节点的输入变量，使用 InputParam
+  }
+  uint32 Source = 1;                // 属性标签来源，1：属性标签
+  uint64 AttributeBizID = 2;        // 属性ID
+  repeated uint64 LabelBizIDs = 3;  // 标签ID， LabelSource是 LABEL_BIZ_ID 时使用（默认） // FIXME [v2.7]
+  LabelSourceEnum LabelSource = 4;  // 标识 label使用哪一种；  // TODO(xinghui) db变动
+  string InputParamName = 5;        // 引用节点的输入变量名字， LabelSource是 INPUT_PARAM 时使用
+}
+
+// 知识检索范围组
+message KnowledgeAttrLabels {
+  enum OperatorEnum {
+    AND = 0;            // AND
+    OR = 1;             // OR
+  }
+  OperatorEnum Operator = 1;                    // 标签之间的关系，可以是 AND OR
+  repeated KnowledgeAttrLabelRefer Labels = 2;  // 标签
+}
+
+// 大模型知识问答节点数据
+message LLMKnowledgeQANodeData {
+  string Query = 1;                 // 用户输入的Query，这个Query可以包含"引用参数"，类似回复节点中的内容
+  string ModelName = 2;             // 模型名； 模型列表复用App配置的模型列表拉取接口
+  KnowledgeFilter Filter = 3;       // 知识检索筛选方式: [文档和问答] or [标签]
+  repeated string DocIDs = 4;       // !!!前端无视!!!
+  repeated string DocBizIDs = 5;    // DOC_AND_QA 时生效 （前端使用）
+  bool AllQA = 6;                   // DOC_AND_QA 时生效 所有QA
+  KnowledgeAttrLabels Labels = 7;   // TAG 时生效
+  int32 DocRecallCount = 8;         // 文档召回数量
+  float DocConfidence = 9;         // 文档检索匹配度
+  int32 QARecallCount = 10;         // 问答召回数量
+  float QAConfidence = 11;          // 问答检索匹配度
+}
+
+// 知识检索节点数据
+message KnowledgeRetrieverNodeData {
+  string Query = 1;                 // 用户输入的Query，这个Query可以包含"引用参数"，类似回复节点中的内容
+  KnowledgeFilter Filter = 2;       // 知识检索筛选方式: [文档和问答] or [标签]
+  repeated string DocIDs = 3;       // !!!前端无视!!!
+  repeated string DocBizIDs = 4;    // DOC_AND_QA 时生效 （前端使用）
+  bool AllQA = 5;                   // DOC_AND_QA 时生效 所有QA
+  KnowledgeAttrLabels Labels = 6;   // TAG 时生效
+  int32 DocRecallCount = 7;         // 文档召回数量
+  float DocConfidence = 8;          // 文档检索匹配度
+  int32 QARecallCount = 9;         // 问答召回数量
+  float QAConfidence = 10;          // 问答检索匹配度
+}
+
+message Tag {
+  string ID = 1;                      // 标签ID, 前端生成的uuid, 标识唯一的"标签"
+  string Name = 2;                    // 标签名
+  string Desc = 3;                    // 标签描述
+  TypeEnum ValueType = 4;             // 只支持 string, int, bool, float
+  repeated string ValueExamples = 5;  // 标签取值示例
+}
+
+// 标签提取节点数据
+message TagExtractorNodeData {
+  string Query = 1;                   // 用户输入的Query，这个Query可以包含"引用参数"，类似回复节点中的内容
+  string ModelName = 2;               // 模型名； 模型列表复用App配置的模型列表拉取接口
+  repeated Tag Tags = 3;              // 标签
+}
+
+// 代码执行节点数据
+message CodeExecutorNodeData {
+  enum LanguageType{
+    PYTHON3 = 0; // 目前仅支持python3
+  }
+  string Code = 1; // 代码文本
+  LanguageType Language = 2; // 代表类型
+}
+
+// 工具节点数据
+// TODO 支持用户引用系统内置，如天气、地图、搜索、代码解释器等——待定
+message ToolNodeData {
+
+  // 授权方式
+  enum AuthTypeEnum {
+    NONE = 0; // 无鉴权
+    API_KEY = 1; // api key鉴权
+    //    OAuth = 2; // oauth鉴权
+  }
+
+  // 密钥位置
+  enum KeyLocationTypeEnum {
+    HEADER = 0; // 头鉴权
+    QUERY = 1; // 请求信息鉴权
+  }
+
+  message APIInfo {
+    string URL = 1;     // 请求路径
+    string Method = 2;  // 请求方式 GET/POST
+    AuthTypeEnum authType = 3;  // 授权方式 无/API_KEY
+    KeyLocationTypeEnum KeyLocation = 4;  // 密钥位置 HEADER/QUERY
+    string KeyParamName = 5;  // 密钥参数名
+    string KeyParamValue = 6;  // 密钥参数值
+  }
+
+  // 定义工具节点的请求信息
+  message RequestParam {
+    string ParamName = 1;  // 参数名称
+    string ParamDesc = 2;  // 参数描述
+    TypeEnum ParamType = 3;// 参数类型
+    Input Input = 4;
+    bool IsRequired = 5; // 是否必选
+    repeated RequestParam SubParams = 6;  // 子参数,ParamType 是OBJECT 或 ARRAY<>类型有用
+  }
+
+    APIInfo API = 1;  // 基础设置
+    repeated RequestParam Header = 2;     // 头信息
+    repeated RequestParam Query = 3;      //  输入参数query
+    repeated RequestParam Body = 4;      //  输入参数body
+//    string PluginID = 5;     // 插件ID
+//    string PluginToolID = 6;     // 插件工具ID
+
+}
+
+
+
+// 逻辑判断节点数据
+message LogicEvaluatorNodeData {
+  repeated LogicalGroup Group = 1;
+}
+
+message LogicalGroup{
+  repeated string NextNodeIDs = 1;              // 下一个节点ID
+  LogicalExpression Logical = 2;
+}
+
+message LogicalExpression {
+  enum LogicalOperatorEnum {
+    UNSPECIFIED = 0;    // 未指定，相当于叶子节点（关注Comparison）
+    AND = 1;            // AND （关注Compound)
+    OR = 2;             // OR  （关注Compound)
+  }
+  // 表达式
+  message ComparisonExpression {
+    enum OperatorEnum {
+      UNSPECIFIED = 0;      // 未指定
+      EQ = 1;               // 等于（Equal）
+      NE = 2;               // 不等于（Not Equal）
+      LT = 3;               // 小于（Less Than）
+      LE = 4;               // 小于等于（Less Than or Equal）
+      GT = 5;               // 大于（Greater Than）
+      GE = 6;               // 大于等于（Greater Than or Equal）
+
+      IS_SET = 7;           // 有值（已填充）
+      NOT_SET = 8;          // 无值（未填充）
+
+      CONTAINS = 9;         // 包含
+      NOT_CONTAINS = 10;    // 不包含
+
+      IN = 11;              // 属于
+      NOT_IN = 12;          // 不属于
+    }
+
+    // 条件匹配方式
+    enum MatchTypeEnum {
+      SEMANTIC = 0;    // 大模型理解语义判断
+      PRECISE = 1;     // 精准匹配
+    }
+
+    Input Left = 1;               // 左值
+    TypeEnum LeftType = 2;        // 左值的数据类型
+    OperatorEnum Operator = 3;    // 运算符
+    Input Right = 4;              // 右值
+    MatchTypeEnum MatchType = 5;  // 匹配类型：大模型理解语义判断 / 精准匹配
+  }
+
+  LogicalOperatorEnum LogicalOperator = 1;      // LogicalOperator 和 Compound 一起使用；字符串: AND 或 OR
+  repeated LogicalExpression Compound = 2;      // LogicalOperator 和 Compound 一起使用；组合的表达式
+  ComparisonExpression Comparison = 3;          // LogicalOperatorEnum 是 UNSPECIFIED 时关注，具体的运算(相当于叶子节点）
+}
+
+// 回复节点数据
+message AnswerNodeData {
+  string Answer = 1;
+}
+
+// 选项卡数据
+message OptionCardNodeData {
+  message Option{
+    string Content = 1;                           // 选项内容
+    repeated string NextNodeIDs = 2;              // 下一个节点ID TODO(xinghui) 如果是选项卡的else，Content是空的； else是必须连线
+  }
+  string Question = 1;            // 问题
+  repeated Option Options = 2;    // 选项内容
+}
+
+
+// 循环节点
+message IterationNodeData {
+  enum BodyTypeEnum {
+    WORKFLOW = 0;         // 默认循环体是工作流
+  }
+  enum IterationModeEnum {
+    ALL = 0;                          // 遍历全部元素
+    BY_CONDITION = 1;                 // 按条件循环
+  }
+
+  BodyTypeEnum BodyType = 1;            // 循环体类型
+  string WorkflowID = 2;                // 当循环体类型是 WORKFLOW 时引用的工作流
+  repeated InputParam RefInputs = 3;       // 子工作流的输入参数(除了 Input 的数据，其他字段需要跟其他保持一致） // TODO(xinghui) 待定
+//  map<string, Input> Inputs = 3;        // 子工作流的输入参数， key为 输入参数名称，Value是Input结构体
+  IterationModeEnum IterationMode = 4;  // 循环模式
+  LogicalExpression Condition = 5;        // 按条件循环时具体的逻辑条件；   // TODO(xinghui) 这里的Inputs 可以输入 "当前循环节点"中的 input.index 和 index.item
+
+//  map<string, RefInput> InputsTemp = 65;
+}
+
+//message RefInput{
+//  map<string, RefInput> Sub = 1;
+//  Input Input = 2;    // 输入的值
+//}
+
+
+// 意图识别节点数据
+message IntentRecognitionNodeData {
+  message Intent {
+    string Content = 1;                           // 单个意图内容 (// TODO(xinghui) tilin 交互确定
+    repeated string NextNodeIDs = 2;              // 下一个节点ID
+  }
+  string ModelName = 1;           // 模型名； 模型列表复用App配置的模型列表拉取接口
+  float Temperature = 2;          // 温度
+  float TopP = 3;                 // Top P (topProbabilityMass, topPMass)
+  int32 MaxTokens = 4;            // 最大回复Token (针对该模型的可用区间同模型列表拉取接口，也要带上这个模型是否支持"最大回复token"的字段)
+  string Prompt = 5;              // 提示词
+  repeated Intent Intents = 6;    // 意图
+}
+
+// 工作流节点
+message WorkflowRefNodeData {
+  string WorkflowID = 1;                           // 引用的工作流ID
+  repeated InputParam RefInputs = 2;               // 子工作流的输入参数 // FIXME [v2.7]
+}
+
+
+// 插件节点
+message PluginNodeData {
+  string PluginID = 1;                // 引用的插件ID
+  string ToolID = 2;                  // 引用的插件工具ID
+  ToolNodeData toolInputs = 3;        // 引用工具节点结构
+
+}
+
+// 结束节点
+message EndNodeData {
+  // 内空，只用外层的Outputs
+}
+
+message WorkflowRsp{}
+
+service generate_workflow_doc_svr {
+  //  用于生成swagger文档的接口，无实际用途
+  rpc doc(Workflow) returns(WorkflowRsp) {};
+}
+
+
+// 简化版的 json schema
+// https://json-schema.org/learn/getting-started-step-by-step
+//
+// 工具节点和代码节点的最外层是固定的 Output 字段
+// 示例：
+// {
+//  "Title": "Output",
+//  "Type": "OBJECT",
+//  "Properties": [
+//    {
+//      "Title": "Name",
+//      "Type": "STRING"
+//    },
+//    {
+//      "Title": "Age",
+//      "Type": "INT"
+//    },
+//    {
+//      "Title": "Addresses",
+//      "Type": "ARRAY_OBJECT",
+//      "Properties": [
+//        {
+//          "Title": "Street",
+//          "Type": "STRING"
+//        },
+//        {
+//          "Title": "City",
+//          "Type": "STRING"
+//        },
+//        {
+//          Title: "Country",
+//          type: STRING
+//        }
+//      ]
+//    }
+//  ]
+//}
+message OutputParam {
+//  string ID = 1;
+  string Title = 2;                 // json中的key
+  TypeEnum Type = 3;                // json中value的类型
+  repeated string Required = 4;     // 如果不需要就忽略；表示是否"必须"，只对 OBJECT 或 ARRAY_OBJECT 类型有用
+  repeated OutputParam Properties = 5;   // 只对 OBJECT 或 ARRAY_OBJECT 类型有用
+  string Desc = 6; // 变量描述
+  Input Value = 7; // 数据值（当前只用于结束节点）
+}
+
+
+// -------------------------------------------- 下面还没用上  -----------------------------------
+
+message Array {
+  repeated DynamicValue elements = 1;
+}
+
+message ObjectValue {
+  map<string, DynamicValue> properties = 1;
+}
+
+// 定义一个可以包含多种类型的数据结构
+message DynamicValue {
+  // 类型字段
+  TypeEnum Type = 1;
+
+  oneof Value {
+    string StringValue = 1001;
+    int32 IntValue = 1002;
+    float FloatValue = 1003;
+    bool BoolValue = 1004;
+    ObjectValue ObjValue = 1005;
+    Array ListValue = 1006;
+  }
+}

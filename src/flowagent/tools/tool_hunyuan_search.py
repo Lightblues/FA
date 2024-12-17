@@ -10,11 +10,13 @@ from tencentcloud.hunyuan.v20230901.hunyuan_client import HunyuanClient
 from tencentcloud.hunyuan.v20230901.models import ChatCompletionsRequest, ChatCompletionsResponse
 from .register import register_tool
 from typing import Iterator
+from loguru import logger
 
-cred = credential.Credential(
-    os.environ.get("TENCENTCLOUD_SECRET_ID"),
-    os.environ.get("TENCENTCLOUD_SECRET_KEY"),
-)
+secret_id, secret_key = os.environ.get("TENCENTCLOUD_SECRET_ID", ""), os.environ.get("TENCENTCLOUD_SECRET_KEY", "")
+if not secret_id or not secret_key:
+    logger.warning("TENCENTCLOUD_SECRET_ID or TENCENTCLOUD_SECRET_KEY not set, using default credentials!")
+    secret_id, secret_key = "xxx", "xxx"
+cred = credential.Credential(secret_id, secret_key)
 client = HunyuanClient(cred, "ap-beijing")
 
 def query_hunyuan(messages, model="Pro", top_p=1, temperature=1, max_tokens=1024, **kwargs):

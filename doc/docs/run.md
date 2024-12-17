@@ -2,7 +2,7 @@
 ```sh
 # 1. clone the repo & data
 git clone git@git.woa.com:easonsshi/huabu.git huabu_test && cd huabu_test
-# ... transfer `huabu_1127.zip` to `./dataset` & unzip it
+# ... transfer `v241127.zip` to `./dataset` & unzip it
 
 # 2. config the env
 conda create -n huabu python=3.10 -y && conda activate huabu

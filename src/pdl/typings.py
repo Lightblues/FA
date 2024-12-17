@@ -2,6 +2,7 @@ import json
 from pydantic import BaseModel
 from typing import List, Dict, Any
 from data_utils.workflow.nodes.node_data.tool_node_data import _TOOL_API
+json_line = lambda x: json.dumps(x, ensure_ascii=False)
 
 class ParameterNode(BaseModel):
     name: str
@@ -9,7 +10,7 @@ class ParameterNode(BaseModel):
     type: str
 
     def __str__(self):
-        return f"- name: {self.name}\n  desc: {self.desc}\n  type: {self.type}"
+        return f"- name: {self.name}\n  desc: {json_line(self.desc)}\n  type: {self.type}"
 
 
 class BaseNode(BaseModel):
@@ -24,7 +25,7 @@ class AnswerNode(BaseNode):
     answer: str
 
     def __str__(self):
-        return f"- name: {self.name}\n  answer: {json.dumps(self.answer, ensure_ascii=False)}"
+        return f"- name: {self.name}\n  answer: {json_line(self.answer)}"
 
 class ToolParam(BaseModel):
     ParamName: str
@@ -57,11 +58,12 @@ class PDL(BaseModel):
     Procedure: str
 
     def __str__(self):
-        s = f"Name: {self.Name}\nDesc: {self.Desc}\n"
+        s = f"Name: {self.Name}\nDesc: {json_line(self.Desc)}\n"
         s += "SLOTs:\n"
         s += "\n".join([str(s) for s in self.SLOTs])
         s += "\nAPIs:\n"
         s += "\n".join([str(a) for a in self.APIs])
         s += "\nANSWERs:\n"
         s += "\n".join([str(a) for a in self.ANSWERs])
+        s += f"\nProcedure: {json_line(self.Procedure)}"
         return s

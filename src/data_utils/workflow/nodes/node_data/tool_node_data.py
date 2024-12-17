@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import *
 from .base import NodeDataBase
+from ...variable import Variable
 
 # --- Tool Node Data ---
 class _TOOL_API(BaseModel):
@@ -14,25 +15,11 @@ class _TOOL_API(BaseModel):
     def __str__(self):
         return f"{self.Method} {self.URL}"
 
-class _TOOL_INPUT_REFERENCE_OUTPUT(BaseModel):
-    NodeID: str
-    JsonPath: str
-
-    def __str__(self):
-        return f"{self.NodeID} {self.JsonPath}"
-
-class _TOOL_INPUT(BaseModel):
-    InputType: Literal["REFERENCE_OUTPUT"]
-    Reference: _TOOL_INPUT_REFERENCE_OUTPUT
-
-    def __str__(self):
-        return f"{self.InputType} {self.Reference}"
-
 class _TOOL_QUERY(BaseModel):
     ParamName: str
     ParamDesc: str
     ParamType: str
-    Input: _TOOL_INPUT
+    Input: Variable
     IsRequired: bool
     SubParams: List[Dict[str, Any]]  # TODO: sub params? 
 

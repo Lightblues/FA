@@ -14,7 +14,7 @@ cases: https://doc.weixin.qq.com/sheet/e3_AcMATAZtAPIaxl2WshdR0KQkIBZdF?scode=AJ
 - [x] for streamlit, implement refresh mechanism: `refresh_config` of workflow, bot, api;  `refresh_pdl` of controller
 @20241127
 - [x] align with test data (https://doc.weixin.qq.com/sheet/e3_AEcAggZ1ACcumx7zFjoQGOBubNd0p?scode=AJEAIQdfAAosxBjyslAcMATAZtAPI&tab=0koe96)
-- [x] dataset: huabu_1127
+- [x] dataset: v241127
 - [x] equip EntityLinker! 
 @241202
 - [x] #feat select workflow_dataset in UI

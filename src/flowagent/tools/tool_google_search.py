@@ -1,8 +1,10 @@
 """ 
 from @ian /cq8/ianxxu/chatchat/_TaskPlan/UI/v2.1/tools/google_search.py
 """
+from loguru import logger
 from langchain_community.utilities import GoogleSerperAPIWrapper
-import os; apikey = os.getenv("SERPER_API_KEY")
+import os; apikey = os.getenv("SERPER_API_KEY", "xxx")
+if apikey == "xxx": logger.warning("SERPER_API_KEY is not set")
 from .register import register_tool
 
 google_serper = GoogleSerperAPIWrapper(

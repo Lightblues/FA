@@ -15,7 +15,7 @@ from flowagent.data import Conversation, Message, Config
 
 
 class DBUtils:
-    def __init__(self, mongo_uri='mongodb://9.134.230.111:27017', db_name='agent-pdl'):
+    def __init__(self, mongo_uri='mongodb://localhost:27017', db_name='agent-pdl'):
         self.db = pymongo.MongoClient(mongo_uri)[db_name]
 
     def find_one_by_sessionid(self, session_id: str, collection: str="ui_multi_sessions") -> Any:

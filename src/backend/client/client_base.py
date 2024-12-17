@@ -6,11 +6,11 @@ from flowagent.data import Conversation
 class BaseClient:
     """Base client class for frontend-backend communication"""
     
-    url: str = "http://9.134.230.111:8100"
+    url: str = None
     conv: Conversation = None       # the conversation that sync with backend
     pdl_str: str = None            # the pdl that sync with backend
 
-    def __init__(self, url: str="http://9.134.230.111:8100"):
+    def __init__(self, url: str="http://localhost:8100"):
         self.url = url
 
     def process_stream_url(self, url: str, data: dict = None) -> Iterator[str]:
