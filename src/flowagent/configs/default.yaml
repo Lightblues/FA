@@ -20,7 +20,7 @@ ui_bot_template_fn: "flowagent/bot_pdl_ui_zh.jinja"
 ui_greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
 ui_available_workflow_datasets:
   - "v241127"
-  - "PDL_zh"
+  # - "PDL_zh"
 ui_default_workflow_dataset: "v241127"
 ui_tools:
   - {name: web_search, is_enabled: false}
@@ -98,7 +98,7 @@ db_name: "agent-pdl"
 # db_message_collection_name: "messages"
 # db_meta_collection_name: "config"
 
-backend_url: "http://localhost:8101"
+backend_url: "http://localhost:8100"
 
 # simulate_num_persona: 5
 # simulate_max_workers: 10
