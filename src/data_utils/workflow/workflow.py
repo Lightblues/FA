@@ -1,15 +1,19 @@
 """Workflow
 
-NOTE: 
+NOTE:
 1. edge: `source, target` is -> NodeID
 """
 
-from pydantic import BaseModel
 from typing import *
+
+from pydantic import BaseModel
+
 from .nodes import WorkflowNodeBase
+
 
 class WorkflowEdge(BaseModel):
     """Workflow edge"""
+
     source: str
     sourceHandle: Optional[str] = None
     target: str
@@ -23,8 +27,10 @@ class WorkflowEdge(BaseModel):
         s = f"- Edge: '{self.source} -> {self.target}'"
         return s
 
+
 class Workflow(BaseModel):
     """Workflow"""
+
     ProtoVersion: str
     WorkflowID: str
     WorkflowName: str

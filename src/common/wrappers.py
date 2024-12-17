@@ -1,13 +1,16 @@
-import time, functools, traceback
+import functools
+import time
+import traceback
 from typing import Callable
 
 
 class Timer:
-    """ timer of a function
+    """timer of a function
     USAGE:
         with Timer("func_name", print=True):
             func()
     """
+
     def __init__(self, name, print=True):
         self.name = name
         self.print = print
@@ -24,12 +27,13 @@ class Timer:
 
 
 def retry_wrapper(retry: int = 3, step_name: str = "", log_fn: Callable = print):
-    """ retry `retry` times for a function
-    
-    USAGE:: 
+    """retry `retry` times for a function
+
+    USAGE::
         @retry_wrapper(retry=3, step_name="example_function", log_fn=xxx)
         def example_function(xxx):
     """
+
     def decorator(f):
         @functools.wraps(f)
         def wrapped_f(*args, **kwargs):
@@ -42,5 +46,7 @@ def retry_wrapper(retry: int = 3, step_name: str = "", log_fn: Callable = print)
                     log_fn(f"  >>> traceback\n" + traceback.format_exc())
             else:
                 raise Exception(f"<{step_name}> failed for {retry} times!!! \n  Args: {args}, Kwargs: {kwargs}")
+
         return wrapped_f
+
     return decorator

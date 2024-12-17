@@ -3,11 +3,11 @@ Given the description of a task, you shuold generate a corresponding PDL.
 
 ### main components of PDL
 - meta information: `Name` and `Desc` are meta information about the PDL.
-- useful slots: `SLOT`s define the information collected from user, usually helpful for API calling. 
+- useful slots: `SLOT`s define the information collected from user, usually helpful for API calling.
 - actions
     - `API` and `ANSWER` nodes are available actions for the bot. APIs are useful functions and ANSWERs are responses to the user. And the `precondition` field defines the dependencies of the API/ANSWER nodes.
-    - besides, there a special `ASKSLOT` action to collect slot value from user, if not provided yet. 
-- pdl: the final `PDL` string is a Pythonic language that defines the core logic of the procedure. 
+    - besides, there a special `ASKSLOT` action to collect slot value from user, if not provided yet.
+- pdl: the final `PDL` string is a Pythonic language that defines the core logic of the procedure.
 
 
 ### sample PDL

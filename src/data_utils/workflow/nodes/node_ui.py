@@ -1,9 +1,11 @@
-""" 
+"""
 NOTE: hasn't been used yet!
 """
 
 from typing import *
+
 from pydantic import BaseModel
+
 
 class _NodeUIDataOutput(BaseModel):
     # [{'id': '42ede01b-9037-4952-5422-5610aebcdff5', 'value': 'Output', 'label': 'Output', 'type': 'OBJECT', 'children': [{'id': '9afe3901-1acc-c2c6-3bbc-364dcddf5c31', 'value': 'invoicing_method', 'label': 'invoicing_method', 'type': 'STRING', 'children': []}]}]
@@ -12,6 +14,7 @@ class _NodeUIDataOutput(BaseModel):
     label: str
     type: str
     children: List[Any]
+
 
 class _NodeUIData(BaseModel):
     content: List[Dict[str, Any]]
@@ -22,6 +25,7 @@ class _NodeUIData(BaseModel):
     debug: Any
     error: bool
     output: List[_NodeUIDataOutput]
+
 
 class _NodeUI(BaseModel):
     data: _NodeUIData

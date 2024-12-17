@@ -1,4 +1,4 @@
-""" 
+"""
 Usage::
 
     cd src
@@ -16,18 +16,22 @@ Usage::
 @241212
 - [x] #feat set `--reload_dir ./backend` for `uvicorn`
 """
-from fastapi import FastAPI
-from contextlib import asynccontextmanager
-from flowagent.data import Config, init_loguru_logger, DataManager
+
 import os
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+
+from common import init_loguru_logger
+from flowagent.data import Config, DataManager
 
 from .common.shared import SharedResources
 
 
 def init_app() -> FastAPI:
     # Get config name from environment variable, default to 'default.yaml'
-    config_name = os.environ.get('CONFIG_NAME', 'default.yaml')
-    
+    config_name = os.environ.get("CONFIG_NAME", "default.yaml")
+
     # Initialize configuration
     cfg = Config.from_yaml(DataManager.normalize_config_name(config_name))
     init_loguru_logger(DataManager.DIR_backend_log)
@@ -41,10 +45,12 @@ def init_app() -> FastAPI:
     )
     return app
 
+
 def setup_router(app: FastAPI):
-    from .routers.router_single import router_single
     from .routers.router_multi import router_multi
+    from .routers.router_single import router_single
     from .routers.router_tool import router_tool
+
     app.include_router(router_single)  # add the prefix `/single`?
     app.include_router(router_multi)
     app.include_router(router_tool)
@@ -57,13 +63,13 @@ async def lifespan(app: FastAPI):
     yield
     print("Shutting down...")
 
-    from .routers.session_context_single import clear_session_contexts_single
     from .routers.session_context_multi import clear_session_contexts_multi
+    from .routers.session_context_single import clear_session_contexts_single
+
     clear_session_contexts_single()
     clear_session_contexts_multi()
     print("Cleanup completed")
 
+
 app = init_app()
 setup_router(app)
-
-

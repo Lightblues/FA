@@ -1,11 +1,11 @@
-""" 
+"""
 
 ## 节点类型
 > 共享属性: ['NodeID', 'NodeName', 'NodeDesc', 'NodeType', 'Inputs', 'Outputs', 'NextNodeIDs', 'NodeUI']
 - CODE_EXECUTOR: 代码执行节点, 主要用于参数处理
     NOTE: 暂不考虑
 - PARAMETER_EXTRACTOR: 参数提取节点, #LLM 生成问题
-    Parameters 定义了所引用的参数 (参数.xlsx); 
+    Parameters 定义了所引用的参数 (参数.xlsx);
     UserConstraint: '当需要对“包裹内容”参数进行追问时，请严格按照以下内容进行追问：“请问您需要寄送什么物品？”'
     NOTE: 可以提取出其中的 `UserConstraint`
 - LLM: 大模型节点, 使用大模型进行结果转换
@@ -44,21 +44,24 @@
 005 [比较两个文档的核心差异]: Counter({'PARAMETER_EXTRACTOR': 2, 'ANSWER': 2, 'KNOWLEDGE_RETRIEVER': 2, 'LLM': 2, 'START': 1, 'LOGIC_EVALUATOR': 1})
 """
 
-import pathlib, json, collections
-import pandas as pd
+import collections
+import json
+import pathlib
 from typing import *
 
+import pandas as pd
+
 from .common import *
-from .workflow import Workflow
 from .parameter import Parameter
+from .workflow import Workflow
 
 
 class DataManager:
     DIR_root = pathlib.Path(__file__).resolve().parent.parent.parent.parent
     DIR_data = DIR_root / "data"
     DIR_dataset = DIR_data / "dataset"
-    
-    def __init__(self, data_version: str="v241127", export_version: str="export-1732628942") -> None:
+
+    def __init__(self, data_version: str = "v241127", export_version: str = "export-1732628942") -> None:
         self.data_version = data_version
         self.export_version = export_version
         self.workflow_infos = self.load_workflow_infos()
@@ -71,8 +74,8 @@ class DataManager:
         """
         fn = self.DIR_data / self.data_version / self.export_version / "工作流程.xlsx"
         df = pd.read_excel(fn)
-        columns_old = ['工作流ID', '工作流名称', '工作流描述', '画布结构']
-        columns_new = ['workflow_id', 'workflow_name', 'workflow_desc', 'workflow_fn']
+        columns_old = ["工作流ID", "工作流名称", "工作流描述", "画布结构"]
+        columns_new = ["workflow_id", "workflow_name", "workflow_desc", "workflow_fn"]
         df.rename(columns=dict(zip(columns_old, columns_new)), inplace=True)
         res = {}
         for idx, row in df.iterrows():
@@ -90,13 +93,33 @@ class DataManager:
         return res
 
     def load_parameter_infos(self, verbose: bool = False) -> Dict[str, Parameter]:
-        """ Load parameter infos
+        """Load parameter infos
         Output: { id: {infos} }
         """
         fn = self.DIR_data / self.data_version / self.export_version / "参数.xlsx"
         df = pd.read_excel(fn)
-        columns_old = ['工作流ID', '工作流节点ID', '工作流节点名称', '参数ID', '参数名称', '参数描述', '参数类型', '参数正确示例', '参数错误示例']
-        columns_new = ['workflow_id', 'workflow_node_id', 'workflow_node_name', 'parameter_id', 'parameter_name', 'parameter_desc', 'parameter_type', 'parameter_correct_example', 'parameter_wrong_example']
+        columns_old = [
+            "工作流ID",
+            "工作流节点ID",
+            "工作流节点名称",
+            "参数ID",
+            "参数名称",
+            "参数描述",
+            "参数类型",
+            "参数正确示例",
+            "参数错误示例",
+        ]
+        columns_new = [
+            "workflow_id",
+            "workflow_node_id",
+            "workflow_node_name",
+            "parameter_id",
+            "parameter_name",
+            "parameter_desc",
+            "parameter_type",
+            "parameter_correct_example",
+            "parameter_wrong_example",
+        ]
         df.rename(columns=dict(zip(columns_old, columns_new)), inplace=True)
         res = {}
         for idx, row in df.iterrows():
@@ -113,7 +136,12 @@ class DataManager:
         assert workflow_id in self.workflow_infos, f"workflow_id {workflow_id} not found"
         return workflow_id
 
-    def get_workflow_by_id(self, workflow_id: Union[str, int], return_dict: bool = False, verbose: bool = False) -> Workflow:
+    def get_workflow_by_id(
+        self,
+        workflow_id: Union[str, int],
+        return_dict: bool = False,
+        verbose: bool = False,
+    ) -> Workflow:
         """Get the workflow by id"""
         workflow_id = self.get_standard_workflow_id(workflow_id)
         fn = self.DIR_data / self.data_version / self.export_version / self.workflow_infos[workflow_id]["workflow_fn"]
@@ -129,7 +157,6 @@ class DataManager:
         else:
             return Workflow(**workflow)
 
-
     def stat_node_type(self):
         """Stat the node type distribution of the dataset"""
         print(f"--- workflow node type stat ---")
@@ -137,5 +164,3 @@ class DataManager:
             workflow = self.get_workflow_by_id(workflow_id)
             cnt = collections.Counter([node.NodeType for node in workflow.Nodes])
             print(f"{workflow_id} [{workflow_info['workflow_name']}]: {cnt}")
-
-

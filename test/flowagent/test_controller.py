@@ -1,5 +1,5 @@
+from flowagent.data import BotOutput, Config, Conversation, DataManager, Workflow
 from flowagent.pdl_controllers import NodeDependencyController
-from flowagent.data import Config, Workflow, DataManager, Conversation, BotOutput
 
 
 def test_dep_controller():
@@ -7,9 +7,12 @@ def test_dep_controller():
     cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
     workflow = Workflow(cfg)
     conv = Conversation()
-    
-    controller = NodeDependencyController(conv=conv, pdl=workflow.pdl, 
-        config={"if_pre": True, "if_post": True, "threshold": 2})
+
+    controller = NodeDependencyController(
+        conv=conv,
+        pdl=workflow.pdl,
+        config={"if_pre": True, "if_post": True, "threshold": 2},
+    )
 
     bot_output: BotOutput = BotOutput(action="check_hospital", action_input={"hospital_name": "test"}, response=None)
     res = controller.post_control(bot_output)
@@ -18,5 +21,6 @@ def test_dep_controller():
     controller.pre_control(bot_output)
     print(f">>> pre_control: {controller.pdl.status_for_prompt}")
     print()
-    
+
+
 test_dep_controller()

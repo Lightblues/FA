@@ -1,1 +1,1 @@
-from .flow import CoreFlow, CoreBlock
+from .flow import CoreBlock, CoreFlow

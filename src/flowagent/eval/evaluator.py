@@ -1,4 +1,4 @@
-""" Main entrypoint for evaluation! run simulations, judge, and analyze
+"""Main entrypoint for evaluation! run simulations, judge, and analyze
 updated @240926
 
 - [ ] add stat of #error_output (for parse)
@@ -6,63 +6,69 @@ updated @240926
 - [x] update analyzer: more metrics
 """
 
-import os, json, tqdm, itertools, pickle, collections, traceback, datetime, argparse
-from typing import List, Dict, Optional, Tuple, Union, Callable
-import pandas as pd
 import concurrent.futures
+import os
+import traceback
+from typing import Callable, Dict, Union
 
-from ..data import Config, DataManager, DBManager, LogUtils, Workflow
-from .analyzer import Analyzer
+import pandas as pd
+import tqdm
+
+from common import LogUtils
+
 from ..conversation_manager import FlowagentConversationManager
-from .judger import Judger
+from ..data import Config, DataManager, DBManager
+from .analyzer import Analyzer
 from .eval_utils import EvalUtils
+from .judger import Judger
 
 
 def task_simulate(cfg: Config) -> None:
-    """ One simulation task
-    """
+    """One simulation task"""
     controller = FlowagentConversationManager(cfg)
     controller.start_conversation(verbose=False)
-    
+
+
 def task_simulate_teacher_forcing(cfg: Config) -> None:
-    """ One simulation task | turn-level
-    """
+    """One simulation task | turn-level"""
     controller = FlowagentConversationManager(cfg)
     controller.start_conversation_teacher_forcing(verbose=False)
 
 
 def task_judge(cfg: Config) -> None:
-    """ One evaluation task
+    """One evaluation task
     return: True if pass
     """
     judger = Judger(cfg)
     judger.start_judge(verbose=False, mode="session")
 
+
 def task_judge_turn_level(cfg: Config) -> None:
-    """ One evaluation task
+    """One evaluation task
     return: True if pass
     """
     judger = Judger(cfg)
     judger.start_judge(verbose=False, mode="turn")
 
 
-class Evaluator: # rename -> Exp?
-    """ abstraction of whole evaluation process
+class Evaluator:  # rename -> Exp?
+    """abstraction of whole evaluation process
     USAGE:
         evaluator = Evaluator(cfg)
         evaluator.main()
     """
+
     cfg: Config = None
     data_namager: DataManager = None
     db: DBManager = None
-    
+
     def __init__(self, cfg: Config):
         self.cfg = cfg
         self.data_namager = DataManager(cfg)
         self.db = DBManager(cfg.db_uri, cfg.db_name, cfg.db_message_collection_name)
-        
+
     def main(self):
-        """ 
+        """
         0. set configs. log the configs by `exp_version`
         1. run simulations, use `XXXController(cfg).start_conversation()` to start a single exp with specific config
             output to db with `exp_version` (clean if exist)
@@ -70,39 +76,51 @@ class Evaluator: # rename -> Exp?
         3. analyze the evaluation results
         """
         self.process_configs()
-        
+
         if self.cfg.exp_mode == "session":
-            self.print_header_info(step_name="STEP 1: Simulating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("simulate") or k.startswith("exp")})
+            self.print_header_info(
+                step_name="STEP 1: Simulating",
+                infos={k: v for k, v in self.cfg.to_dict().items() if k.startswith("simulate") or k.startswith("exp")},
+            )
             self.run_simulations(f_task=task_simulate)
-            self.print_header_info(step_name="STEP 2: Evaluating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("judge")})
+            self.print_header_info(
+                step_name="STEP 2: Evaluating",
+                infos={k: v for k, v in self.cfg.to_dict().items() if k.startswith("judge")},
+            )
             self.run_evaluations(f_task=task_judge)
             self.print_header_info(step_name="STEP 3: Analyzing")
             self.analyze()
         elif self.cfg.exp_mode == "turn":
-            self.print_header_info(step_name="STEP 1: Simulating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("simulate") or k.startswith("exp")})
+            self.print_header_info(
+                step_name="STEP 1: Simulating",
+                infos={k: v for k, v in self.cfg.to_dict().items() if k.startswith("simulate") or k.startswith("exp")},
+            )
             self.run_simulations(f_task=task_simulate_teacher_forcing)
-            self.print_header_info(step_name="STEP 2: Evaluating", infos={k:v for k,v in self.cfg.to_dict().items() if k.startswith("judge")})
+            self.print_header_info(
+                step_name="STEP 2: Evaluating",
+                infos={k: v for k, v in self.cfg.to_dict().items() if k.startswith("judge")},
+            )
             self.run_evaluations(f_task=task_judge_turn_level)
             self.print_header_info(step_name="STEP 3: Analyzing")
             self.analyze()
         else:
             raise NotImplementedError(f"Unknown exp_mode: {self.cfg.exp_mode}")
-    
+
     def process_configs(self):
-        """ Log the config. If existed, reload it! """
+        """Log the config. If existed, reload it!"""
         cfn_fn = self.data_namager.DIR_config / f"exps/{self.cfg.exp_version}.yaml"
         os.makedirs(cfn_fn.parent, exist_ok=True)
         if os.path.exists(cfn_fn):
             print(f"EXP {self.cfg.exp_version} config existed! Loading from {cfn_fn}")
-            self.cfg = Config.from_yaml(cfn_fn)     # NOTE: reload the config!
+            self.cfg = Config.from_yaml(cfn_fn)  # NOTE: reload the config!
         else:
-            if self.cfg.exp_save_config: # save the config
+            if self.cfg.exp_save_config:  # save the config
                 self.cfg.to_yaml(cfn_fn)
                 print(f"EXP {self.cfg.exp_version} config saved to {cfn_fn}")
 
     @staticmethod
-    def print_header_info(step_name: str, infos: Union[None, Dict, pd.DataFrame]=None):
-        """ Formatted header info """
+    def print_header_info(step_name: str, infos: Union[None, Dict, pd.DataFrame] = None):
+        """Formatted header info"""
         step_name = f" {step_name.strip()} "
         s_print = step_name.center(150, "=") + "\n"
         if infos is not None:
@@ -110,10 +128,11 @@ class Evaluator: # rename -> Exp?
         print(s_print)
 
     def run_simulations(self, f_task: Callable):
-        """ 
+        """
         1. get all the simulation configs
         2. run simulations in parallel
         """
+
         def f_exec(cfg, f_task=f_task):
             # 1. check if run (query db) -- DONE in `XXXController.start_conversation`
             # 2. run with retry (3 times) NOTE: can be a decorator? @retry_wrapper
@@ -134,15 +153,19 @@ class Evaluator: # rename -> Exp?
                 future = executor.submit(f_exec, cfg, f_task=f_task)
                 futures.append(future)
             print(f"Running {len(futures)} tasks...")
-            for future in tqdm.tqdm(concurrent.futures.as_completed(futures), total=len(futures), desc="Executing tasks"):
+            for future in tqdm.tqdm(
+                concurrent.futures.as_completed(futures),
+                total=len(futures),
+                desc="Executing tasks",
+            ):
                 future.result()
 
-
     def run_evaluations(self, f_task: Callable):
-        """ evaluation process:
+        """evaluation process:
         1. get the experiments to be evaluated
         2. run evaluations in parallel
         """
+
         def f_exec(cfg, f_task=f_task):
             for retry_ in range(3):
                 try:
@@ -153,7 +176,7 @@ class Evaluator: # rename -> Exp?
             else:
                 print(f"ERROR!!! Task failed after 3 retrys for {cfg}")
                 return None
-        
+
         tasks = EvalUtils.get_evaluation_configs(self.cfg, db=self.db)
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.cfg.judge_max_workers) as executor:
             futures = []
@@ -162,15 +185,18 @@ class Evaluator: # rename -> Exp?
                 futures.append(future)
             print(f"Executing {len(futures)} judge tasks...")
             # num_errors = 0
-            for future in tqdm.tqdm(concurrent.futures.as_completed(futures), total=len(futures), desc="Executing tasks"):
-                future.result() 
+            for future in tqdm.tqdm(
+                concurrent.futures.as_completed(futures),
+                total=len(futures),
+                desc="Executing tasks",
+            ):
+                future.result()
             #     if r: num_errors += 1
             # print(f"# of errors: {num_errors}")
         # if num_errors > 0:
         #     raise Exception(f"# of errors when evaluation: {num_errors}")
 
     def analyze(self):
-        """ analysis process: -> to `Analyzer`
-        """
+        """analysis process: -> to `Analyzer`"""
         analyzer = Analyzer(self.cfg)
         analyzer.analyze()

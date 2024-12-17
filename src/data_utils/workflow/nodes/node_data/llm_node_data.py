@@ -1,6 +1,7 @@
-from pydantic import BaseModel
 from typing import *
+
 from .base import NodeDataBase
+
 
 class LLMNodeData(NodeDataBase):
     ModelName: str

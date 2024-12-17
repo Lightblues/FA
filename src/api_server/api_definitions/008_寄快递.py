@@ -1,18 +1,22 @@
-from pydantic import BaseModel
 from typing import List
+
 from api_registry import register_api
+from pydantic import BaseModel
 
 
 # Request and Response Models
 class ItemsRequest(BaseModel):
     Items: List[str]
 
+
 class DangerResponse(BaseModel):
     containDander: bool
+
 
 class OrderRequest(BaseModel):
     Addr: str
     PhoneNumber: str
+
 
 class OrderResponse(BaseModel):
     orderStatus: str

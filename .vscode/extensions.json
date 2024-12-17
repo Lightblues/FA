@@ -22,6 +22,11 @@
         "kortina.vscode-markdown-notes",
         // YAML
         "redhat.vscode-yaml",
+        // TOML
+        "tamasfe.even-better-toml",
+        // utils
+        "moshfeu.compare-folders",
+        "jebbs.plantuml",
         // proto
         "zxh404.vscode-proto3",
     ]

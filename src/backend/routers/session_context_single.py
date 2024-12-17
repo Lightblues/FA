@@ -1,4 +1,4 @@
-""" 
+"""
 @241210
 - [x] #feat implement SingleSessionContext
     structure: session_id, user_identity, cfg, conv, workflow, bot, tool, controllers, last_bot_output
@@ -7,22 +7,24 @@
 - [x] #structure seperate single & multi SessionContext
 """
 
-from pydantic import BaseModel
-from typing import Optional, Union, Dict
-from flowagent.roles import UISingleBot, RequestTool
-from flowagent.pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
-from flowagent.data import Workflow, Config, Conversation, BotOutput, Role
+from typing import Dict, Optional, Union
+
 from loguru import logger
+from pydantic import BaseModel
+
+from flowagent.data import BotOutput, Config, Conversation, Role, Workflow
+from flowagent.pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
+from flowagent.roles import RequestTool, UISingleBot
 
 from ..common.shared import get_db
+
+
 db = get_db()
 
 
 class SingleSessionContext(BaseModel):
     # Add this configuration to allow arbitrary types
-    model_config = {
-        "arbitrary_types_allowed": True
-    }
+    model_config = {"arbitrary_types_allowed": True}
 
     # session context, include all the necessary information
     session_id: str
@@ -43,7 +45,7 @@ class SingleSessionContext(BaseModel):
 
         Args:
             session_id (str): session_id
-            cfg (Config): config. 
+            cfg (Config): config.
                 Used config:
                     ``Workflow``: workflow_type, workflow_id, pdl_version
                         mode | exp_mode | user_mode
@@ -63,35 +65,46 @@ class SingleSessionContext(BaseModel):
         tool = RequestTool(cfg=cfg, conv=conv, workflow=workflow)
         controllers = {}
         for c in cfg.bot_pdl_controllers:
-            if c['is_activated']:
-                controllers[c['name']] = CONTROLLER_NAME2CLASS[c['name']](conv, workflow.pdl, c['config'])
-        return cls(session_id=session_id, cfg=cfg, conv=conv, workflow=workflow, bot=bot, tool=tool, controllers=controllers)
+            if c["is_activated"]:
+                controllers[c["name"]] = CONTROLLER_NAME2CLASS[c["name"]](conv, workflow.pdl, c["config"])
+        return cls(
+            session_id=session_id,
+            cfg=cfg,
+            conv=conv,
+            workflow=workflow,
+            bot=bot,
+            tool=tool,
+            controllers=controllers,
+        )
 
 
 SINGLE_SESSION_CONTEXT_MAP = {}
+
+
 def create_session_context_single(session_id: str, cfg: Config) -> SingleSessionContext:
     assert session_id not in SINGLE_SESSION_CONTEXT_MAP, "session_id already exists"
     session_context = SingleSessionContext.from_config(session_id, cfg)
     SINGLE_SESSION_CONTEXT_MAP[session_id] = session_context
     return session_context
 
+
 def get_session_context_single(session_id: str) -> Union[SingleSessionContext, None]:
-    if session_id not in SINGLE_SESSION_CONTEXT_MAP: return None
+    if session_id not in SINGLE_SESSION_CONTEXT_MAP:
+        return None
     return SINGLE_SESSION_CONTEXT_MAP[session_id]
 
+
 def clear_session_context_single(session_id: str):
-    """Clear the session context
-    """
+    """Clear the session context"""
     if session_id in SINGLE_SESSION_CONTEXT_MAP:
         del SINGLE_SESSION_CONTEXT_MAP[session_id]
-
 
 
 def db_upsert_session_single(ss: SingleSessionContext):
     """Upsert conversation to `db.backend_single_sessions`
     Infos: (sessionid, name, mode[single/multi], infos, conversation, version)...
 
-    NOTE: 
+    NOTE:
     - ideal upsert time? -> single_disconnect
     - save the conversation to db when user exit the page
     """
@@ -104,20 +117,17 @@ def db_upsert_session_single(ss: SingleSessionContext):
         "session_id": ss.session_id,
         "user": ss.user_identity,
         "mode": "single",
-        "conversation": ss.conv.to_list(), # TODO: only save messages? polish it!
-        "config": ss.cfg.model_dump(),      # to_list -> model_dump
+        "conversation": ss.conv.to_list(),  # TODO: only save messages? polish it!
+        "config": ss.cfg.model_dump(),  # to_list -> model_dump
     }
-    if not db:
+    if db is None:
         logger.warning(f"Skipping database operation for session {ss.session_id} due to connection failure")
         return
     try:
-        db.backend_single_sessions.replace_one(
-            {"session_id": ss.session_id},
-            _session_info,
-            upsert=True
-        )
+        db.backend_single_sessions.replace_one({"session_id": ss.session_id}, _session_info, upsert=True)
     except Exception as e:
         logger.error(f"Failed to save session {ss.session_id}: {e}")
+
 
 def clear_session_contexts_single():
     """Clear all the session contexts:
@@ -127,7 +137,7 @@ def clear_session_contexts_single():
     # Create a list of session IDs first to avoid modifying dict during iteration
     session_ids = list(SINGLE_SESSION_CONTEXT_MAP.keys())
     logger.warning(f"[clear_session_contexts_single] clearing session_ids: {session_ids}")
-    
+
     for session_id in session_ids:
         session_context = SINGLE_SESSION_CONTEXT_MAP.get(session_id)
         if session_context:

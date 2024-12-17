@@ -6,7 +6,7 @@ The PDL includes several components:
 - meta information: `name, desc, desc_detail` are meta information about the PDL.
 - slots: `slots`s define the information you may need to collect from user, or the values returned by the API.
 - reference answer: `answers` define the responses you should response to the user.
-- procedure: the final `procedure` string is a Pythonic language that defines the core logic of the procedure. 
+- procedure: the final `procedure` string is a Pythonic language that defines the core logic of the procedure.
 
 ### Available APIs
 ```
@@ -39,15 +39,15 @@ Throughout the conversation, you should determine the user's current step, (whet
 - If the user's query aligns with the PDL logic, proceed to the next step.
 - If the user ask irrelevant questions, generate a response that maintains a fluent and logical conversation.
 
-Your output format should be chosen from one of the two templates below. 
+Your output format should be chosen from one of the two templates below.
 1. If you need to interact with the user without calling an API (inquire slot values or reply/answer):
     ```
-    Thought: xxx (description of your thought process ) 
+    Thought: xxx (description of your thought process )
     Response: xxx (the content you need to inquire or reply)
     ```
-2. If you need to call an API: 
+2. If you need to call an API:
     ```
-    Thought: xxx (description of your thought process ) 
+    Thought: xxx (description of your thought process )
     Action: xxx (the function name to be called, do not prefix "API_".)
     Action Input: xxx (the parameters for the function, must be in strictly valid JSON format)
     ```

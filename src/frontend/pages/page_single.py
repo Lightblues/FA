@@ -1,4 +1,4 @@
-""" 
+"""
 url: http://agent-pdl.woa.com
 cases: https://doc.weixin.qq.com/sheet/e3_AcMATAZtAPIaxl2WshdR0KQkIBZdF?scode=AJEAIQdfAAolrl13UxAcMATAZtAPI&tab=qe4ogl
 
@@ -15,37 +15,47 @@ cases: https://doc.weixin.qq.com/sheet/e3_AcMATAZtAPIaxl2WshdR0KQkIBZdF?scode=AJ
 @20241127
 - [x] align with test data (https://doc.weixin.qq.com/sheet/e3_AEcAggZ1ACcumx7zFjoQGOBubNd0p?scode=AJEAIQdfAAosxBjyslAcMATAZtAPI&tab=0koe96)
 - [x] dataset: v241127
-- [x] equip EntityLinker! 
+- [x] equip EntityLinker!
 @241202
 - [x] #feat select workflow_dataset in UI
-@241209 
+@241209
 - [x] basic UI implement from [ui_conv] -> Front-Backend Separation
     -> see `backend/client.py`
 @241211
 - [x] #log move logger to backend
 - [x] #feat UI align with `src/flowagent/ui_conv/page_single_workflow.py`
     logic align with `test/backend/test_ui_backend.py`
-- [x] #feat refresh sessionId when session is changed; 
+- [x] #feat refresh sessionId when session is changed;
     check the time to `refresh_session()`!
 - [x] submit `single_disconnect` to clear backend cache (with `single_register`)
 - [x] #feat add `single_disconnect` to clear the session context when user exit the page
 @241212
 - [x] #bug check the controllers
 """
-import streamlit as st; ss = st.session_state
-import json, datetime
-from flowagent.data import Conversation, Role, BotOutput, APIOutput
-from flowagent.utils import retry_wrapper
-from ..ui.ui_single import init_sidebar, post_sidebar
-from ..ui.data_single import refresh_session_single
-from ..common import fake_stream, StreamlitUtils
+
+import streamlit as st
+
+
+ss = st.session_state
+import json
+
 from backend import FrontendClient
+from common import retry_wrapper
+from flowagent.data import APIOutput, BotOutput, Conversation, Role
+
+from ..common import StreamlitUtils, fake_stream
+from ..ui.data_single import refresh_session_single
+from ..ui.ui_single import init_sidebar, post_sidebar
+
+
 st_utils = StreamlitUtils()
+
 
 def insert_disconnect_js():
     # JavaScript to notify server on page unload
     # ref: https://discuss.streamlit.io/t/detecting-user-exit-browser-tab-closed-session-end/62066
-    st.components.v1.html(f"""
+    st.components.v1.html(
+        f"""
         <script>
             window.onbeforeunload = function() {{
                 fetch('{ss.client.url}/single_disconnect/{ss.session_id}', {{
@@ -53,19 +63,24 @@ def insert_disconnect_js():
                 }});
             }};
         </script>
-    """, height=0)
+    """,
+        height=0,
+    )
+
 
 def show_conversations(conversation: Conversation):
     for message in conversation.msgs:
         if (message.role == Role.SYSTEM) or (message.content.startswith("<")):
             continue
-        with st.chat_message(message.role.rolename, avatar=ss['avatars'][message.role.rolename]):
+        with st.chat_message(message.role.rolename, avatar=ss["avatars"][message.role.rolename]):
             st.write(message.content)
+
 
 def step_user_input(query: str):
     ss.client.single_user_input(ss.session_id, query)
-    with st.chat_message("user", avatar=ss['avatars']['user']):
+    with st.chat_message("user", avatar=ss["avatars"]["user"]):
         st.write(query)
+
 
 @retry_wrapper(retry=3, step_name="step_bot_prediction", log_fn=ss.logger.bind(custom=True).error)
 def step_bot_prediction() -> BotOutput:
@@ -76,11 +91,12 @@ def step_bot_prediction() -> BotOutput:
     """
     print(f">> conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
     client: FrontendClient = ss.client
-    
+
     with st.expander(f"{ss['tool_emoji']['think']} Thinking...", expanded=True):
         llm_response = st.write_stream(client.single_bot_predict(ss.session_id))
     res = client.single_bot_predict_output(ss.session_id)
     return res.bot_output
+
 
 def step_api_process(bot_output: BotOutput) -> APIOutput:
     client: FrontendClient = ss.client
@@ -88,8 +104,9 @@ def step_api_process(bot_output: BotOutput) -> APIOutput:
     st_utils.show_api_call(res.api_output)
     return res
 
+
 def case_workflow():
-    """ 
+    """
     add to db
     1. session level: (sessionid, name, mode[single/multi], infos, conversation, version)
     2. turn level (optional?): (sessionid, turnid, bot_output, prompt, version) TODO:
@@ -113,30 +130,31 @@ def case_workflow():
                 # TODO: add `_response_control` in FlowagentConversationManager
                 # ss.logger.info(f"<case_workflow> bot response: {bot_output.response}")
                 break
-            else: raise TypeError(f"Unexpected BotOutputType: {bot_output.action_type}")
+            else:
+                raise TypeError(f"Unexpected BotOutputType: {bot_output.action_type}")
         else:
             st.logger.warning(f"<case_workflow> bot actions exceed the limit: {ss.cfg.bot_action_limit}")
-            pass # TODO: 
+            pass  # TODO:
 
 
 def main_single():
     # 1. init
-    init_sidebar()      # need cfg
+    init_sidebar()  # need cfg
 
-    if "client" not in ss: ss.client = FrontendClient(ss.cfg)
+    if "client" not in ss:
+        ss.client = FrontendClient(ss.cfg)
     if ("mode" not in ss) or (ss.mode == "multi") or ("session_id" not in ss):
         ss.mode = "single"
         refresh_session_single()  # single_register
 
     insert_disconnect_js()
-    post_sidebar()      # need conv
+    post_sidebar()  # need conv
 
     # 3. the main loop!
     show_conversations(ss.conv)
-    if query := st.chat_input('Input...'):
+    if query := st.chat_input("Input..."):
         step_user_input(query)
         case_workflow()
         # show final bot response to screen
-        with st.chat_message("assistant", avatar=ss['avatars']['assistant']):
+        with st.chat_message("assistant", avatar=ss["avatars"]["assistant"]):
             st.write_stream(fake_stream(ss.conv.get_last_message().content))
-

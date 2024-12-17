@@ -30,17 +30,17 @@ Use the following criteria to score the assistant's performance on a scale of 1 
 
 
 ### Scoring Instructions
-Based on the evaluation criteria and task description provided, review the conversation history between assistant and user. Assign a score between 1 to 5 that best reflects the assistant's performance, where 1 is the lowest and 5 is the highest. 
+Based on the evaluation criteria and task description provided, review the conversation history between assistant and user. Assign a score between 1 to 5 that best reflects the assistant's performance, where 1 is the lowest and 5 is the highest.
 {# 注意在YAML输出的时候, 避免下面的输出导致解析失败!
 `errors: 回复信息不明确: "用户询问的法规政策变化问题没有得到具体回答"`
 ---
-            # List of error_type and error_reason. If donot have any, set to `null`. e.g., 
-            # - error_type: API参数错误: 
+            # List of error_type and error_reason. If donot have any, set to `null`. e.g.,
+            # - error_type: API参数错误:
             #   error_reason: 在当前轮的调用中传入了错误的参数
 #}
 Output your evaluation with **valid YAML format**, without any extra information:
 ```yaml
-detailed: 
+detailed:
     round-1:
         errors:
             # Dict of {error_type: error_reason}. e.g.,

@@ -1,6 +1,7 @@
-from flowagent import Config, DataManager, Judger, Analyzer
-from flowagent.data import Conversation, Workflow, Role, Message
-from flowagent.roles import ReactBot, CoREBot, PDLBot, UISingleBot
+from flowagent import Config, DataManager
+from flowagent.data import Conversation, Message, Role, Workflow
+from flowagent.roles import UISingleBot
+
 
 def init_ui_bot() -> UISingleBot:
     cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
@@ -8,17 +9,25 @@ def init_ui_bot() -> UISingleBot:
     cfg.bot_mode = "pdl_bot"
     cfg.workflow_dataset = "PDL_zh"
     cfg.workflow_type = "pdl"
-    
+
     workflow = Workflow(cfg)
     conv = Conversation()
     bot = UISingleBot(cfg=cfg, conv=conv, workflow=workflow)
     return bot
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     bot = init_ui_bot()
     conv = bot.conv
     query = "hello"
-    conv.add_message(Message(role=Role.USER, content=query, conversation_id=conv.conversation_id, utterance_id=conv.current_utterance_id))
+    conv.add_message(
+        Message(
+            role=Role.USER,
+            content=query,
+            conversation_id=conv.conversation_id,
+            utterance_id=conv.current_utterance_id,
+        )
+    )
     prompt, stream = bot.process_stream()
     llm_response = ""
     for chunk in stream:

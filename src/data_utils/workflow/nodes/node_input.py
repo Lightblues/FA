@@ -1,6 +1,7 @@
 from typing import *
+
 from pydantic import BaseModel
-from enum import Enum
+
 
 # ---------------------------------------------------
 # Inputs & Outputs
@@ -23,6 +24,7 @@ from enum import Enum
 #     def __str__(self):
 #         return f"[{self.Name}] ({self.Type}) {self.Input}"
 
+
 class _NodeOutputProperty(BaseModel):
     Title: str
     Type: str
@@ -30,8 +32,9 @@ class _NodeOutputProperty(BaseModel):
     Properties: List[Any]
     Desc: str
 
+
 class NodeOutput(BaseModel):
-    """ 
+    """
     - It seems that only the TOOL node has Outputs
     {
         "Title": "Output",
@@ -43,6 +46,7 @@ class NodeOutput(BaseModel):
         "Desc": "输出内容"
     }
     """
+
     Title: str
     Type: str
     Required: List[str]

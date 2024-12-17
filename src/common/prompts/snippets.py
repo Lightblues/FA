@@ -1,5 +1,6 @@
 import datetime
 
+
 class PromptUtils:
     @staticmethod
     def get_formated_time() -> str:

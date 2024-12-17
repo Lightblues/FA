@@ -1,20 +1,27 @@
-""" Data for mutli-agent
+"""Data for mutli-agent
 
 - [ ] can also implemented as service/backend
 
 """
 
 import json
-import streamlit as st; ss = st.session_state
-from flowagent.tools import TOOLS_MAP
+
+import streamlit as st
+
+
+ss = st.session_state
 from flowagent.data import Config
-from .data_single import get_workflow_names_map, get_session_id
+from flowagent.tools import TOOLS_MAP
+
+from .data_single import get_session_id
+
 
 def debug_print_infos_multi() -> None:
     print(f"[DEBUG] Conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
     print(f"  cfg.mui_workflow_infos: {ss.cfg.mui_workflow_infos}")
     print(f"  cfg.ui_tools: {ss.cfg.ui_tools}")
     print(f"  client.curr_status: {ss.client.curr_status}")
+
 
 def init_tools():
     """Set ss.tools from ss.cfg.ui_tools.
@@ -23,25 +30,29 @@ def init_tools():
     """
     if "tools" not in ss:
         for t in ss.cfg.ui_tools:
-            assert t['name'] in TOOLS_MAP, f"{t['name']} not in available tools {TOOLS_MAP.keys()}"
-            if "is_enabled" not in t: t['is_enabled'] = True
+            assert t["name"] in TOOLS_MAP, f"{t['name']} not in available tools {TOOLS_MAP.keys()}"
+            if "is_enabled" not in t:
+                t["is_enabled"] = True
         ss.tools = ss.cfg.ui_tools
+
 
 def _collect_ui_config_tools():
     """Collect `cfg.ui_tools` from ss.tool_toggle_<tool_name>"""
     for t in ss.cfg.ui_tools:
-        t['is_enabled'] = ss.get(f"tool_toggle_{t['name']}", True)
+        t["is_enabled"] = ss.get(f"tool_toggle_{t['name']}", True)
     return ss.cfg.ui_tools
+
 
 def _collect_ui_config_workflows():
     """Collect `cfg.mui_workflow_infos` from ss.workflow_checkbox_<workflow_name>"""
     for w in ss.cfg.mui_workflow_infos:
         # NOTE: use `get` to avoid KeyError. see `update_workflow_dependencies` in ui_multi.py
-        w['is_activated'] = ss.get(f"workflow_checkbox_{w['name']}", True)
+        w["is_activated"] = ss.get(f"workflow_checkbox_{w['name']}", True)
     return ss.cfg.mui_workflow_infos
 
+
 def refresh_session_multi():
-    """ Refresh the config and init new session
+    """Refresh the config and init new session
     NOTE: will reset a new session!
 
     Used config:
@@ -71,4 +82,3 @@ def refresh_session_multi():
         ss.client.multi_disconnect(ss.session_id)
     ss.session_id = get_session_id()
     ss.conv = ss.client.multi_register(ss.session_id, ss.cfg, ss.user_identity)
-

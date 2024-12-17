@@ -1,13 +1,18 @@
-""" 
+"""
 from 对话接口 https://cloud.tencent.com/document/product/1759/105561
 """
 
-from tencentcloud.common.common_client import CommonClient
+import os
+import uuid
+
 from tencentcloud.common import credential
-from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
+from tencentcloud.common.common_client import CommonClient
+from tencentcloud.common.exception.tencent_cloud_sdk_exception import (
+    TencentCloudSDKException,
+)
 from tencentcloud.common.profile.client_profile import ClientProfile
 from tencentcloud.common.profile.http_profile import HttpProfile
-import os, uuid
+
 
 _service = "lke"
 _api_version = "2023-11-30"
@@ -46,6 +51,7 @@ def get_token(secret, profile, region, params):  # region是字符串，其他�
     except TencentCloudSDKException as err:
         print(err)
         return ""
+
 
 def get_session_id():
     # 生成一个 UUID

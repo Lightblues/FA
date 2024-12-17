@@ -1,4 +1,4 @@
-""" 
+"""
 align with `src/flowagent/ui_conv/page_single_workflow.py`
 
 USAGE::
@@ -8,33 +8,40 @@ USAGE::
     python test_ui_backend.py
 
 @241209
-- [x] test UI backend logic with CLI. 
+- [x] test UI backend logic with CLI.
 @241210
 - [x] standardize the conversation logic (with FrontendClient)
 """
+
 import datetime
-from flowagent.data import Config, DataManager, LogUtils
+
 from backend import FrontendClient
+from common import LogUtils
+from flowagent.data import Config, DataManager
+
 
 conversation_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
 
 client = FrontendClient(cfg)
+
+
 def main():
     # 1. init the conversation
     conv = client.single_register(conversation_id, cfg)
     while True:
         user_input = LogUtils.format_user_input("[USER] ")
-        if user_input == "END": 
+        if user_input == "END":
             client.single_disconnect(conversation_id)
             break
         client.single_user_input(conversation_id, user_input)
 
         for i in range(3):
             # 1.0. pre_control
-            # 1.1. bot predict. (stream). Stream out the bot's response, and get the final bot_output. 
+            # 1.1. bot predict. (stream). Stream out the bot's response, and get the final bot_output.
             stream = client.single_bot_predict(conversation_id)
-            for chunk in stream: print(chunk, end="")
+            for chunk in stream:
+                print(chunk, end="")
             print()
             res_bot_predict = client.single_bot_predict_output(conversation_id)
             bot_output = res_bot_predict.bot_output
@@ -55,9 +62,12 @@ def main():
                 # 3. response. Show the response
                 print(LogUtils.format_str_with_color(f"[BOT] {bot_output.response}", "orange"))
                 break
-            else: raise NotImplementedError
-        else: print(f"  Failed to get response after 3 attempts!")
+            else:
+                raise NotImplementedError
+        else:
+            print(f"  Failed to get response after 3 attempts!")
     print()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

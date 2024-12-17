@@ -1,18 +1,21 @@
-""" 
+"""
 利用LLM自动化地将API转为后端代码
 see [PDL_2_apicode]
 """
 
 # %%
 import os
+
+
 _file_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(f"{_file_dir}/../../src")
-from engine_v1.datamodel import PDL
 # DIR_data = "../../data/v240628/huabu_step3/"
 from engine_v1.common import DIR_data
+from engine_v1.datamodel import PDL
+
 
 template_v01 = """Please mock some data and write a `fastapi` backend for the following apis, please also include test cases for each api with package `requests`.
-NOTE to keep the function and parameter names! 
+NOTE to keep the function and parameter names!
 
 Here are the natural language format APIs:
 ```PDL
@@ -22,16 +25,16 @@ Here are the natural language format APIs:
 Please give your code below:
 """
 
-template = """Please mock some data and write a `fastapi` backend for the following apis, NOTE to 
-1. keep the function and parameter names! 
-2. just use sync version of FastAPI, and you need to write the Request and Response models in the code! 
+template = """Please mock some data and write a `fastapi` backend for the following apis, NOTE to
+1. keep the function and parameter names!
+2. just use sync version of FastAPI, and you need to write the Request and Response models in the code!
 3. also output the corresponding API infos in the following format:
 ```json
 [
     {{
         "name": "通过交易金额查询",
         "type": "POST",
-        "endpoint": "/query_by_amount", 
+        "endpoint": "/query_by_amount",
         "request": ["amount"],
         "response": ["order_links"],
         "request_zh": ["交易金额"],
@@ -60,8 +63,10 @@ print(prompt)
 
 # %%
 import os
+
 from engine_v1.common import init_client
-from easonsi.llm.openai_client import OpenAIClient, Formater
+
+
 # llm_cfg = {
 #     "model_name": "神农大模型",
 #     "base_url": "http://9.91.12.52:8001",
@@ -114,7 +119,7 @@ def query_by_order_id(request: QueryByOrderIdRequest):
         raise HTTPException(status_code=404, detail="No orders found with the specified order ID")
     return QueryByOrderIdResponse(details=order["details"])
 
-Please write a function for me 
+Please write a function for me
 ```python
 def call_py_name_and_paras(api_name:str, api_paras:List[str]):
     # call_py_name_and_paras("通过交易时间查询", ["2024-06-01"])

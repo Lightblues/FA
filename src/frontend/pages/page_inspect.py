@@ -1,5 +1,5 @@
-""" 
-Inspect the history conversations. 
+"""
+Inspect the history conversations.
 
 Display logic:
 1. select mode: single or multi;
@@ -11,16 +11,22 @@ Display logic:
 """
 
 from typing import List
-import streamlit as st; ss = st.session_state
+
+import streamlit as st
+
+
+ss = st.session_state
 from ..common.util_db import DBUtils
+
 
 COLLECTION_NAMES = {
     "single": "backend_single_sessions",
-    "multi": "backend_multi_sessions"
+    "multi": "backend_multi_sessions",
 }
 
-def get_latest_sessionids(refresh: bool=False) -> List[str]:
-    """set ss.latest_sessionids. 
+
+def get_latest_sessionids(refresh: bool = False) -> List[str]:
+    """set ss.latest_sessionids.
     NOTE: set refresh=True when ``ss.inspect_mode`` changes
 
     Args:
@@ -31,15 +37,17 @@ def get_latest_sessionids(refresh: bool=False) -> List[str]:
         ss.latest_sessionids = db_utils.get_latest_sessionids(n=10, collection=COLLECTION_NAMES[ss.inspect_mode])
     return ss.latest_sessionids
 
+
 def main_inspect():
-    if "db_utils" not in ss: ss.db_utils = DBUtils()
+    if "db_utils" not in ss:
+        ss.db_utils = DBUtils()
     # if "inspect_mode" not in ss: ss.inspect_mode = "single"  # NOTE: set default mode to single
     db_utils: DBUtils = ss.db_utils
 
     with st.sidebar:
         # 1. select interested mode
         st.selectbox(
-            "1️⃣ Select mode", 
+            "1️⃣ Select mode",
             options=["single", "multi"],
             index=1,
             key="inspect_mode",
@@ -51,16 +59,14 @@ def main_inspect():
         with col1:
             get_latest_sessionids()
             conversation_id = st.selectbox(
-                "2️⃣ Select conversation_id", 
+                "2️⃣ Select conversation_id",
                 options=ss.latest_sessionids,
-                
             )
         with col2:
             st.button("Refresh", on_click=lambda: get_latest_sessionids(refresh=True))
-        customized_conversation_id = st.text_input(
-            "Or input a customized conversation_id:"
-        )
-        if customized_conversation_id: conversation_id = customized_conversation_id
+        customized_conversation_id = st.text_input("Or input a customized conversation_id:")
+        if customized_conversation_id:
+            conversation_id = customized_conversation_id
         st.info(f"selected conversation_id: {conversation_id}")
         display_option = st.selectbox(
             "Choose display option",
@@ -75,27 +81,28 @@ def main_inspect():
             st.warning(f"Conversation `{conversation_id}` is empty.")
             return
         df = conv.to_dataframe()
-        selected_columns = ['role', 'content', 'utterance_id']
-        df_selected = df[selected_columns].set_index('utterance_id')
+        selected_columns = ["role", "content", "utterance_id"]
+        df_selected = df[selected_columns].set_index("utterance_id")
         st.markdown(f"### Conversation `{conversation_id}`")
         if display_option == "Dataframe":
             st.dataframe(df_selected)
         else:
-            st.table(df_selected, ) # table is better for reading then st.dataframe!
-        
+            st.table(
+                df_selected,
+            )  # table is better for reading then st.dataframe!
+
         # 2. show the config
         st.markdown(f"### Configuration")
         with st.expander("Details"):
             st.write(cfg.to_dict())
-        
+
         # 5. show the utterance infors
-        utterance_ids = df['utterance_id'].unique()
-        with st.sidebar: 
-            selected_utterance_id = st.selectbox(
-                "3️⃣ Select utterance_id", options=utterance_ids)
-    
+        utterance_ids = df["utterance_id"].unique()
+        with st.sidebar:
+            selected_utterance_id = st.selectbox("3️⃣ Select utterance_id", options=utterance_ids)
+
         st.markdown(f"### Details of `utterance_id={selected_utterance_id}`")
         with st.expander("Details", expanded=True):
             if selected_utterance_id is not None:
-                selected_row = df[df['utterance_id'] == selected_utterance_id].iloc[0]
+                selected_row = df[df["utterance_id"] == selected_utterance_id].iloc[0]
                 st.write(selected_row.to_dict())

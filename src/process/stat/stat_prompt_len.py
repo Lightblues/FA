@@ -1,15 +1,18 @@
-""" 
+"""
 统计PDL prompt的长度
 """
 
 # %%
-import tiktoken, os, sys, yaml, datetime
-from transformers import AutoTokenizer, AutoModelForCausalLM, PreTrainedTokenizer
+import datetime
+import os
+
 import numpy as np
+import tiktoken
+from engine import _DIRECTORY_MANAGER, PDL
+from transformers import AutoTokenizer
+
 from utils.jinja_templates import jinja_render
-from engine import (
-    _DIRECTORY_MANAGER, PDL
-)
+
 
 # %%
 def stat_prompt_len(tokenizer):
@@ -34,12 +37,13 @@ def stat_prompt_len(tokenizer):
         prompt = jinja_render(
             "query_PDL.jinja",
             head_info=head_info,
-            conversation="xxx", 
+            conversation="xxx",
             PDL=pdl.PDL_str,
-            current_state="xxx"
+            current_state="xxx",
         )
         token_lengths_full.append(len(tokenizer.encode(prompt)))
     print(f"Avg token length of full prompt: {np.mean(token_lengths_full)}")
+
 
 # %%
 """ 发现qwen的中文编码效率还是要高出openai不少的!

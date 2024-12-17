@@ -1,4 +1,4 @@
-""" 
+"""
 align with `src/flowagent/ui_conv/page_single_workflow.py`
 
 USAGE::
@@ -8,7 +8,7 @@ USAGE::
     python test_ui_backend_multi.py
 
 @241209
-- [x] test UI backend logic with CLI. 
+- [x] test UI backend logic with CLI.
 @241210
 - [x] standardize the conversation logic (with FrontendClient)
 
@@ -25,27 +25,33 @@ Client
     .multi_post_control(conversation_id, bot_output)
     .multi_tool_workflow(conversation_id, bot_output)
 """
+
 import datetime
-from flowagent.data import Config, DataManager, LogUtils
+
 from backend import FrontendClient
+from flowagent.data import Config, DataManager, LogUtils
+
 
 conversation_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
 client = FrontendClient(cfg)
+
 
 def step_tool(agent_main_output):
     res_tool = client.multi_tool_main(conversation_id, agent_main_output)
     print(LogUtils.format_str_with_color(f"{res_tool.msg}", "green"))
     return res_tool
 
+
 def case_main():
     for r in range(3):
         stream = client.multi_bot_main_predict(conversation_id)
-        for chunk in stream: print(chunk, end="")
+        for chunk in stream:
+            print(chunk, end="")
         print()
         res_bot_predict = client.multi_bot_main_predict_output(conversation_id)
         agent_main_output = res_bot_predict.bot_output
-        if agent_main_output.workflow: 
+        if agent_main_output.workflow:
             print(LogUtils.format_str_with_color(f"{res_bot_predict.msg}", "orange"))
             break
         else:
@@ -55,16 +61,19 @@ def case_main():
             elif agent_main_output.response:
                 print(LogUtils.format_str_with_color(f"{res_bot_predict.msg}", "orange"))
                 break
-    else: print(f"  Failed to get response after 3 attempts!")
+    else:
+        print(f"  Failed to get response after 3 attempts!")
     if agent_main_output.workflow:
         case_workflow()
+
 
 def case_workflow():
     for i in range(5):
         # 1.0. pre_control
-        # 1.1. bot predict. (stream). Stream out the bot's response, and get the final bot_output. 
+        # 1.1. bot predict. (stream). Stream out the bot's response, and get the final bot_output.
         stream = client.multi_bot_workflow_predict(conversation_id)
-        for chunk in stream: print(chunk, end="")
+        for chunk in stream:
+            print(chunk, end="")
         print()
         res_bot_predict = client.multi_bot_workflow_predict_output(conversation_id)
         bot_output = res_bot_predict.bot_output
@@ -86,10 +95,13 @@ def case_workflow():
                 # 3. response. Show the response
                 print(LogUtils.format_str_with_color(f"{res_bot_predict.msg}", "orange"))
                 break
-            else: raise NotImplementedError
-    else: print(f"  Failed to get response after 3 attempts!")
+            else:
+                raise NotImplementedError
+    else:
+        print(f"  Failed to get response after 3 attempts!")
     if bot_output.workflow:
         case_main()
+
 
 def main():
     # 1. init the conversation
@@ -97,7 +109,7 @@ def main():
     print(LogUtils.format_str_with_color(f"{conv.get_last_message()}", "orange"))
     while True:
         user_input = LogUtils.format_user_input("[USER] ")
-        if user_input == "END": 
+        if user_input == "END":
             client.multi_disconnect(conversation_id)
             break
         client.multi_user_input(conversation_id, user_input)
@@ -109,5 +121,6 @@ def main():
 
     print()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

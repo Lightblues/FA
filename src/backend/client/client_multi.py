@@ -1,47 +1,56 @@
+from typing import Dict, Iterator
+
 import requests
-from typing import Iterator, Dict
-from flowagent.data import Config, Conversation, BotOutput, Role
+
+from flowagent.data import BotOutput, Config, Conversation, Role
+
 from ..typings import (
-    MultiRegisterResponse, MultiRegisterRequest,
     MultiBotMainPredictResponse,
-    MultiBotWorkflowPredictResponse, 
-    MultiPostControlResponse, 
+    MultiBotWorkflowPredictResponse,
+    MultiPostControlResponse,
+    MultiRegisterRequest,
+    MultiRegisterResponse,
     MultiToolWorkflowResponse,
 )
 from .client_base import BaseClient
 
+
 class MultiAgentMixin(BaseClient):
     curr_status: str = "main"
 
-    def multi_register(self, conversation_id: str, config: Config, user_identity: Dict=None) -> Conversation:
+    def multi_register(self, conversation_id: str, config: Config, user_identity: Dict = None) -> Conversation:
         """Register a new conversation
 
         Args:
             conversation_id (str): the id of the conversation
             config (Config): the config of the conversation
-        
+
         Notes:
             - reset the curr_status to "main"
         """
         self.curr_status = "main"
 
         url = f"{self.url}/multi_register/{conversation_id}"
-        response = requests.post(url, json=MultiRegisterRequest(user_identity=user_identity, config=config).model_dump())
+        response = requests.post(
+            url,
+            json=MultiRegisterRequest(user_identity=user_identity, config=config).model_dump(),
+        )
         if response.status_code == 200:
             result = MultiRegisterResponse(**response.json())
             self.conv = result.conversation
             return self.conv
-        else: 
+        else:
             print(f"Error: {response.text}")
             raise NotImplementedError
-        
+
     def multi_disconnect(self, conversation_id: str):
         url = f"{self.url}/multi_disconnect/{conversation_id}"
         response = requests.post(url)
         if response.status_code == 200:
             return response.json()
-        else: raise NotImplementedError
-    
+        else:
+            raise NotImplementedError
+
     def multi_user_input(self, conversation_id: str, query: str):
         """Add a user message to the conversation
 
@@ -54,7 +63,8 @@ class MultiAgentMixin(BaseClient):
         response = requests.post(url, json=self.conv.get_last_message().model_dump())
         if response.status_code == 200:
             return response.json()
-        else: raise NotImplementedError
+        else:
+            raise NotImplementedError
 
     # ---
     def multi_bot_main_predict(self, conversation_id: str) -> Iterator[str]:
@@ -71,7 +81,8 @@ class MultiAgentMixin(BaseClient):
             if res.bot_output.workflow:
                 self.curr_status = res.bot_output.workflow
             return res
-        else: raise NotImplementedError
+        else:
+            raise NotImplementedError
 
     # ---
     def multi_bot_workflow_predict(self, conversation_id: str) -> Iterator[str]:
@@ -87,7 +98,7 @@ class MultiAgentMixin(BaseClient):
             if res.bot_output.workflow:
                 self.curr_status = res.bot_output.workflow
             return res
-        else: 
+        else:
             print(f"Error: {response.text}")
             raise NotImplementedError
 
@@ -105,10 +116,11 @@ class MultiAgentMixin(BaseClient):
         response = requests.post(url, json=bot_output.model_dump())
         if response.status_code == 200:
             res = MultiPostControlResponse(**response.json())
-            if not res.success: # TODO: can add system instruction every turn? 
+            if not res.success:  # TODO: can add system instruction every turn?
                 self.conv.add_message(res.msg)
             return res
-        else: raise NotImplementedError
+        else:
+            raise NotImplementedError
 
     def multi_tool_workflow(self, conversation_id: str, bot_output: BotOutput) -> MultiToolWorkflowResponse:
         """Get the response of the tool
@@ -126,5 +138,5 @@ class MultiAgentMixin(BaseClient):
             res = MultiToolWorkflowResponse(**response.json())
             self.conv.add_message(res.msg)
             return res
-        else: 
+        else:
             raise NotImplementedError

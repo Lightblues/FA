@@ -1,5 +1,5 @@
 from flowagent import Config, DataManager, FlowagentConversationManager
-from flowagent.roles import ReactBot, CoREBot, PDLBot
+
 
 cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
 cfg.simulate_force_rerun = True
@@ -28,7 +28,7 @@ elif mode == "pdl":
     cfg.bot_mode = "pdl_bot"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     controller = FlowagentConversationManager(cfg)
     conv = controller.conversation(verbose=True)
     print(conv)

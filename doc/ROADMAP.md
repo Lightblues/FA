@@ -9,7 +9,7 @@
         - [ ] Add PDL standard #P0 #doc
 2. Data & DB & Log
     1. Data convert: Huabu Json -> PDL #auto #P0
-        - [ ] Align existed Huabu nodes 
+        - [ ] Align existed Huabu nodes
         - [ ] LLM auto generate node dependencies #auto
     2. Data collection (for LLM training)
         - [x] Data storage: with `mongodb` (v0.1.0)
@@ -31,13 +31,12 @@
 4. Evaluation & Optimization
     - [ ] Optimization: find the better PDL format #P0 (link 1.2)
         API_check_hospital_exist -> `API.check_hospital_exist`?
-    - [ ] Testing: 
-        - [ ] Procedure compliance in larger graph? 
+    - [ ] Testing:
+        - [ ] Procedure compliance in larger graph?
 5. Bugs
-    - [ ] 点击 "重置对话", DAG controller 状态没有更新. 
+    - [ ] 点击 "重置对话", DAG controller 状态没有更新.
 
 
 ## Change log
 ### v0.1.0
 - code structure: frontend-backend separation
-

@@ -1,4 +1,4 @@
-""" 
+"""
 输入: Graph (条件判断)
 输出: Python 形式的流程描述
 
@@ -10,8 +10,8 @@ new API: (p1, p2) -> (o2)
 
 template_procudure = """
 <任务>
-1. 对于一个图结构的工作流, 请你将其核心流程转为 Procedure 的形式. 
-2. Procedure 语法: 整体上采用 Python/伪代码 的形式, 其中, 
+1. 对于一个图结构的工作流, 请你将其核心流程转为 Procedure 的形式.
+2. Procedure 语法: 整体上采用 Python/伪代码 的形式, 其中,
     通过 `[变量] = API.API_NAME([参数])` 的形式调用 API;
     通过 `ANSWER.ANSWER_NAME()` 的形式调用 ANSWER.
 3. 仅支持 API 和 ANSWER 两类节点, 节点名称需要和已有的名称完全一致.

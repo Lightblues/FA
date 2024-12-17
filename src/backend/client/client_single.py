@@ -1,4 +1,4 @@
-""" 
+"""
 @241209
 - [x] basic implement
 @241210
@@ -8,18 +8,24 @@
 - [x] multi-agent
 
 todos
-- [ ] 
+- [ ]
 """
-import requests, json, asyncio, aiohttp
-from typing import Union, Iterator, Tuple, AsyncIterator, Dict
-from flowagent.data import Config, Conversation, BotOutput, Role
+
+from typing import Dict, Iterator
+
+import requests
+
+from flowagent.data import BotOutput, Config, Conversation, Role
+
 from ..typings import (
-    SingleRegisterResponse, SingleRegisterRequest,
-    SingleBotPredictResponse, 
-    SinglePostControlResponse, 
-    SingleToolResponse
+    SingleBotPredictResponse,
+    SinglePostControlResponse,
+    SingleRegisterRequest,
+    SingleRegisterResponse,
+    SingleToolResponse,
 )
 from .client_base import BaseClient
+
 
 class SingleAgentMixin(BaseClient):
     """Wrapper of `backend/routers/router_single_agent.py`
@@ -27,7 +33,7 @@ class SingleAgentMixin(BaseClient):
     NOTE:
     - The conversation should be synced with the backend! So note to `add_message`!
 
-    Usage:: 
+    Usage::
 
         client = FrontendClient(cfg)
         # 1. init the conversation
@@ -36,12 +42,13 @@ class SingleAgentMixin(BaseClient):
         while True:
             client.single_user_input(conversation_id, user_input)
             while True:
-                stream = client.single_bot_predict(conversation_id) # process the Iterator
+                stream = client.single_bot_predict(conversation_id)  # process the Iterator
                 res_bot_predict = client.single_bot_predict_output(conversation_id)
                 bot_output = res_bot_predict.bot_output
                 if bot_output.action:
                     res_post_control = client.single_post_control(conversation_id, bot_output)
-                    if not res_post_control.success: continue
+                    if not res_post_control.success:
+                        continue
                     res_tool = client.single_tool(conversation_id, bot_output)
                 elif bot_output.response:
                     break
@@ -49,8 +56,7 @@ class SingleAgentMixin(BaseClient):
         client.single_disconnect(conversation_id)
     """
 
-
-    def single_register(self, conversation_id: str, config: Config, user_identity: Dict=None) -> Conversation:
+    def single_register(self, conversation_id: str, config: Config, user_identity: Dict = None) -> Conversation:
         """Register a new conversation
 
         Args:
@@ -58,13 +64,16 @@ class SingleAgentMixin(BaseClient):
             config (Config): the config of the conversation
         """
         url = f"{self.url}/single_register/{conversation_id}"
-        response = requests.post(url, json=SingleRegisterRequest(user_identity=user_identity, config=config).model_dump())
+        response = requests.post(
+            url,
+            json=SingleRegisterRequest(user_identity=user_identity, config=config).model_dump(),
+        )
         if response.status_code == 200:
             result = SingleRegisterResponse(**response.json())
             self.pdl_str = result.pdl_str
             self.conv = result.conversation
             return self.conv
-        else: 
+        else:
             print(f"Error: {response.text}")
             raise NotImplementedError
 
@@ -73,8 +82,9 @@ class SingleAgentMixin(BaseClient):
         response = requests.post(url)
         if response.status_code == 200:
             return response.json()
-        else: raise NotImplementedError
-    
+        else:
+            raise NotImplementedError
+
     def single_user_input(self, conversation_id: str, query: str):
         """Add a user message to the conversation
 
@@ -87,7 +97,8 @@ class SingleAgentMixin(BaseClient):
         response = requests.post(url, json=self.conv.get_last_message().model_dump())
         if response.status_code == 200:
             return response.json()
-        else: raise NotImplementedError
+        else:
+            raise NotImplementedError
 
     def single_bot_predict(self, conversation_id: str) -> Iterator[str]:
         """Get the response of the bot in stream (step 1)
@@ -117,7 +128,7 @@ class SingleAgentMixin(BaseClient):
             # add message to sync with backend!
             self.conv.add_message(res.msg, role=Role.BOT)
             return res
-        else: 
+        else:
             print(f"Error: {response.text}")
             raise NotImplementedError
 
@@ -138,7 +149,8 @@ class SingleAgentMixin(BaseClient):
             if not res.success:
                 self.conv.add_message(res.msg, role=Role.SYSTEM)
             return res
-        else: raise NotImplementedError
+        else:
+            raise NotImplementedError
 
     def single_tool(self, conversation_id: str, bot_output: BotOutput) -> SingleToolResponse:
         """Get the response of the tool
@@ -156,5 +168,5 @@ class SingleAgentMixin(BaseClient):
             res = SingleToolResponse(**response.json())
             self.conv.add_message(res.msg, role=Role.SYSTEM)
             return res
-        else: 
+        else:
             raise NotImplementedError

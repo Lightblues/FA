@@ -1,18 +1,20 @@
-""" 
+"""
 - [ ] #debug skip `db` operations for debuging
 """
 
 from typing import Union
+
 import pymongo
+from loguru import logger
 from pymongo.database import Database
 from pymongo.mongo_client import MongoClient
+
 from flowagent.data import Config
-from loguru import logger
 
 
 def check_db_connection(client: MongoClient) -> bool:
     """Check if MongoDB client connection is available
-    
+
     Args:
         client: MongoDB client instance
     Returns:
@@ -20,7 +22,7 @@ def check_db_connection(client: MongoClient) -> bool:
     """
     try:
         # Ping the database
-        client.admin.command('ping')
+        client.admin.command("ping")
         return True
     except Exception as e:
         logger.warning(f"MongoDB client {client} connection failed: {e}")
@@ -40,13 +42,13 @@ class SharedResources:
             self.db_client = None
         else:
             self.db = self.db_client[config.db_name]
-    
+
     @classmethod
     def initialize(cls, config: Config):
         if cls._instance is None:
             cls._instance = cls(config)
         return cls._instance
-    
+
     @classmethod
     def get_instance(cls):
         if cls._instance is None:
@@ -56,4 +58,3 @@ class SharedResources:
 
 def get_db() -> Union[Database, None]:
     return SharedResources.get_instance().db
-
