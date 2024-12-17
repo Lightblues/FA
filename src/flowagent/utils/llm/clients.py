@@ -1,8 +1,4 @@
 
-""" 
-# from easonsi.llm.openai_client import OpenAIClient, Formater
-"""
-
 import sys, os, json, re, time, requests, yaml, traceback
 from typing import List, Dict, Optional, Tuple, Union, Iterator
 import openai

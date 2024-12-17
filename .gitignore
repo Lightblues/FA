@@ -2,7 +2,7 @@
 /data/
 *tmp*
 wandb/
-.env
+# .env
 *.ipynb
 poetry.lock
 
