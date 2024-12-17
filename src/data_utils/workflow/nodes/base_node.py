@@ -58,10 +58,13 @@ class WorkflowNodeBase(BaseModel):
         #     self.NodeUI = _NodeUI(**json.loads(self.NodeUI))
 
     def __str__(self):
-        s = f"- NODE: {self.NodeName} ({self.NodeType}) ({self.NodeID})\n"
-        s += f"  Inputs: {' | '.join(str(x) for x in self.Inputs)}\n"
-        s += f"  Outputs: {self.Outputs}\n"
-        s += f"  NodeData: {self.NodeData}"
+        s = f"- name: {self.NodeName}\n"
+        s += f"  id: {self.NodeID}\n"
+        s += f"  desc: {self.NodeDesc}\n"
+        s += f"  type: {self.NodeType}\n"
+        s += f"  inputs: {self.Inputs}\n"
+        s += f"  outputs: {self.Outputs}\n"
+        s += f"  node_data: {self.NodeData}"
         return s
 
     def to_pdl(self):

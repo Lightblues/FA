@@ -42,9 +42,9 @@ class ToolNode(BaseNode):
     Body: List[ToolParam]
 
     def __str__(self):
-        paras = self.Query + self.Body
-        paras = [f"(name={p.ParamName}, type={p.ParamType}, required={p.IsRequired})" for p in paras]
-        return f"- name: {self.name}\n  desc: {self.desc}\n  API: {self.API.URL}\n  Params: [{', '.join(paras)}]"
+        s_query = [f"(name={p.ParamName}, type={p.ParamType}, required={p.IsRequired})" for p in self.Query]
+        s_body = [f"(name={p.ParamName}, type={p.ParamType}, required={p.IsRequired})" for p in self.Body]
+        return f"- name: {self.name}\n  desc: {self.desc}\n  API: {self.API.URL}\n  Query: [{', '.join(s_query)}]\n  Body: [{', '.join(s_body)}]"
 
 
 class PDL(BaseModel):

@@ -15,6 +15,7 @@ author: easonsshi
 ## 背景
 
 ## 详细规范
+> 参见 [src/pdl]
 
 
 ### 语法结构

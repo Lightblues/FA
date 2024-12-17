@@ -19,16 +19,19 @@ TODO:
 """
 
 from typing import List
+from . import prompts
 from ..workflow import DataManager, Workflow, Parameter
 from pdl.typings import PDL
+from flowagent.utils import init_client, LLM_CFG, Formater
 
 VALID_NODE_TYPES = ("START", "ANSWER", "PARAMETER_EXTRACTOR", "TOOL", "LOGIC_EVALUATOR")
 
 class WorkflowPDLConverter:
-    def __init__(self, data_version: str="huabu_1127", export_version: str="export-1732628942") -> None:
+    def __init__(self, data_version: str="huabu_1127", export_version: str="export-1732628942", llm_name: str="gpt-4o") -> None:
         self.data_version = data_version
         self.export_version = export_version
         self.data_manager = DataManager(data_version, export_version)
+        self.llm = init_client(LLM_CFG[llm_name])
 
     def convert(self, workflow_id: str):
         # 1. load the workflow
@@ -44,8 +47,7 @@ class WorkflowPDLConverter:
         params = [p for p in self.data_manager.parameter_infos.values() if p.workflow_id == workflow.WorkflowID]
         SLOTs = [p.to_pdl() for p in params]
         # 3. convert the workflow procedure
-        procedure = ""
-        ...
+        procedure = self._convert_procedure(workflow, params)
         # 4. build the PDL
         pdl = PDL(
             Name=workflow.WorkflowName,
@@ -57,6 +59,16 @@ class WorkflowPDLConverter:
         )
         return pdl
     
+    def _convert_procedure(self, workflow: Workflow, params: List[Parameter]) -> str:
+        """Convert the workflow procedure to a string"""
+        meta = f"Name: {workflow.WorkflowName}\nDesc: {workflow.WorkflowDesc}"
+        nodes = "\n".join([str(node) for node in workflow.Nodes])
+        edges = "\n".join([f"{edge.source} -> {edge.target}" for edge in workflow.Edges])
+        params = "\n".join([str(p) for p in params])
+        input_prompt = prompts.template_procudure.format(meta=meta, nodes=nodes, edges=edges, params=params)
+        llm_response = self.llm.query_one(input_prompt)
+        res = Formater.parse_codeblock(llm_response, "python")
+        return res
 
     def build_edge_graph(self, workflow: Workflow):
         """Build the edge graph from the nodes and edges.
