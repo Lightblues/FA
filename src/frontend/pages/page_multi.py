@@ -161,7 +161,7 @@ def main_multi():
     init_tools()
     init_sidebar()      # need cfg
 
-    if "client" not in ss: ss.client = FrontendClient()
+    if "client" not in ss: ss.client = FrontendClient(ss.cfg)
     if ("mode" not in ss) or (ss.mode == "single") or ("session_id" not in ss):
         ss.mode = "multi"
         refresh_session_multi()  # multi_register

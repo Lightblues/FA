@@ -16,9 +16,9 @@ import datetime
 from flowagent.data import Config, DataManager, LogUtils
 from backend import FrontendClient
 
-client = FrontendClient()
 conversation_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
+client = FrontendClient(cfg)
 def main():
     # 1. init the conversation
     conv = client.single_register(conversation_id, cfg)

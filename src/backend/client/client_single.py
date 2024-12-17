@@ -29,7 +29,7 @@ class SingleAgentMixin(BaseClient):
 
     Usage:: 
 
-        client = FrontendClient()
+        client = FrontendClient(cfg)
         # 1. init the conversation
         _ = client.single_register(conversation_id, cfg)
         # 2. query loop

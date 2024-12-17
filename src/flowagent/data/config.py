@@ -81,6 +81,8 @@ class Config(BaseModel):
     db_name: str = "agent-pdl"
     db_message_collection_name: str = "messages"
     db_meta_collection_name: str = "config"
+
+    backend_url: str = "http://localhost:8100"
     
     simulate_num_persona: int = -1
     simulate_max_workers: int = 10

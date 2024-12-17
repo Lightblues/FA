@@ -29,9 +29,9 @@ import datetime
 from flowagent.data import Config, DataManager, LogUtils
 from backend import FrontendClient
 
-client = FrontendClient()
 conversation_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
+client = FrontendClient(cfg)
 
 def step_tool(agent_main_output):
     res_tool = client.multi_tool_main(conversation_id, agent_main_output)

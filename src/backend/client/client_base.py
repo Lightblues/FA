@@ -1,6 +1,6 @@
 import json, requests
 from typing import Iterator
-from flowagent.data import Conversation
+from flowagent.data import Conversation, Config
 
 
 class BaseClient:
@@ -10,8 +10,8 @@ class BaseClient:
     conv: Conversation = None       # the conversation that sync with backend
     pdl_str: str = None            # the pdl that sync with backend
 
-    def __init__(self, url: str="http://localhost:8100"):
-        self.url = url
+    def __init__(self, config: Config):
+        self.url = config.backend_url
 
     def process_stream_url(self, url: str, data: dict = None) -> Iterator[str]:
         """Process the stream url and return the iterator of the stream
