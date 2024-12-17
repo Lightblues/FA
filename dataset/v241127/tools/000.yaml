@@ -1,0 +1,243 @@
+# enum list see m000_114挂号.py
+- name: check_hospital_exist
+  description: 校验挂号医院
+  parameters:
+    type: object
+    properties:
+      hos_name:
+        type: string
+        name: 医院名称
+        description: 医院名称
+        enum: ['北京301医院', '北京安贞医院', '北京朝阳医院', '北京大学第一医院', '北京大学人民医院', '北京儿童医院', '北京积水潭医院', '北京世纪坛医院', '北京天坛医院', '北京协和医学院附属肿瘤医院', '北京协和医院', '北京宣武医院', '北京友谊医院', '北京中日友好医院', '北京中医药大学东方医院', '北京中医药大学东直门医院']
+    required:
+    - hos_name
+  response:
+    type: object
+    properties:
+      type:
+        type: string
+        name: 医院存在类型
+        description: 输出内容
+  url: http://8.134.222.238:8091/check-hospital-exist
+  method: GET
+
+- name: check_department_exist
+  description: 科室校验
+  parameters:
+    type: object
+    properties:
+      keshi_name:
+        type: string
+        name: 科室名称
+        description: 科室名称
+        # enum: ['内科', '外科', '妇产科', '儿科', '骨科', '心血管科', '呼吸科', '消化科', '神经科', '泌尿科', '眼科', '耳鼻喉科', '口腔科', '皮肤科', '感染科', '肿瘤科', '精神科', '急诊科']
+      hos_name:
+        type: string
+        name: 医院名称
+        description: 医院名称
+    required:
+    - keshi_name
+    - hos_name
+  response:
+    type: object
+    properties:
+      type:
+        type: string
+        name: 科室存在状态
+        description: 输出内容
+  url: http://8.134.222.238:8091/check-department-exist
+  method: GET
+
+- name: get_hospital_by_department
+  description: 查询对应科室可选医院
+  parameters:
+    type: object
+    properties:
+      keshi_name:
+        type: string
+        name: 科室名称
+        description: 科室名称
+    required:
+    - keshi_name
+  response:
+    type: object
+    properties:
+      hos_name:
+        type: string
+        name: 可选医院名称
+        description: 可选医院名称
+      num:
+        type: int
+        name: 可选医院数量
+        description: 可选医院数量
+  url: http://8.134.222.238:8091/get-hospital-by-department
+  method: GET
+
+- name: get_appointment_info
+  description: 指定时间号源查询
+  parameters:
+    type: object
+    properties:
+      hos_name:
+        type: string
+        name: 医院名称
+        description: 医院名称
+      keshi_name:
+        type: string
+        name: 科室名称
+        description: 科室名称
+      time:
+        type: string
+        name: 挂号时间
+        description: 挂号时间, 格式为 "x月xx日", 例如 "4月15日"
+    required:
+    - hos_name
+    - keshi_name
+    - time
+  response:
+    type: object
+    properties:
+      num:
+        type: int
+        name: 可挂号数量
+        description: 可挂号数量
+      haolist:
+        type: array
+        items:
+          type: string
+        name: 可挂号列表
+        description: 可挂号列表
+      zhuan_num:
+        type: int
+        name: 专家号数量
+        description: 专家号数量
+      pu_num:
+        type: int
+        name: 普通号数量
+        description: 普通号数量
+  url: http://8.134.222.238:8091/get-appointment-info
+  method: GET
+
+- name: get_available_date
+  description: 同医院同科室其他日期号源
+  parameters:
+    type: object
+    properties:
+      hos_name:
+        type: string
+        name: 医院名称
+        description: 医院名称
+      keshi_name:
+        type: string
+        name: 科室名称
+        description: 科室名称
+    required:
+    - hos_name
+    - keshi_name
+  response:
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            time:
+              type: string
+              description: 可挂号日期
+            num_type:
+              type: string
+              description: 号类
+        name: 可挂号日期信息
+        description: 可挂号日期信息
+      num:
+        type: int
+        name: 可挂号日期数量
+        description: 可挂号日期数量
+      data_num_type:
+        type: array
+        items:
+          type: object
+        name: 号类信息
+        description: 号类信息
+  url: http://8.134.222.238:8091/get-available-date
+  method: GET
+
+- name: get_other_hospital
+  description: 其他医院号源推荐
+  parameters:
+    type: object
+    properties:
+      keshi_name:
+        type: string
+        name: 科室名称
+        description: 科室名称
+      time:
+        type: string
+        name: 挂号时间
+        description: 挂号时间, 格式为 "x月xx日", 例如 "4月15日"
+    required:
+    - keshi_name
+    - time
+  response:
+    type: object
+    properties:
+      num:
+        type: int
+        name: 号源数量
+        description: 号源数量
+      hos_name:
+        type: array
+        items:
+          type: string
+        name: 医院名称
+        description: 医院名称
+      doc_name:
+        type: array
+        items:
+          type: string
+        name: 挂号医生
+        description: 挂号医生
+  url: http://8.134.222.238:8091/get-other-hospital
+  method: GET
+
+- name: appointment
+  description: 本医院挂号执行
+  parameters:
+    type: object
+    properties:
+      id_num:
+        type: string
+        name: 身份证号
+        description: 身份证号
+      num_type:
+        type: string
+        name: 号类
+        description: 号类
+      hos_name:
+        type: string
+        name: 医院名称
+        description: 医院名称
+      keshi_name:
+        type: string
+        name: 科室名称
+        description: 科室名称
+      time:
+        type: string
+        name: 挂号时间
+        description: 挂号时间, 格式为 "x月xx日", 例如 "4月15日"
+    required:
+    - id_num
+    - num_type
+    - hos_name
+    - keshi_name
+    - time
+  response:
+    type: object
+    properties:
+      type:
+        type: int
+        name: 挂号状态
+        description: 挂号状态
+  url: http://8.134.222.238:8091/appointment
+  method: GET

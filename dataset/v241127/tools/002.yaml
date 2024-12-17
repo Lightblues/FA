@@ -1,0 +1,56 @@
+- name: check_destination_customs_policy
+  description: 查验目的地清关政策
+  body:
+    type: object
+    properties:
+      countryCode:
+        type: string
+        description: 收件国家
+    required:
+    - countryCode
+  response:
+    type: object
+    properties:
+      status:
+        type: int
+        description: 状态码
+      message:
+        type: string
+        description: 成功失败中文
+      data:
+        type: string
+        description: 清关提示
+      success:
+        type: bool
+        description: 成功失败
+  url: https://wippe2-pc.cndhl.com/api/wiplus/base/large-model/serviceTips
+  method: POST
+
+- name: destination_customs_tips
+  description: 物品目的地清关提示
+  body:
+    type: object
+    properties:
+      countryCode:
+        type: string
+        description: 收件国家
+      goodsName:
+        type: string
+        description: 包裹内容
+  response:
+    type: object
+    properties:
+      status:
+        type: int
+        description: 状态码
+      message:
+        type: string
+        description: 成功失败中文
+      data:
+        type: string
+        description: 清关提示
+      success:
+        type: bool
+        description: 成功失败
+  url: https://wippe2-pc.cndhl.com/api/wiplus/base/large-model/itemsCustomsTips
+  method: POST

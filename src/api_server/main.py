@@ -1,4 +1,4 @@
-""" 
+"""
 Usage::
 
     cd src
@@ -8,13 +8,16 @@ Usage::
 2. 模拟调用, 这里直接 mock 了
 3. 整理API调用形式 (openapi.json), 转换为可解析的形式
 """
-import argparse, pathlib
-from fastapi import FastAPI, Depends
+
+import pathlib
+
 import yaml  # 或者 json, toml 等
+from fastapi import FastAPI
 
 from .api_definitions import *  # NOTE: to register the apis
 from .api_registry import api_registry
 from .mocker import Mocker
+
 
 DIR = pathlib.Path(__file__).parent
 
@@ -26,9 +29,11 @@ def register_apis(app: FastAPI, config: dict):
         route = app.post(f"/{api_name}")(mocker.create_dynamic_api(api_name, api_info))
     return app
 
+
 def load_config():
     with open(DIR / "config.yaml", "r") as f:
         return yaml.safe_load(f)
+
 
 config = load_config()
 app = FastAPI()

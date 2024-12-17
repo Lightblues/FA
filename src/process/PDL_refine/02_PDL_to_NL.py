@@ -1,16 +1,26 @@
-""" 给定 PDL 生成流程描述
+"""给定 PDL 生成流程描述
 @240715
 
 """
 
-import json, os
-from tqdm import tqdm
-from utils.jinja_templates import jinja_render
+import json
+import os
+
+from easonsi.llm.openai_client import Formater, OpenAIClient
+from engine_v1.common import (
+    LLM_CFG,
+    DIR_data,
+    DIR_data_meta,
+    init_client,
+)
 from engine_v1.datamodel import PDL
-from engine_v1.common import DIR_data, init_client, LLM_CFG, DIR_apis, DIR_data_base, DIR_data_meta
-from easonsi.llm.openai_client import OpenAIClient, Formater
+from tqdm import tqdm
+
+from utils.jinja_templates import jinja_render
+
 
 client = init_client(llm_cfg=LLM_CFG["gpt-4o"])
+
 
 # workflow_name = "000-114挂号"
 # workflow_name = "002-新闻查询"
@@ -31,7 +41,8 @@ def gen_NL(client: OpenAIClient, workflow_name: str):
         json.dump(r, f, indent=4, ensure_ascii=False)
     return r
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     workflow_names = []
     for fn in os.listdir(DIR_data):
         if fn.endswith(".txt"):
@@ -40,7 +51,7 @@ if __name__ == '__main__':
     for workflow_name in tqdm(workflow_names):
         gen_NL(client, workflow_name)
         print(f"[INFO] {workflow_name} done!")
-        
+
 # # %%
 # from engine_v1.common import DIR_data, init_client, LLM_CFG, DIR_apis, DIR_data_base, DIR_data_meta
 # import json, os

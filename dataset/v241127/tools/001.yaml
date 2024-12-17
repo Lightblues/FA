@@ -1,0 +1,56 @@
+- name: get_invoicing_method
+  description: 查询开票方式
+  parameters:
+    type: object
+    properties:
+      order_id:
+        type: string
+        description: 订单编号
+    required:
+    - order_id
+  response:
+    type: object
+    properties:
+      invoicing_method:
+        type: string
+        description: 开票方式
+  url: http://11.141.203.151:8089/get_invoicing_method
+  method: GET
+
+- name: search_invoicing_progress
+  description: 开票进度查询
+  body:
+    type: object
+    properties:
+      name:
+        type: string
+        description: 姓名
+    required:
+    - name
+  response:
+    type: object
+    properties:
+      invoicing_progress:
+        type: string
+        description: 开票信息进度
+  url: http://11.141.203.151:8089/search_invoicing_progress
+  method: POST
+
+- name: get_card_type
+  description: get_card_type
+  body:
+    type: object
+    properties:
+      card_id:
+        type: string
+        description: 会员卡ID
+    required:
+    - card_id
+  response:
+    type: object
+    properties:
+      card_type:
+        type: string
+        description: 卡类型
+  url: http://11.141.203.151:8089/get_card_type
+  method: POST

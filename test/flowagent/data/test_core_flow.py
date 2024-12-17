@@ -1,11 +1,13 @@
 from flowagent.data.core.flow import CoreBlock, CoreFlow
 
+
 def test_block():
     block = CoreBlock("Step 17:::Decision:::Is this a 3-days trip?:::Yes::Step 39::No::Step 18")
     print(block)
     print(block.get_instruction())
     print()
-    
+
+
 def test_flow():
     flow_lines = """Step 1:::Process:::Determine date range, deprature city and destination in task description.:::next::Step 2
 Step 2:::Decision:::Is the destination a state or a city?:::city::step 7::state::step 3
@@ -52,7 +54,7 @@ Step 42:::Process:::Select the most suitable transportation among taxi, self-dri
 Step 43:::Process:::Select suitable restaurants of breakfast, lunch, and dinner in the  last destination city for the last day in this trip. The selection should be constrained by the budget and preferences detailed in the task description, avoiding duplicates and scheduling conflicts.:::next::step 44
 Step 44:::Process:::Select one attraction in the last destination city for the last day in this trip. The selection should be constrained by the budget and preferences detailed in the task description, avoiding duplicates and scheduling conflicts.:::next::step 45
 Step 45:::Terminal:::Output the whole plans for all days.:::"""
-    flow = CoreFlow(flow_lines.split('\n'))
+    flow = CoreFlow(flow_lines.split("\n"))
     print(flow.__str__())
     print()
 

@@ -1,18 +1,18 @@
-""" updated @240904
+"""updated @240904
 - basic implementations
     - [x] XXXController logic @240905
     - [x] logging and metrics -> append prompts to Message
-    - [x] data: Workflow abstraction | align with FlowBench 
+    - [x] data: Workflow abstraction | align with FlowBench
     - [x] user: add user profiling? aware of workflow?
     - [x] bot implementation
-    - [x] api: mimic by LLM? 
+    - [x] api: mimic by LLM?
 - data
     - [x] convert from v240820
     - [x] dataset orginization (Datamanager)
     - [x] whole generation | simulation
     - [x] store the generated conversation data in a database!
 - evaluation
-    - [x] start simulations. 
+    - [x] start simulations.
 - robustness & accuracy
     - [x] add retry for API or bot? -> how to evaluate?
     - [x] user simulation: make simulated user to be more realistic (shorter utterance, ...)
@@ -25,11 +25,11 @@ Conversation:
     .get_last_message()
 
 BaseRole:
-    name; cfg; llm; conv; workflow; 
+    name; cfg; llm; conv; workflow;
     .process() -> UserOutput, BotOutput, APIOutput
-BotOutput: 
+BotOutput:
     action_type; action; action_input; thought;
-    
+
 Workflow:
-    name; 
+    name;
 """

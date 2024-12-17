@@ -1,11 +1,13 @@
-from pydantic import BaseModel
 from typing import Literal
+
+from pydantic import BaseModel
 
 from ..api_registry import register_api
 
 
 class IdentityQueryRequest(BaseModel):
     CardID: str
+
 
 class IdentityQueryResponse(BaseModel):
     Identity: Literal["退休职工", "在职职工", "城乡居民"]

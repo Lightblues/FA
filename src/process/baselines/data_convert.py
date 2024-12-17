@@ -1,4 +1,4 @@
-""" 
+"""
 --- input ---
 # STAR dataset (24 tasks)
 /work/huabu/data/STAR/tasks_transfered
@@ -34,7 +34,7 @@
 ├── trivia.json
 └── weather.json
 
---- output --- 
+--- output ---
 /work/huabu/dataset/flowbench
 ├── code
 │   └── 000.py
@@ -57,8 +57,12 @@
 }
 """
 
+import json
+import os
+import pathlib
 
-import os, sys, json, yaml, pathlib
+import yaml
+
 
 DATA = "STAR"
 DATA = "SGD"
@@ -72,12 +76,11 @@ elif DATA == "SGD":
 os.makedirs(ODIR, exist_ok=True)
 
 
-
-
 def check_is_binary(fn):
     with open(fn, "rb") as f:
         code = f.read()
-    return b'\0' in code
+    return b"\0" in code
+
 
 def fix_typo(d: dict, old_key: str = "interative_pattern", new_key: str = "interactive_pattern"):
     # interative_pattern -> interactive_pattern
@@ -85,6 +88,7 @@ def fix_typo(d: dict, old_key: str = "interative_pattern", new_key: str = "inter
         d[new_key] = d[old_key]
         del d[old_key]
     return d
+
 
 class DataConverter:
     def __init__(self) -> None:
@@ -103,7 +107,7 @@ class DataConverter:
         print(f"Converting task infos from `NL` subfolder")
         task_infos = {}
         for name, oname in self.name_map.items():
-            try: 
+            try:
                 with open(IDIR / "NL" / f"{name}.json", "r") as f:
                     infos = json.load(f)
                 task_infos[oname] = {
@@ -114,15 +118,11 @@ class DataConverter:
             except Exception as e:
                 print(f"Error for {name}: {e}")
                 continue
-        result = {
-            "version": version,
-            "task_infos": task_infos
-        }
+        result = {"version": version, "task_infos": task_infos}
         print(f"Converted {len(task_infos)} tasks")
         with open(ODIR / "task_infos.json", "w") as f:
             json.dump(result, f, indent=2, ensure_ascii=False)
         return task_infos
-
 
     def convert_format_code(self):
         print(f"Converting code from `code` subfolder")
@@ -148,7 +148,8 @@ class DataConverter:
         for name, oname in self.name_map.items():
             try:
                 # check that code in not binary
-                if check_is_binary(IDIR / "PDL" / f"{name}.txt"): raise Exception(f"{name} is binary")
+                if check_is_binary(IDIR / "PDL" / f"{name}.txt"):
+                    raise Exception(f"{name} is binary")
                 with open(IDIR / "PDL" / f"{name}.txt", "r") as f:
                     content = f.read()
                     _data = yaml.load(content, Loader=yaml.FullLoader)
@@ -181,7 +182,7 @@ class DataConverter:
                 continue
         print(f"Converted {num_success} tasks")
         return num_success
-    
+
     def convert_format_core(self):
         print(f"Converting core from `CoRE` subfolder")
         os.makedirs(ODIR / "core", exist_ok=True)
@@ -201,7 +202,7 @@ class DataConverter:
                 continue
         print(f"Converted {num_success} tasks")
         return num_success
-    
+
     def convert_format_text(self):
         print(f"Converting text from `NL` subfolder")
         os.makedirs(ODIR / "text", exist_ok=True)
@@ -243,7 +244,11 @@ class DataConverter:
         print(f"Converted {num_success} tasks")
         return num_success
 
-    def convert_format_convsation(self, subdir="../user_conversation_w_constraints", odir="user_profile_w_conversation"):
+    def convert_format_convsation(
+        self,
+        subdir="../user_conversation_w_constraints",
+        odir="user_profile_w_conversation",
+    ):
         print(f"Converting user profile from `{subdir}` subfolder")
         os.makedirs(ODIR / odir, exist_ok=True)
         num_success = 0
@@ -254,7 +259,7 @@ class DataConverter:
                     raise Exception(f"{name} is binary")
                 with open(IDIR / subdir / f"{name}.json", "r") as f:
                     data = json.load(f)
-                with open(ODIR / odir/ f"{oname}.json", "w") as f:
+                with open(ODIR / odir / f"{oname}.json", "w") as f:
                     json.dump(data, f, indent=2, ensure_ascii=False)
                 num_success += 1
             except Exception as e:
@@ -277,8 +282,7 @@ class DataConverter:
         return num_success
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     c = DataConverter()
     # c.convert_format_code()
     # c.convert_format_pdl()

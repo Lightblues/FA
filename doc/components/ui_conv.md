@@ -38,8 +38,8 @@ UI
 
 ## single_workflow
 ```python
-    """ 
-    交互逻辑: 
+    """
+    交互逻辑:
         当用户输入query之后, 用一个while循环来执行ANSWER或者API调用:
             用一个 expander 来展示stream输出
             若为API调用, 则进一步展示中间结果

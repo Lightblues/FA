@@ -42,7 +42,7 @@ def step_bot_prediction() -> StreamingResponse:
     return bot.process_LLM_response(prompt, llm_response)
 ```
 
-## UI 
+## UI
 ### single
 - 选择模型
 - 选择模板
@@ -50,20 +50,20 @@ def step_bot_prediction() -> StreamingResponse:
 - 选择画布版本
 - 选择画布
 - 重置对话: `refresh_session`
-- DEBUG: 后台打印相关信息. 
+- DEBUG: 后台打印相关信息.
 - 自定义配置
 - 勾选使用的 workflows
 - 查看 PDL / template
 - 日志: sessionid / name
 
 ## 修改思路
-- Q: 如何去维护 conversation? 
+- Q: 如何去维护 conversation?
     see `test/backend/test_ui_backend.py`
 - Q: 如何去维护 session? (何时更新 session_id)
     - 通过 refresh_session() 来收集UI中的配置, 并初始化 session, see `src/frontend/page_single.py`
-    - 通过 single_disconnect() 来清除 session; 
+    - 通过 single_disconnect() 来清除 session;
     - 在页面关闭时, 通过 JavaScript 来清除 session
-- Q: 接口设计? 
+- Q: 接口设计?
     see `src/backend/client.py` 实现一个标准化的client来匹配逻辑
 - Q: DB & log
     - log: 复用原本的 loguru 方案;
@@ -97,7 +97,5 @@ DB
 
 ### Frontend
 1. 参考已有的 multi-UI 交互逻辑, 搭建 `ui_multi.py`;
-2. 梳理组件之间的逻辑, 实现 `data_multi.py`; 
+2. 梳理组件之间的逻辑, 实现 `data_multi.py`;
     1. refresh_session, debug_print_infos
-
-

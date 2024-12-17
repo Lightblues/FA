@@ -1,0 +1,86 @@
+Name: 114挂号
+Desc: 114挂号服务, 为用户提供北京相关医院的挂号服务
+# Detailed_desc: 根据用户指定的医院, 科室和时间查询号源信息, 尝试进行挂号; 若本院未剩余可挂号名额, 则尝试在其他医院进行挂号
+
+SLOTs:
+  - name: hos_name
+    desc: 用户想挂号的医院名称
+  - name: keshi_name
+    desc: 用户想挂号的科室名称
+  - name: time
+    desc: 用户想要的挂号时间
+  - name: id_num
+    desc: 用户的身份证号
+  - name: num_type
+    desc: 挂号类别 (号类), 分为专家号和普通号
+  - name: doc_name
+    desc: 用户想挂号的医生姓名
+
+APIs:
+  - name: check_hospital_exist
+  - name: check_department_exist
+    precondition: ['check_hospital_exist']
+  - name: get_hospital_by_department
+    precondition: ['check_department_exist']
+  - name: get_appointment_info
+    precondition: ['check_department_exist']
+  - name: get_available_date
+    precondition: ['get_appointment_info']
+  - name: get_other_hospital
+    precondition: ['get_appointment_info']
+  - name: appointment
+    precondition: ['get_appointment_info']
+
+ANSWERs:
+  - name: 医院不存在
+    desc: 抱歉，目前无法提供该医院的挂号服务，您考虑下其他医院吗？
+  - name: 无对应科室医院回复
+    desc: $hos_name 没有找到您要挂号的科室，我这边为您转接人工客服咨询一下，请稍等。
+  - name: 拒绝其他医院科室回复
+    desc: 那建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
+  - name: 无号回复
+    desc: 非常抱歉，最近您想挂的科室，平台已出号的医院近期均无号源，建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
+  - name: 拒绝其他医院科室回复
+    desc: 那建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
+  - name: 本医院挂号成功
+    desc: 好的，已为您成功挂了 $hos_name $keshi_name $time 号源，稍后也会短信发送到您的来电号码，还有什么可以帮您吗？
+  - name: 本医院挂号失败
+    desc: 非常抱歉，暂时没有 $hos_name $keshi_name $time 的 $num_type；建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
+  - name: 其他自由回复问题
+  - name: 请用户提供必要信息
+
+PDL: |
+  hos_name = ANSWER_请用户提供必要信息()
+  [type] = API_check_hospital_exist([hos_name])
+  if type == "0"
+      ANSWER_医院不存在()
+  keshi_name = ANSWER_请用户提供必要信息()
+  [type] = API_check_department_exist([keshi_name, hos_name])
+  if type == "0":
+      [num] = get_hospital_by_department([keshi_name])
+      if num == 0:
+          ANSWER_无对应科室医院回复()
+      else:
+          其他医院挂号意愿 = ANSWER_请用户提供必要信息()
+          if 其他医院挂号意愿 == False:
+              ANSWER_拒绝其他医院科室回复()
+  time = ANSWER_请用户提供必要信息()
+  [num, haolist, zhuan_num, pu_num] = API_get_appointment_info([hos_name, keshi_name, time])
+  if num == 0:
+      [data, num, data_num_type] = API_get_available_date([keshi_name, time])
+      if num > 0:
+          其他日期挂号意愿 = 询问用户是否愿意在其他日期挂号
+          if 其他日期挂号意愿 == False:
+              [num, hos_name, doc_num] = API_get_other_hospital([keshi_name, time])
+              if num == "0":
+                  ANSWER_无号回复()
+              else:
+                  其他医院挂号意愿 = ANSWER_请用户提供必要信息()
+                  if 其他医院挂号意愿 == False:
+                      ANSWER_拒绝挂号回复()
+  num_type = ANSWER_请用户提供必要信息()
+  [type] = API_appointment([id_num, num_type, hos_name, keshi_name, time])
+  if type == "0":
+      ANSWER_本医院挂号失败()
+  else:
+      ANSWER_本医院挂号成功()

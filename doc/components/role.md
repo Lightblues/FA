@@ -1,5 +1,5 @@
 
-## base 
+## base
 - [ ] change to `ctx` setting like MetaGPT?
 
 ```python
@@ -18,7 +18,7 @@ class BaseRole:
 ```python
 class ReactBot(BaseBot):
     """ ReactBot
-    prediction format: 
+    prediction format:
         (Thought, Response) for response node
         (Thought, Action, Action Input) for call api node
     """

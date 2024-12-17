@@ -1,15 +1,24 @@
-""" updated @240906
+"""updated @240906
 - [ ] update to [af_core]
 """
+
 from typing import List
-import pymongo, pymongo.results
-from .base_data import Message, Conversation, Role
+
+import pymongo
+import pymongo.results
+
+from .base_data import Conversation, Message, Role
+
 
 class DBManager:
     def __init__(
-        self, uri='mongodb://localhost:27017/', db_name='message_database', 
-        collection_name='messages', meta_collection_name='config', eval_collection_name='evaluations',
-        **kwargs
+        self,
+        uri="mongodb://localhost:27017/",
+        db_name="message_database",
+        collection_name="messages",
+        meta_collection_name="config",
+        eval_collection_name="evaluations",
+        **kwargs,
     ) -> None:
         self.client = pymongo.MongoClient(uri)
         self.db = self.client[db_name]
@@ -30,54 +39,49 @@ class DBManager:
     def query_messages_by_conversation_id(self, conversation_id: str) -> Conversation:
         query = {"conversation_id": conversation_id}
         results = self.collection.find(query)
-        results = [res for res in results]
-        if len(results)==0:
+        if len(results) == 0:
             return Conversation()
         # TODO: fix it
         messages = [Message(**{**res, "role": Role.get_by_rolename(res["role"])}) for res in results]
         return Conversation.from_messages(messages)
-    
+
     def insert_config(self, infos: dict) -> pymongo.results.InsertOneResult:
-        """ record one experiment """
+        """record one experiment"""
         res = self.collection_meta.insert_one(infos)
         return res
-    
+
     def query_config_by_conversation_id(self, conversation_id: str) -> dict:
         query = {"conversation_id": conversation_id}
         res = self.collection_meta.find_one(query)
         return res
-    
-    def get_most_recent_unique_conversation_ids(
-        self, query: dict = {}, limit: int = 0
-    ) -> List[str]:
-        """ query collection_meta, sort by conversation_id """
-        sort_order = [('conversation_id', -1)]
+
+    def get_most_recent_unique_conversation_ids(self, query: dict = {}, limit: int = 0) -> List[str]:
+        """query collection_meta, sort by conversation_id"""
+        sort_order = [("conversation_id", -1)]
         results = self.collection_meta.find(query).sort(sort_order).limit(limit)
         return [res["conversation_id"] for res in results]
-    
+
     def query_run_experiments(self, query: dict = {}, limit: int = 0) -> List[dict]:
-        sort_order = [('conversation_id', -1)]
+        sort_order = [("conversation_id", -1)]
         results = self.collection_meta.find(query).sort(sort_order).limit(limit)
-        return [res for res in results]
-    
+        return results
+
     def delete_run_experiments(self, query: dict = {}) -> pymongo.results.DeleteResult:
         res = self.collection_meta.delete_many(query)
         return res
-    
+
     def get_all_run_exp_versions(self) -> List[str]:
         results = self.collection_meta.distinct("exp_version")
         return results
 
     def query_evaluations(self, query: dict = {}, limit: int = 0) -> List[dict]:
         results = self.collection_eval.find(query).limit(limit)
-        return [res for res in results]
-    
+        return results
+
     def insert_evaluation(self, eval_result: dict) -> pymongo.results.InsertOneResult:
         res = self.collection_eval.insert_one(eval_result)
         return res
-    
+
     def delete_evaluations(self, query: dict = {}) -> pymongo.results.DeleteResult:
         res = self.collection_eval.delete_many(query)
         return res
-
-

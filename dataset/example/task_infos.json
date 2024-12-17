@@ -1,0 +1,9 @@
+{
+    "version": "v241216",
+    "task_infos": {
+      "000": {
+        "name": "新闻查询",
+        "task_description": "根据特定需求查询新闻"
+      }
+    }
+}

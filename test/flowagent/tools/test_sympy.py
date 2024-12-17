@@ -1,10 +1,12 @@
 from sympy import sympify
 
+
 def calculator(question):
     try:
         return str(float(sympify(question)))
     except Exception as e:
         return str(e)
+
 
 if __name__ == "__main__":
     # question = "3+2*2"

@@ -18,7 +18,5 @@ tmux new/attach -t huabu
 uvicorn backend.main:app --host 0.0.0.0 --port 8100 --reload --reload-dir ./backend
 # 3.2 run frontend
 streamlit run run_flowagent_ui2.py -- --config=ui_deploy.yaml
-# ... interct in the UI! 
+# ... interct in the UI!
 ```
-
-

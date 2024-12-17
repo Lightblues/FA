@@ -1,4 +1,4 @@
-""" 
+"""
 cases: https://doc.weixin.qq.com/sheet/e3_AcMATAZtAPIaxl2WshdR0KQkIBZdF?scode=AJEAIQdfAAoAaaG6YXAcMATAZtAPI&tab=BB08J2
 
 @241125 implement main agent (step 1)
@@ -30,21 +30,37 @@ todos
 - [ ] #doc add standard test cases in doc [cases]
 - [ ] #tune set LLM parameters
 """
-import streamlit as st; ss = st.session_state
-import json, datetime
-from typing import Any, Union
-from flowagent.data import Conversation, Message, Role, BotOutput, APIOutput, MainBotOutput
-from flowagent.utils import retry_wrapper
-from ..ui.ui_multi import init_sidebar, post_sidebar
-from ..ui.data_multi import refresh_session_multi, init_tools
-from ..common import fake_stream, StreamlitUtils
+
+import streamlit as st
+
+
+ss = st.session_state
+import json
+from typing import Union
+
 from backend import FrontendClient
+from common import retry_wrapper
+from flowagent.data import (
+    APIOutput,
+    BotOutput,
+    Conversation,
+    MainBotOutput,
+    Message,
+)
+
+from ..common import StreamlitUtils, fake_stream
+from ..ui.data_multi import init_tools, refresh_session_multi
+from ..ui.ui_multi import init_sidebar, post_sidebar
+
+
 st_utils = StreamlitUtils()
+
 
 def insert_disconnect_js():
     # JavaScript to notify server on page unload
     # ref: https://discuss.streamlit.io/t/detecting-user-exit-browser-tab-closed-session-end/62066
-    st.components.v1.html(f"""
+    st.components.v1.html(
+        f"""
         <script>
             window.onbeforeunload = function() {{
                 fetch('{ss.client.url}/multi_disconnect/{ss.session_id}', {{
@@ -52,21 +68,32 @@ def insert_disconnect_js():
                 }});
             }};
         </script>
-    """, height=0)
+    """,
+        height=0,
+    )
+
 
 def show_conversations(conversation: Conversation):
     for message in conversation.msgs:
-        if not (message.role.rolename == "user" or message.role.rolename.startswith("bot")): continue
-        elif (message.content.startswith("<")): continue
-        with st.chat_message(message.role.rolename, avatar=ss['avatars'][message.role.rolename]):
+        if not (message.role.rolename == "user" or message.role.rolename.startswith("bot")):
+            continue
+        elif message.content.startswith("<"):
+            continue
+        with st.chat_message(message.role.rolename, avatar=ss["avatars"][message.role.rolename]):
             st.write(message.content)
+
 
 def step_user_input(query: str):
     ss.client.multi_user_input(ss.session_id, query)
-    with st.chat_message("user", avatar=ss['avatars']['user']):
+    with st.chat_message("user", avatar=ss["avatars"]["user"]):
         st.write(query)
 
-@retry_wrapper(retry=3, step_name="step_agent_workflow_prediction", log_fn=ss.logger.bind(custom=True).error)
+
+@retry_wrapper(
+    retry=3,
+    step_name="step_agent_workflow_prediction",
+    log_fn=ss.logger.bind(custom=True).error,
+)
 def step_agent_workflow_prediction() -> BotOutput:
     print(f">> conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
     client: FrontendClient = ss.client
@@ -75,7 +102,12 @@ def step_agent_workflow_prediction() -> BotOutput:
     res = client.multi_bot_workflow_predict_output(ss.session_id)
     return res.bot_output
 
-@retry_wrapper(retry=3, step_name="step_agent_main_prediction", log_fn=ss.logger.bind(custom=True).error)
+
+@retry_wrapper(
+    retry=3,
+    step_name="step_agent_main_prediction",
+    log_fn=ss.logger.bind(custom=True).error,
+)
 def step_agent_main_prediction() -> Union[MainBotOutput, Message]:
     print(f">> conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
     client: FrontendClient = ss.client
@@ -84,28 +116,36 @@ def step_agent_main_prediction() -> Union[MainBotOutput, Message]:
     res = client.multi_bot_main_predict_output(ss.session_id)
     return res.bot_output, res.msg
 
+
 def step_api_process(bot_output: BotOutput) -> APIOutput:
     client: FrontendClient = ss.client
     res = client.multi_tool_workflow(ss.session_id, bot_output)
     st_utils.show_api_call(res.api_output)
     return res.api_output
 
+
 def step_tool(agent_main_output: MainBotOutput) -> str:
     client: FrontendClient = ss.client
-    # see @ian /cq8/ianxxu/chatchat/_TaskPlan/UI/v2.1/IanAGI.py 
+    # see @ian /cq8/ianxxu/chatchat/_TaskPlan/UI/v2.1/IanAGI.py
     tool_name, tool_args = agent_main_output.action, agent_main_output.action_input
-    if tool_name in ("web_search"): spinner_info = f"Google searching for {tool_args['query']}..."
-    elif tool_name in ("hunyuan_search"): spinner_info = f"Hunyuan searching for {tool_args['query']}..."
-    else: raise NotImplementedError
+    if tool_name in ("web_search"):
+        spinner_info = f"Google searching for {tool_args['query']}..."
+    elif tool_name in ("hunyuan_search"):
+        spinner_info = f"Hunyuan searching for {tool_args['query']}..."
+    else:
+        raise NotImplementedError
 
     with st.spinner(f"{ss['tool_emoji'][tool_name]} {spinner_info}"):
         expander_msg = ""
-        if tool_name in ("web_search", "hunyuan_search"): expander_msg = f"{ss['tool_emoji']['web_logo']} Searching results for '{tool_args['query']}'"
-        else: raise NotImplementedError
+        if tool_name in ("web_search", "hunyuan_search"):
+            expander_msg = f"{ss['tool_emoji']['web_logo']} Searching results for '{tool_args['query']}'"
+        else:
+            raise NotImplementedError
         with st.expander(expander_msg, expanded=True):
             _ = st.write_stream(client.multi_tool_main_stream(ss.session_id, agent_main_output))
         res = client.multi_tool_main_output(ss.session_id)
         return res.tool_output
+
 
 def case_workflow():
     client: FrontendClient = ss.client
@@ -130,12 +170,14 @@ def case_workflow():
                     # TODO: add `_response_control` in FlowagentConversationManager
                     # ss.logger.info(f"<case_workflow> bot response: {bot_output.response}")
                     break
-                else: raise TypeError(f"Unexpected BotOutputType: {bot_output.action_type}")
+                else:
+                    raise TypeError(f"Unexpected BotOutputType: {bot_output.action_type}")
         else:
             ss.logger.warning(f"<case_workflow> bot actions exceed the limit: {ss.cfg.bot_action_limit}")
-            pass # TODO: 
+            pass  # TODO:
     if bot_output.workflow:
         case_main()
+
 
 def case_main():
     with st.container():
@@ -149,36 +191,37 @@ def case_main():
                     _ = step_tool(bot_output)
                 elif bot_output.response:
                     break
-                else: raise NotImplementedError
+                else:
+                    raise NotImplementedError
         else:
             ss.logger.warning(f"<case_main> bot actions exceed the limit: {ss.cfg.bot_action_limit}")
-            pass # TODO: 
+            pass  # TODO:
     if bot_output.workflow:
         case_workflow()
+
 
 def main_multi():
     # 1. init
     init_tools()
-    init_sidebar()      # need cfg
+    init_sidebar()  # need cfg
 
-    if "client" not in ss: ss.client = FrontendClient()
+    if "client" not in ss:
+        ss.client = FrontendClient(ss.cfg)
     if ("mode" not in ss) or (ss.mode == "single") or ("session_id" not in ss):
         ss.mode = "multi"
         refresh_session_multi()  # multi_register
 
     insert_disconnect_js()
-    post_sidebar()      # need conv
+    post_sidebar()  # need conv
 
     # 3. the main loop!
     show_conversations(ss.conv)
-    if query := st.chat_input('Input...'):
+    if query := st.chat_input("Input..."):
         step_user_input(query)
         if ss.client.curr_status == "main":
             case_main()
         else:
             case_workflow()
         # show final bot response to screen
-        with st.chat_message("assistant", avatar=ss['avatars']['assistant']):
+        with st.chat_message("assistant", avatar=ss["avatars"]["assistant"]):
             st.write_stream(fake_stream(ss.conv.get_last_message().content))
-
-

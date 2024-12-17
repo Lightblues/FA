@@ -18,7 +18,7 @@ cd /work/huabu_online/scripts
 cd $PROJECT_PATH/src
 # 1. backend
 python main.py --model_name=gpt-4o
-# 2. UI 
+# 2. UI
 streamlit run run_flowagent_ui.py --server.port 8501 -- --config=ui_local.yaml
 
 # kill dead streamlit

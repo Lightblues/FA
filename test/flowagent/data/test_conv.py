@@ -1,13 +1,11 @@
-
-from flowagent.data import DBManager, Conversation, Message, Role
+from flowagent.data import Conversation, Message, Role
 
 
 def test_message():
-    for role in (
-        Role.USER, "custom_role"
-    ):
+    for role in (Role.USER, "custom_role"):
         msg = Message(role=role, content="hello")
         print(msg)
+
 
 def test_add_message():
     conv = Conversation()
@@ -20,4 +18,3 @@ def test_add_message():
 
 test_message()
 # test_add_message()
-
