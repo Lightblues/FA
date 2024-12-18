@@ -1,6 +1,6 @@
 import collections
 from abc import abstractmethod
-from typing import Dict, List, Union
+from typing import Dict, Iterator, List, Tuple, Union
 
 from common import LLM_CFG, OpenAIClient, init_client
 
@@ -86,7 +86,7 @@ class BaseBot(BaseRole):
         """
         raise NotImplementedError
 
-    def process_stream(self):
+    def process_stream(self) -> Tuple[str, Iterator[str]]:
         prompt = self._gen_prompt()
         llm_response_stream = self.llm.query_one_stream_generator(prompt)
         return prompt, llm_response_stream

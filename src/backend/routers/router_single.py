@@ -57,22 +57,21 @@ def _pre_control(session_context: SingleSessionContext) -> None:
 
 
 def generate_response(session_context: SingleSessionContext) -> Iterator[str]:
-    logger.info(f">> generate_response with conversation: {json.dumps(str(session_context.conv), ensure_ascii=False)}")
+    logger.info(
+        f">> [{session_context.bot.llm.model_name}] generate_response with conversation: {json.dumps(str(session_context.conv), ensure_ascii=False)}"
+    )
     _pre_control(session_context)
 
     prompt, stream = session_context.bot.process_stream()
-    llm_response = []
     for chunk in stream:
-        llm_response.append(chunk)
         chunk_output = {
             "is_finish": False,
             "conversation_id": session_context.session_id,
             "chunk": chunk,
         }
         yield f"data: {json.dumps(chunk_output, ensure_ascii=False)}\n\n"
-    llm_response = "".join(llm_response)
-    bot_output = session_context.bot.process_LLM_response(prompt, llm_response)
-    _debug_msg = f"\n{f'({session_context.session_id}) [BOT] ({session_context.bot.workflow.name}) ({session_context.bot.llm.model_name})'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
+    bot_output = session_context.bot.process_LLM_response(prompt)
+    _debug_msg = f"\n{f'({session_context.session_id}) [BOT] ({session_context.bot.workflow.name}) ({session_context.bot.llm.model_name})'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{bot_output}\n"
     logger.bind(custom=True).debug(_debug_msg)
     session_context.last_bot_output = bot_output
 
@@ -121,7 +120,6 @@ def single_add_message(conversation_id: str, message: Message) -> None:
 async def single_bot_predict(conversation_id: str) -> StreamingResponse:
     logger.info(f"[single_bot_predict] {conversation_id}")
     session_context = get_session_context_single(conversation_id)
-    # db_upsert_session(session_context)
     return StreamingResponse(generate_response(session_context), media_type="text/event-stream")
 
 

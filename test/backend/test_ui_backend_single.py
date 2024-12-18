@@ -1,11 +1,9 @@
 """
-align with `src/flowagent/ui_conv/page_single_workflow.py`
-
 USAGE::
     # 1. run the backend firsy
     uvicorn main:app --host 0.0.0.0 --port 8100 --reload
     # 2. test
-    python test_ui_backend.py
+    python test_ui_backend_single.py
 
 @241209
 - [x] test UI backend logic with CLI.

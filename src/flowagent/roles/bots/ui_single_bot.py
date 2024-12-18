@@ -7,8 +7,14 @@
 
 import json
 import re
+from typing import Iterator, List, Tuple, Union
 
-from common import Formater, PromptUtils, jinja_render
+from loguru import logger
+from openai._streaming import Stream
+from openai.types.chat import ChatCompletion, ChatCompletionChunk
+from openai.types.chat.chat_completion_chunk import Choice, ChoiceDelta
+
+from common import Formater, PromptUtils, init_client, jinja_render
 
 from ...data import BotOutput
 from .react_bot import ReactBot
@@ -32,9 +38,14 @@ class UISingleBot(ReactBot):
     # llm: OpenAIClient = None
     # bot_template_fn: str = "flowagent/bot_pdl.jinja"
     names = ["UISingleBot", "ui_single_bot"]
+    last_llm_chat_completions: List[ChoiceDelta] = []
+    last_llm_response: str = ""
+    if_fc: bool = False
 
     def __init__(self, **args):
         super().__init__(**args)
+        self.llm = init_client(self.cfg.ui_bot_llm_name)
+        self.if_fc = self.cfg.ui_bot_if_fc
 
     def _gen_prompt(self) -> str:
         # TODO: format apis. 1) remove URL; 2) add preconditions
@@ -44,7 +55,7 @@ class UISingleBot(ReactBot):
         # s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
         state_infos |= self.workflow.pdl.status_for_prompt  # add the status infos from PDL!
         prompt = jinja_render(
-            self.cfg.ui_bot_template_fn,  # "flowagent/bot_pdl.jinja"
+            self.cfg.ui_bot_template_fn,
             workflow_name=self.workflow.pdl.Name,  #
             PDL=self.workflow.pdl.to_str_wo_api(),  # .to_str()
             api_infos=self.workflow.toolbox,
@@ -54,8 +65,50 @@ class UISingleBot(ReactBot):
         )
         return prompt
 
-    def process_LLM_response(self, prompt: str, llm_response: str) -> BotOutput:
-        prediction = self._parse_react_output(llm_response)
+    def _get_tool_list(self):
+        tool_list = []
+        for tool in self.workflow.toolbox:
+            fc = {}
+            fc["type"] = "function"
+            fc["function"] = tool
+            tool_list.append(fc)
+        return tool_list
+
+    def process_stream(self) -> Tuple[str, Iterator[str]]:
+        # super().process_stream()
+        prompt = self._gen_prompt()
+        client = self.llm.client
+        tools = self._get_tool_list() if self.if_fc else None
+        response = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model=self.llm.model_name,
+            temperature=self.llm.temperature,
+            tools=tools,
+            tool_choice="auto",  # TODO: what's that?
+            stream=True,
+        )
+        self.last_llm_chat_completions = []
+
+        def stream_generator(response: Stream[ChatCompletionChunk]) -> Iterator[str]:
+            for chunk in response:
+                delta = chunk.choices[0].delta
+                self.last_llm_chat_completions.append(delta)
+                if delta.content:
+                    yield delta.content
+                elif delta.tool_calls:
+                    function = delta.tool_calls[0].function
+                    if function.name:
+                        yield f"<API>{function.name}</API>"
+                    elif function.arguments:
+                        yield function.arguments
+
+        return prompt, stream_generator(response)
+
+    def process_LLM_response(self, prompt: str) -> BotOutput:
+        if self.if_fc:
+            prediction = self._parse_react_output_fc()
+        else:
+            prediction = self._parse_react_output()
 
         if prediction.action:
             msg_content = f"<Call API> {prediction.action}({prediction.action_input})"
@@ -67,18 +120,19 @@ class UISingleBot(ReactBot):
             msg_content,
             llm_name=self.cfg.ui_bot_llm_name,
             llm_prompt=prompt,
-            llm_response=llm_response,
-            role="bot_main",
+            llm_response=self.last_llm_response,
+            role="bot",
         )
         return prediction
 
-    @staticmethod
-    def _parse_react_output(s: str) -> BotOutput:
+    def _parse_react_output(self) -> BotOutput:
         """Parse output with full `Tought, Action, Action Input, Response`."""
-        if "```" in s:
-            s = Formater.parse_codeblock(s, type="").strip()
+        llm_response = "".join(c.content for c in self.last_llm_chat_completions)
+        self.last_llm_response = llm_response
+        if "```" in llm_response:
+            llm_response = Formater.parse_codeblock(llm_response, type="").strip()
         pattern = r"(Thought|Action|Action Input|Response):\s*(.*?)\s*(?=Thought:|Action:|Action Input:|Response:|\Z)"
-        matches = re.finditer(pattern, s, re.DOTALL)
+        matches = re.finditer(pattern, llm_response, re.DOTALL)
         result = {match.group(1): match.group(2).strip() for match in matches}
 
         # validate result
@@ -99,4 +153,32 @@ class UISingleBot(ReactBot):
                 thought=thought,
             )
         except Exception as e:
-            raise RuntimeError(f"Parse error: {e}\n[LLM output] {s}\n[Result] {result}")
+            raise RuntimeError(f"Parse error: {e}\n[LLM output] {llm_response}\n[Result] {result}")
+
+    def _parse_react_output_fc(self) -> BotOutput:
+        """Parse output with full `Tought, Action, Action Input, Response`."""
+        action, action_input, response = None, "", ""
+        for delta in self.last_llm_chat_completions:
+            if delta.tool_calls:
+                function = delta.tool_calls[0].function
+                if function.name:
+                    action = function.name
+                elif function.arguments:
+                    action_input += function.arguments
+            elif delta.content:
+                response += delta.content
+        self.last_llm_response = f"{response}"
+        if action:
+            self.last_llm_response += f"<API>{action}</API>{action_input}"
+        logger.info(f"last_llm_response: {self.last_llm_response}")
+        if action:
+            return BotOutput(
+                action=action,
+                action_input=json.loads(action_input),
+                response=response,
+            )
+        else:
+            assert response, "response is empty"
+            return BotOutput(
+                response=response,
+            )

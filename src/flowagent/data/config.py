@@ -45,6 +45,8 @@ class Config(BaseModel):
     api_entity_linking_llm: str = "gpt-4o"
     api_entity_linking_template: str = "flowagent/entity_linking.jinja"
 
+    ui_bot_mode: str = "ui_single_bot"  # ui_single_bot
+    ui_bot_if_fc: bool = True
     ui_available_models: Optional[List[str]] = None
     ui_available_templates: Optional[List[str]] = None
     ui_available_workflow_datasets: Optional[List[str]] = None

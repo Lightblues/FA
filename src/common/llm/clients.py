@@ -1,26 +1,20 @@
-import json
-import os
-import re
-import sys
 import time
-import traceback
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 import numpy as np
 import openai
-import requests
-import yaml
 from openai.types.chat import ChatCompletion
 from tqdm import tqdm
 
 
-def stream_generator(response) -> Iterator[str]:
+def stream_generator(response) -> Iterator[str]:  # TODO:
     for chunk in response:
-        # yield chunk.choices[0].delta.content or ""
-        text = chunk.choices[0].delta.content or ""
-        text = text.replace("\n", "  \n")
-        yield text
+        yield chunk.choices[0].delta
+        # # yield chunk.choices[0].delta.content or ""
+        # text = chunk.choices[0].delta.content or ""
+        # text = text.replace("\n", "  \n")
+        # yield text
 
 
 class OpenAIClient:
@@ -130,17 +124,6 @@ class OpenAIClient:
             stop=stop,
         )
         return stream_generator(response)
-
-    def query_one_stream(self, text, stop=None, print_stream=True) -> None:
-        res = ""
-        stream = self.query_one_stream_generator(text, stop)
-        for text in stream:
-            res += text
-            if print_stream:
-                print(f"\033[90m{text}\033[0m", end="")
-        if print_stream:
-            print("\n")
-        return res
 
     def query_many(self, texts, stop=None, temperature=None, model_id=None) -> list:
         with ThreadPoolExecutor(max_workers=self.n_thread) as executor:

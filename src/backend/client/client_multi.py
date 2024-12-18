@@ -16,6 +16,12 @@ from .client_base import BaseClient
 
 
 class MultiAgentMixin(BaseClient):
+    """Wrapper of `backend/routers/router_multi_agent.py`
+
+    Usage: similar to :class:`SingleAgentMixin`
+        see `test/backend/test_ui_backend_multi.py`
+    """
+
     curr_status: str = "main"
 
     def multi_register(self, conversation_id: str, config: Config, user_identity: Dict = None) -> Conversation:

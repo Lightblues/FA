@@ -11,6 +11,7 @@ todos
 - [ ]
 """
 
+import json
 from typing import Dict, Iterator
 
 import requests
@@ -35,6 +36,7 @@ class SingleAgentMixin(BaseClient):
 
     Usage::
 
+        # see `test/backend/test_ui_backend_single.py`
         client = FrontendClient(cfg)
         # 1. init the conversation
         _ = client.single_register(conversation_id, cfg)
@@ -109,6 +111,7 @@ class SingleAgentMixin(BaseClient):
         Returns:
             Iterator[str]: the response of the bot
         """
+        print(f">> single_bot_predict with conversation: {json.dumps(str(self.conv), ensure_ascii=False)}")
         url = f"{self.url}/single_bot_predict/{conversation_id}"
         return self.process_stream_url(url)
 

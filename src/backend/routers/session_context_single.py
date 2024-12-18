@@ -14,7 +14,7 @@ from pydantic import BaseModel
 
 from flowagent.data import BotOutput, Config, Conversation, Role, Workflow
 from flowagent.pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
-from flowagent.roles import RequestTool, UISingleBot
+from flowagent.roles import BOT_NAME2CLASS, RequestTool, UISingleBot
 
 from ..common.shared import get_db
 
@@ -33,7 +33,7 @@ class SingleSessionContext(BaseModel):
     cfg: Config
     conv: Conversation
     workflow: Workflow
-    bot: UISingleBot
+    bot: UISingleBot  # or UISingleFCBot
     tool: RequestTool
     controllers: Dict[str, BaseController]
     # user
@@ -61,7 +61,7 @@ class SingleSessionContext(BaseModel):
         workflow = Workflow(cfg)
         conv = Conversation.create(session_id)
         conv.add_message(msg=cfg.ui_greeting_msg.format(name=workflow.pdl.Name), role=Role.BOT)
-        bot = UISingleBot(cfg=cfg, conv=conv, workflow=workflow)
+        bot = BOT_NAME2CLASS[cfg.ui_bot_mode](cfg=cfg, conv=conv, workflow=workflow)
         tool = RequestTool(cfg=cfg, conv=conv, workflow=workflow)
         controllers = {}
         for c in cfg.bot_pdl_controllers:
