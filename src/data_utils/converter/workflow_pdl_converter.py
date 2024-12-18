@@ -25,17 +25,18 @@ from common import LLM_CFG, Formater, init_client
 from pdl.typings import PDL
 
 from ..workflow import DataManager, Parameter, Workflow
+from ..workflow.base import NodeType
 from . import prompts
 
 
 VALID_NODE_TYPES = (
-    "START",
-    "ANSWER",
-    "PARAMETER_EXTRACTOR",
-    "TOOL",
-    "LOGIC_EVALUATOR",
-    "LLM",
-    "CODE_EXECUTOR",
+    NodeType.START,
+    NodeType.ANSWER,
+    NodeType.PARAMETER_EXTRACTOR,
+    NodeType.TOOL,
+    NodeType.LOGIC_EVALUATOR,
+    NodeType.LLM,
+    NodeType.CODE_EXECUTOR,
 )
 
 
@@ -61,9 +62,9 @@ class WorkflowPDLConverter:
         APIs = []
         ANSWERs = []
         for node in workflow.Nodes:
-            if node.NodeType == "TOOL":
+            if node.NodeType == NodeType.TOOL:
                 APIs.append(node.to_pdl())
-            elif node.NodeType == "ANSWER":
+            elif node.NodeType == NodeType.ANSWER:
                 ANSWERs.append(node.to_pdl())
         params = [p for p in self.data_manager.parameter_infos.values() if p.workflow_id == workflow.WorkflowID]
         SLOTs = [p.to_pdl() for p in params]

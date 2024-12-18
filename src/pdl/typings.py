@@ -1,12 +1,8 @@
-import json
 from typing import Any, Dict, List
 
 from pydantic import BaseModel
 
-from data_utils.workflow.nodes.node_data.tool_node_data import _TOOL_API
-
-
-json_line = lambda x: json.dumps(x, ensure_ascii=False)
+from common import json_line
 
 
 class ParameterNode(BaseModel):
@@ -22,7 +18,7 @@ class BaseNode(BaseModel):
     type: str = "default"
     name: str
     desc: str
-    node_data: Any = None  # NOTE: for compatibility with Huabu NodeData
+    # node_data: Any = None   # NOTE: for compatibility with Huabu NodeData
 
 
 class AnswerNode(BaseNode):
@@ -37,22 +33,20 @@ class ToolParam(BaseModel):
     ParamName: str
     ParamDesc: str
     ParamType: str
-    # Input: _TOOL_INPUT  # NOTE: compared to online Huabu , remove the input field
     IsRequired: bool
-    # SubParams: List[Dict[str, Any]]
 
 
 class ToolNode(BaseNode):
     type: str = "tool"
-    API: _TOOL_API
-    Header: List[Dict[str, Any]]
+    URL: str
+    Method: str
     Query: List[ToolParam]
     Body: List[ToolParam]
 
     def __str__(self):
         s_query = [f"(name={p.ParamName}, type={p.ParamType}, required={p.IsRequired})" for p in self.Query]
         s_body = [f"(name={p.ParamName}, type={p.ParamType}, required={p.IsRequired})" for p in self.Body]
-        return f"- name: {self.name}\n  desc: {self.desc}\n  API: {self.API.URL}\n  Query: [{', '.join(s_query)}]\n  Body: [{', '.join(s_body)}]"
+        return f"- name: {self.name}\n  desc: {self.desc}\n  API: {self.URL}\n  Query: [{', '.join(s_query)}]\n  Body: [{', '.join(s_body)}]"
 
 
 class PDL(BaseModel):

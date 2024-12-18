@@ -1,14 +1,19 @@
-"""Workflow
+"""Workflow related type definitions based on workflow.proto"""
 
-NOTE:
-1. edge: `source, target` is -> NodeID
-"""
+from enum import Enum
+from typing import Annotated, Dict, List, Optional, Union
 
-from typing import *
+from pydantic import BaseModel, Field
 
-from pydantic import BaseModel
+from .base import Input, NodeType, TypeEnum
+from .workflow_node import WorkflowNode
 
-from .nodes import WorkflowNodeBase
+
+class WorkflowProtoVersion(Enum):
+    """工作流的协议版本号"""
+
+    UNSPECIFIED = "UNSPECIFIED"
+    V2_6 = "V2_6"
 
 
 class WorkflowEdge(BaseModel):
@@ -29,24 +34,15 @@ class WorkflowEdge(BaseModel):
 
 
 class Workflow(BaseModel):
-    """Workflow"""
+    """工作流"""
 
-    ProtoVersion: str
+    ProtoVersion: WorkflowProtoVersion
     WorkflowID: str
     WorkflowName: str
     WorkflowDesc: str
-    Nodes: list[WorkflowNodeBase]
-    Edges: list[WorkflowEdge]
-    node_id_to_node: Dict[str, WorkflowNodeBase] = {}
-
-    def __init__(self, **data):
-        super().__init__(**data)
-        # create node_id to node mapping
-        self.node_id_to_node = {node.NodeID: node for node in self.Nodes}
-
-    def __getitem__(self, node_id: str) -> WorkflowNodeBase:
-        """Allow the workflow to be indexed by node_id"""
-        return self.node_id_to_node[node_id]
+    Nodes: List[WorkflowNode]
+    # Edge: str  # JSON string of edges
+    Edges: List[WorkflowEdge]
 
     def __str__(self) -> str:
         s = f"Name: {self.WorkflowName}\nDesc: {self.WorkflowDesc}\n"
@@ -57,16 +53,3 @@ class Workflow(BaseModel):
         for edge in self.Edges:
             s += f"{edge}\n"
         return s
-
-    def check_validation(self) -> bool:
-        """Check the edge infos for PDL conversion
-        NOTE: only used in EDA
-
-        - [x] edges: check that the source and target are valid node ids
-        - [ ] node.LogicEvaluator...Reference: check JsonPath
-        """
-        # 1. edges
-        for edge in self.Edges:
-            if (edge.source not in self.node_id_to_node) or (edge.target not in self.node_id_to_node):
-                raise ValueError(f"Invalid edge: {edge}")
-        return True

@@ -7,6 +7,7 @@ workflow = dm.get_workflow_by_id("001")
 
 def test_workflow():
     print(workflow)
+    print()
 
 
 def test_check_edges():
@@ -20,5 +21,5 @@ def test_check_edges():
     print("check edges passed!")
 
 
-# test_workflow()
-test_check_edges()
+test_workflow()
+# test_check_edges()

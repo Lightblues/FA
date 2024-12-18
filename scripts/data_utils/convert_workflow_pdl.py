@@ -7,7 +7,7 @@ from data_utils.converter.workflow_pdl_converter import WorkflowPDLConverter
 
 converter = WorkflowPDLConverter(llm_name="gpt-4o-mini")
 dm = converter.data_manager
-version = "20241217"
+version = "20241218"
 odir = dm.DIR_data / dm.data_version / f"pdl_converted_{version}"
 odir.mkdir(parents=True, exist_ok=True)
 

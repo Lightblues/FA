@@ -51,7 +51,6 @@ from typing import *
 
 import pandas as pd
 
-from .common import *
 from .parameter import Parameter
 from .workflow import Workflow
 
@@ -139,23 +138,16 @@ class DataManager:
     def get_workflow_by_id(
         self,
         workflow_id: Union[str, int],
-        return_dict: bool = False,
         verbose: bool = False,
     ) -> Workflow:
         """Get the workflow by id"""
         workflow_id = self.get_standard_workflow_id(workflow_id)
         fn = self.DIR_data / self.data_version / self.export_version / self.workflow_infos[workflow_id]["workflow_fn"]
         workflow = json.load(open(fn, "r", encoding="utf-8"))
-        # workflow keys: ['ProtoVersion', 'WorkflowID', 'WorkflowName', 'WorkflowDesc', 'Nodes', 'Edge']
-        # Node keys: ['NodeID', 'NodeName', 'NodeDesc', 'NodeType', 'StartNodeData', 'Inputs', 'Outputs', 'NextNodeIDs', 'NodeUI']
-        # Edge keys: ['source', 'sourceHandle', 'target', 'type', 'data', 'id', 'selected', 'animated']
         workflow["Edges"] = json.loads(workflow.pop("Edge"))
         if verbose:
             print(f"--- Loaded [{workflow_id}] {workflow['WorkflowName']} {workflow['WorkflowID']} ---")
-        if return_dict:
-            return workflow
-        else:
-            return Workflow(**workflow)
+        return Workflow(**workflow)
 
     def stat_node_type(self):
         """Stat the node type distribution of the dataset"""
