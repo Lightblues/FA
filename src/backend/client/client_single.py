@@ -16,7 +16,8 @@ from typing import Dict, Iterator
 
 import requests
 
-from flowagent.data import BotOutput, Config, Conversation, Role
+from common import Config
+from flowagent.data import BotOutput, Conversation, Role
 
 from ..typings import (
     SingleBotPredictResponse,

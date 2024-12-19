@@ -22,8 +22,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from common import init_loguru_logger
-from flowagent.data import Config, DataManager
+from common import Config, init_loguru_logger
+from flowagent.data import DataManager
 
 from .common.shared import SharedResources
 
@@ -33,7 +33,7 @@ def init_app() -> FastAPI:
     config_name = os.environ.get("CONFIG_NAME", "default.yaml")
 
     # Initialize configuration
-    cfg = Config.from_yaml(DataManager.normalize_config_name(config_name))
+    cfg = Config.from_yaml(config_name)
     init_loguru_logger(DataManager.DIR_backend_log)
     SharedResources.initialize(cfg)
 

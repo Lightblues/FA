@@ -14,12 +14,11 @@ USAGE::
 import datetime
 
 from backend import FrontendClient
-from common import LogUtils
-from flowagent.data import Config, DataManager
+from common import Config, LogUtils
 
 
 conversation_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
+cfg = Config.from_yaml("default.yaml")
 
 client = FrontendClient(cfg)
 

@@ -1,7 +1,8 @@
-from flowagent import Config, DataManager, FlowagentConversationManager
+from common import Config
+from flowagent import FlowagentConversationManager
 
 
-cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
+cfg = Config.from_yaml("default.yaml")
 
 cfg.workflow_dataset = "PDL_zh"
 cfg.workflow_id = "000"

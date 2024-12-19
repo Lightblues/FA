@@ -2,7 +2,8 @@ from typing import Dict, Optional
 
 from pydantic import BaseModel
 
-from flowagent.data import APIOutput, BotOutput, Config, Conversation
+from common import Config
+from flowagent.data import APIOutput, BotOutput, Conversation
 
 from .typings_base import BaseResponse
 

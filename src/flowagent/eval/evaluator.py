@@ -14,10 +14,10 @@ from typing import Callable, Dict, Union
 import pandas as pd
 import tqdm
 
-from common import LogUtils
+from common import Config, LogUtils
 
 from ..conversation_manager import FlowagentConversationManager
-from ..data import Config, DataManager, DBManager
+from ..data import DataManager, DBManager
 from .analyzer import Analyzer
 from .eval_utils import EvalUtils
 from .judger import Judger
@@ -80,12 +80,12 @@ class Evaluator:  # rename -> Exp?
         if self.cfg.exp_mode == "session":
             self.print_header_info(
                 step_name="STEP 1: Simulating",
-                infos={k: v for k, v in self.cfg.to_dict().items() if k.startswith("simulate") or k.startswith("exp")},
+                infos={k: v for k, v in self.cfg.model_dump().items() if k.startswith("simulate") or k.startswith("exp")},
             )
             self.run_simulations(f_task=task_simulate)
             self.print_header_info(
                 step_name="STEP 2: Evaluating",
-                infos={k: v for k, v in self.cfg.to_dict().items() if k.startswith("judge")},
+                infos={k: v for k, v in self.cfg.model_dump().items() if k.startswith("judge")},
             )
             self.run_evaluations(f_task=task_judge)
             self.print_header_info(step_name="STEP 3: Analyzing")
@@ -93,12 +93,12 @@ class Evaluator:  # rename -> Exp?
         elif self.cfg.exp_mode == "turn":
             self.print_header_info(
                 step_name="STEP 1: Simulating",
-                infos={k: v for k, v in self.cfg.to_dict().items() if k.startswith("simulate") or k.startswith("exp")},
+                infos={k: v for k, v in self.cfg.model_dump().items() if k.startswith("simulate") or k.startswith("exp")},
             )
             self.run_simulations(f_task=task_simulate_teacher_forcing)
             self.print_header_info(
                 step_name="STEP 2: Evaluating",
-                infos={k: v for k, v in self.cfg.to_dict().items() if k.startswith("judge")},
+                infos={k: v for k, v in self.cfg.model_dump().items() if k.startswith("judge")},
             )
             self.run_evaluations(f_task=task_judge_turn_level)
             self.print_header_info(step_name="STEP 3: Analyzing")

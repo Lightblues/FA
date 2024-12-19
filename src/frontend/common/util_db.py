@@ -6,7 +6,7 @@ _session_info = {
     "user": ss.user_identity,
     "mode": ss.mode,            # "single"
     "conversation": ss.conv.to_list(),
-    "config": ss.cfg.to_dict(),
+    "config": ss.cfg.model_dump(),
 }
 """
 
@@ -15,7 +15,8 @@ from typing import *
 import pymongo
 import pymongo.results
 
-from flowagent.data import Config, Conversation, Message
+from common import Config
+from flowagent.data import Conversation, Message
 
 
 class DBUtils:

@@ -2,9 +2,9 @@ from typing import Dict, List
 
 from loguru import logger
 
-from common import LLM_CFG, Formater, OpenAIClient, init_client, jinja_render
+from common import LLM_CFG, Config, Formater, OpenAIClient, init_client, jinja_render
 
-from ...data import Config, Conversation
+from ...data import Conversation
 from ..base import BaseRole
 
 

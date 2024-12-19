@@ -1,6 +1,8 @@
 from typing import List
 
-from ..data import Config, DataManager, DBManager, Workflow
+from common import Config
+
+from ..data import DataManager, DBManager, Workflow
 
 
 class EvalUtils:

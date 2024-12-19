@@ -9,9 +9,9 @@ from typing import Any, Dict, List
 
 from loguru import logger
 
-from common import LLM_CFG, Formater, LogUtils, init_client, jinja_render, retry_wrapper
+from common import LLM_CFG, Config, Formater, LogUtils, init_client, jinja_render, retry_wrapper
 
-from ..data import Config, Conversation, DBManager, Role, Workflow
+from ..data import Conversation, DBManager, Role, Workflow
 
 
 class Judger:
@@ -62,7 +62,7 @@ class Judger:
         out_dict = {
             "conversation_id": self.cfg.judge_conversation_id,
             "exp_version": self.cfg.exp_version,  # these infos can also be found in `db.config`
-            **{k: v for k, v in self.cfg.to_dict().items() if k.startswith("workflow")},
+            **{k: v for k, v in self.cfg.model_dump().items() if k.startswith("workflow")},
             "num_turns": len(simulated_conversation),  # //2
         }
         # NOTE: standardize the judge results
@@ -219,8 +219,8 @@ class Judger:
             "conversation_id": self.cfg.judge_conversation_id,
             "judge_model_name": self.cfg.judge_model_name,
             "exp_version": self.cfg.exp_version,
-            **{k: v for k, v in self.cfg.to_dict().items() if k.startswith("workflow")},
-            "config": self.cfg.to_dict(),
+            **{k: v for k, v in self.cfg.model_dump().items() if k.startswith("workflow")},
+            "config": self.cfg.model_dump(),
         }
         logger.log(LogUtils.format_infos_with_tabulate(infos))
 

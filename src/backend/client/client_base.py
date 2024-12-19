@@ -3,7 +3,8 @@ from typing import Iterator
 
 import requests
 
-from flowagent.data import Config, Conversation
+from common import Config
+from flowagent.data import Conversation
 
 
 class BaseClient:

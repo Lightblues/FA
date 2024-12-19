@@ -1,10 +1,10 @@
-from flowagent import Config, DataManager
+from common import Config
 from flowagent.data import Conversation, Message, Role, Workflow
 from flowagent.roles import CoREBot, PDLBot, ReactBot
 
 
 def init_react_bot() -> ReactBot:
-    cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
+    cfg = Config.from_yaml("default.yaml")
     cfg.workflow_type = "text"
     cfg.bot_mode = "react_bot"
 
@@ -15,7 +15,7 @@ def init_react_bot() -> ReactBot:
 
 
 def init_core_bot() -> CoREBot:
-    cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
+    cfg = Config.from_yaml("default.yaml")
     cfg.workflow_type = "core"
     cfg.bot_mode = "core_bot"
 
@@ -26,7 +26,7 @@ def init_core_bot() -> CoREBot:
 
 
 def init_pdl_bot() -> PDLBot:
-    cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
+    cfg = Config.from_yaml("default.yaml")
     cfg.workflow_type = "pdl"
     cfg.bot_mode = "pdl_bot"
     cfg.workflow_dataset = "PDL_zh"

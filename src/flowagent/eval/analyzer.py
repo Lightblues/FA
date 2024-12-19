@@ -11,9 +11,9 @@ import pandas as pd
 import seaborn as sns
 import wandb
 
-from common import LogUtils
+from common import Config, LogUtils
 
-from ..data import Config, DataManager, DBManager
+from ..data import DataManager, DBManager
 from .metric import MetricF1
 
 

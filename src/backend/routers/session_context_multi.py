@@ -14,7 +14,8 @@ from typing import Dict, Optional, Union
 from loguru import logger
 from pydantic import BaseModel
 
-from flowagent.data import BotOutput, Config, Conversation, Workflow
+from common import Config
+from flowagent.data import BotOutput, Conversation, Workflow
 from flowagent.pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
 from flowagent.roles import RequestTool, UIMultiMainBot, UIMultiWorkflowBot
 

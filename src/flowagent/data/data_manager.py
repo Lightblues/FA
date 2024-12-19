@@ -3,7 +3,7 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .config import Config
+from common import Config
 
 
 @dataclass
@@ -47,11 +47,6 @@ class DataManager:
     def refresh_config(self, cfg: Config) -> None:
         self.cfg = cfg
         self._build_workflow_infos(cfg.workflow_dataset)
-
-    @staticmethod
-    def normalize_config_name(config_name: str):
-        config_fn = DataManager.DIR_config / config_name
-        return config_fn
 
     @property
     def num_workflows(self):

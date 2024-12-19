@@ -1,14 +1,10 @@
-"""updated @240906"""
-
-import copy
 from typing import Dict, List, Optional
 
-import yaml
 from pydantic import BaseModel
 
 
-class Config(BaseModel):
-    mode: str = "ui"
+class V010Mixin(BaseModel):
+    mode: str = "ui"  # exp, sim
 
     workflow_dataset: str = "STAR"
     workflow_type: str = "pdl"  # text, code, flowchart
@@ -100,42 +96,3 @@ class Config(BaseModel):
     judge_log_to: str = "wandb"
     judge_force_rejudge: bool = False
     judge_retry_limit: int = 3
-
-    def to_dict(self):
-        return self.model_dump()  # .dict()
-
-    #     return asdict(self)
-
-    @classmethod
-    def from_yaml(cls, yaml_file: str):
-        with open(yaml_file, "r") as file:
-            data = yaml.safe_load(file)
-        return cls(**data)
-
-    def to_yaml(self, yaml_file: str):
-        with open(yaml_file, "w") as file:
-            yaml.dump(self.model_dump(), file, sort_keys=False)
-
-    @classmethod
-    def from_dict(cls, dic: dict):
-        return cls(**dic)
-
-    def copy(self):
-        return copy.deepcopy(self)
-
-    def __getitem__(self, key):
-        try:
-            return getattr(self, key)
-        except AttributeError:
-            raise KeyError(f"Key '{key}' not found in Config")
-
-
-if __name__ == "__main__":
-    config_dict = {
-        "workflow_dataset": "xxx",
-        "workflow_type": "xxx",
-        "workflow_id": "000",
-        "xxx": "xxx",
-    }
-    cfg = Config.from_dict(config_dict)
-    print(cfg)

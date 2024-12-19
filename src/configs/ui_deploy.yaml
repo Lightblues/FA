@@ -1,0 +1,24 @@
+
+defaults: !include default.yaml
+
+x-available-models: &available_models
+  - 神农大模型
+  - "gpt-4o"
+  - "gpt-4o-mini"
+  - "gpt-4-turbo"
+
+ui_available_models: *available_models
+ui_available_templates:
+  - bot_pdl_ui_zh.jinja
+ui_default_model: "神农大模型"
+
+mui_available_models: *available_models
+
+api_entity_linking: false               # turn off entity linking!
+
+bot_pdl_controllers:
+  - {name: "api_duplication", config: {if_pre: true, if_post: true, threshold: 2}, is_activated: true}
+  - {name: "node_dependency", config: {if_pre: true, if_post: true}, is_activated: true}
+  # - {name: "session_length", config: {if_pre: true, min: 5, max: 15}, is_activated: true}
+
+backend_url: "http://localhost:8100"

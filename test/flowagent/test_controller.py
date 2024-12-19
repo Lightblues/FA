@@ -1,10 +1,11 @@
-from flowagent.data import BotOutput, Config, Conversation, DataManager, Workflow
+from common import Config
+from flowagent.data import BotOutput, Conversation, Workflow
 from flowagent.pdl_controllers import NodeDependencyController
 
 
 def test_dep_controller():
     # {name: "api_duplication", config: {if_pre: true, if_post: true, threshold: 2}}
-    cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
+    cfg = Config.from_yaml("default.yaml")
     workflow = Workflow(cfg)
     conv = Conversation()
 

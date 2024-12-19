@@ -13,8 +13,8 @@ import streamlit as st
 
 
 ss = st.session_state
-from common import init_loguru_logger
-from flowagent.data import Config, DataManager
+from common import Config, init_loguru_logger
+from flowagent.data import DataManager
 
 from .common.util_st import init_resource
 
@@ -28,7 +28,7 @@ def setup_basic(config_version: str):
         ss.logger = init_loguru_logger(DataManager.DIR_ui_log)
     # logger, config and data_manager
     if "cfg" not in ss:
-        ss.cfg = Config.from_yaml(DataManager.normalize_config_name(config_version))
+        ss.cfg = Config.from_yaml(config_version)
     if "data_manager" not in ss:
         ss.data_manager = DataManager(ss.cfg)
 

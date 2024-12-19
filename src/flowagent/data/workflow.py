@@ -10,8 +10,9 @@ from typing import Dict, List
 
 import yaml
 
+from common import Config
+
 from .base_data import Conversation, ConversationWithIntention
-from .config import Config
 from .core import CoreFlow
 from .data_manager import DataManager
 from .pdl import PDL

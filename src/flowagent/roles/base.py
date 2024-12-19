@@ -2,12 +2,11 @@ import collections
 from abc import abstractmethod
 from typing import Dict, Iterator, List, Tuple, Union
 
-from common import LLM_CFG, OpenAIClient, init_client
+from common import LLM_CFG, Config, OpenAIClient, init_client
 
 from ..data import (
     APIOutput,
     BotOutput,
-    Config,
     Conversation,
     UserOutput,
     Workflow,

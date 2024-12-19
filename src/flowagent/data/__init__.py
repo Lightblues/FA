@@ -1,6 +1,5 @@
 # dependecies
 from .base_data import Conversation, ConversationWithIntention, Message, Role
-from .config import Config
 from .data_manager import DataManager
 from .db import DBManager
 from .pdl import PDL

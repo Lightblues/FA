@@ -66,27 +66,35 @@ class UISingleBot(ReactBot):
         return prompt
 
     def _get_tool_list(self):
+        # TODO: validate tool formats
         tool_list = []
         for tool in self.workflow.toolbox:
-            fc = {}
-            fc["type"] = "function"
-            fc["function"] = tool
+            parameters = tool.get("parameters", {})
+            fc = {
+                "type": "function",
+                "function": {
+                    "name": tool["name"],
+                    "description": tool.get("description", ""),
+                    "parameters": {"type": "object", "properties": parameters.get("properties", {}), "required": parameters.get("required", [])},
+                },
+            }
             tool_list.append(fc)
         return tool_list
 
     def process_stream(self) -> Tuple[str, Iterator[str]]:
-        # super().process_stream()
         prompt = self._gen_prompt()
         client = self.llm.client
-        tools = self._get_tool_list() if self.if_fc else None
-        response = client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt}],
-            model=self.llm.model_name,
-            temperature=self.llm.temperature,
-            tools=tools,
-            tool_choice="auto",  # TODO: what's that?
-            stream=True,
-        )
+
+        params = {
+            "messages": [{"role": "user", "content": prompt}],
+            "model": self.llm.model_name,
+            "temperature": self.llm.temperature,
+            "stream": True,
+        }
+        if self.if_fc:
+            params["tools"] = self._get_tool_list()
+
+        response = client.chat.completions.create(**params)
         self.last_llm_chat_completions = []
 
         def stream_generator(response: Stream[ChatCompletionChunk]) -> Iterator[str]:

@@ -9,7 +9,7 @@ from loguru import logger
 from pymongo.database import Database
 from pymongo.mongo_client import MongoClient
 
-from flowagent.data import Config
+from common import Config
 
 
 def check_db_connection(client: MongoClient) -> bool:

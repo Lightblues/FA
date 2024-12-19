@@ -12,7 +12,9 @@ from typing import Dict, Tuple
 import requests
 from loguru import logger
 
-from ...data import APIOutput, BotOutput, Config, Role
+from common import Config
+
+from ...data import APIOutput, BotOutput, Role
 from ..base import BaseTool
 from .entity_linker import EntityLinker
 

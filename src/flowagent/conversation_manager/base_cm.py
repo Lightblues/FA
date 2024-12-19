@@ -6,10 +6,9 @@ from abc import abstractmethod
 import pandas as pd
 from loguru import logger
 
-from common import LogUtils
+from common import Config, LogUtils
 
 from ..data import (
-    Config,
     Conversation,
     DataManager,
     DBManager,
@@ -57,7 +56,7 @@ class BaseConversationManager:
         infos = {
             "conversation_id": self.conversation_id,
             "exp_version": self.cfg.exp_version,
-            "config": self.cfg.to_dict(),
+            "config": self.cfg.model_dump(),
         }
         logger.log(LogUtils.format_infos_with_tabulate(infos))
 
@@ -78,7 +77,7 @@ class BaseConversationManager:
         infos = {
             "conversation_id": self.conversation_id,
             "exp_version": self.cfg.exp_version,
-            "config": self.cfg.to_dict(),
+            "config": self.cfg.model_dump(),
         }
         logger.log(LogUtils.format_infos_with_tabulate(infos))
 
@@ -101,7 +100,7 @@ class BaseConversationManager:
         query = {  # identify a single exp
             "exp_version": self.cfg.exp_version,
             "exp_mode": self.cfg.exp_mode,
-            **{k: v for k, v in self.cfg.to_dict().items() if k.startswith("workflow")},
+            **{k: v for k, v in self.cfg.model_dump().items() if k.startswith("workflow")},
             "user_profile_id": self.cfg.user_profile_id,
         }
         if self.cfg.simulate_force_rerun:
@@ -123,7 +122,7 @@ class BaseConversationManager:
         infos_dict = {
             "conversation_id": self.conversation_id,
             "exp_version": self.cfg.exp_version,
-            **self.cfg.to_dict(),
+            **self.cfg.model_dump(),
         }
         res = self.db.insert_config(infos_dict)
         logger.log(f"  <db> Inserted config")

@@ -94,7 +94,7 @@ def main_inspect():
         # 2. show the config
         st.markdown(f"### Configuration")
         with st.expander("Details"):
-            st.write(cfg.to_dict())
+            st.write(cfg.model_dump())
 
         # 5. show the utterance infors
         utterance_ids = df["utterance_id"].unique()

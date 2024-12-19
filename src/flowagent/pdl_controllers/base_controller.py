@@ -1,7 +1,9 @@
 import abc
 from typing import Dict, Tuple
 
-from ..data import PDL, BotOutput, Config, Conversation, Role
+from common import Config
+
+from ..data import PDL, BotOutput, Conversation, Role
 
 
 class BaseController:

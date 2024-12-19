@@ -1,5 +1,4 @@
-
-ui_available_models:
+x-available-models: &available_models
   - "1.0.2"
   - "default"
   - "gpt-4o-mini"
@@ -10,15 +9,19 @@ ui_available_models:
   - Qwen2.5-72B-INT8
   - "debug"
   - claude-3-5-sonnet-20241022
+x-default-model: &default_model "default"
+
+ui_bot_mode: ui_single_bot
+ui_bot_if_fc: false
+ui_available_models: *available_models
 ui_available_templates:
-  # - bot_pdl.jinja
-  - bot_pdl_ui.jinja
-  - bot_pdl_ui_zh_fc.jinja
+  # - bot_pdl_ui.jinja
+  # - bot_pdl_ui_zh.jinja
 # ui_available_workflow_dirs:
 # ui_available_workflows:
-ui_default_model: "default"   # "gpt-4o"
-ui_default_template: "bot_pdl_ui_zh_fc.jinja"
-ui_bot_template_fn: "flowagent/bot_pdl_ui_zh_fc.jinja"
+ui_default_model: default_model
+ui_default_template: "bot_pdl_ui_zh.jinja"
+ui_bot_template_fn: "flowagent/bot_pdl_ui_zh.jinja"
 ui_greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
 ui_available_workflow_datasets:
   - "v241127"
@@ -34,24 +37,14 @@ ui_tools:
 mui_agent_main_template_fn: "flowagent/bot_mui_main_agent.jinja"
 mui_agent_main_llm_name: "gpt-4o"
 mui_agent_workflow_template_fn: "flowagent/bot_mui_workflow_agent.jinja"
-mui_available_models:
-  - "1.0.2"
-  - "default"
-  - "gpt-4o-mini"
-  - "gpt-4o"
-  - "gpt-4-turbo"
-  - Vendor-A/Qwen/Qwen2.5-72B-Instruct
-  - Qwen/Qwen2.5-7B-Instruct
-  - Qwen2.5-72B-INT8
-  - "debug"
-  - claude-3-5-sonnet-20241022
+mui_available_models: *available_models
 mui_agent_main_available_templates:
   - bot_mui_main_agent.jinja
 mui_agent_workflow_available_templates:
   - bot_mui_workflow_agent.jinja
 mui_agent_main_default_template: "bot_mui_main_agent.jinja"
 mui_agent_workflow_default_template: "bot_mui_workflow_agent.jinja"
-mui_agent_main_default_model: "default"
+mui_agent_main_default_model: *default_model
 mui_default_workflow_dataset: "v241127"
 mui_greeting_msg: "你好，有什么可以帮您?"
 
@@ -80,9 +73,9 @@ bot_mode: "pdl_bot"       # dummy_bot, react_bot, pdl_bot, core_bot
 bot_template_fn: null     # "flowagent/bot_flowbench.jinja"
 bot_llm_name: "gpt-4o"
 bot_action_limit: 5
-bot_pdl_controllers: []
-  # - {name: "api_duplication", config: {if_pre: true, if_post: true, threshold: 2}, is_activated: true}
-  # - {name: "node_dependency", config: {if_pre: true, if_post: true}, is_activated: true}
+bot_pdl_controllers:
+  - {name: "api_duplication", config: {if_pre: true, if_post: true, threshold: 2}, is_activated: true}
+  - {name: "node_dependency", config: {if_pre: true, if_post: true}, is_activated: true}
   # - {name: "session_length", config: {if_pre: true, min: 5, max: 15}, is_activated: true}
 
 
@@ -102,7 +95,7 @@ db_name: "agent-pdl"
 # db_message_collection_name: "messages"
 # db_meta_collection_name: "config"
 
-backend_url: "http://localhost:8101"
+backend_url: "http://localhost:8100"
 
 # simulate_num_persona: 5
 # simulate_max_workers: 10

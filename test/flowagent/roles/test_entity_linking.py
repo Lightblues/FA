@@ -1,8 +1,8 @@
-from flowagent.data import Config, DataManager
+from common import Config
 from flowagent.roles.tools.entity_linker import EntityLinker
 
 
-cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
+cfg = Config.from_yaml("default.yaml")
 
 entity_linker = EntityLinker(cfg=cfg)
 

@@ -10,7 +10,7 @@ import streamlit as st
 
 
 ss = st.session_state
-from flowagent.data import Config
+from common import Config
 from flowagent.tools import TOOLS_MAP
 
 from .data_single import get_session_id

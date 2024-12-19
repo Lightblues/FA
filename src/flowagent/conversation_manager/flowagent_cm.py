@@ -4,12 +4,11 @@ from typing import List
 
 from loguru import logger
 
-from common import Timer
+from common import Config, Timer
 
 from ..data import (
     APIOutput,
     BotOutput,
-    Config,
     Conversation,
     Role,
     UserOutput,
