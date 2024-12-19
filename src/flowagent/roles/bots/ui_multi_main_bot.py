@@ -14,7 +14,7 @@ from common import (
     init_client,
     jinja_render,
 )
-from flowagent.tools import TOOL_SCHEMAS, TOOLS_MAP
+from tools import TOOL_SCHEMAS, TOOLS_MAP
 
 from ...data import DataManager, MainBotOutput
 from .react_bot import ReactBot

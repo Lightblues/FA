@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 
 import yaml
 
-from .clients import OpenAIClient
+from .clients.client_openai import OpenAIClient
 
 
 LLM_CFG = {}
@@ -27,7 +27,7 @@ def add_openai_models():
         ]
         for model in model_list:
             LLM_CFG[model] = {
-                "model_name": model,
+                "model": model,
                 "base_url": os.getenv("OPENAI_PROXY_BASE_URL"),
                 "api_key": os.getenv("OPENAI_PROXY_API_KEY"),
             }
@@ -40,7 +40,7 @@ def add_openai_models():
         ]
         for model in model_list:
             LLM_CFG[model] = {
-                "model_name": model,
+                "model": model,
                 "base_url": os.getenv("SILICONFLOW_BASE_URL"),
                 "api_key": os.getenv("SILICONFLOW_API_KEY"),
             }
@@ -71,10 +71,9 @@ def add_local_models():
                 print(f"[warning] <add_local_models> {model} already exist! pass!")
                 continue
             LLM_CFG[model] = {
-                "model_name": model,
+                "model": model,
                 "base_url": url,
                 "api_key": "xxx",  # NOTE: api_key 不能为 "" 不然也会报错
-                "is_sn": True,
             }
 
 
@@ -89,6 +88,6 @@ def init_client(llm_cfg: Union[str, Dict]):
     # global client
     base_url = os.getenv("OPENAI_PROXY_BASE_URL") if llm_cfg.get("base_url") is None else llm_cfg["base_url"]
     api_key = os.getenv("OPENAI_PROXY_API_KEY") if llm_cfg.get("api_key") is None else llm_cfg["api_key"]
-    model_name = llm_cfg.get("model_name", "gpt-4o")
-    client = OpenAIClient(model_name=model_name, base_url=base_url, api_key=api_key, is_sn=llm_cfg.get("is_sn", False))
+    model = llm_cfg.get("model", "gpt-4o")
+    client = OpenAIClient(model=model, base_url=base_url, api_key=api_key)
     return client

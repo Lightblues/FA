@@ -87,7 +87,7 @@ class BaseBot(BaseRole):
 
     def process_stream(self) -> Tuple[str, Iterator[str]]:
         prompt = self._gen_prompt()
-        llm_response_stream = self.llm.query_one_stream_generator(prompt)
+        llm_response_stream = self.llm.query_one_stream(prompt)
         return prompt, llm_response_stream
 
 

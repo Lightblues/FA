@@ -1,3 +1,7 @@
+"""
+hunyuan-code, hunyuan-turbo-latest, hunyuan-large, hunyuan-pro
+"""
+
 from concurrent.futures import ThreadPoolExecutor
 
 import tqdm

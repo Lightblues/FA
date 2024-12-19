@@ -87,7 +87,7 @@ class UISingleBot(ReactBot):
 
         params = {
             "messages": [{"role": "user", "content": prompt}],
-            "model": self.llm.model_name,
+            "model": self.llm.model,
             "temperature": self.llm.temperature,
             "stream": True,
         }

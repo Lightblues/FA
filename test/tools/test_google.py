@@ -1,4 +1,4 @@
-from flowagent.tools.tool_google_search import images_search, news_search, web_search
+from tools.tool_google_search import images_search, news_search, web_search
 
 
 def test_web():

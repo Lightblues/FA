@@ -1,4 +1,4 @@
-from flowagent.tools import function_to_schema, web_search
+from tools import function_to_schema, web_search
 
 
 def test_function_to_schema():
