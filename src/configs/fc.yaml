@@ -15,9 +15,9 @@ bot_pdl_controllers:
   - {name: "node_dependency", config: {if_pre: true, if_post: true}, is_activated: true}
   # - {name: "session_length", config: {if_pre: true, min: 5, max: 15}, is_activated: true}
 
-db_uri: 'mongodb://localhost:27017'
+db_uri: "mongodb://9.134.230.111:27017/"
 db_name: "agent-pdl"
-# db_message_collection_name: "messages"
-# db_meta_collection_name: "config"
+db_collection_single: "exp_fc_single_sessions"
+db_collection_multi: "exp_fc_multi_sessions"
 
 backend_url: "http://localhost:8101"

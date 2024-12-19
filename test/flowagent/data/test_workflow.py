@@ -1,15 +1,17 @@
 from common import Config
-from flowagent.data import DataManager, Workflow
+from flowagent.data import DataHandler
 
 
 cfg = Config.from_yaml("default.yaml")
 cfg.workflow_dataset = "PDL"
 cfg.user_profile_id = 0
 
-workflow = Workflow(cfg)
+data_handler = DataHandler.create(cfg)
+_dict = data_handler.model_dump()
+print(_dict)
 
 
 def test_workflow_str():
-    print(workflow.to_str())
-    print(workflow.pdl.to_str_wo_api())
+    print(data_handler.to_str())
+    print(data_handler.pdl.to_str_wo_api())
     # print(workflow.pdl)

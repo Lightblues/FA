@@ -2,7 +2,7 @@ from typing import List
 
 from common import Config
 
-from ..data import DataManager, DBManager, Workflow
+from ..data import DataHandler, DataManager, DBManager
 
 
 class EvalUtils:
@@ -10,7 +10,7 @@ class EvalUtils:
     def _get_configs_per_workflow(cfg: Config, simulate_num_persona: int = None):
         """collect simulation for a specific workflow"""
         # 1. get all user ids
-        num_user_profile = Workflow(cfg).num_user_profile
+        num_user_profile = DataHandler.create(cfg).num_user_profile
         if simulate_num_persona is not None and simulate_num_persona > 0:
             num_user_profile = min(num_user_profile, simulate_num_persona)
         # 2. get all the configs

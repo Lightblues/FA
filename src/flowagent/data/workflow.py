@@ -6,9 +6,10 @@ WorkflowType: text, code, flowchart, pdl
 import json
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List
+from typing import Any, Dict, List, Optional
 
 import yaml
+from pydantic import BaseModel, Field
 
 from common import Config
 
@@ -19,27 +20,30 @@ from .pdl import PDL
 from .user_profile import OOWIntention, UserProfile
 
 
-class WorkflowType(Enum):
-    TEXT = ("TEXT", "format for natural language", ".txt", "text")
-    CODE = ("CODE", "format of code", ".py", "code")
-    FLOWCHART = ("FLOWCHART", "format of flowchart", ".md", "flowchart")
-    PDL = ("PDL", "format of PDL", ".yaml", "pdl")
-    CORE = ("CORE", "format of CoRE", ".txt", "core")
-
-    def __init__(self, workflow_type, description, suffix, subdir):
-        self.workflow_type: str = workflow_type
-        self.description: str = description
-        self.suffix: str = suffix
-        self.subdir: str = subdir
+class WorkflowType(str, Enum):
+    TEXT = "TEXT"
+    CODE = "CODE"
+    FLOWCHART = "FLOWCHART"
+    PDL = "PDL"
+    CORE = "CORE"
 
     @property
-    def types(self):
-        types_upper = [x.value[0] for x in WorkflowType]
-        types_lower = [x.value[0].lower() for x in WorkflowType]
-        return types_upper + types_lower
+    def description(self) -> str:
+        return {
+            "TEXT": "format for natural language",
+            "CODE": "format of code",
+            "FLOWCHART": "format of flowchart",
+            "PDL": "format of PDL",
+            "CORE": "format of CoRE",
+        }[self.value]
 
-    def __str__(self):
-        return self.workflow_type
+    @property
+    def suffix(self) -> str:
+        return {"TEXT": ".txt", "CODE": ".py", "FLOWCHART": ".md", "PDL": ".yaml", "CORE": ".txt"}[self.value]
+
+    @property
+    def subdir(self) -> str:
+        return self.value.lower()
 
 
 class WorkflowTypeStr(str, Enum):
@@ -50,37 +54,27 @@ class WorkflowTypeStr(str, Enum):
     CORE = "core"
 
 
-@dataclass
-class Workflow:  # rename -> Data
-    type: WorkflowType = None
-    id: str = None  # 000
-    name: str = None
-    task_description: str = None
-    # task_detailed_description: str = None
+class DataHandler(BaseModel):  # rename -> Data
+    type: Optional[WorkflowType] = None
+    id: Optional[str] = None  # 000
+    name: Optional[str] = None
+    task_description: Optional[str] = None
 
-    workflow: str = None
-    toolbox: List[Dict] = field(default_factory=list)  # apis
-    pdl: PDL = None  # only for PDL
-    core_flow: CoreFlow = None  # only for CORE
+    workflow: Optional[str] = None
+    toolbox: List[Dict] = Field(default_factory=list)  # Changed field() to Field()
+    pdl: Optional[PDL] = None
+    core_flow: Optional[CoreFlow] = None
 
-    user_profiles: List[UserProfile] = None
-    reference_conversations: List[ConversationWithIntention] = None
-    user_oow_intentions: List[OOWIntention] = None
+    user_profiles: Optional[List[UserProfile]] = None
+    reference_conversations: Optional[List[ConversationWithIntention]] = None
+    user_oow_intentions: Optional[List[OOWIntention]] = None
 
-    cfg: Config = None
-    # data_manager: DataManager = None
+    cfg: Optional[Config] = None
 
-    def _get_workflow_id(self, id_or_name: str, workflow_infos: dict):
-        if id_or_name in workflow_infos:
-            return id_or_name
-        for id, info in workflow_infos.items():
-            if info["name"] == id_or_name:
-                return id
-        raise ValueError(f"[ERROR] {id_or_name} not found in {workflow_infos.keys()}")
-
-    def __init__(self, cfg: Config, data_manager: DataManager = None, id_or_name: str = None) -> None:
-        """Overall data handler
-
+    # def __init__(self, cfg: Config, data_manager: DataManager = None, id_or_name: str = None) -> None:
+    @classmethod
+    def create(cls, cfg: Config, data_manager: Optional[DataManager] = None, id_or_name: Optional[str] = None) -> "DataHandler":
+        """Factory method to create a Workflow instance with all the initialization logic
         Args:
             cfg (Config): config
             data_manager (DataManager): data manager
@@ -91,9 +85,9 @@ class Workflow:  # rename -> Data
         3. load .toolbox (f"tools/{self.id}.yaml")
         4. load .workflow (f"{self.type.subdir}/{self.id}{self.type.suffix}")
         """
-        self.cfg = cfg
+        self = cls(cfg=cfg)  # Initialize with basic fields
         data_manager = data_manager or DataManager(cfg)
-        self.type = WorkflowType[self.cfg.workflow_type.upper()]
+        self.type = WorkflowType[cfg.workflow_type.upper()]
         self.id = self._get_workflow_id(id_or_name or cfg.workflow_id, data_manager.workflow_infos)
 
         # 1. load basic info
@@ -144,8 +138,17 @@ class Workflow:  # rename -> Data
                             Conversation.load_from_json(d["conversation"]),
                         )
                     )
+        return self
 
-    def refresh_config(self, cfg: Config) -> "Workflow":
+    def _get_workflow_id(self, id_or_name: str, workflow_infos: dict):
+        if id_or_name in workflow_infos:
+            return id_or_name
+        for id, info in workflow_infos.items():
+            if info["name"] == id_or_name:
+                return id
+        raise ValueError(f"[ERROR] {id_or_name} not found in {workflow_infos.keys()}")
+
+    def refresh_config(self, cfg: Config) -> "DataHandler":
         """used for UI!
         TODO: check if is used!
         """

@@ -8,8 +8,8 @@ from ..data import (
     APIOutput,
     BotOutput,
     Conversation,
+    DataHandler,
     UserOutput,
-    Workflow,
 )
 
 
@@ -18,13 +18,13 @@ class BaseRole:
     cfg: Config = None  # unified config
     llm: OpenAIClient = None  # for simulation
     conv: Conversation = None  # global variable for conversation
-    workflow: Workflow = None
+    workflow: DataHandler = None
 
     def __init__(
         self,
         cfg: Config,
         conv: Conversation = None,
-        workflow: Workflow = None,
+        workflow: DataHandler = None,
         *args,
         **kwargs,
     ) -> None:

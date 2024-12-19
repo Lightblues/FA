@@ -80,8 +80,10 @@ class V010Mixin(BaseModel):
 
     db_uri: str = "mongodb://localhost:27017/"
     db_name: str = "agent-pdl"
-    db_message_collection_name: str = "messages"
-    db_meta_collection_name: str = "config"
+    # db_message_collection_name: str = "messages"
+    # db_meta_collection_name: str = "config"
+    db_collection_single: str = "backend_single_sessions"
+    db_collection_multi: str = "backend_multi_sessions"
 
     backend_url: str = "http://localhost:8100"
 

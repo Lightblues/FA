@@ -1,5 +1,5 @@
 from flowagent import Config, DataManager
-from flowagent.data import Conversation, Message, Role, Workflow
+from flowagent.data import Conversation, DataHandler, Message, Role
 from flowagent.roles import UISingleBot
 
 
@@ -10,7 +10,7 @@ def init_ui_bot() -> UISingleBot:
     cfg.workflow_dataset = "PDL_zh"
     cfg.workflow_type = "pdl"
 
-    workflow = Workflow(cfg)
+    workflow = DataHandler.create(cfg)
     conv = Conversation()
     bot = UISingleBot(cfg=cfg, conv=conv, workflow=workflow)
     return bot

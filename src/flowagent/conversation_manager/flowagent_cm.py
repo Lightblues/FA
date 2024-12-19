@@ -10,9 +10,9 @@ from ..data import (
     APIOutput,
     BotOutput,
     Conversation,
+    DataHandler,
     Role,
     UserOutput,
-    Workflow,
 )
 from ..pdl_controllers import (
     CONTROLLER_NAME2CLASS,
@@ -31,7 +31,7 @@ class FlowagentConversationManager(BaseConversationManager):
 
     def __init__(self, cfg: Config) -> None:
         super().__init__(cfg)
-        self.workflow = Workflow(cfg)
+        self.workflow = DataHandler.create(cfg)
         self.bot = BOT_NAME2CLASS[cfg.bot_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
         self.user = USER_NAME2CLASS[cfg.user_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)
         self.api = API_NAME2CLASS[cfg.api_mode](cfg=cfg, conv=self.conv, workflow=self.workflow)

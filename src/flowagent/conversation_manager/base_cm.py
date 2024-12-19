@@ -10,11 +10,11 @@ from common import Config, LogUtils
 
 from ..data import (
     Conversation,
+    DataHandler,
     DataManager,
     DBManager,
     Message,
     Role,
-    Workflow,
 )
 from ..roles import BaseBot, BaseTool, BaseUser, InputUser
 
@@ -32,7 +32,7 @@ class BaseConversationManager:
     api: BaseTool = None
     conv: Conversation = None  # global variable for conversation
     data_manager: DataManager = None  # remove it?
-    workflow: Workflow = None
+    workflow: DataHandler = None
     conversation_id: str = None
 
     def __init__(self, cfg: Config) -> None:

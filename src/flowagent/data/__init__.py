@@ -12,4 +12,4 @@ from .role_outputs import (
     WorkflowBotOutput,
 )
 from .user_profile import OOWIntention, UserProfile
-from .workflow import Workflow, WorkflowType, WorkflowTypeStr
+from .workflow import DataHandler, WorkflowType, WorkflowTypeStr

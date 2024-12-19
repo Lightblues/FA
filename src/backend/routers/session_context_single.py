@@ -13,7 +13,7 @@ from loguru import logger
 from pydantic import BaseModel
 
 from common import Config
-from flowagent.data import BotOutput, Conversation, Role, Workflow
+from flowagent.data import BotOutput, Conversation, DataHandler, Role
 from flowagent.pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
 from flowagent.roles import BOT_NAME2CLASS, RequestTool, UISingleBot
 
@@ -33,7 +33,7 @@ class SingleSessionContext(BaseModel):
 
     cfg: Config
     conv: Conversation
-    workflow: Workflow
+    workflow: DataHandler
     bot: UISingleBot  # or UISingleFCBot
     tool: RequestTool
     controllers: Dict[str, BaseController]
@@ -59,7 +59,7 @@ class SingleSessionContext(BaseModel):
             SessionContext: session context
         """
         # logger.info(f"cfg.bot_pdl_controllers: {cfg.bot_pdl_controllers}")
-        workflow = Workflow(cfg)
+        workflow = DataHandler.create(cfg)
         conv = Conversation.create(session_id)
         conv.add_message(msg=cfg.ui_greeting_msg.format(name=workflow.pdl.Name), role=Role.BOT)
         bot = BOT_NAME2CLASS[cfg.ui_bot_mode](cfg=cfg, conv=conv, workflow=workflow)
@@ -102,7 +102,7 @@ def clear_session_context_single(session_id: str):
 
 
 def db_upsert_session_single(ss: SingleSessionContext):
-    """Upsert conversation to `db.backend_single_sessions`
+    """Upsert conversation to `cfg.db_collection_single`
     Infos: (sessionid, name, mode[single/multi], infos, conversation, version)...
 
     NOTE:
@@ -114,18 +114,19 @@ def db_upsert_session_single(ss: SingleSessionContext):
         return
     logger.info(f"[db_upsert_session] {ss.session_id} into {db}")
     _session_info = {
-        # model_llm_name, template, etc
+        # model_llm_name, template, tools, etc
         "session_id": ss.session_id,
         "user": ss.user_identity,
         "mode": "single",
         "conversation": ss.conv.to_list(),  # TODO: only save messages? polish it!
         "config": ss.cfg.model_dump(),  # to_list -> model_dump
+        "workflow": ss.workflow.model_dump(),
     }
     if db is None:
         logger.warning(f"Skipping database operation for session {ss.session_id} due to connection failure")
         return
     try:
-        db.backend_single_sessions.replace_one({"session_id": ss.session_id}, _session_info, upsert=True)
+        db[ss.cfg.db_collection_single].replace_one({"session_id": ss.session_id}, _session_info, upsert=True)
     except Exception as e:
         logger.error(f"Failed to save session {ss.session_id}: {e}")
 

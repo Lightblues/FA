@@ -11,7 +11,7 @@ from loguru import logger
 
 from common import LLM_CFG, Config, Formater, LogUtils, init_client, jinja_render, retry_wrapper
 
-from ..data import Conversation, DBManager, Role, Workflow
+from ..data import Conversation, DataHandler, DBManager, Role
 
 
 class Judger:
@@ -54,7 +54,7 @@ class Judger:
         assert len(simulated_conversation) > 0, "simulated conversation is empty"
 
         # 1.2. get the workflow infos
-        workflow = Workflow(self.cfg)
+        workflow = DataHandler.create(self.cfg)
 
         # 2. judge: call the judge model & parse the output
         logger.log(f"  <judge> start to judge {self.cfg.judge_conversation_id}")
@@ -83,7 +83,7 @@ class Judger:
 
     def _judge_session(
         self,
-        workflow: Workflow,
+        workflow: DataHandler,
         simulated_conversation: Conversation,
     ) -> Dict[str, Any]:
         """
@@ -133,7 +133,7 @@ class Judger:
 
     def _judge_turn(
         self,
-        workflow: Workflow,
+        workflow: DataHandler,
         simulated_conversation: Conversation,
     ) -> Dict[str, Any]:
         out = {"judge_turn_result": [], "judge_turn_details": []}
@@ -173,7 +173,7 @@ class Judger:
             )
         return out
 
-    def _judge_stat_session(self, workflow: Workflow, simulated_conversation: Conversation) -> Dict[str, Any]:
+    def _judge_stat_session(self, workflow: DataHandler, simulated_conversation: Conversation) -> Dict[str, Any]:
         _user_profile = workflow.user_profiles[self.cfg.user_profile_id]
         apis_gt = _user_profile.required_apis
         assert apis_gt is not None, "user_profile.required_apis is None"
@@ -181,7 +181,7 @@ class Judger:
         apis_pred = simulated_conversation.get_called_apis()
         return {"judge_session_stat": {"apis_gt": apis_gt, "apis_pred": apis_pred}}
 
-    def _judge_stat_turn(self, workflow: Workflow, simulated_conversation: Conversation) -> Dict[str, Any]:
+    def _judge_stat_turn(self, workflow: DataHandler, simulated_conversation: Conversation) -> Dict[str, Any]:
         apis_gt, apis_pred = [], []  # record the api calls for each BOT turn
         for i, msg in enumerate(simulated_conversation):
             if msg.role != Role.BOT:

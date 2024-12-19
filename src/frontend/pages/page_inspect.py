@@ -16,12 +16,15 @@ import streamlit as st
 
 
 ss = st.session_state
+from common import Config
+
 from ..common.util_db import DBUtils
 
 
+cfg: Config = ss.cfg
 COLLECTION_NAMES = {
-    "single": "backend_single_sessions",
-    "multi": "backend_multi_sessions",
+    "single": cfg.db_collection_single,
+    "multi": cfg.db_collection_multi,
 }
 
 

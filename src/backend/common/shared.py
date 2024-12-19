@@ -36,6 +36,7 @@ class SharedResources:
 
     def __init__(self, config: Config):
         self.config = config
+        logger.info(f"Connecting to MongoDB with URI: {config.db_uri}, DB: {config.db_name}")
         self.db_client = pymongo.MongoClient(config.db_uri)
         if not check_db_connection(self.db_client):
             logger.error(f"Failed to connect to MongoDB with URI: {config.db_uri}")

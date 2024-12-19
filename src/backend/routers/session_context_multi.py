@@ -15,7 +15,7 @@ from loguru import logger
 from pydantic import BaseModel
 
 from common import Config
-from flowagent.data import BotOutput, Conversation, Workflow
+from flowagent.data import BotOutput, Conversation, DataHandler
 from flowagent.pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
 from flowagent.roles import RequestTool, UIMultiMainBot, UIMultiWorkflowBot
 
@@ -64,7 +64,7 @@ class MultiSessionContext(BaseModel):
         Returns:
             SessionContext: session context
         """
-        workflow = Workflow(cfg)
+        workflow = DataHandler.create(cfg)
         conv = Conversation.create(session_id)
         conv.add_message(msg=cfg.mui_greeting_msg, role="bot_main")
         agent_main = UIMultiMainBot(cfg=cfg, conv=conv, workflow_infos=cfg.mui_workflow_infos)
@@ -102,7 +102,7 @@ class MultiSessionContext(BaseModel):
                     self._workflow_controllers_map,
                 )
             ), "workflow_name already exists"
-            workflow = Workflow(self.cfg, id_or_name=workflow_name)
+            workflow = DataHandler.create(self.cfg, id_or_name=workflow_name)
             self._workflow_agent_map[workflow_name] = UIMultiWorkflowBot(cfg=self.cfg, conv=self.conv, workflow=workflow)
             self._workflow_tool_map[workflow_name] = RequestTool(cfg=self.cfg, conv=self.conv, workflow=workflow)
             self._workflow_controllers_map[workflow_name] = {}
@@ -146,7 +146,7 @@ def clear_session_context_multi(session_id: str):
 
 
 def db_upsert_session_multi(ss: MultiSessionContext):
-    """Upsert conversation to `db.backend_multi_sessions`
+    """Upsert conversation to `cfg.db_collection_multi`
     Infos: (sessionid, name, mode[multi/multi], infos, conversation, version)...
 
     NOTE:
@@ -164,12 +164,13 @@ def db_upsert_session_multi(ss: MultiSessionContext):
         "mode": "multi",
         "conversation": ss.conv.to_list(),  # TODO: only save messages? polish it!
         "config": ss.cfg.model_dump(),  # to_list -> model_dump
+        "workflow": ss.workflow.model_dump(),
     }
     if db is None:
         logger.warning(f"Skipping database operation for session {ss.session_id} due to connection failure")
         return
     try:
-        db.backend_multi_sessions.replace_one({"session_id": ss.session_id}, _session_info, upsert=True)
+        db[ss.cfg.db_collection_multi].replace_one({"session_id": ss.session_id}, _session_info, upsert=True)
     except Exception as e:
         logger.error(f"Failed to save session {ss.session_id}: {e}")
 

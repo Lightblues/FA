@@ -54,7 +54,7 @@ Step 42:::Process:::Select the most suitable transportation among taxi, self-dri
 Step 43:::Process:::Select suitable restaurants of breakfast, lunch, and dinner in the  last destination city for the last day in this trip. The selection should be constrained by the budget and preferences detailed in the task description, avoiding duplicates and scheduling conflicts.:::next::step 44
 Step 44:::Process:::Select one attraction in the last destination city for the last day in this trip. The selection should be constrained by the budget and preferences detailed in the task description, avoiding duplicates and scheduling conflicts.:::next::step 45
 Step 45:::Terminal:::Output the whole plans for all days.:::"""
-    flow = CoreFlow(flow_lines.split("\n"))
+    flow = CoreFlow.create(flow_lines.split("\n"))
     print(flow.__str__())
     print()
 

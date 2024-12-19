@@ -92,8 +92,6 @@ log_to_db: true
 
 db_uri: 'mongodb://localhost:27017'
 db_name: "agent-pdl"
-# db_message_collection_name: "messages"
-# db_meta_collection_name: "config"
 
 backend_url: "http://localhost:8100"
 

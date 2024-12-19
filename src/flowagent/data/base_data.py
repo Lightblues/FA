@@ -300,10 +300,9 @@ class Conversation(BaseModel):
         return iter(self.msgs)
 
 
-class ConversationWithIntention:
-    def __init__(self, user_intention: str, conversation: Conversation) -> None:
-        self.user_intention = user_intention
-        self.conversation = conversation
+class ConversationWithIntention(BaseModel):
+    user_intention: str
+    conversation: Conversation
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"simulated conversation with {len(self.conversation)} messages.\nUser intention: {self.user_intention}"

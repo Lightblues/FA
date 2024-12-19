@@ -4,7 +4,7 @@ updated @240925
 
 from collections import defaultdict
 
-from flowagent.data import Config, DataManager, Workflow
+from flowagent.data import Config, DataHandler, DataManager
 
 
 cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))
@@ -18,7 +18,7 @@ class Stat:
         cnt = defaultdict(int)
         for i in range(data_manager.num_workflows):
             workflow_id = f"{i:03d}"
-            workflow = Workflow.load_by_id(
+            workflow = DataHandler.load_by_id(
                 data_manager=data_manager,
                 id=workflow_id,
                 type=cfg.workflow_type,
