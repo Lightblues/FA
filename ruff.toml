@@ -26,7 +26,7 @@ ignore = [
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
-[isort]
+[lint.isort]
 lines-after-imports = 2
 known-first-party = ["common", "flowagent", "backend", "frontend"]
 known-third-party = []

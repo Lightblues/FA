@@ -14,7 +14,6 @@ import json
 import re
 from typing import Iterator, List, Tuple, Union
 
-from loguru import logger
 from openai._streaming import Stream
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
 from openai.types.chat.chat_completion_chunk import Choice, ChoiceDelta
@@ -41,8 +40,10 @@ class UISingleBot(ReactBot):
     """
 
     names = ["UISingleBot", "ui_single_bot"]
+
     last_llm_chat_completions: List[ChoiceDelta] = []
-    last_llm_response: str = ""
+    last_llm_prompt: str = ""  # the prompt for logging
+    last_llm_response: str = ""  # the llm response (with tool calls) for logging
     if_fc: bool = False
     ui_user_additional_constraints: str = ""
 
@@ -88,12 +89,12 @@ class UISingleBot(ReactBot):
             tool_list.append(fc)
         return tool_list
 
-    def process_stream(self) -> Tuple[str, Iterator[str]]:
-        prompt = self._gen_prompt()
+    def process_stream(self) -> Iterator[str]:
+        self.last_llm_prompt = self._gen_prompt()
         client = self.llm.client
 
         params = {
-            "messages": [{"role": "user", "content": prompt}],
+            "messages": [{"role": "user", "content": self.last_llm_prompt}],
             "model": self.llm.model,
             "temperature": self.llm.temperature,
             "stream": True,
@@ -105,6 +106,7 @@ class UISingleBot(ReactBot):
         self.last_llm_chat_completions = []
 
         def stream_generator(response: Stream[ChatCompletionChunk]) -> Iterator[str]:
+            """yield str from ChatCompletionChunk, and save to self.last_llm_chat_completions"""
             for chunk in response:
                 # print(f"> chunk: {chunk}") TODO: fix the error of none from 4o-mini
                 delta = chunk.choices[0].delta
@@ -118,9 +120,9 @@ class UISingleBot(ReactBot):
                     elif function.arguments:
                         yield function.arguments
 
-        return prompt, stream_generator(response)
+        return stream_generator(response)
 
-    def process_LLM_response(self, prompt: str) -> BotOutput:
+    def process_LLM_response(self) -> BotOutput:
         if self.if_fc:
             prediction = self._parse_react_output_fc()
         else:
@@ -135,7 +137,7 @@ class UISingleBot(ReactBot):
         self.context.conv.add_message(
             msg_content,
             llm_name=self.bot_llm_name,
-            llm_prompt=prompt,
+            llm_prompt=self.last_llm_prompt,
             llm_response=self.last_llm_response,
             role="bot",
         )
@@ -186,7 +188,6 @@ class UISingleBot(ReactBot):
         self.last_llm_response = f"{response}"
         if action:
             self.last_llm_response += f"<API>{action}</API>{action_input}"
-        logger.info(f"last_llm_response: {self.last_llm_response}")
         if action:
             return BotOutput(
                 action=action,

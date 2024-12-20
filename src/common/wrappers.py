@@ -69,7 +69,7 @@ def log_exceptions():
             except Exception as e:
                 logger.error(f"Exception in {f.__name__}: {str(e)}")
                 logger.error(f"Traceback:\n{traceback.format_exc()}")
-                raise
+                raise e
 
         return wrapped_f
 

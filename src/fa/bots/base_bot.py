@@ -25,6 +25,12 @@ class BaseBot(BaseModel):
         """e.g. init the llm"""
         pass
 
+    """
+    NOTE: two APIs
+    1. .process();
+    2. .process_stream() then .process_LLM_response()
+    """
+
     def process(self, *args, **kwargs) -> BotOutput:
         """
         1. generate ReAct format output by LLM
@@ -33,6 +39,7 @@ class BaseBot(BaseModel):
         raise NotImplementedError
 
     def process_stream(self) -> Tuple[str, Iterator[str]]:
-        prompt = self._gen_prompt()
-        llm_response_stream = self.llm.query_one_stream(prompt)
-        return prompt, llm_response_stream
+        raise NotImplementedError
+
+    def process_LLM_response(self) -> BotOutput:
+        raise NotImplementedError

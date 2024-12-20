@@ -58,12 +58,10 @@ def _pre_control(session_context: SingleSessionContext) -> None:
 
 
 def generate_response(session_context: SingleSessionContext) -> Iterator[str]:
-    logger.info(
-        f">> [{session_context.bot.llm.model}] generate_response with conversation: {json.dumps(str(session_context.conv), ensure_ascii=False)}"
-    )
+    logger.info(f">>> model={session_context.bot.llm.model} conversation={json.dumps(str(session_context.conv), ensure_ascii=False)}")
     _pre_control(session_context)
 
-    prompt, stream = session_context.bot.process_stream()
+    stream = session_context.bot.process_stream()
     for chunk in stream:
         chunk_output = {
             "is_finish": False,
@@ -71,10 +69,11 @@ def generate_response(session_context: SingleSessionContext) -> Iterator[str]:
             "chunk": chunk,
         }
         yield f"data: {json.dumps(chunk_output, ensure_ascii=False)}\n\n"
-    bot_output = session_context.bot.process_LLM_response(prompt)
-    _debug_msg = f"\n{f'({session_context.session_id}) [BOT] ({session_context.workflow.name}) ({session_context.bot.llm.model})'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{bot_output}\n"
+    bot_output = session_context.bot.process_LLM_response()
+    _debug_msg = f"\n{f'({session_context.session_id}) [BOT] ({session_context.workflow.name}) ({session_context.bot.llm.model})'.center(50, '=')}\n<<lllm prompt>>\n{session_context.bot.last_llm_prompt}\n\n<<llm response>>\n{session_context.bot.last_llm_response}\n"
     logger.bind(custom=True).debug(_debug_msg)
     session_context.last_bot_output = bot_output
+    logger.info(f"<{session_context.session_id}> [generate_response] done!")
 
 
 router_single = APIRouter()
@@ -92,38 +91,42 @@ async def single_register(conversation_id: str, request: SingleRegisterRequest) 
     Returns:
         SingleRegisterResponse: with conversation
     """
-    logger.info(f"[single_register] {conversation_id}")
+    logger.info(f"<{conversation_id}> [single_register] creating session context...")
     session_context = create_session_context_single(conversation_id, cfg=request.config)
     session_context.user_identity = request.user_identity
-    return SingleRegisterResponse(
+    response = SingleRegisterResponse(
         conversation_id=conversation_id,
         success=True,
         conversation=session_context.conv,
         pdl_str=session_context.workflow.pdl.to_str(),
     )
+    logger.info(f"<{conversation_id}> [single_register] done!")
+    return response
 
 
 @log_exceptions()
 @router_single.post("/single_disconnect/{conversation_id}")
 def single_disconnect(conversation_id: str) -> None:
     """Disconnect the session"""
-    logger.info(f"[single_disconnect] {conversation_id}")
+    logger.info(f"<{conversation_id}> [single_disconnect] clearing session context...")
     db_upsert_session_single(get_session_context_single(conversation_id))
     clear_session_context_single(conversation_id)
+    logger.info(f"<{conversation_id}> [single_disconnect] done!")
 
 
 @log_exceptions()
 @router_single.post("/single_add_message/{conversation_id}")
 def single_add_message(conversation_id: str, message: Message) -> None:
-    logger.info(f"[single_add_message] {conversation_id} with message: {message}")
+    logger.info(f"<{conversation_id}> [single_add_message] adding message: {message}")
     session_context = get_session_context_single(conversation_id)
     session_context.conv.add_message(message)
+    logger.info(f"<{conversation_id}> [single_add_message] done!")
 
 
 @log_exceptions()
 @router_single.post("/single_bot_predict/{conversation_id}")
 async def single_bot_predict(conversation_id: str) -> StreamingResponse:
-    logger.info(f"[single_bot_predict] {conversation_id}")
+    logger.info(f"<{conversation_id}> [single_bot_predict] predicting...")
     session_context = get_session_context_single(conversation_id)
     return StreamingResponse(generate_response(session_context), media_type="text/event-stream")
 
@@ -131,13 +134,14 @@ async def single_bot_predict(conversation_id: str) -> StreamingResponse:
 @log_exceptions()
 @router_single.get("/single_bot_predict_output/{conversation_id}")
 def single_bot_predict_output(conversation_id: str) -> SingleBotPredictResponse:
-    logger.info(f"[single_bot_predict_output] {conversation_id}")
+    logger.info(f"<{conversation_id}> [single_bot_predict_output] getting bot output...")
     session_context = get_session_context_single(conversation_id)
-    # db_upsert_session(session_context)
-    return SingleBotPredictResponse(
+    response = SingleBotPredictResponse(
         bot_output=session_context.last_bot_output,
         msg=session_context.conv.get_last_message().content,
     )
+    logger.info(f"<{conversation_id}> [single_bot_predict_output] done! response: {response.bot_output}")
+    return response
 
 
 @log_exceptions()
@@ -147,7 +151,7 @@ def single_post_control(conversation_id: str, bot_output: BotOutput) -> SinglePo
     NOTE: if not validated, the error infomation will be added to ss.conv!
     """
     session_context = get_session_context_single(conversation_id)
-    logger.info(f"[single_post_control] {conversation_id} with `{list(session_context.controllers.keys())}`")
+    logger.info(f"<{conversation_id}> [single_post_control] checking post control with controllers: {session_context.controllers.keys()}...")
     success = True
     for controller in session_context.controllers.values():
         if not controller.if_post_control:
@@ -155,20 +159,22 @@ def single_post_control(conversation_id: str, bot_output: BotOutput) -> SinglePo
         if not controller.post_control(bot_output):
             success = False
             break
-    # db_upsert_session(session_context)
-    return SinglePostControlResponse(
+    response = SinglePostControlResponse(
         success=success,
         msg="" if success else session_context.conv.get_last_message().content,  # TODO: format the error message
     )
+    logger.info(f"<{conversation_id}> [single_post_control] done! response: {response}")
+    return response
 
 
 @log_exceptions()
 @router_single.post("/single_tool/{conversation_id}")
 def single_tool(conversation_id: str, bot_output: BotOutput) -> SingleToolResponse:
-    logger.info(f"[single_tool] {conversation_id} with bot_output: {bot_output}")
+    logger.info(f"<{conversation_id}> [single_tool] calling tool with bot_output: {bot_output}")
     session_context = get_session_context_single(conversation_id)
     api_output = session_context.tool.process(bot_output)
     _debug_msg = f"\n{f'({session_context.session_id}) [API]'.center(50, '=')}\n<<calling api>>\n{api_output.request}\n\n<< api response>>\n{api_output.response_data}\n"
     logger.bind(custom=True).debug(_debug_msg)
-    # db_upsert_session(session_context)
-    return SingleToolResponse(api_output=api_output, msg=session_context.conv.get_last_message().content)
+    response = SingleToolResponse(api_output=api_output, msg=session_context.conv.get_last_message().content)
+    logger.info(f"<{conversation_id}> [single_tool] done! response: {response.api_output}")
+    return response
