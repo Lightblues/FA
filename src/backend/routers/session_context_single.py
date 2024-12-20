@@ -65,7 +65,7 @@ class SingleSessionContext(BaseModel):
         _context = Context(cfg=cfg, data_handler=workflow, conv=conv)
         # TODO: check the config `ui_bot_llm_name`
         bot = BOT_NAME2CLASS[cfg.ui_bot_mode](cfg=cfg, context=_context)
-        tool = RequestTool(cfg=cfg, context=_context, api_infos=workflow.toolbox)
+        tool = RequestTool(cfg=cfg, context=_context)
         controllers = {}
         logger.info(f"cfg.bot_pdl_controllers: {cfg.bot_pdl_controllers}")
         for c in cfg.bot_pdl_controllers:

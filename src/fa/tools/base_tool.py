@@ -12,8 +12,8 @@ class BaseTool(BaseModel):
     names: ClassVar[List[str]] = ["base_tool"]
 
     cfg: Config = Field(default=None)  # bot_llm_name, bot_template_fn
-    context: Context = Field(default=None)  # , exclude=True)  # NOTE: avoid circular import
-    api_infos: List[Dict] = Field(default_factory=list)  # TODO: add typing for api_infos
+    context: Context = Field(default=None)  # include workflow.toolbox (api_infos)
+    # api_infos: List[Dict] = Field(default_factory=list)  # TODO: add typing for api_infos
 
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)

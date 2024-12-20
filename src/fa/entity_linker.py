@@ -1,10 +1,10 @@
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from loguru import logger
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from common import LLM_CFG, Config, Formater, OpenAIClient, init_client, jinja_render
-from data import Conversation
+from fa.envs import Context
 
 
 class EntityLinker(BaseModel):
@@ -22,12 +22,20 @@ class EntityLinker(BaseModel):
     """
 
     cfg: Config = None
-    llm: OpenAIClient
+    context: Context = Field(default=None)  # , exclude=True)  # NOTE: avoid circular import
+    llm: OpenAIClient = Field(default=None)
 
-    def __init__(self, cfg: Config, conv: Conversation = None) -> None:
-        self.cfg = cfg
-        self.conv = conv
-        self.llm = init_client(llm_cfg=LLM_CFG[cfg.api_entity_linking_llm])
+    api_entity_linking_llm: str = ""
+    api_entity_linking_template: str = ""
+
+    def model_post_init(self, __context: Any) -> None:
+        super().model_post_init(__context)
+        self._post_init()
+
+    def _post_init(self) -> None:
+        self.api_entity_linking_llm = self.cfg.api_entity_linking_llm
+        self.api_entity_linking_template = self.cfg.api_entity_linking_template
+        self.llm = init_client(llm_cfg=LLM_CFG[self.api_entity_linking_llm])
         # print(f">> [api] init EL model `{cfg.api_entity_linking_llm}`")
 
     def entity_linking(self, query: str, eneity_list: List[str]) -> Dict:
@@ -38,7 +46,7 @@ class EntityLinker(BaseModel):
 
         # if DEBUG: print(f">> runing EL for {query} with {json.dumps(eneity_list, ensure_ascii=False)}")
         res = {"is_matched": True, "matched_entity": None}
-        prompt = jinja_render(self.cfg.api_entity_linking_template, query=query, eneity_list=eneity_list)
+        prompt = jinja_render(self.api_entity_linking_template, query=query, eneity_list=eneity_list)
         llm_response = self.llm.query_one(prompt)
         _debug_msg = f"\n{'[EL]'.center(50, '=')}\n<<prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
         logger.bind(custom=True).debug(_debug_msg)

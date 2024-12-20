@@ -62,7 +62,7 @@ class RequestTool(BaseTool):
 
     def _build_api_infos_map(self):
         self.api_infos_map = {}
-        for api in self.api_infos:
+        for api in self.context.data_handler.toolbox:
             self.api_infos_map[api["name"]] = api
             self.api_infos_map[api["description"]] = api
 

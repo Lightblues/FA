@@ -1,15 +1,31 @@
 
 defaults: !include default.yaml
 
+x-available-models: &available_models
+  # - "1.0.2"
+  # - "default"
+  # - "debug"
+  - "gpt-4o-mini"
+  - "gpt-4o"
+  - "gpt-4-turbo"
+  - claude-3-5-sonnet-20241022
+  - Vendor-A/Qwen/Qwen2.5-72B-Instruct
+  - Qwen/Qwen2.5-7B-Instruct
+  - Qwen2.5-72B-INT8
 
 ui_bot_mode: ui_single_bot
 ui_bot_if_fc: true                    # test FC mode!
+ui_available_models: *available_models
+ui_available_templates:
+  # - bot_pdl_ui.jinja
+  # - bot_pdl_ui_zh.jinja
+  - bot_pdl_ui_zh_fc.jinja
 ui_default_model: "gpt-4o"
 ui_default_template: "bot_pdl_ui_zh_fc.jinja"
 ui_bot_template_fn: "flowagent/bot_pdl_ui_zh_fc.jinja"
 ui_greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
 
-api_entity_linking: false               # turn off entity linking!
+api_entity_linking: true               # entity linking!
 
 bot_pdl_controllers: []
   # - {name: "api_duplication", config: {if_pre: true, if_post: true, threshold: 2}, is_activated: true}

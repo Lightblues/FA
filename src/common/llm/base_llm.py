@@ -22,7 +22,8 @@ def add_openai_models():
             "gpt-3.5-turbo",
             "gpt-4",
             "claude-3-haiku-20240307",
-            "claude-3-5-sonnet-20240620",
+            # "claude-3-5-sonnet-20240620",
+            "claude-3-5-sonnet-20241022",
             "claude-3-opus-20240229",
         ]
         for model in model_list:
