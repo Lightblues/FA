@@ -70,7 +70,7 @@ class SingleSessionContext(BaseModel):
         logger.info(f"cfg.bot_pdl_controllers: {cfg.bot_pdl_controllers}")
         for c in cfg.bot_pdl_controllers:
             if c["is_activated"]:
-                controllers[c["name"]] = CONTROLLER_NAME2CLASS[c["name"]](conv, workflow.pdl, c["config"])
+                controllers[c["name"]] = CONTROLLER_NAME2CLASS[c["name"]](context=_context, config=c["config"])
         return cls(
             session_id=session_id,
             cfg=cfg,

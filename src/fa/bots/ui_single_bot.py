@@ -3,6 +3,11 @@
 - [x] #feat implement UISingleBot
     modify from `ui_con/bot_single.py`.
     - replace streamlit with class properties
+@241220
+- [x] rewrite roles with `pydantic`
+    - [x] fix: roles
+    - [x] fix: controllers (testing)
+- [x] #feat add `Context`
 """
 
 import json
@@ -55,7 +60,7 @@ class UISingleBot(ReactBot):
         }
         data_handler = self.context.data_handler
         # s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
-        state_infos |= data_handler.pdl.status_for_prompt  # add the status infos from PDL!
+        state_infos |= self.context.status_for_prompt  # add the status infos from PDL!
         prompt = jinja_render(
             self.bot_template_fn,
             workflow_name=data_handler.pdl.Name,  #

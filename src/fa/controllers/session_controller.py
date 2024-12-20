@@ -9,8 +9,8 @@ class SessionLengthController(BaseController):
     """ """
 
     names = ["session_length"]
-    if_response_control = False  # default value, can be overwritten in config
-    if_pre_control = True
+    if_response_control: bool = False  # default value, can be overwritten in config
+    if_pre_control: bool = True
 
     def _pre_control(self, prev_bot_output: BotOutput):
         num_user_queries = self.get_num_user_queries()
@@ -33,4 +33,4 @@ class SessionLengthController(BaseController):
         return True, ""
 
     def get_num_user_queries(self) -> int:
-        return self.conv.get_messages_num(Role.USER)
+        return self.context.conv.get_messages_num(Role.USER)

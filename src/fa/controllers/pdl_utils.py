@@ -3,34 +3,24 @@ updated @240918
 
 """
 
-from typing import Dict, List
+from typing import Dict, List, Optional
+
+from pydantic import BaseModel, Field
+
+from data import PDL
 
 
-class PDLNode:
+class PDLNode(BaseModel):
     name: str
-    precondition: List[str] = []
+    precondition: List[str] = Field(default_factory=list)
     is_activated: bool = False
-    # is_end: bool = False
-
-    def __init__(self, name: str, preconditions: str = None) -> None:
-        self.name = name
-        if preconditions is not None:
-            assert isinstance(preconditions, list)
-            self.precondition = preconditions
 
     def __repr__(self) -> str:
         return f"PDLNode({self.name}, with precondition {self.precondition})"
 
-    # def __str__(self) -> str:
-    #     return f"PDLNode({self.name})"
 
-
-class PDLGraph:
-    # nodes: List[PDLNode] = []
-    name2node: Dict[str, PDLNode] = {}
-
-    def __init__(self) -> None:
-        self.name2node = {}  # NOTE: have to add __init__ to clear the dict
+class PDLGraph(BaseModel):
+    name2node: Dict[str, PDLNode] = Field(default_factory=dict)
 
     def add_node(self, node: PDLNode):
         assert node.name not in self.name2node, f"node {node.name} already exists!"
@@ -45,14 +35,27 @@ class PDLGraph:
                 assert name in names, f"precondition `{name}` not found in nodes: {names}!!"
         return True
 
-    def get_invalid_node_names(self) -> List[str]:
+    def get_invalid_node_names(self) -> set[str]:
+        """Get the names list of invalid nodes"""
         invalid_nodes = []
         for node in self.name2node.values():
             for precondition in node.precondition:
                 if not self.name2node[precondition].is_activated:
                     invalid_nodes.append(node)
                     break
-        return [node.name for node in invalid_nodes]
+        return {node.name for node in invalid_nodes}
 
     def __repr__(self) -> str:
         return f"PDLGraph({self.name2node})"
+
+    @classmethod
+    def from_pdl(cls, pdl: PDL):
+        """Build PDL Graph from PDL"""
+        if (pdl.APIs is None) or (not pdl.APIs):  # if pdl.apis is None
+            pdl.APIs = []
+        g = PDLGraph()
+        for api in pdl.APIs:
+            node = PDLNode(name=api.name, precondition=api.precondition)
+            g.add_node(node)
+        g.check_preconditions()
+        return g

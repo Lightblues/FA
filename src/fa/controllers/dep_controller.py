@@ -1,5 +1,7 @@
 from typing import Dict, List, Tuple
 
+from pydantic import Field
+
 from data import PDL, BotOutput
 
 from .base_controller import BaseController
@@ -31,28 +33,20 @@ class NodeDependencyController(BaseController):
     names = ["node_dependency"]
 
     graph: PDLGraph = None
-    curr_node = None  # ... to be used?
+    # curr_node = None  # ... to be used?
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.graph = self._build_graph(self.pdl)
+    if_add_invalid_msg: bool = True
+    if_add_valid_msg: bool = False
 
-    def refresh_pdl(self, pdl: PDL):
-        super().refresh_pdl(pdl)
-        self.graph = self._build_graph(pdl)
+    def _post_init(self) -> None:
+        self.graph = PDLGraph.from_pdl(self.context.data_handler.pdl)
 
-    def _build_graph(self, pdl: PDL):
-        if (pdl.APIs is None) or (not pdl.APIs):  # if pdl.apis is None
-            pdl.APIs = []
-        apis = pdl.APIs
-        g = PDLGraph()
-        for api in apis:
-            node = PDLNode(name=api.name, preconditions=api.precondition)
-            g.add_node(node)
-        g.check_preconditions()
-        return g
+    # def refresh_pdl(self, pdl: PDL):
+    #     super().refresh_pdl(pdl)
+    #     self.graph = self._build_graph(pdl)
 
     def _post_check_with_message(self, bot_output: BotOutput) -> Tuple[bool, str]:
+        """Check if the next action is valid (all the preconditions are satisfied)"""
         next_node = bot_output.action
         # 1. match the node
         if next_node not in self.graph.name2node:
@@ -70,37 +64,13 @@ class NodeDependencyController(BaseController):
         return True, msg
 
     def _pre_control(self, prev_bot_output: BotOutput):
-        # 我这里先重置一下, 直接在这个controller里面修改
-        self.pdl.reset_invalid_api()
-        self.pdl.reset_api_status()
-        # check the dependencies of next turn, and reset the invalid API list
-        next_turn_invalid_apis = self.graph.get_invalid_node_names()
-        if len(next_turn_invalid_apis) > 0:
-            self.pdl.add_invalid_apis(
-                self._add_invalid_reason(
-                    next_turn_invalid_apis,
-                    "API dependency not satisfied: The precondintion API has not been called.",
-                )
+        """Update the status for prompt"""
+        all_api_names = {api.name for api in self.context.data_handler.pdl.APIs}
+        invalid_apis = self.graph.get_invalid_node_names()
+        valid_apis = all_api_names - invalid_apis
+        if self.if_add_invalid_msg and (len(invalid_apis) > 0):
+            self.context.status_for_prompt["Current invalid apis"] = (
+                f"`{invalid_apis}` are invalid because the precondintion APIs have not been called!"
             )
-            self.pdl.add_current_api_status(
-                self._get_invalid_status_str(
-                    next_turn_invalid_apis,
-                    "API dependency not satisfied: The precondintion API has not been called.",
-                )
-            )
-
-        # set the pdl.status_for_prompt dict -> for PDLBot's prompt
-        # 1. Current valid apis
-        valid_apis = self.pdl.get_valid_apis()
-        valid_api_names = [api["name"] for api in valid_apis]
-        valid_apis_str = "There are no valid apis now!" if not valid_apis else f"You can call `{valid_api_names}`"
-        self.pdl.status_for_prompt["Current valid apis"] = valid_apis_str
-        # 2. Current state
-        self.pdl.status_for_prompt["Current state"] = self.pdl.current_api_status
-
-    def _add_invalid_reason(self, api_names: List[str], msg: str) -> List[Dict]:
-        apis_w_reason = [{"api_name": api_name, "invalid_reason": [msg]} for api_name in api_names]
-        return apis_w_reason
-
-    def _get_invalid_status_str(self, api_names: List[str], msg: str):
-        return f"APIs `{api_names}` is unavailable. Reason: {msg}"
+        if self.if_add_valid_msg and (len(valid_apis) > 0):
+            self.context.status_for_prompt["Current valid apis"] = f"You can call `{valid_apis}`"

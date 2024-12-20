@@ -1,0 +1,36 @@
+target-version = "py310"
+line-length = 150
+indent-width = 4
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+select = ["E", "F"]
+ignore = [
+    # "C403",  # Unnecessary list comprehension (rewrite as set comprehension)
+    # "C408",  # Unnecessary `dict` call (rewrite as literal)
+    # "C901",  # Function is too complex
+    # "W605",  # Invalid escape sequence
+    "E402",  # Module level import not at top of file
+    "E501",  # Line too long
+    "E731",  # Do not assign a lambda expression, use a def
+    "E741",  # Ambiguous variable name
+    "E701",  # Multiple statements on one line (colon)
+    "E401",  # Multiple imports on one line
+    "F541",  # f-string without any placeholders
+    "F841",  # Local variable is assigned to but never used
+    "F401",  # Module imported but unused
+    "F403",  # 'from module import *' used
+    "F405",  # Name may be undefined from star imports
+]
+
+[isort]
+lines-after-imports = 2
+known-first-party = ["common", "flowagent", "backend", "frontend"]
+known-third-party = []
+
+[format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+skip-magic-trailing-comma = false
+line-ending = "auto"

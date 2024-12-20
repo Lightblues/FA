@@ -5,7 +5,6 @@ from pydantic import BaseModel, Field
 
 from common import json_line
 
-from .pdl_mixin import PDLMixin
 from .pdl_nodes import AnswerNode, BaseNode, ParameterNode, ToolDependencyNode
 from .tool import ToolNode
 
@@ -28,7 +27,7 @@ class MyDumper(yaml.SafeDumper):
         return super(MyDumper, self).represent_scalar(tag, value, style)
 
 
-class PDL(PDLMixin, BaseModel):
+class PDL(BaseModel):
     Name: str
     Desc: str
     # Desc_detail: str
