@@ -1,5 +1,5 @@
 from common import Config
-from flowagent.data import BotOutput, Conversation, DataHandler
+from data import BotOutput, Conversation, DataHandler
 from flowagent.pdl_controllers import NodeDependencyController
 
 

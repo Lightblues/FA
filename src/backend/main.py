@@ -23,7 +23,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from common import Config, init_loguru_logger
-from flowagent.data import DataManager
+from data import DataManager
 
 from .common.shared import SharedResources
 

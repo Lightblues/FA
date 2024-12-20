@@ -14,7 +14,7 @@ import streamlit as st
 
 ss = st.session_state
 from common import Config, init_loguru_logger
-from flowagent.data import DataManager
+from data import DataManager
 
 from .common.util_st import init_resource
 

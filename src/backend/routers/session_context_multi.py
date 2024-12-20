@@ -15,9 +15,8 @@ from loguru import logger
 from pydantic import BaseModel
 
 from common import Config
-from flowagent.data import BotOutput, Conversation, DataHandler
-from flowagent.pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
-from flowagent.roles import RequestTool, UIMultiMainBot, UIMultiWorkflowBot
+from data import BotOutput, Conversation, DataHandler
+from fa import CONTROLLER_NAME2CLASS, BaseController, RequestTool, UIMultiMainBot, UIMultiWorkflowBot
 
 from ..common.shared import get_db
 
@@ -68,7 +67,7 @@ class MultiSessionContext(BaseModel):
         conv = Conversation.create(session_id)
         conv.add_message(msg=cfg.mui_greeting_msg, role="bot_main")
         agent_main = UIMultiMainBot(cfg=cfg, conv=conv, workflow_infos=cfg.mui_workflow_infos)
-        tool = RequestTool(cfg=cfg, conv=conv, workflow=workflow)
+        tool = RequestTool(cfg=cfg, conv=conv, data_handler=workflow)
         controllers = {}
         for c in cfg.bot_pdl_controllers:
             if c["is_activated"]:
@@ -104,7 +103,7 @@ class MultiSessionContext(BaseModel):
             ), "workflow_name already exists"
             workflow = DataHandler.create(self.cfg, id_or_name=workflow_name)
             self._workflow_agent_map[workflow_name] = UIMultiWorkflowBot(cfg=self.cfg, conv=self.conv, workflow=workflow)
-            self._workflow_tool_map[workflow_name] = RequestTool(cfg=self.cfg, conv=self.conv, workflow=workflow)
+            self._workflow_tool_map[workflow_name] = RequestTool(cfg=self.cfg, conv=self.conv, data_handler=workflow)
             self._workflow_controllers_map[workflow_name] = {}
             for c in self.cfg.bot_pdl_controllers:
                 if c["is_activated"]:

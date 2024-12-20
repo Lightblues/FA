@@ -4,7 +4,7 @@ updated @240924
 
 from collections import defaultdict
 
-from flowagent.data import Config, DataManager, DBManager
+from data import Config, DataManager, DBManager
 
 
 class Stat:

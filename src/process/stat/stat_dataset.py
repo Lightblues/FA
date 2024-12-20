@@ -4,7 +4,7 @@ updated @240925
 
 from collections import defaultdict
 
-from flowagent.data import Config, DataHandler, DataManager
+from data import Config, DataHandler, DataManager
 
 
 cfg = Config.from_yaml(DataManager.normalize_config_name("default.yaml"))

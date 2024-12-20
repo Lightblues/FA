@@ -24,7 +24,7 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from loguru import logger
 
-from flowagent.data import Message
+from data import Message
 
 from ..typings import (
     BotOutput,
@@ -71,7 +71,7 @@ def generate_response(session_context: SingleSessionContext) -> Iterator[str]:
         }
         yield f"data: {json.dumps(chunk_output, ensure_ascii=False)}\n\n"
     bot_output = session_context.bot.process_LLM_response(prompt)
-    _debug_msg = f"\n{f'({session_context.session_id}) [BOT] ({session_context.bot.workflow.name}) ({session_context.bot.llm.model})'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{bot_output}\n"
+    _debug_msg = f"\n{f'({session_context.session_id}) [BOT] ({session_context.workflow.name}) ({session_context.bot.llm.model})'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{bot_output}\n"
     logger.bind(custom=True).debug(_debug_msg)
     session_context.last_bot_output = bot_output
 

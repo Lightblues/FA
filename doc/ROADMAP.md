@@ -4,12 +4,12 @@
 ## Roadmap
 
 1. Code structure & Docs
-    1. Frontend-Backend separation (v0.1.0) #structure
+    1. Frontend-Backend separation #structure (v0.1.0)
     2. PDL standard #P0 #doc
         - [ ] Add PDL standard #P0 #doc
 2. Data & DB & Log
     1. Data convert: Huabu Json -> PDL #auto #P0
-        - [ ] Align existed Huabu nodes
+        - [x] Align existed Huabu nodes
         - [ ] LLM auto generate node dependencies #auto
     2. Data collection (for LLM training)
         - [x] Data storage: with `mongodb` (v0.1.0)
@@ -27,14 +27,17 @@
     4. Multi-agent (ref: MetaGPT/Coze)
         - [x] Basic: The "main agent" like @sarm (v0.1.0)
     5. Entity linking (v0.1.0)
-    6. memory | summary
+    6. FC: try the difference of ReAct & Function calling
+        - [ ] implement for single-agent
+    7. memory | summary
 4. Evaluation & Optimization
-    - [ ] Optimization: find the better PDL format #P0 (link 1.2)
-        API_check_hospital_exist -> `API.check_hospital_exist`?
-    - [ ] Testing:
+    1. Optimization: find the better PDL format #P0 (link 1.2)
+        - [ ] API_check_hospital_exist -> `API.check_hospital_exist`?
+    2. Testing:
         - [ ] Procedure compliance in larger graph?
 5. Bugs
-    - [ ] 点击 "重置对话", DAG controller 状态没有更新.
+    - [ ] For "重置对话", the DAG controller state is not reset after clicked.
+    - [ ] API dependency is missed in prompt. #P0
 
 
 ## Change log

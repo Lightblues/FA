@@ -1,6 +1,5 @@
-from pydantic import BaseModel
-
 from pdl.typings import ParameterNode
+from pydantic import BaseModel
 
 
 class Parameter(BaseModel):

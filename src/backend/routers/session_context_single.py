@@ -13,9 +13,9 @@ from loguru import logger
 from pydantic import BaseModel
 
 from common import Config
-from flowagent.data import BotOutput, Conversation, DataHandler, Role
-from flowagent.pdl_controllers import CONTROLLER_NAME2CLASS, BaseController
-from flowagent.roles import BOT_NAME2CLASS, RequestTool, UISingleBot
+from data import BotOutput, Conversation, DataHandler, Role
+from fa import BOT_NAME2CLASS, CONTROLLER_NAME2CLASS, BaseController, RequestTool, UISingleBot
+from fa.envs import Context
 
 from ..common.shared import get_db
 
@@ -62,9 +62,12 @@ class SingleSessionContext(BaseModel):
         workflow = DataHandler.create(cfg)
         conv = Conversation.create(session_id)
         conv.add_message(msg=cfg.ui_greeting_msg.format(name=workflow.pdl.Name), role=Role.BOT)
-        bot = BOT_NAME2CLASS[cfg.ui_bot_mode](cfg=cfg, conv=conv, workflow=workflow)
-        tool = RequestTool(cfg=cfg, conv=conv, workflow=workflow)
+        _context = Context(cfg=cfg, data_handler=workflow, conv=conv)
+        # TODO: check the config `ui_bot_llm_name`
+        bot = BOT_NAME2CLASS[cfg.ui_bot_mode](cfg=cfg, context=_context)
+        tool = RequestTool(cfg=cfg, context=_context, api_infos=workflow.toolbox)
         controllers = {}
+        logger.info(f"cfg.bot_pdl_controllers: {cfg.bot_pdl_controllers}")
         for c in cfg.bot_pdl_controllers:
             if c["is_activated"]:
                 controllers[c["name"]] = CONTROLLER_NAME2CLASS[c["name"]](conv, workflow.pdl, c["config"])

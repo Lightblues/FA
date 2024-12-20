@@ -16,7 +16,7 @@ import pymongo
 import pymongo.results
 
 from common import Config
-from flowagent.data import Conversation, Message
+from data import Conversation, Message
 
 
 class DBUtils:

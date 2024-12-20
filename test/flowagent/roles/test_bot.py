@@ -1,5 +1,5 @@
 from common import Config
-from flowagent.data import Conversation, DataHandler, Message, Role
+from data import Conversation, DataHandler, Message, Role
 from flowagent.roles import CoREBot, PDLBot, ReactBot
 
 

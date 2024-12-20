@@ -1,4 +1,5 @@
-from ...data import APIOutput, BotOutput, Role
+from data import APIOutput, BotOutput, Role
+
 from .llm_simulated_tool import LLMSimulatedTool
 
 

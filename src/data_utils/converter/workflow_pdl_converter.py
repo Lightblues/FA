@@ -22,7 +22,7 @@ import json
 from typing import Dict, List
 
 from common import LLM_CFG, Formater, init_client
-from pdl.typings import PDL
+from data.pdl import PDL
 
 from ..workflow import DataManager, Parameter, Workflow
 from ..workflow.base import NodeType

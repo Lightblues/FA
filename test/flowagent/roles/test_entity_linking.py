@@ -1,5 +1,5 @@
 from common import Config
-from flowagent.roles.tools.entity_linker import EntityLinker
+from fa.entity_linker import EntityLinker
 
 
 cfg = Config.from_yaml("default.yaml")

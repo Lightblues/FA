@@ -1,4 +1,4 @@
-from flowagent.data import Conversation, Message, Role
+from data import Conversation, Message, Role
 
 
 def test_message():

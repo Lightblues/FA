@@ -6,29 +6,9 @@ from .bots import (
     CoREBot,
     DummyBot,
     PDLBot,
-    ReactBot,
-    UIMultiMainBot,
-    UIMultiWorkflowBot,
-    UISingleBot,
 )
-from .tools import CoREAPIHandler, DummyTool, LLMSimulatedTool, RequestTool
-from .user import DummyUser, InputUser
-
-
-def build_attr_list_map(base_class: BaseRole, name_to_class_dict: Dict[str, BaseRole], attr: str = "names"):
-    for cls in base_class.__subclasses__():
-        for name in cls.__dict__[attr]:
-            name_to_class_dict[name] = cls
-        # recursive!
-        build_attr_list_map(cls, name_to_class_dict)
-
-
-USER_NAME2CLASS: Dict[str, BaseUser] = {}
-build_attr_list_map(BaseUser, USER_NAME2CLASS)
-BOT_NAME2CLASS: Dict[str, BaseBot] = {}
-build_attr_list_map(BaseBot, BOT_NAME2CLASS)
-API_NAME2CLASS: Dict[str, BaseTool] = {}
-build_attr_list_map(BaseTool, API_NAME2CLASS)
+from .tools import CoREAPIHandler, DummyTool, LLMSimulatedTool
+from .user import DummyUser
 
 
 def build_attr_map(base_class: BaseRole, name_to_class_dict: Dict[str, BaseRole], attr: str = "names"):
@@ -51,6 +31,6 @@ def create_enum(name, values):
     return Enum(name, {key: key for key in values})
 
 
-UserMode = create_enum("UserMode", USER_NAME2CLASS.keys())
-BotMode = create_enum("BotMode", BOT_NAME2CLASS.keys())
-ApiMode = create_enum("ApiMode", API_NAME2CLASS.keys())
+# UserMode = create_enum("UserMode", USER_NAME2CLASS.keys())
+# BotMode = create_enum("BotMode", BOT_NAME2CLASS.keys())
+# ApiMode = create_enum("ApiMode", API_NAME2CLASS.keys())

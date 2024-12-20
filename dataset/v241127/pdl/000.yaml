@@ -49,7 +49,7 @@ ANSWERs:
   - name: 其他自由回复问题
   - name: 请用户提供必要信息
 
-PDL: |
+Procedure: |
   hos_name = ANSWER_请用户提供必要信息()
   [type] = API_check_hospital_exist([hos_name])
   if type == "0"

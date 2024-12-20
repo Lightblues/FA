@@ -30,7 +30,7 @@ import datetime
 
 from backend import FrontendClient
 from common import Config, LogUtils
-from flowagent.data import DataManager
+from data import DataManager
 
 
 conversation_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")

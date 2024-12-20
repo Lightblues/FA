@@ -93,7 +93,7 @@ class FlowagentConversationManager(BaseConversationManager):
                             api_output: APIOutput = self.api.process(bot_output)
                         self.log_msg(self.conv.get_last_message(), verbose=verbose)
                     else:
-                        raise TypeError(f"Unexpected BotOutputType: {bot_output}")
+                        raise TypeError(f"Unexpected bot output: {bot_output}")
 
                     num_bot_actions += 1
                     if num_bot_actions > self.cfg.bot_action_limit:

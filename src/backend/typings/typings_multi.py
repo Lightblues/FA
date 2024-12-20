@@ -3,7 +3,7 @@ from typing import Dict, Optional
 from pydantic import BaseModel
 
 from common import Config
-from flowagent.data import (
+from data import (
     APIOutput,
     Conversation,
     MainBotOutput,

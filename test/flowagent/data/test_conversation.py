@@ -1,6 +1,6 @@
 import json
 
-from flowagent.data import BotOutput, Message
+from data import BotOutput, Message
 
 
 def test_custom_role():

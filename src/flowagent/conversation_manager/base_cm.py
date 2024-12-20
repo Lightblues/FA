@@ -7,11 +7,10 @@ import pandas as pd
 from loguru import logger
 
 from common import Config, LogUtils
+from data import DataHandler, DataManager
 
 from ..data import (
     Conversation,
-    DataHandler,
-    DataManager,
     DBManager,
     Message,
     Role,

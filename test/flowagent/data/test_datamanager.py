@@ -1,5 +1,5 @@
 from common import Config
-from flowagent.data import DataManager
+from data import DataManager
 
 
 cfg = Config.from_yaml("default.yaml")

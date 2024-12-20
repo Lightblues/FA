@@ -4,7 +4,7 @@ from typing import Iterator
 import requests
 
 from common import Config
-from flowagent.data import Conversation
+from data import Conversation
 
 
 class BaseClient:

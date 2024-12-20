@@ -6,7 +6,8 @@
 
 from typing import List
 
-from ...data import BotOutput, Message, Role
+from data import BotOutput, Message, Role
+
 from ..base import BaseBot
 
 

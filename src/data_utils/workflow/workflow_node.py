@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-from pdl.typings import AnswerNode, BaseNode, ToolNode, ToolParam
+from data.pdl import AnswerNode, BaseNode, ToolNode, ToolParam
 
 from .base import Input, NodeType, TypeEnum
 from .workflow_node_data import APIInfo, NodeDataBase, NodeType_Data_Map, NodeType_Key_Map
@@ -81,7 +81,7 @@ class WorkflowNode(BaseModel):
         return BaseNode(
             name=self.NodeName,
             desc=self.NodeDesc,
-            type=self.NodeType,
+            _type=self.NodeType,
             node_data=self.NodeData,
         )
 

@@ -48,7 +48,7 @@ ANSWERs:
   - name: 其他自由回复问题
   - name: 请用户提供必要信息
 
-PDL: |
+Procedure: |
   order_id = ANSWER_请用户提供必要信息()
   [invoicing_method] = API_get_invoicing_method([order_id])
   if invoicing_method == "酒店开具":

@@ -14,7 +14,7 @@ import streamlit as st
 ss = st.session_state
 
 from common import LLM_CFG, Config
-from flowagent.data import DataManager
+from data import DataManager
 
 
 def debug_print_infos_single() -> None:

@@ -1,6 +1,4 @@
 """
-- [ ] add to af_core
-
 openai function_calling: https://platform.openai.com/docs/assistants/tools/function-calling
 https://platform.openai.com/docs/guides/function-calling
 """

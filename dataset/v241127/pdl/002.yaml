@@ -38,7 +38,7 @@ ANSWERs:
   - name: 其他自由回复问题
   - name: 请用户提供必要信息
 
-PDL: |
+Procedure: |
   def 转换为ISO3166_1二位代码(country) -> str:
       # 将 country 转为 countryName, 格式为 ISO 3166-1二位字母代码, 例如将"中国"转换为"CN", "美国"转换为"US"; "德国"转换为"DE".
   def 归类物品(goods_name) -> bool:

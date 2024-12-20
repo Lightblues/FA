@@ -3,7 +3,7 @@ from typing import Iterator, Union
 
 import streamlit as st
 
-from flowagent.data import APIOutput, Message
+from data import APIOutput, Message
 
 
 def fake_stream(response: str) -> Iterator[str]:

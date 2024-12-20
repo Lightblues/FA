@@ -19,7 +19,7 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from loguru import logger
 
-from flowagent.data import Message
+from data import Message
 
 from ..typings import (
     BotOutput,

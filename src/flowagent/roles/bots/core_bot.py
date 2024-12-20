@@ -8,8 +8,8 @@ CoRE: https://github.com/agiresearch/core
 from typing import Tuple
 
 from common import OpenAIClient, jinja_render
+from data import BotOutput
 
-from ...data import BotOutput, BotOutputType
 from ...data.core import CoreBlock
 from .react_bot import ReactBot
 
@@ -80,7 +80,7 @@ class CoREBot(ReactBot):
         llm_response = self.llm.query_one(prompt)
         prediction = self.parse_react_output(llm_response)
         #
-        if (prediction.action_type == BotOutputType.ACTION) and (prediction.action == "binary_choice"):
+        if (prediction.action) and (prediction.action == "binary_choice"):
             self.num_jumps += 1
         else:
             self.num_jumps = 0

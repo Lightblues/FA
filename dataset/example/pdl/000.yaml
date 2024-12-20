@@ -23,7 +23,7 @@ ANSWERs:
 - name: 其他自由回复问题
 - name: 请用户提供必要信息
 
-PDL: |
+Procedure: |
   while True:
       [news_location] = ANSWER.请用户提供必要信息()
       if API.check_location([news_location]) == True:

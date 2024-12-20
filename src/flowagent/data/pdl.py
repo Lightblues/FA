@@ -1,7 +1,8 @@
 from dataclasses import asdict, dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import yaml
+from pydantic import BaseModel, Field
 
 
 class MyDumper(yaml.SafeDumper):
@@ -15,51 +16,38 @@ class MyDumper(yaml.SafeDumper):
         return super(MyDumper, self).represent_scalar(tag, value, style)
 
 
-@dataclass
-class PDL:
-    PDL_str: str = None
+class PDL(BaseModel):
+    # PDL_str: Optional[str] = None
 
     Name: str = ""
     Desc: str = ""
-    Desc_detail: str = ""
-    APIs: list = field(default_factory=list)
-    SLOTs: list = field(default_factory=list)
-    ANSWERs: list = field(default_factory=list)
-    Procedure: str = ""  # the core logic of the taskflow
+    # Desc_detail: str = Field(default="")          # TODO: use LLM to generate?
+    APIs: List[Dict] = Field(default_factory=list)
+    SLOTs: List = Field(default_factory=list)
+    ANSWERs: List = Field(default_factory=list)
+    Procedure: str = Field(default="")
 
-    invalid_apis: Dict[str, Dict] = field(default_factory=dict)  # {name: {api_name, [invalid_reason]}}
-    current_api_status: List[str] = field(default_factory=list)  # strings that descripts api status
-
-    status_for_prompt: Dict[str, str] = field(default_factory=dict)
-
-    def __init__(self, PDL_str):
-        self.PDL_str = PDL_str
+    invalid_apis: Dict[str, Dict] = Field(default_factory=dict)  # {name: {api_name, [invalid_reason]}}
+    current_api_status: List[str] = Field(default_factory=list)  # strings that descripts api status
+    status_for_prompt: Dict[str, str] = Field(default_factory=dict)
 
     @classmethod
-    def load_from_str(cls, PDL_str):
-        instance = cls(PDL_str)
-        instance.parse_PDL_str()
-        return instance
+    def load_from_str(cls, PDL_str: str):
+        ob = yaml.load(PDL_str, Loader=yaml.FullLoader)
+        return cls(
+            Name=ob["Name"],
+            Desc=ob["Desc"],
+            APIs=ob["APIs"],
+            SLOTs=ob["SLOTs"],
+            ANSWERs=ob["ANSWERs"],
+            Procedure=ob["Procedure"],
+        )
 
     @classmethod
     def load_from_file(cls, file_path):
         with open(file_path, "r") as f:
             PDL_str = f.read().strip()
         return cls.load_from_str(PDL_str)
-
-    def parse_PDL_str(self):
-        ob = yaml.load(self.PDL_str, Loader=yaml.FullLoader)
-        self.Name = ob["Name"]
-        self.Desc = ob["Desc"]
-        self.Desc_detail = ob.get("Detailed_desc", "")
-        self.APIs = ob.get("APIs", [])
-        self.SLOTs = ob["SLOTs"]
-        self.ANSWERs = ob["ANSWERs"]
-        self.Procedure = ob["PDL"]
-
-        self.invalid_apis = {}
-        self.current_api_status = []
-        self.status_for_prompt = {}
 
     def to_str(self):
         return self.PDL_str.strip()

@@ -41,7 +41,7 @@ import json
 
 from backend import FrontendClient
 from common import retry_wrapper
-from flowagent.data import APIOutput, BotOutput, Conversation, Role
+from data import APIOutput, BotOutput, Conversation, Role
 
 from ..common import StreamlitUtils, fake_stream
 from ..ui.data_single import refresh_session_single
@@ -131,7 +131,7 @@ def case_workflow():
                 # ss.logger.info(f"<case_workflow> bot response: {bot_output.response}")
                 break
             else:
-                raise TypeError(f"Unexpected BotOutputType: {bot_output.action_type}")
+                raise TypeError(f"Unexpected bot output: {bot_output}")
         else:
             st.logger.warning(f"<case_workflow> bot actions exceed the limit: {ss.cfg.bot_action_limit}")
             pass  # TODO:

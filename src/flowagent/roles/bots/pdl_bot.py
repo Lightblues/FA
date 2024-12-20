@@ -1,8 +1,8 @@
 from typing import Tuple
 
 from common import OpenAIClient, PromptUtils, jinja_render
+from data import BotOutput
 
-from ...data import BotOutput
 from .react_bot import ReactBot
 
 
