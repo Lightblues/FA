@@ -63,8 +63,8 @@ class UISingleBot(ReactBot):
         state_infos |= self.context.status_for_prompt  # add the status infos from PDL!
         prompt = jinja_render(
             self.bot_template_fn,
-            workflow_name=data_handler.pdl.Name,  #
-            PDL=data_handler.pdl.to_str(),  # .to_str()
+            workflow_name=data_handler.pdl.Name,
+            PDL=data_handler.pdl.to_str(),
             api_infos=data_handler.toolbox,
             conversation=self.context.conv.to_str(),
             user_additional_constraints=self.ui_user_additional_constraints,

@@ -25,6 +25,7 @@ from fastapi.responses import StreamingResponse
 from loguru import logger
 
 from data import Message
+from common import log_exceptions
 
 from ..typings import (
     BotOutput,
@@ -79,6 +80,7 @@ def generate_response(session_context: SingleSessionContext) -> Iterator[str]:
 router_single = APIRouter()
 
 
+@log_exceptions()
 @router_single.post("/single_register/{conversation_id}")
 async def single_register(conversation_id: str, request: SingleRegisterRequest) -> SingleRegisterResponse:
     """init a new session with session_id & config
@@ -101,6 +103,7 @@ async def single_register(conversation_id: str, request: SingleRegisterRequest) 
     )
 
 
+@log_exceptions()
 @router_single.post("/single_disconnect/{conversation_id}")
 def single_disconnect(conversation_id: str) -> None:
     """Disconnect the session"""
@@ -109,6 +112,7 @@ def single_disconnect(conversation_id: str) -> None:
     clear_session_context_single(conversation_id)
 
 
+@log_exceptions()
 @router_single.post("/single_add_message/{conversation_id}")
 def single_add_message(conversation_id: str, message: Message) -> None:
     logger.info(f"[single_add_message] {conversation_id} with message: {message}")
@@ -116,6 +120,7 @@ def single_add_message(conversation_id: str, message: Message) -> None:
     session_context.conv.add_message(message)
 
 
+@log_exceptions()
 @router_single.post("/single_bot_predict/{conversation_id}")
 async def single_bot_predict(conversation_id: str) -> StreamingResponse:
     logger.info(f"[single_bot_predict] {conversation_id}")
@@ -123,6 +128,7 @@ async def single_bot_predict(conversation_id: str) -> StreamingResponse:
     return StreamingResponse(generate_response(session_context), media_type="text/event-stream")
 
 
+@log_exceptions()
 @router_single.get("/single_bot_predict_output/{conversation_id}")
 def single_bot_predict_output(conversation_id: str) -> SingleBotPredictResponse:
     logger.info(f"[single_bot_predict_output] {conversation_id}")
@@ -134,6 +140,7 @@ def single_bot_predict_output(conversation_id: str) -> SingleBotPredictResponse:
     )
 
 
+@log_exceptions()
 @router_single.post("/single_post_control/{conversation_id}")
 def single_post_control(conversation_id: str, bot_output: BotOutput) -> SinglePostControlResponse:
     """Check the validation of bot's action
@@ -155,6 +162,7 @@ def single_post_control(conversation_id: str, bot_output: BotOutput) -> SinglePo
     )
 
 
+@log_exceptions()
 @router_single.post("/single_tool/{conversation_id}")
 def single_tool(conversation_id: str, bot_output: BotOutput) -> SingleToolResponse:
     logger.info(f"[single_tool] {conversation_id} with bot_output: {bot_output}")

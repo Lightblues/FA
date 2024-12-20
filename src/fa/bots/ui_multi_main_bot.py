@@ -33,20 +33,19 @@ class UIMultiMainBot(ReactBot):
         bot_output: BotOutput = bot.process_LLM_response(prompt, llm_response)
     """
 
-    # cfg: Config = None
-    # conv: Conversation = None
-    # llm: OpenAIClient = None
-    tools: Dict[str, Dict] = {}
-    bot_main_workflow_infos: List[Dict] = []  # [{name, task_description, task_detailed_description}]
     names = ["UIMultiMainBot", "ui_multi_main_bot"]
 
-    def __init__(self, workflow_infos: List[Dict] = None, **args):
+    tools: Dict[str, Dict] = {}
+    bot_main_workflow_infos: List[Dict] = []  # [{name, task_description, task_detailed_description}]
+
+    def _post_init(self) -> None:
         # logger.info(f"init UIMultiMainBot with workflow_infos: {workflow_infos}")
-        super().__init__(**args)
         # use `config.mui_agent_main_llm_name`
-        self.llm = init_client(llm_cfg=LLM_CFG[self.cfg.mui_agent_main_llm_name])
-        self._init_workflow_infos(workflow_infos)
-        self._init_tools()
+        self.bot_template_fn = self.cfg.mui_agent_main_template_fn
+        self.bot_llm_name = self.cfg.mui_agent_main_llm_name
+        self.llm = init_client(self.bot_llm_name)
+        self._init_workflow_infos(self.cfg.mui_workflow_infos)
+        self._init_tools(self.cfg.ui_tools)
 
     def _init_workflow_infos(self, workflow_infos: List[Dict] = []):  # config.workflow_infos
         # 1. set default workflow_infos
@@ -60,9 +59,9 @@ class UIMultiMainBot(ReactBot):
         #     ss.workflow_infos = [w for w in ss.workflow_infos if w['name'] in ss.cfg.mui_available_workflows]
         self.bot_main_workflow_infos = workflow_infos
 
-    def _init_tools(self):
+    def _init_tools(self, tools_list: List[Dict]):
         tools = {}
-        for t in self.cfg.ui_tools:
+        for t in tools_list:
             assert t["name"] in TOOLS_MAP, f"{t['name']} not in available tools {TOOLS_MAP.keys()}"
             tools[t["name"]] = {
                 "is_enabled": t.get("is_enabled", True),
@@ -79,10 +78,10 @@ class UIMultiMainBot(ReactBot):
         enabled_tools = [k for k, v in self.tools.items() if v["is_enabled"]]
         tools_info = [s for s in TOOL_SCHEMAS if s["function"]["name"] in enabled_tools]
         prompt = jinja_render(
-            self.cfg.mui_agent_main_template_fn,  # "flowagent/bot_mui_main_agent.jinja"
+            self.bot_template_fn,  # "flowagent/bot_mui_main_agent.jinja"
             workflows=workflows,
             tools_info=tools_info,
-            conversation=self.conv.to_str(),
+            conversation=self.context.conv.to_str(),
             current_state="\n".join(f"{k}: {v}" for k, v in state_infos.items()),
         )
         return prompt
@@ -133,9 +132,9 @@ class UIMultiMainBot(ReactBot):
                 msg_content = prediction.response
             else:
                 raise NotImplementedError
-        self.conv.add_message(
+        self.context.conv.add_message(
             msg_content,
-            llm_name=self.cfg.mui_agent_main_llm_name,
+            llm_name=self.bot_llm_name,
             llm_prompt=prompt,
             llm_response=llm_response,
             role="bot_main",

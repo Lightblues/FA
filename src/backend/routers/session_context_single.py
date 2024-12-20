@@ -59,10 +59,10 @@ class SingleSessionContext(BaseModel):
             SessionContext: session context
         """
         # logger.info(f"cfg.bot_pdl_controllers: {cfg.bot_pdl_controllers}")
-        workflow = DataHandler.create(cfg)
+        data_handler = DataHandler.create(cfg)
         conv = Conversation.create(session_id)
-        conv.add_message(msg=cfg.ui_greeting_msg.format(name=workflow.pdl.Name), role=Role.BOT)
-        _context = Context(cfg=cfg, data_handler=workflow, conv=conv)
+        conv.add_message(msg=cfg.ui_greeting_msg.format(name=data_handler.pdl.Name), role=Role.BOT)
+        _context = Context(cfg=cfg, data_handler=data_handler, conv=conv)
         # TODO: check the config `ui_bot_llm_name`
         bot = BOT_NAME2CLASS[cfg.ui_bot_mode](cfg=cfg, context=_context)
         tool = RequestTool(cfg=cfg, context=_context)
@@ -75,7 +75,7 @@ class SingleSessionContext(BaseModel):
             session_id=session_id,
             cfg=cfg,
             conv=conv,
-            workflow=workflow,
+            workflow=data_handler,
             bot=bot,
             tool=tool,
             controllers=controllers,

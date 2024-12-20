@@ -2,6 +2,7 @@ import functools
 import time
 import traceback
 from typing import Callable
+from loguru import logger
 
 
 class Timer:
@@ -46,6 +47,29 @@ def retry_wrapper(retry: int = 3, step_name: str = "", log_fn: Callable = print)
                     log_fn(f"  >>> traceback\n" + traceback.format_exc())
             else:
                 raise Exception(f"<{step_name}> failed for {retry} times!!! \n  Args: {args}, Kwargs: {kwargs}")
+
+        return wrapped_f
+
+    return decorator
+
+
+def log_exceptions():
+    """Log exceptions using logger.error(...)
+
+    USAGE::
+        @log_exceptions()
+        def example_function(xxx):
+    """
+
+    def decorator(f):
+        @functools.wraps(f)
+        def wrapped_f(*args, **kwargs):
+            try:
+                return f(*args, **kwargs)
+            except Exception as e:
+                logger.error(f"Exception in {f.__name__}: {str(e)}")
+                logger.error(f"Traceback:\n{traceback.format_exc()}")
+                raise
 
         return wrapped_f
 

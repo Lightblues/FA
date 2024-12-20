@@ -60,7 +60,7 @@ def stream_results(response) -> Iterator[str]:
             yield output
 
 
-def hunyuan_search_full(query, stream=True, conversations=None, top_p=1, temperature=1, enable_enhancement=False):
+def hunyuan_search_full(query, stream=True, conversations=None, top_p=1, temperature=1, enable_enhancement=True):
     if not conversations:
         conversations = [
             {"Role": "system", "Content": "请你扮演一个搜索引擎，帮助用户搜索并回答问题。"},

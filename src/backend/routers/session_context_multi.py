@@ -17,6 +17,7 @@ from pydantic import BaseModel
 from common import Config
 from data import BotOutput, Conversation, DataHandler
 from fa import CONTROLLER_NAME2CLASS, BaseController, RequestTool, UIMultiMainBot, UIMultiWorkflowBot
+from fa.envs import Context
 
 from ..common.shared import get_db
 
@@ -63,22 +64,18 @@ class MultiSessionContext(BaseModel):
         Returns:
             SessionContext: session context
         """
-        workflow = DataHandler.create(cfg)
+        data_handler = DataHandler.create(cfg)
         conv = Conversation.create(session_id)
         conv.add_message(msg=cfg.mui_greeting_msg, role="bot_main")
-        agent_main = UIMultiMainBot(cfg=cfg, conv=conv, workflow_infos=cfg.mui_workflow_infos)
-        tool = RequestTool(cfg=cfg, conv=conv, data_handler=workflow)
-        controllers = {}
-        for c in cfg.bot_pdl_controllers:
-            if c["is_activated"]:
-                controllers[c["name"]] = CONTROLLER_NAME2CLASS[c["name"]](conv, workflow.pdl, c["config"])
+        _context = Context(cfg=cfg, data_handler=data_handler, conv=conv)
+        agent_main = UIMultiMainBot(cfg=cfg, context=_context)
+        tool = RequestTool(cfg=cfg, context=_context)
         return cls(
             session_id=session_id,
             cfg=cfg,
             conv=conv,
             agent_main=agent_main,
             tool=tool,
-            controllers=controllers,
         )
 
     def init_workflow_agent(self, workflow_name: str):
@@ -163,7 +160,7 @@ def db_upsert_session_multi(ss: MultiSessionContext):
         "mode": "multi",
         "conversation": ss.conv.to_list(),  # TODO: only save messages? polish it!
         "config": ss.cfg.model_dump(),  # to_list -> model_dump
-        "workflow": ss.workflow.model_dump(),
+        # "workflow": ss.workflow.model_dump(),
     }
     if db is None:
         logger.warning(f"Skipping database operation for session {ss.session_id} due to connection failure")

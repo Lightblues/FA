@@ -1,9 +1,8 @@
 target-version = "py310"
 line-length = 150
 indent-width = 4
-# Allow unused variables when underscore-prefixed.
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
+[lint]
 select = ["E", "F"]
 ignore = [
     # "C403",  # Unnecessary list comprehension (rewrite as set comprehension)
@@ -16,12 +15,16 @@ ignore = [
     "E741",  # Ambiguous variable name
     "E701",  # Multiple statements on one line (colon)
     "E401",  # Multiple imports on one line
-    "F541",  # f-string without any placeholders
-    "F841",  # Local variable is assigned to but never used
+
     "F401",  # Module imported but unused
     "F403",  # 'from module import *' used
     "F405",  # Name may be undefined from star imports
+    "F541",  # f-string without any placeholders
+    "F841",  # Local variable is assigned to but never used
 ]
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [isort]
 lines-after-imports = 2
