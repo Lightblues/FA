@@ -1,23 +1,125 @@
-from typing import List
+"""
+openai function_calling: https://platform.openai.com/docs/assistants/tools/function-calling
+https://platform.openai.com/docs/guides/function-calling
 
-from pydantic import BaseModel
+@241221
+- [x] #feat  ExtToolSpec & ToolDefinition @OpenAI
+"""
+
+# from openai import BaseModel
+# from openai.types.shared_params import FunctionDefinition, FunctionParameters
+# from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall, Function
+# from openai.types.chat.chat_completion_message import ChatCompletionMessage
+# from openai.types.chat.chat_completion_tool_param import ChatCompletionToolParam
+
+from typing import Dict, Optional, List
+from typing_extensions import Literal, Required, TypedDict
+
+from pydantic import BaseModel, Field
+from typing_extensions import TypeAlias
 
 
-class ToolParam(BaseModel):
-    ParamName: str
-    ParamDesc: str
-    ParamType: str
-    IsRequired: bool
+""" --------------------------------------------
+Function Definition
+NOTE: use TypedDict instead of BaseModel for parameters definition
+"""
+# class FunctionDefinition(BaseModel):
+#     name: str
+#     description: Optional[str] = None
+#     parameters: Optional[FunctionParameters] = None
+
+FunctionParameters: TypeAlias = Dict[str, object]
 
 
-class ToolNode(BaseModel):
-    _type: str = "tool"
-    URL: str
-    Method: str
-    Query: List[ToolParam]
-    Body: List[ToolParam]
+class FunctionDefinition(TypedDict, total=False):
+    name: Required[str]
+    description: str
+    parameters: FunctionParameters
+
+
+class ChatCompletionToolParam(TypedDict, total=False):
+    function: FunctionDefinition
+    type: Literal["function"]
+
+
+""" --------------------------------------------
+Function Call & Message
+"""
+
+
+class Function(BaseModel):
+    arguments: str
+    name: str
+
+
+class ChatCompletionMessageToolCall(BaseModel):
+    id: str
+    function: Function
+    type: Literal["function"]
+
+
+class ChatCompletionMessage(BaseModel):
+    content: Optional[str] = None
+    refusal: Optional[str] = None
+    role: Literal["assistant"]
+    tool_calls: Optional[List[ChatCompletionMessageToolCall]] = None
+
+
+""" -------------------------------------------------------------------
+Customized Tool Definition with BaseModel
+see https://platform.openai.com/docs/api-reference/chat/create for typings
+"""
+
+
+class ToolParameter(BaseModel):
+    # https://json-schema.org/understanding-json-schema/reference/type
+    type: Literal["string", "number", "integer", "object", "array", "boolean", "null", "int", "float"]
+    description: str = ""
+    enum: Optional[List[str]] = None
+
+    name: Optional[str] = None  # NOTE: extended for Workflow
+
+
+class ToolProperties(BaseModel):
+    # NOTE:
+    # https://json-schema.org/understanding-json-schema
+    type: Literal["object"] = "object"
+    properties: dict[str, ToolParameter] = Field(default_factory=dict)
+    required: list[str] = Field(default_factory=list)
+
+
+class ToolSpec(BaseModel):
+    """Tool Specification aligned with OpenAI"""
+
+    name: str
+    description: str = ""
+    # The parameters the functions accepts, described as a JSON Schema object. See the guide for examples, and the JSON Schema reference for documentation about the format.
+    parameters: ToolProperties = Field(default_factory=ToolProperties)
 
     def __str__(self):
-        s_query = [f"(name={p.ParamName}, type={p.ParamType}, required={p.IsRequired})" for p in self.Query]
-        s_body = [f"(name={p.ParamName}, type={p.ParamType}, required={p.IsRequired})" for p in self.Body]
-        return f"- name: {self.name}\n  desc: {self.desc}\n  API: {self.URL}\n  Query: [{', '.join(s_query)}]\n  Body: [{', '.join(s_body)}]"
+        return str(self.model_dump())
+
+    def to_tool_definition(self) -> "ToolDefinition":
+        return ToolDefinition(type="function", function=self)
+
+
+class ToolDefinition(BaseModel):
+    type: Literal["function"] = "function"
+    function: ToolSpec
+
+    def __str__(self):
+        return str(self.model_dump())
+
+
+class ExtToolSpec(ToolSpec):
+    """Extended Tool Specification for Workflow"""
+
+    name: str
+    description: str = ""
+    parameters: ToolProperties = Field(default_factory=ToolProperties)
+    response: ToolProperties = Field(default_factory=ToolProperties)
+    url: str
+    method: Literal["GET", "POST"]
+
+    def to_tool_spec(self) -> ToolSpec:
+        return ToolSpec(**self.model_dump())

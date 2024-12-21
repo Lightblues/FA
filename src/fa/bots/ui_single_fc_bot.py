@@ -2,10 +2,29 @@ import json
 from typing import Iterator
 from common import jinja_render, PromptUtils
 from .ui_single_bot import UISingleBot, BotOutput
+from data import ToolDefinition
+
+tool_response = {
+    "type": "function",
+    "function": {
+        "name": "response_to_user",
+        "description": "Response to user, and wait for user's response",
+        "parameters": {
+            "type": "object",
+            "properties": {"content": {"type": "string", "description": "your response content to user"}},
+            "required": ["content"],
+        },
+    },
+}
 
 
 class UISingleFCBot(UISingleBot):
     names = ["UISingleFCBot", "ui_single_fc_bot"]
+
+    def _post_init(self) -> None:
+        super()._post_init()
+        self.context.data_handler.pdl.add_tool(ToolDefinition(**tool_response))
+        # NOTE: the dep_controller doesn't need to be modified because it is initialized after Bot!
 
     def process_stream(self) -> Iterator[str]:
         self.last_llm_prompt = self._gen_prompt()

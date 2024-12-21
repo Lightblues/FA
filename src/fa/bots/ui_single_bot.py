@@ -17,7 +17,7 @@ from typing import Iterator, List, Tuple, Union
 from openai.types.chat.chat_completion_chunk import ChoiceDelta
 
 from common import Formater, PromptUtils, init_client, jinja_render
-from data import BotOutput
+from data import BotOutput, ToolDefinition
 
 from .react_bot import ReactBot
 
@@ -43,31 +43,12 @@ class UISingleBot(ReactBot):
     last_llm_prompt: str = ""  # the prompt for logging
     last_llm_response: str = ""  # the llm response (with tool calls) for logging
     ui_user_additional_constraints: str = ""
-    tools: list[dict] = []  # tools in OpenAI FC format, only used in Prompt!
 
     def _post_init(self) -> None:
         self.bot_template_fn = self.cfg.ui_bot_template_fn
         self.bot_llm_name = self.cfg.ui_bot_llm_name
         self.ui_user_additional_constraints = self.cfg.ui_user_additional_constraints
         self.llm = init_client(self.bot_llm_name)
-        self._init_tools()
-
-    def _init_tools(self):
-        # TODO: validate tool formats
-        tool_list = []
-        for tool in self.context.data_handler.toolbox:
-            parameters = tool.get("parameters", {})
-            fc = {
-                "type": "function",
-                "function": {
-                    "name": tool["name"],
-                    "description": tool.get("description", ""),
-                    "parameters": {"type": "object", "properties": parameters.get("properties", {}), "required": parameters.get("required", [])},
-                },
-            }
-            tool_list.append(fc)
-        self.tools = tool_list
-        return tool_list
 
     def _gen_prompt(self) -> str:
         # - [x]: format apis
@@ -77,12 +58,14 @@ class UISingleBot(ReactBot):
         data_handler = self.context.data_handler
         # s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
         state_infos |= self.context.status_for_prompt  # add the status infos from PDL!
+        _tool_infos = [tool.model_dump() for tool in data_handler.pdl.apis]
+        # _pdl_info = data_handler.pdl.to_str()
+        _pdl_info = (data_handler.pdl.to_json(),)  # NOTE convert to json instead of str!!
         prompt = jinja_render(
             self.bot_template_fn,
             workflow_name=data_handler.pdl.Name,
-            # PDL=data_handler.pdl.to_str(),
-            PDL=data_handler.pdl.model_dump(),
-            api_infos=self.tools,
+            PDL=_pdl_info,
+            api_infos=_tool_infos,
             conversation=self.context.conv.to_str(),
             user_additional_constraints=self.ui_user_additional_constraints,
             current_state="\n".join(f"{k}: {v}" for k, v in state_infos.items()),

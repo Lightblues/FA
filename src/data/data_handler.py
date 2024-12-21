@@ -12,9 +12,8 @@ import yaml
 from pydantic import BaseModel, Field
 
 from common import Config
-
 from .data_manager import DataManager
-from .pdl import PDL
+from .pdl import PDL, ExtToolSpec
 
 
 class WorkflowType(str, Enum):
@@ -58,7 +57,7 @@ class DataHandler(BaseModel):  # rename -> Data
     task_description: Optional[str] = None
 
     workflow: Optional[str] = None
-    toolbox: List[Dict] = Field(default_factory=list)  # Changed field() to Field()
+    toolbox: List[ExtToolSpec] = Field(default_factory=list)
     pdl: Optional[PDL] = None
     # core_flow: Optional[CoreFlow] = None
 
@@ -95,10 +94,11 @@ class DataHandler(BaseModel):  # rename -> Data
         # 2. load the workflow & toolbox
         # TODO: update toolbox
         with open(data_manager.DIR_data_workflow / f"tools/{self.id}.yaml", "r") as f:
-            self.toolbox = yaml.safe_load(f)
+            self.toolbox = [ExtToolSpec(**tool) for tool in yaml.safe_load(f)]
         if self.type == WorkflowType.PDL:  # sepcial for PDL
             _dir = data_manager.DIR_data_workflow / self.cfg.pdl_version / f"{self.id}.yaml"
             self.pdl = PDL.load_from_file(_dir)
+            self.pdl.apis = [tool.to_tool_definition() for tool in self.toolbox]  # NOTE to add apis to pdl
             self.workflow = self.pdl.to_str()  # self.pdl.procedure
         else:
             with open(
@@ -144,21 +144,21 @@ class DataHandler(BaseModel):  # rename -> Data
                 return id
         raise ValueError(f"[ERROR] {id_or_name} not found in {workflow_infos.keys()}")
 
-    def refresh_config(self, cfg: Config) -> "DataHandler":
-        """used for UI!
-        TODO: check if is used!
-        """
-        print(f"> [workflow] refresh config: {cfg.workflow_dataset, cfg.pdl_version, cfg.workflow_id}")
-        data_manager = DataManager(cfg)
-        self.cfg = cfg
-        self.id = self.cfg.workflow_id
-        assert self.id in data_manager.workflow_infos, f"[ERROR] {self.id} not found in {data_manager.workflow_infos.keys()}"
-        with open(data_manager.DIR_data_workflow / f"tools/{self.id}.yaml", "r") as f:
-            self.toolbox = yaml.safe_load(f)
-        _dir = data_manager.DIR_data_workflow / self.cfg.pdl_version / f"{self.id}.yaml"
-        self.pdl = PDL.load_from_file(_dir)
-        self.workflow = self.pdl.to_str()  # self.pdl.procedure
-        return self
+    # def refresh_config(self, cfg: Config) -> "DataHandler":
+    #     """used for UI!
+    #     TODO: check if is used!
+    #     """
+    #     print(f"> [workflow] refresh config: {cfg.workflow_dataset, cfg.pdl_version, cfg.workflow_id}")
+    #     data_manager = DataManager(cfg)
+    #     self.cfg = cfg
+    #     self.id = self.cfg.workflow_id
+    #     assert self.id in data_manager.workflow_infos, f"[ERROR] {self.id} not found in {data_manager.workflow_infos.keys()}"
+    #     with open(data_manager.DIR_data_workflow / f"tools/{self.id}.yaml", "r") as f:
+    #         self.toolbox = yaml.safe_load(f)
+    #     _dir = data_manager.DIR_data_workflow / self.cfg.pdl_version / f"{self.id}.yaml"
+    #     self.pdl = PDL.load_from_file(_dir)
+    #     self.workflow = self.pdl.to_str()  # self.pdl.procedure
+    #     return self
 
     # @property
     # def num_user_profile(self):
@@ -178,5 +178,5 @@ class DataHandler(BaseModel):  # rename -> Data
         }
         return "".join([f"{k}: {v}\n" for k, v in info_dict.items()])
 
-    def get_toolbox_by_names(self, names: List[str]):
-        return [tool for tool in self.toolbox if tool["API"] in names]
+    # def get_toolbox_by_names(self, names: List[str]):
+    #     return [tool for tool in self.toolbox if tool["API"] in names]

@@ -2,6 +2,10 @@
 @241212
 - [x] Unified API format! - OpenAI function calling https://platform.openai.com/docs/guides/function-calling
 - [x] add entity linker
+@241221
+- [x] #feat update tool (dict -> ExtToolSpec)
+
+- [ ] tackle entity linking??
 """
 
 import copy
@@ -14,7 +18,7 @@ from loguru import logger
 from pydantic import Field
 
 from data import APIOutput, BotOutput, Role
-
+from data.pdl.tool import ExtToolSpec
 from ..entity_linker import EntityLinker
 from .base_tool import BaseTool
 
@@ -51,7 +55,8 @@ class RequestTool(BaseTool):
 
     api_entity_linking: bool = False
     entity_linker: EntityLinker = None
-    api_infos_map: Dict[str, Dict] = Field(default_factory=dict)
+
+    tool_map: Dict[str, ExtToolSpec] = Field(default_factory=dict)
 
     def _post_init(self) -> None:
         self.api_entity_linking = self.cfg.api_entity_linking
@@ -61,10 +66,9 @@ class RequestTool(BaseTool):
         self._build_api_infos_map()
 
     def _build_api_infos_map(self):
-        self.api_infos_map = {}
+        self.tool_map = {}
         for api in self.context.data_handler.toolbox:
-            self.api_infos_map[api["name"]] = api
-            self.api_infos_map[api["description"]] = api
+            self.tool_map[api.name] = api  # also use tool.description as key?
 
     def process(self, apicalling_info: BotOutput, *args, **kwargs) -> APIOutput:
         """main function to process the request (bot_output)
@@ -115,25 +119,23 @@ class RequestTool(BaseTool):
         """
         api_name, api_arguments = apicalling_info.action, apicalling_info.action_input
         # 1. check the API name
-        assert api_name in self.api_infos_map, f"API `{api_name}` not found!"
-        api_info = self.api_infos_map[api_name]
+        assert api_name in self.tool_map, f"API `{api_name}` not found!"
+        api_spec = self.tool_map[api_name]
 
         # 2. check the parameters all match the API
-        assert isinstance(api_arguments, dict), f"API `{api_name}` expects parameters as dict!"
-        if not ("parameters" in api_info and isinstance(api_info["parameters"], dict) and "properties" in api_info["parameters"]):
-            return api_info, api_arguments
-        api_params = api_info["parameters"]["properties"]
+        assert isinstance(api_arguments, dict), f"API `{api_name}` expects parameters as dict! Input: {api_arguments}"
+        _params_set = set(api_spec.parameters.properties.keys())
         # TODO: the "required"
-        assert all(k in api_params for k in api_arguments.keys()), f"API {api_name} expects parameters {api_params.keys()}!"
+        assert all(k in _params_set for k in api_arguments.keys()), f"API {api_name} expects parameters {_params_set}!"
 
         # 3. entity linking @240802
         if self.api_entity_linking:
             # if DEBUG: print(f">> entity linking for `{api_name}` ... with input {input_params}")
             _api_arguments = copy.deepcopy(api_arguments)
             for k, v in api_arguments.items():
-                param_info = api_params[k]
-                if ("enum" in param_info) and (param_info["enum"]):
-                    res, _meta = self.entity_linker.entity_linking(v, param_info["enum"])
+                param_info = api_spec.parameters.properties[k]
+                if hasattr(param_info, "enum") and param_info.enum:
+                    res, _meta = self.entity_linker.entity_linking(v, param_info.enum)
                     if res["is_matched"]:
                         api_arguments[k] = res["matched_entity"]
             # info the entity linking result
@@ -143,7 +145,7 @@ class RequestTool(BaseTool):
                     role=Role.SYSTEM,
                 )
             logger.info(f"entity linked from {json.dumps(_api_arguments, ensure_ascii=False)} to {json.dumps(api_arguments, ensure_ascii=False)}")
-        return api_info, api_arguments
+        return api_spec, api_arguments
 
     # @handle_exceptions
     def _process_api(
@@ -185,13 +187,13 @@ class RequestTool(BaseTool):
     def _call_api(api_info: Dict, api_params_dict: Dict):
         # assert "Method" in api_info and "URL" in api_info, f"API should provide Method and URL!"
         try:
-            if api_info["method"] == "POST":
+            if api_info.method == "POST":
                 # if DEBUG: print(f">> calling [{api_info['name']}] -- {api_info['URL']} with params {api_params_dict}")
-                response = requests.post(api_info["url"], data=json.dumps(api_params_dict))
-            elif api_info["method"] == "GET":
-                response = requests.get(api_info["url"], params=api_params_dict)
+                response = requests.post(api_info.url, data=json.dumps(api_params_dict))
+            elif api_info.method == "GET":
+                response = requests.get(api_info.url, params=api_params_dict)
             else:
-                raise ValueError(f"Method {api_info['Method']} not supported.")
+                raise ValueError(f"Method {api_info.method} not supported.")
             # check the status code
             response.raise_for_status()
             try:

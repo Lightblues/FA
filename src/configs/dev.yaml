@@ -1,4 +1,6 @@
-
+# Usage::
+#   CONFIG_NAME=dev.yaml uvicorn backend.main:app --host 0.0.0.0 --port 8101 --reload --reload-dir ./backend
+#   streamlit run run_flowagent_ui2.py --server.port 8502 -- --config=dev.yaml --page_default_index=0
 defaults: !include default.yaml
 
 x-available-models: &available_models

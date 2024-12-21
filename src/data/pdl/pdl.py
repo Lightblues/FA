@@ -2,11 +2,11 @@ from typing import Any, Dict, List
 
 import yaml
 from pydantic import BaseModel, Field
-
+from typing import Union
 from common import json_line
 
 from .pdl_nodes import AnswerNode, BaseNode, ParameterNode, ToolDependencyNode
-from .tool import ToolNode
+from .tool import FunctionDefinition, ToolDefinition
 
 
 # def base_node_representer(dumper, data):
@@ -36,7 +36,7 @@ class PDL(BaseModel):
     ANSWERs: List[AnswerNode]
     Procedure: str
 
-    apis: List[ToolNode] = Field(default_factory=list)
+    apis: List[ToolDefinition] = Field(default_factory=list)
 
     @classmethod
     def load_from_str(cls, PDL_str: str):
@@ -56,6 +56,12 @@ class PDL(BaseModel):
             PDL_str = f.read().strip()
         return cls.load_from_str(PDL_str)
 
+    def add_tool(self, tool: Union[ToolDefinition, dict], precondition: List[str] = []):
+        if isinstance(tool, dict):
+            tool = ToolDefinition(**tool)
+        self.apis.append(tool)
+        self.APIs.append(ToolDependencyNode(tool, precondition))
+
     def __str__(self):
         _indented_procedure = "\n".join([f"    {line}" for line in self.Procedure.split("\n")])
         s = f"Name: {self.Name}\nDesc: {json_line(self.Desc)}\n"
@@ -71,6 +77,10 @@ class PDL(BaseModel):
     def to_str(self):
         selected_keys = ["Name", "Desc", "SLOTs", "APIs", "ANSWERs", "Procedure"]
         return self._format_with_yaml(selected_keys)
+
+    def to_json(self):
+        selected_keys = ["Name", "Desc", "SLOTs", "APIs", "ANSWERs", "Procedure"]
+        return self.model_dump(include=selected_keys)
 
     def _format_with_yaml(self, selected_keys: List[str]) -> str:
         infos = self.model_dump()

@@ -54,6 +54,7 @@ class OpenAIClient(BaseClient):
     client: Optional[openai.OpenAI] = None
 
     def model_post_init(self, __context: Any) -> None:
+        super().model_post_init(__context)
         # 1. init client
         if not self.api_key:
             logger.warning(f"[WARNING] api_key is None, please set it in the environment variable (OPENAI_API_KEY) or pass it as a parameter.")
@@ -65,13 +66,19 @@ class OpenAIClient(BaseClient):
         self.kwargs = {**OPENAI_DEFAULT_CONFIG, **self.kwargs}
 
     def _process_openai_kwargs(self, kwargs: Dict) -> Dict:
+        # support query or messages
         if "query" in kwargs:
             kwargs["messages"] = self._process_text_or_conv(kwargs["query"])
             del kwargs["query"]
+        # set default kwargs
         default_kwargs = self.kwargs
         if set(kwargs.keys()) - set(default_kwargs.keys()):
             logger.warning(f"WARNING: {set(kwargs.keys()) - set(default_kwargs.keys())} are not supported by OpenAI API")
-        return {**default_kwargs, **kwargs}
+        kwargs = {**default_kwargs, **kwargs}
+        # tackle with tools
+        if not kwargs["tools"]:
+            del kwargs["tools"], kwargs["tool_choice"]
+        return kwargs
 
     def _process_text_or_conv(self, query: str = None, messages: List[Dict] = None):
         if query:
