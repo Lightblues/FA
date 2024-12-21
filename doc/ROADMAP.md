@@ -25,10 +25,11 @@
         - [x] FlowBench #baseline
         - [x] CoRE #baseline
     4. Multi-agent (ref: MetaGPT/Coze)
-        - [x] Basic: The "main agent" like @sarm (v0.1.0)
+        - [x] Basic: The "main agent" like @swarm (v0.1.0)
     5. Entity linking (v0.1.0)
     6. FC: try the difference of ReAct & Function calling
-        - [ ] implement for single-agent
+        - [x] implement for single-agent. [Observation: FC capability of open-source LLM is pretty bad! (maybe need deep prompt engineering?)]
+        - [x] seperate `UISingleBot` & `UISingleFCBot`
     7. memory | summary
 4. Evaluation & Optimization
     1. Optimization: find the better PDL format #P0 (link 1.2)
