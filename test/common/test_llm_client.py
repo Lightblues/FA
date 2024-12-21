@@ -1,6 +1,5 @@
 from common import HunyuanClient, init_client
 
-
 query = "今天上海天气如何?"
 
 
@@ -26,5 +25,6 @@ def test_hunyuan():
     print()
 
 
-# test_hunyuan()
+# test_hunyuan_request()
+test_hunyuan()
 test_openai()

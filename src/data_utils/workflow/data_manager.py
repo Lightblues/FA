@@ -48,25 +48,40 @@ import collections
 import json
 import pathlib
 from typing import *
-
+from pydantic import BaseModel
 import pandas as pd
 
 from .parameter import Parameter
 from .workflow import Workflow
 
 
-class DataManager:
-    DIR_root = pathlib.Path(__file__).resolve().parent.parent.parent.parent
-    DIR_data = DIR_root / "data"
-    DIR_dataset = DIR_data / "dataset"
+class DataManager(BaseModel):
+    DIR_root: pathlib.Path = pathlib.Path(__file__).resolve().parent.parent.parent.parent
+    DIR_data: pathlib.Path = DIR_root / "data"
+    DIR_dataset: pathlib.Path = DIR_data / "dataset"
 
-    def __init__(self, data_version: str = "v241127", export_version: str = "export-1732628942") -> None:
-        self.data_version = data_version
-        self.export_version = export_version
-        self.workflow_infos = self.load_workflow_infos()
-        self.parameter_infos = self.load_parameter_infos()
+    data_version: str = "v241127"
+    export_version: str = "export-1732628942"
+    workflow_infos: Dict[str, Dict[str, str]] = {}
+    parameter_infos: Dict[str, Parameter] = {}
 
-    def load_workflow_infos(self, verbose: bool = False):
+    def model_post_init(self, __context: Any) -> None:
+        self.workflow_infos = self._load_workflow_infos()
+        self.parameter_infos = self._load_parameter_infos()
+
+    def get_task_infos(self) -> Dict[str, Dict[str, str]]:
+        """Get the standard task infos
+        Format: { "000": { "name": "114挂号", "task_description": "提供挂号服务, 为用户查询和推荐北京相关医院和科室" }, ... }
+        """
+        task_infos = {}
+        for workflow_id, workflow_info in self.workflow_infos.items():
+            task_infos[workflow_id] = {
+                "name": workflow_info["workflow_name"],
+                "task_description": workflow_info["workflow_desc"],
+            }
+        return task_infos
+
+    def _load_workflow_infos(self, verbose: bool = False):
         """Load the workflow infos from the excel file.
         1. rename the columns to ['workflow_id', 'workflow_name', 'workflow_desc', 'workflow_fn']
         2. output: { "000": { key: value } }
@@ -91,7 +106,7 @@ class DataManager:
                 print(f"  {id}: {info['workflow_name']}")
         return res
 
-    def load_parameter_infos(self, verbose: bool = False) -> Dict[str, Parameter]:
+    def _load_parameter_infos(self, verbose: bool = False) -> Dict[str, Parameter]:
         """Load parameter infos
         Output: { id: {infos} }
         """

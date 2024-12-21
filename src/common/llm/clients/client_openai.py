@@ -58,7 +58,11 @@ class OpenAIClient(BaseClient):
         # 1. init client
         if not self.api_key:
             logger.warning(f"[WARNING] api_key is None, please set it in the environment variable (OPENAI_API_KEY) or pass it as a parameter.")
-        self.client = openai.OpenAI(api_key=self.api_key, base_url=self.base_url)
+        self.client = openai.OpenAI(
+            api_key=self.api_key,
+            base_url=self.base_url,
+            timeout=60 * 5,  # addup the timeout to 5 minutes
+        )
 
         # 2. setup kwargs
         if set(self.kwargs.keys()) - set(OPENAI_DEFAULT_CONFIG.keys()):
@@ -130,6 +134,8 @@ class OpenAIClient(BaseClient):
                     yield f"<API>{function.name}</API>"
                 elif function.arguments:
                     yield function.arguments
+            else:
+                yield ""
 
     def proces_collected_deltas(self, collected_deltas: List[ChoiceDelta]) -> Tuple[str, str, str]:
         """process the collected deltas to get the response, action, and action_input
@@ -194,14 +200,10 @@ class OpenAIClient(BaseClient):
 
     def query_one_stream(self, query: str = None, messages: List[Dict] = None, **kwargs) -> Iterator[str]:
         kwargs["messages"] = self._process_text_or_conv(query, messages)
+        kwargs = self._process_openai_kwargs(kwargs)
         kwargs["stream"] = True
         response = self.chat_completions_create(**kwargs)
-
-        def stream_generator(response) -> Iterator[str]:
-            for chunk in response:
-                yield chunk.choices[0].delta.content or ""
-
-        return stream_generator(response)
+        return self.stream_generator(response)
 
     def query_many(self, texts, stop=None, temperature=None, model_id=None) -> list:
         with ThreadPoolExecutor(max_workers=self.n_thread) as executor:

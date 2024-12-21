@@ -47,10 +47,8 @@ class WorkflowPDLConverter:
         export_version: str = "export-1732628942",
         llm_name: str = "gpt-4o",
     ) -> None:
-        self.data_version = data_version
-        self.export_version = export_version
-        self.data_manager = DataManager(data_version, export_version)
-        self.llm = init_client(LLM_CFG[llm_name])
+        self.data_manager = DataManager(data_version=data_version, export_version=export_version)
+        self.llm = init_client(llm_name)
 
     def convert(self, workflow_id: str):
         # 1. load the workflow
@@ -59,11 +57,13 @@ class WorkflowPDLConverter:
             node.NodeType in VALID_NODE_TYPES for node in workflow.Nodes
         ), f"Invalid node type found in workflow, valid types: {VALID_NODE_TYPES}"
         # 2. convert the nodes
+        tools = []
         APIs = []
         ANSWERs = []
         for node in workflow.Nodes:
             if node.NodeType == NodeType.TOOL:
                 APIs.append(node.to_pdl())
+                tools.append(node.to_tool_spec())
             elif node.NodeType == NodeType.ANSWER:
                 ANSWERs.append(node.to_pdl())
         params = [p for p in self.data_manager.parameter_infos.values() if p.workflow_id == workflow.WorkflowID]
@@ -81,6 +81,7 @@ class WorkflowPDLConverter:
         )
         return {
             "pdl": pdl,
+            "tools": tools,
             "llm_prompt": res["llm_prompt"],
             "llm_response": res["llm_response"],
         }

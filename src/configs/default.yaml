@@ -9,6 +9,9 @@ x-available-models: &available_models
   - Qwen2.5-72B-INT8
   - "debug"
   - claude-3-5-sonnet-20241022
+  - hunyuan-turbo
+  - hunyuan-large
+
 x-default-model: &default_model "default"
 
 ui_bot_mode: ui_single_bot

@@ -17,7 +17,7 @@ import tqdm
 import yaml
 from easonsi import utils
 from easonsi.llm.openai_client import Formater
-from engine import LLM_CFG, init_client
+from common import LLM_CFG, init_client
 
 from data_utils.workflow_format.format_transformer import (
     FormatTransformer,
@@ -30,7 +30,7 @@ ODIR = pathlib.Path("/work/huabu/dataset/PDL")
 os.makedirs(ODIR, exist_ok=True)
 
 KEYS = [f"{i:03d}" for i in range(6)]
-llm = init_client(llm_cfg=LLM_CFG["gpt-4o"])
+llm = init_client("gpt-4o")
 
 
 format_to_codeblock = {

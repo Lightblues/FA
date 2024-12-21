@@ -6,9 +6,25 @@ from urllib.parse import urlparse
 import yaml
 
 from .clients.client_openai import OpenAIClient
+from .clients.client_hunyuan import HunyuanClient
 
+LLM_CFG = {}  # Link llm_name -> base_url, api_key, model
 
-LLM_CFG = {}
+HUNYUAN_MODEL_LIST = [
+    "hunyuan-turbo",
+    "hunyuan-large",
+    "hunyuan-pro",
+    "hunyuan-standard",
+    "hunyuan-standard-256K",
+    "hunyuan-lite",
+    "hunyuan-turbo-latest",
+    "hunyuan-large-longcontext",
+    "hunyuan-turbo-vision",
+    "hunyuan-vision",
+    "hunyuan-code",
+    "hunyuan-role",
+    "hunyuan-functioncall",
+]
 
 
 def add_openai_models():
@@ -47,6 +63,13 @@ def add_openai_models():
             }
 
 
+def add_hunyuan_models():
+    global LLM_CFG
+
+    for model in HUNYUAN_MODEL_LIST:
+        LLM_CFG[model] = {"model": model}
+
+
 def add_local_models():
     global LLM_CFG
 
@@ -79,16 +102,24 @@ def add_local_models():
 
 
 add_openai_models()
+add_hunyuan_models()
 add_local_models()
 
 
-def init_client(llm_cfg: Union[str, Dict]):
-    if isinstance(llm_cfg, str):
-        assert llm_cfg in LLM_CFG, f"{llm_cfg} not in LLM_CFG"
-        return init_client(LLM_CFG[llm_cfg])
-    # global client
-    base_url = os.getenv("OPENAI_PROXY_BASE_URL") if llm_cfg.get("base_url") is None else llm_cfg["base_url"]
-    api_key = os.getenv("OPENAI_PROXY_API_KEY") if llm_cfg.get("api_key") is None else llm_cfg["api_key"]
-    model = llm_cfg.get("model", "gpt-4o")
-    client = OpenAIClient(base_url=base_url, api_key=api_key, kwargs={"model": model})
+def init_client(model: str, **kwargs):
+    """Initialize the LLM client
+
+    Args:
+        model: the configed model name
+        **kwargs: the kwargs for LLM
+    """
+    if model in HUNYUAN_MODEL_LIST:
+        return HunyuanClient(kwargs={"model": model, **kwargs})
+
+    assert model in LLM_CFG, f"{model} not in LLM_CFG"
+    client = OpenAIClient(
+        base_url=LLM_CFG[model].get("base_url", os.getenv("OPENAI_PROXY_BASE_URL")),
+        api_key=LLM_CFG[model].get("api_key", os.getenv("OPENAI_PROXY_API_KEY")),
+        kwargs={"model": LLM_CFG[model].get("model", "gpt-4o"), **kwargs},
+    )
     return client

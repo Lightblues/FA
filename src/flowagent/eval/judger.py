@@ -27,7 +27,7 @@ class Judger:
     def __init__(self, cfg: Config) -> None:
         self.cfg = cfg
         self.db = DBManager(cfg.db_uri, cfg.db_name, cfg.db_message_collection_name)
-        self.llm = init_client(llm_cfg=LLM_CFG[self.cfg.judge_model_name])
+        self.llm = init_client(self.cfg.judge_model_name)
 
     def judge(self, mode: str = "session", verbose=True) -> Dict:
         """judge process:

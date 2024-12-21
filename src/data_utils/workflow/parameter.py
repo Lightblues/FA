@@ -1,5 +1,8 @@
-from pdl.typings import ParameterNode
+from data.pdl.pdl_nodes import ParameterNode
+from .base import TypeEnum
 from pydantic import BaseModel
+from typing import Any
+from common import json_line
 
 
 class Parameter(BaseModel):
@@ -13,12 +16,15 @@ class Parameter(BaseModel):
     parameter_id: str
     parameter_name: str
     parameter_desc: str
-    parameter_type: str
+    parameter_type: TypeEnum
     parameter_correct_example: str = None
     parameter_wrong_example: str = None
+
+    def model_post_init(self, __context: Any) -> None:
+        self.parameter_desc = json_line(self.parameter_desc)
 
     def __str__(self):
         return f"Parameter(name={self.parameter_name}, id={self.parameter_id}, desc={self.parameter_desc}, type={self.parameter_type})"
 
     def to_pdl(self) -> ParameterNode:
-        return ParameterNode(name=self.parameter_name, desc=self.parameter_desc, type=self.parameter_type)
+        return ParameterNode(name=self.parameter_name, desc=self.parameter_desc, type=self.parameter_type.value.lower())

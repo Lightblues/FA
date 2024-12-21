@@ -35,7 +35,7 @@ class EntityLinker(BaseModel):
     def _post_init(self) -> None:
         self.api_entity_linking_llm = self.cfg.api_entity_linking_llm
         self.api_entity_linking_template = self.cfg.api_entity_linking_template
-        self.llm = init_client(llm_cfg=LLM_CFG[self.api_entity_linking_llm])
+        self.llm = init_client(model=self.api_entity_linking_llm)
         # print(f">> [api] init EL model `{cfg.api_entity_linking_llm}`")
 
     def entity_linking(self, query: str, eneity_list: List[str]) -> Dict:

@@ -2,7 +2,7 @@ import yaml
 
 from common import Config
 from data import PDL, DataManager
-
+from data.pdl.pdl_nodes import ParameterNode
 
 cfg = Config.from_yaml("default.yaml")
 data_manager = DataManager(cfg)
@@ -31,6 +31,14 @@ def format_str():
     return pdl_new
 
 
+def test_pdl_node():
+    node = ParameterNode(name="test", desc="test", type="string")
+    print(node)
+    node = ParameterNode(name="test")
+    print(node)
+
+
+test_pdl_node()
 to_dict()
 
 format_yaml()

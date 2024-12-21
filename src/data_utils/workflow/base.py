@@ -1,7 +1,7 @@
 """Base type definitions for workflow"""
 
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, TypedDict, Literal
 
 from pydantic import BaseModel
 
@@ -20,8 +20,8 @@ class TypeEnum(Enum):
     ARRAY_BOOL = "ARRAY_BOOL"
     ARRAY_OBJECT = "ARRAY_OBJECT"
 
-    def __str__(self):
-        return self.value
+    # def __str__(self):
+    #     return self.value.lower()
 
 
 class ReferenceFromNode(BaseModel):

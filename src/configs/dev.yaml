@@ -15,6 +15,14 @@ x-available-models: &available_models
   - Vendor-A/Qwen/Qwen2.5-72B-Instruct
   - Qwen/Qwen2.5-7B-Instruct
   - Qwen2.5-72B-INT8
+  - hunyuan-turbo
+  - hunyuan-large
+
+
+ui_available_workflow_datasets:
+  - "v241127"
+  - "pdl_converted_20241221_4o"
+ui_default_workflow_dataset: "v241127"
 
 ui_bot_mode: ui_single_bot
 ui_default_template: "bot_pdl_ui_zh.jinja"

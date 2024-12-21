@@ -36,7 +36,7 @@ class PDL(BaseModel):
     ANSWERs: List[AnswerNode]
     Procedure: str
 
-    apis: List[ToolDefinition] = Field(default_factory=list)
+    tools: List[ToolDefinition] = Field(default_factory=list)
 
     @classmethod
     def load_from_str(cls, PDL_str: str):
@@ -59,7 +59,7 @@ class PDL(BaseModel):
     def add_tool(self, tool: Union[ToolDefinition, dict], precondition: List[str] = []):
         if isinstance(tool, dict):
             tool = ToolDefinition(**tool)
-        self.apis.append(tool)
+        self.tools.append(tool)
         self.APIs.append(ToolDependencyNode(tool, precondition))
 
     def __str__(self):
@@ -80,7 +80,7 @@ class PDL(BaseModel):
 
     def to_json(self):
         selected_keys = ["Name", "Desc", "SLOTs", "APIs", "ANSWERs", "Procedure"]
-        return self.model_dump(include=selected_keys)
+        return self.model_dump(include=selected_keys, exclude_none=True, exclude_unset=True)
 
     def _format_with_yaml(self, selected_keys: List[str]) -> str:
         infos = self.model_dump()

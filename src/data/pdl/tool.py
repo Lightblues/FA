@@ -69,11 +69,12 @@ class ChatCompletionMessage(BaseModel):
 Customized Tool Definition with BaseModel
 see https://platform.openai.com/docs/api-reference/chat/create for typings
 """
+ToolParameterType = Literal["string", "number", "integer", "object", "array", "boolean", "null", "int", "float"]
 
 
 class ToolParameter(BaseModel):
     # https://json-schema.org/understanding-json-schema/reference/type
-    type: Literal["string", "number", "integer", "object", "array", "boolean", "null", "int", "float"]
+    type: ToolParameterType = None
     description: str = ""
     enum: Optional[List[str]] = None
 
@@ -97,7 +98,7 @@ class ToolSpec(BaseModel):
     parameters: ToolProperties = Field(default_factory=ToolProperties)
 
     def __str__(self):
-        return str(self.model_dump())
+        return str(self.model_dump(exclude_none=True, exclude_unset=True))
 
     def to_tool_definition(self) -> "ToolDefinition":
         return ToolDefinition(type="function", function=self)
@@ -112,12 +113,13 @@ class ToolDefinition(BaseModel):
 
 
 class ExtToolSpec(ToolSpec):
-    """Extended Tool Specification for Workflow"""
+    """Extended Tool Specification for Workflow
+    Add: url, method
+    """
 
     name: str
     description: str = ""
     parameters: ToolProperties = Field(default_factory=ToolProperties)
-    response: ToolProperties = Field(default_factory=ToolProperties)
     url: str
     method: Literal["GET", "POST"]
 

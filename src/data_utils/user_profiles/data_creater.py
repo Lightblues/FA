@@ -16,7 +16,7 @@ class ProfileCreater(BaseRole):
 
     def __init__(self, cfg: Config) -> None:
         self.cfg = cfg
-        self.llm = init_client(llm_cfg=LLM_CFG["gpt-4o"])
+        self.llm = init_client("gpt-4o")
 
     def create_profile(self, task: str, personas: List[str], task_desc: str) -> int:
         profiles = []

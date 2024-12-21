@@ -98,7 +98,7 @@ class DataHandler(BaseModel):  # rename -> Data
         if self.type == WorkflowType.PDL:  # sepcial for PDL
             _dir = data_manager.DIR_data_workflow / self.cfg.pdl_version / f"{self.id}.yaml"
             self.pdl = PDL.load_from_file(_dir)
-            self.pdl.apis = [tool.to_tool_definition() for tool in self.toolbox]  # NOTE to add apis to pdl
+            self.pdl.tools = [tool.to_tool_definition() for tool in self.toolbox]  # NOTE to add apis to pdl
             self.workflow = self.pdl.to_str()  # self.pdl.procedure
         else:
             with open(

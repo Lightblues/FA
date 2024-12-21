@@ -11,7 +11,7 @@ class FormatTransformer:
     return_codeblock_format: str = None  # python, PDL, mermaid, ...
 
     def __init__(self, model_name, template_file, return_format) -> None:
-        self.llm = init_client(llm_cfg=LLM_CFG[model_name])
+        self.llm = init_client(model_name)
         self.template_file = template_file
         self.return_codeblock_format = return_format
 
@@ -35,7 +35,7 @@ class APITransformer:
     template_file: str = None
 
     def __init__(self, model_name, template_file, return_format) -> None:
-        self.llm = init_client(llm_cfg=LLM_CFG[model_name])
+        self.llm = init_client(model_name)
         self.template_file = template_file
 
     def transform(self, api: dict) -> str:

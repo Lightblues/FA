@@ -2,10 +2,12 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-from data.pdl import AnswerNode, BaseNode, ToolNode, ToolParam
+from data.pdl.pdl_nodes import AnswerNode, BaseNode, ToolDependencyNode
+from data.pdl.tool import ExtToolSpec, ToolParameter
 
 from .base import Input, NodeType, TypeEnum
 from .workflow_node_data import APIInfo, NodeDataBase, NodeType_Data_Map, NodeType_Key_Map
+from .workflow_node_data import ToolNodeData
 
 
 class InputParam(BaseModel):
@@ -86,23 +88,20 @@ class WorkflowNode(BaseModel):
         )
 
     def _answer_to_pdl(self) -> AnswerNode:
-        return AnswerNode(name=self.NodeName, desc=self.NodeDesc, answer=self.NodeData.Answer)
+        return AnswerNode(name=self.NodeName, desc=self.NodeData.Answer or self.NodeDesc)
 
-    def _tool_to_pdl(self) -> ToolNode:
-        def _convert_param(param: APIInfo) -> ToolParam:
-            return ToolParam(
-                ParamName=param.ParamName,
-                ParamDesc=param.ParamDesc,
-                ParamType=param.ParamType,
-                IsRequired=param.IsRequired,
-                Input=param.Input,
-            )
-
-        return ToolNode(
+    def _tool_to_pdl(self) -> ToolDependencyNode:
+        return ToolDependencyNode(
             name=self.NodeName,
             desc=self.NodeDesc,
-            URL=self.NodeData.API.URL,
-            Method=self.NodeData.API.Method,
-            Query=[_convert_param(param) for param in self.NodeData.Query],
-            Body=[_convert_param(param) for param in self.NodeData.Body],
+        )
+
+    def to_tool_spec(self) -> ExtToolSpec:
+        node_data: ToolNodeData = self.NodeData
+        return ExtToolSpec(
+            name=self.NodeName,
+            description=self.NodeDesc,
+            parameters=node_data.to_tool_spec(),
+            url=node_data.API.URL,
+            method=node_data.API.Method,
         )

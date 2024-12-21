@@ -6,8 +6,8 @@ from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 
 from common import json_line
-
-from .base import Input, NodeType
+from data.pdl.tool import ToolParameter, ToolProperties
+from .base import Input, NodeType, TypeEnum
 
 
 # --- Base Node Data ---
@@ -23,7 +23,7 @@ class NodeDataBase(BaseModel):
 class RequestParam(BaseModel):
     ParamName: str
     ParamDesc: str
-    ParamType: str
+    ParamType: TypeEnum
     Input: Input
     IsRequired: bool = False
     SubParams: List["RequestParam"] = Field(default_factory=list)
@@ -56,6 +56,19 @@ class ToolNodeData(NodeDataBase):
         query_str = "[" + ", ".join(f"{q}" for q in self.Query) + "]"
         body_str = "[" + ", ".join(f"{b}" for b in self.Body) + "]"
         return f"API={self.API}, Query={query_str}, Body={body_str}"
+
+    def to_tool_spec(self) -> ToolProperties:
+        properties = {}
+        required = []
+        for param in self.Query + self.Body:
+            properties[param.ParamName] = ToolParameter(
+                type=param.ParamType.value.lower(),  # NOTE be careful about the case
+                description=param.ParamDesc,
+                # FIXME: enum
+            )
+            if param.IsRequired:
+                required.append(param.ParamName)
+        return ToolProperties(properties=properties, required=required)
 
 
 # --- Answer Node Data ---
@@ -101,8 +114,6 @@ class ParameterExtractorNodeData(NodeDataBase):
 
 
 # --- Logic Evaluator Node Data ---
-
-
 class ComparisonExpression(BaseModel):
     """比较表达式"""
 

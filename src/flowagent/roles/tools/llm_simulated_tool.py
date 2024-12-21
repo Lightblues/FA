@@ -39,7 +39,7 @@ class LLMSimulatedTool(BaseTool):
 
     def __init__(self, **args) -> None:
         super().__init__(**args)
-        self.llm = init_client(llm_cfg=LLM_CFG[self.cfg.api_llm_name])
+        self.llm = init_client(self.cfg.api_llm_name)
         # overwrite the default template
         if self.cfg.api_template_fn is not None:
             self.api_template_fn = self.cfg.api_template_fn

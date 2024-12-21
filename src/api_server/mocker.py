@@ -53,7 +53,7 @@ class Mocker:
     client: OpenAIClient
 
     def __init__(self, model_name: str):
-        self.client = init_client(llm_cfg=LLM_CFG[model_name])
+        self.client = init_client(model_name)
 
     def mock_api_response(self, query: APICalling_Info):
         print(f"> calling {query.name} with {query.kwargs}")

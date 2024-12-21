@@ -1,7 +1,7 @@
-from common import LLM_CFG, init_client
+from common import init_client
 
 
-client = init_client(llm_cfg=LLM_CFG["debug"])
+client = init_client("debug")
 
 
 def test_query_one():

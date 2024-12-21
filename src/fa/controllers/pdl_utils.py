@@ -12,7 +12,7 @@ from data import PDL
 
 class PDLNode(BaseModel):
     name: str
-    precondition: List[str] = Field(default_factory=list)
+    precondition: Optional[List[str]] = Field(default_factory=list)
     is_activated: bool = False
 
     def __repr__(self) -> str:
@@ -20,7 +20,7 @@ class PDLNode(BaseModel):
 
 
 class PDLGraph(BaseModel):
-    name2node: Dict[str, PDLNode] = Field(default_factory=dict)
+    name2node: Optional[Dict[str, PDLNode]] = Field(default_factory=dict)
 
     def add_node(self, node: PDLNode):
         assert node.name not in self.name2node, f"node {node.name} already exists!"
@@ -55,7 +55,7 @@ class PDLGraph(BaseModel):
             pdl.APIs = []
         g = PDLGraph()
         for api in pdl.APIs:
-            node = PDLNode(name=api.name, precondition=api.precondition)
+            node = PDLNode(name=api.name, precondition=api.precondition or [])
             g.add_node(node)
         g.check_preconditions()
         return g

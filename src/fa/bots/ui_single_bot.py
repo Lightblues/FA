@@ -58,7 +58,7 @@ class UISingleBot(ReactBot):
         data_handler = self.context.data_handler
         # s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
         state_infos |= self.context.status_for_prompt  # add the status infos from PDL!
-        _tool_infos = [tool.model_dump() for tool in data_handler.pdl.apis]
+        _tool_infos = [tool.model_dump() for tool in data_handler.pdl.tools]
         # _pdl_info = data_handler.pdl.to_str()
         _pdl_info = (data_handler.pdl.to_json(),)  # NOTE convert to json instead of str!!
         prompt = jinja_render(
