@@ -5,9 +5,11 @@ from pydantic import BaseModel, Field
 
 
 class BaseClient(BaseModel):
-    model: str = Field(default="gpt-4o")
-    temperature: float = Field(default=0.5)
-    max_tokens: int = Field(default=4096)
+    kwargs: Dict = Field(default_factory=dict)
+
+    @property
+    def model(self):
+        return self.kwargs.get("model", "gpt-4o")
 
     class Config:
         arbitrary_types_allowed = True

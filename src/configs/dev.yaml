@@ -2,9 +2,10 @@
 defaults: !include default.yaml
 
 x-available-models: &available_models
-  # - "1.0.2"
-  # - "default"
-  # - "debug"
+  - "1.0.2"
+  - "default"
+  - "test-eason"
+  - "debug"
   - "gpt-4o-mini"
   - "gpt-4o"
   - "gpt-4-turbo"
@@ -25,11 +26,11 @@ ui_default_template: "bot_pdl_ui_zh_fc.jinja"
 ui_bot_template_fn: "flowagent/bot_pdl_ui_zh_fc.jinja"
 ui_greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
 
-api_entity_linking: true               # entity linking!
+api_entity_linking: false               # entity linking! FIXME: entity linker message not in log! (mismatch with client)
 
 bot_pdl_controllers:
   - {name: "api_duplication", config: {if_pre: true, if_post: true, threshold: 2}, is_activated: true}
-  - {name: "node_dependency", config: {if_pre: true, if_post: true}, is_activated: true}
+  - {name: "node_dependency", config: {if_pre: false, if_post: true}, is_activated: true}
   # - {name: "session_length", config: {if_pre: true, min: 5, max: 15}, is_activated: true}
 
 db_uri: "mongodb://localhost:27017/"

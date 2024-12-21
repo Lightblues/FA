@@ -90,5 +90,5 @@ def init_client(llm_cfg: Union[str, Dict]):
     base_url = os.getenv("OPENAI_PROXY_BASE_URL") if llm_cfg.get("base_url") is None else llm_cfg["base_url"]
     api_key = os.getenv("OPENAI_PROXY_API_KEY") if llm_cfg.get("api_key") is None else llm_cfg["api_key"]
     model = llm_cfg.get("model", "gpt-4o")
-    client = OpenAIClient(model=model, base_url=base_url, api_key=api_key)
+    client = OpenAIClient(base_url=base_url, api_key=api_key, kwargs={"model": model})
     return client

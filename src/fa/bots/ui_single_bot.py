@@ -45,14 +45,17 @@ class UISingleBot(ReactBot):
     last_llm_prompt: str = ""  # the prompt for logging
     last_llm_response: str = ""  # the llm response (with tool calls) for logging
     if_fc: bool = False
+    tools: list[dict] = []
     ui_user_additional_constraints: str = ""
 
     def _post_init(self) -> None:
         self.bot_template_fn = self.cfg.ui_bot_template_fn
         self.bot_llm_name = self.cfg.ui_bot_llm_name
-        self.if_fc = self.cfg.ui_bot_if_fc
         self.ui_user_additional_constraints = self.cfg.ui_user_additional_constraints
         self.llm = init_client(self.bot_llm_name)
+        self.if_fc = self.cfg.ui_bot_if_fc
+        if self.if_fc:
+            self._init_tools()
 
     def _gen_prompt(self) -> str:
         # TODO: format apis. 1) remove URL; 2) add preconditions
@@ -66,14 +69,14 @@ class UISingleBot(ReactBot):
             self.bot_template_fn,
             workflow_name=data_handler.pdl.Name,
             PDL=data_handler.pdl.to_str(),
-            api_infos=data_handler.toolbox,
+            api_infos=self.tools,
             conversation=self.context.conv.to_str(),
             user_additional_constraints=self.ui_user_additional_constraints,
             current_state="\n".join(f"{k}: {v}" for k, v in state_infos.items()),
         )
         return prompt
 
-    def _get_tool_list(self):
+    def _init_tools(self):
         # TODO: validate tool formats
         tool_list = []
         for tool in self.context.data_handler.toolbox:
@@ -87,40 +90,14 @@ class UISingleBot(ReactBot):
                 },
             }
             tool_list.append(fc)
+        self.tools = tool_list
         return tool_list
 
     def process_stream(self) -> Iterator[str]:
         self.last_llm_prompt = self._gen_prompt()
-        client = self.llm.client
-
-        params = {
-            "messages": [{"role": "user", "content": self.last_llm_prompt}],
-            "model": self.llm.model,
-            "temperature": self.llm.temperature,
-            "stream": True,
-        }
-        if self.if_fc:
-            params["tools"] = self._get_tool_list()
-
-        response = client.chat.completions.create(**params)
+        response = self.llm.chat_completions_create(query=self.last_llm_prompt, tools=self.tools, tool_choice="auto", stream=True)
         self.last_llm_chat_completions = []
-
-        def stream_generator(response: Stream[ChatCompletionChunk]) -> Iterator[str]:
-            """yield str from ChatCompletionChunk, and save to self.last_llm_chat_completions"""
-            for chunk in response:
-                # print(f"> chunk: {chunk}") TODO: fix the error of none from 4o-mini
-                delta = chunk.choices[0].delta
-                self.last_llm_chat_completions.append(delta)
-                if delta.content:
-                    yield delta.content
-                elif delta.tool_calls:
-                    function = delta.tool_calls[0].function
-                    if function.name:
-                        yield f"<API>{function.name}</API>"
-                    elif function.arguments:
-                        yield function.arguments
-
-        return stream_generator(response)
+        return self.llm.stream_generator(response, collected_deltas=self.last_llm_chat_completions)
 
     def process_LLM_response(self) -> BotOutput:
         if self.if_fc:
@@ -133,7 +110,7 @@ class UISingleBot(ReactBot):
         elif prediction.response:
             msg_content = prediction.response
         else:
-            raise NotImplementedError
+            raise RuntimeError("response is empty")
         self.context.conv.add_message(
             msg_content,
             llm_name=self.bot_llm_name,
@@ -175,19 +152,13 @@ class UISingleBot(ReactBot):
 
     def _parse_react_output_fc(self) -> BotOutput:
         """Parse output with full `Tought, Action, Action Input, Response`."""
-        action, action_input, response = None, "", ""
-        for delta in self.last_llm_chat_completions:
-            if delta.tool_calls:
-                function = delta.tool_calls[0].function
-                if function.name:
-                    action = function.name
-                elif function.arguments:
-                    action_input += function.arguments
-            elif delta.content:
-                response += delta.content
+        response, action, action_input = self.llm.proces_collected_deltas(self.last_llm_chat_completions)
+
+        # log the response with tool calls
         self.last_llm_response = f"{response}"
         if action:
             self.last_llm_response += f"<API>{action}</API>{action_input}"
+
         if action:
             return BotOutput(
                 action=action,
@@ -195,7 +166,7 @@ class UISingleBot(ReactBot):
                 response=response,
             )
         else:
-            assert response, "response is empty"
+            # assert response, "response is empty"  # can also be not empty?
             return BotOutput(
                 response=response,
             )
