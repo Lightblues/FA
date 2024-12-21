@@ -1,6 +1,6 @@
 from typing import Dict
 
-from .bots import BaseBot, ReactBot, UIMultiMainBot, UIMultiWorkflowBot, UISingleBot
+from .bots import BaseBot, ReactBot, UIMultiMainBot, UIMultiWorkflowBot, UISingleBot, UISingleFCBot
 from .controllers import APIDuplicationController, BaseController, NodeDependencyController, SessionLengthController
 from .tools import BaseTool, RequestTool
 from .users import BaseUser, InputUser

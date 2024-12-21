@@ -12,7 +12,6 @@ x-available-models: &available_models
 x-default-model: &default_model "default"
 
 ui_bot_mode: ui_single_bot
-ui_bot_if_fc: false
 ui_available_models: *available_models
 ui_available_templates:
   # - bot_pdl_ui.jinja

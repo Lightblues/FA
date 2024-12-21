@@ -11,6 +11,12 @@ fn = data_manager.DIR_data_workflow / "pdl/000.yaml"
 pdl = PDL.load_from_file(fn)
 
 
+def to_dict():
+    pdl_dict = pdl.model_dump()
+    print(pdl_dict)
+    return pdl_dict
+
+
 def format_yaml():
     s = pdl.to_str()
     d = yaml.safe_load(s)
@@ -24,6 +30,8 @@ def format_str():
     pdl_new = PDL(**d)
     return pdl_new
 
+
+to_dict()
 
 format_yaml()
 format_str()

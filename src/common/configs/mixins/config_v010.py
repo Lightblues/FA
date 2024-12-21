@@ -42,11 +42,11 @@ class V010Mixin(BaseModel):
     api_entity_linking_template: str = "flowagent/entity_linking.jinja"
 
     ui_bot_mode: str = "ui_single_bot"  # ui_single_bot
-    ui_bot_if_fc: bool = True
+    # ui_bot_if_fc: bool = True         # DEPRECATED! seperate to `ui_single_fc_bot` and `ui_single_bot`
     ui_available_models: Optional[List[str]] = None
     ui_available_templates: Optional[List[str]] = None
     ui_available_workflow_datasets: Optional[List[str]] = None
-    ui_default_workflow_dataset: str = "PDL_zh"
+    ui_default_workflow_dataset: str = "v241127"
     ui_available_workflow_dirs: Optional[List[str]] = None  # subdirs
     ui_available_workflows: Optional[List[str]] = None  # NOTE: 暂未生效
     ui_default_model: str = "default"

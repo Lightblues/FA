@@ -2,7 +2,6 @@
 defaults: !include default.yaml
 
 ui_bot_mode: ui_single_bot
-ui_bot_if_fc: true                    # test FC mode!
 ui_default_model: "gpt-4o-mini"
 ui_default_template: "bot_pdl_ui_zh_fc.jinja"
 ui_bot_template_fn: "flowagent/bot_pdl_ui_zh_fc.jinja"
