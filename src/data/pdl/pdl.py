@@ -60,7 +60,7 @@ class PDL(BaseModel):
         if isinstance(tool, dict):
             tool = ToolDefinition(**tool)
         self.tools.append(tool)
-        self.APIs.append(ToolDependencyNode(tool, precondition))
+        self.APIs.append(ToolDependencyNode(name=tool.function.name, precondition=precondition))
 
     def __str__(self):
         _indented_procedure = "\n".join([f"    {line}" for line in self.Procedure.split("\n")])

@@ -30,7 +30,7 @@ class UISingleFCBot(UISingleBot):
         self.last_llm_prompt = self._gen_prompt()
         response = self.llm.chat_completions_create(
             query=self.last_llm_prompt,
-            tools=self.tools,  # NOTE: used in `tools` field!
+            tools=self.context.data_handler.pdl.tools,  # NOTE: used in `tools` field!
             tool_choice="auto",
             stream=True,
         )
@@ -66,6 +66,8 @@ class UISingleFCBot(UISingleBot):
             self.last_llm_response += f"<API>{action}</API>{action_input}"
 
         if action:
+            if action == "response_to_user":
+                return BotOutput(response=json.loads(action_input)["content"])
             return BotOutput(
                 action=action,
                 action_input=json.loads(action_input),
@@ -73,6 +75,4 @@ class UISingleFCBot(UISingleBot):
             )
         else:
             # assert response, "response is empty"  # can also be not empty?
-            return BotOutput(
-                response=response,
-            )
+            return BotOutput(response=response)

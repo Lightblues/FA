@@ -133,7 +133,7 @@ def case_workflow():
             else:
                 raise TypeError(f"Unexpected bot output: {bot_output}")
         else:
-            st.logger.warning(f"<case_workflow> bot actions exceed the limit: {ss.cfg.bot_action_limit}")
+            ss.logger.warning(f"<case_workflow> bot actions exceed the limit: {ss.cfg.bot_action_limit}")
             pass  # TODO:
 
 
