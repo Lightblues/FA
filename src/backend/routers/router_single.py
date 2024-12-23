@@ -173,7 +173,7 @@ def single_tool(conversation_id: str, bot_output: BotOutput) -> SingleToolRespon
     logger.info(f"<{conversation_id}> [single_tool] calling tool with bot_output: {bot_output}")
     session_context = get_session_context_single(conversation_id)
     api_output = session_context.tool.process(bot_output)
-    _debug_msg = f"\n{f'({session_context.session_id}) [API]'.center(150, '=')}\n<<calling api>>\n{api_output.request}\n\n<< api response>>\n{api_output.response_data}\n"
+    _debug_msg = f"\n{f'({session_context.session_id}) [API]'.center(150, '=')}\n<<calling api>>\n{api_output.name}({api_output.request})\n\n<< api response>>\n{api_output.response_data}\n"
     logger.bind(custom=True).debug(_debug_msg)
     response = SingleToolResponse(api_output=api_output, msg=session_context.conv.get_last_message().content)
     logger.info(f"<{conversation_id}> [single_tool] done! response: {response.api_output}")

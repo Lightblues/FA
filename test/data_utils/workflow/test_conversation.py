@@ -1,6 +1,21 @@
 import json
 
-from data import BotOutput, Message
+from data import BotOutput, Message, Role, Conversation
+
+
+def test_message():
+    for role in (Role.USER, "custom_role"):
+        msg = Message(role=role, content="hello")
+        print(msg)
+
+
+def test_add_message():
+    conv = Conversation()
+
+    conv.add_message(Message(role=Role.USER, content="hello"))
+    conv.add_message(msg="hello", role=Role.USER)
+    print(conv)
+    print()
 
 
 def test_custom_role():

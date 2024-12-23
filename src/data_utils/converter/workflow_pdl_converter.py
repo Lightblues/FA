@@ -1,21 +1,22 @@
 """
 @241214
-- [ ] buld typing for workflow
+- [x] buld typing for workflow
     - [x] nodes (node data)
-    - [ ] input / output (reference)
+    - [x] input / output (reference)
+    --> rewriten with @proto3
 @241216
-- [ ] implement to_pdl() for each node
-    - [ ] params
+- [x] implement to_pdl() for each node
+    - [x] params
     - [x] ANSWER
     - [x] TOOL
     - [ ] LOGIC_EVALUATOR
+@241220
+- [x] finish convert for `001: 同程开发票`!
+    nodes: ANSWER, PARAMETER_EXTRACTOR, TOOL, LOGIC_EVALUATOR
 
 TODO:
 - [ ] use LLM to generate summary for each node
 - [ ] draw node graph (e.g. with graphviz | pyecharts)
-
-- [ ] finish convert for `001: 同程开发票`!
-    nodes: ANSWER, PARAMETER_EXTRACTOR, TOOL, LOGIC_EVALUATOR
 """
 
 import json
@@ -39,6 +40,11 @@ VALID_NODE_TYPES = (
     NodeType.CODE_EXECUTOR,
 )
 
+llm_kwargs = {
+    "temperature": 0.0,
+    "max_completion_tokens": 8192,  # for long PDL!
+}
+
 
 class WorkflowPDLConverter:
     def __init__(
@@ -48,7 +54,7 @@ class WorkflowPDLConverter:
         llm_name: str = "gpt-4o",
     ) -> None:
         self.data_manager = DataManager(data_version=data_version, export_version=export_version)
-        self.llm = init_client(llm_name)
+        self.llm = init_client(llm_name, **llm_kwargs)
 
     def convert(self, workflow_id: str):
         # 1. load the workflow
@@ -61,7 +67,7 @@ class WorkflowPDLConverter:
         APIs = []
         ANSWERs = []
         for node in workflow.Nodes:
-            if node.NodeType == NodeType.TOOL:
+            if node.NodeType in (NodeType.TOOL, NodeType.CODE_EXECUTOR, NodeType.LLM):
                 APIs.append(node.to_pdl())
                 tools.append(node.to_tool_spec())
             elif node.NodeType == NodeType.ANSWER:

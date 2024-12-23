@@ -7,7 +7,7 @@ wandb/
 poetry.lock
 
 core.*
-
+*.zip
 
 __*/
 

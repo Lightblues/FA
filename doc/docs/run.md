@@ -1,4 +1,8 @@
 
+Environment variables:
+- `LOCAL_MODELS_CONFIG_PATH`: the path to the local models config file (OpenAI client)
+- `LOCAL_MODELS_INFO_PATH`: local model registry file (inner only!)
+
 ```sh
 # 1. clone the repo & data
 git clone git@git.woa.com:easonsshi/huabu.git huabu_test && cd huabu_test

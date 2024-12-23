@@ -18,8 +18,10 @@ export_version = "export-1732628942"
 # output_version = "20241221_4omini"
 # llm_name="hunyuan-turbo"
 # output_version = "20241221_hyturbo"
-llm_name = "gpt-4o"
-output_version = "20241221_4o"
+# llm_name = "gpt-4o"
+# output_version = "20241223_4o"
+llm_name = "hunyuan-turbo"
+output_version = "20241223_hyturbo"
 
 workflow_ids = ["000", "001", "002", "004", "006", "007"]
 max_workers = 10
@@ -29,7 +31,8 @@ def convert():
     converter = WorkflowPDLConverter(llm_name=llm_name, data_version=data_version, export_version=export_version)
     dm = converter.data_manager
 
-    odir = dm.DIR_dataset / dm.data_version / f"pdl_converted_{output_version}"
+    odir = dm.DIR_dataset / f"pdl_converted_{output_version}"
+    print(f">>> output dir: {odir}")
     odir_tools = odir / "tools"
     odir_pdl = odir / "pdl"
     odir_debug = odir / "debug"
@@ -50,7 +53,7 @@ def convert():
         with open(odir_pdl / f"{workflow_id}.yaml", "w") as f:
             f.write(res["pdl"].to_str())
         with open(odir_tools / f"{workflow_id}.yaml", "w") as f:
-            tools = [tool.model_dump(exclude_none=True, exclude_unset=True) for tool in res["tools"]]
+            tools = [tool.model_dump() for tool in res["tools"]]
             f.write(yaml.dump(tools, sort_keys=False, allow_unicode=True))
 
         with open(odir_debug / f"{workflow_id}_llm_prompt.txt", "w") as f:

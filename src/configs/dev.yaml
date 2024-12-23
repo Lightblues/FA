@@ -20,9 +20,9 @@ x-available-models: &available_models
 
 
 ui_available_workflow_datasets:
-  - "v241127"
+  # - "v241127"
   - "pdl_converted_20241221_4o"
-ui_default_workflow_dataset: "v241127"
+ui_default_workflow_dataset: "pdl_converted_20241221_4o"
 
 ui_bot_mode: ui_single_bot
 ui_default_template: "bot_pdl_ui_zh.jinja"
@@ -34,7 +34,7 @@ ui_available_models: *available_models
 ui_available_templates:
   # - bot_pdl_ui.jinja
   - bot_pdl_ui_zh.jinja
-  - bot_pdl_ui_zh_fc.jinja
+  # - bot_pdl_ui_zh_fc.jinja
 ui_default_model: "test-eason"          # default model for dev
 
 ui_greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"

@@ -32,7 +32,7 @@ def get_hunyuan_client() -> _HunyuanClient:
             max_fail_num=5,
             max_fail_percent=0.75,
             window_interval=60 * 5,
-            timeout=60 * 5,  # 60, addup the timeout to 5 minutes
+            timeout=60 * 10,  # 60, addup the timeout to 5 minutes
             max_requests=5,
         )
     )

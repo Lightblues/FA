@@ -58,6 +58,7 @@ class ToolNodeData(NodeDataBase):
         return f"API={self.API}, Query={query_str}, Body={body_str}"
 
     def to_tool_spec(self) -> ToolProperties:
+        # Transform Query/Body to ToolProperties
         properties = {}
         required = []
         for param in self.Query + self.Body:

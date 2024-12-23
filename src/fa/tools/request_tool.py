@@ -21,6 +21,7 @@ from data import APIOutput, BotOutput, Role
 from data.pdl.tool import ExtToolSpec
 from ..entity_linker import EntityLinker
 from .base_tool import BaseTool
+from .tool_mock_mixin import ToolMockMixin
 
 
 def handle_exceptions(func):
@@ -38,7 +39,7 @@ def handle_exceptions(func):
     return wrapper
 
 
-class RequestTool(BaseTool):
+class RequestTool(BaseTool, ToolMockMixin):
     """
     Used config:
         api_entity_linking
@@ -89,7 +90,7 @@ class RequestTool(BaseTool):
         logger.info(f"process api calling info: {apicalling_info}")
         # 1. match the api
         try:
-            api_info, api_params_dict = self._match_and_check_api(apicalling_info)  # match the standard API
+            api_spec, api_params_dict = self._match_and_check_api(apicalling_info)  # match the standard API
         except Exception as e:
             self.context.conv.add_message(f"<API response> {str(e)}", role=Role.SYSTEM)
             return APIOutput(
@@ -99,7 +100,7 @@ class RequestTool(BaseTool):
                 response_data=str(e),
             )
         # 2. call the api
-        prediction = self._process_api(api_info, api_params_dict, apicalling_info)
+        prediction = self._process_api(api_spec, api_params_dict, apicalling_info)
         # 3. add message
         if prediction.response_status_code == 200:
             msg_content = f"<API response> {prediction.response_data}"
@@ -109,7 +110,7 @@ class RequestTool(BaseTool):
         return prediction
 
     # @handle_exceptions
-    def _match_and_check_api(self, apicalling_info: BotOutput, **kwargs) -> Tuple[str, Dict]:
+    def _match_and_check_api(self, apicalling_info: BotOutput, **kwargs) -> Tuple[ExtToolSpec, Dict]:
         """Maybe ERROR!
         args:
             action_metas: hock
@@ -150,7 +151,7 @@ class RequestTool(BaseTool):
     # @handle_exceptions
     def _process_api(
         self,
-        api_info: Dict,
+        api_info: ExtToolSpec,
         api_params_dict: Dict,
         apicalling_info: BotOutput,
         **kwargs,
@@ -163,19 +164,7 @@ class RequestTool(BaseTool):
         # action_metas.apicalling_info_matched = APICalling_Info(name=api_info["name"], kwargs=api_params_dict)
         response = self._call_api(api_info, api_params_dict)
 
-        # # 2] parse the response
-        # expected_response_properties = api_info["response"]["properties"]
-        # ret = {}
-        # for param in expected_response_properties:
-        #     if param in response:
-        #         ret[expected_response_properties[param]['name']] = response[param]
-        # if len(ret) == 0:    # 如果返回结果中没有有效的参数，则返回原始response
-        #     ret = response
-        # return json.dumps(
-        #     {"status": "success", "response": ret},
-        #     ensure_ascii=False
-        # )
-        # return json.dumps(response, ensure_ascii=False)
+        # 2] parse the response? skip now
         return APIOutput(
             name=apicalling_info.action,
             request=apicalling_info.action_input,
@@ -183,17 +172,25 @@ class RequestTool(BaseTool):
             response_status_code=200,  # TODO:
         )
 
-    @staticmethod
-    def _call_api(api_info: Dict, api_params_dict: Dict):
+    def _call_api(self, api_spec: ExtToolSpec, api_params_dict: Dict):
         # assert "Method" in api_info and "URL" in api_info, f"API should provide Method and URL!"
-        try:
-            if api_info.method == "POST":
-                # if DEBUG: print(f">> calling [{api_info['name']}] -- {api_info['URL']} with params {api_params_dict}")
-                response = requests.post(api_info.url, data=json.dumps(api_params_dict))
-            elif api_info.method == "GET":
-                response = requests.get(api_info.url, params=api_params_dict)
+        if api_spec.extra_infos:
+            extra_infos = api_spec.extra_infos
+            print(f"> Mocking result of {extra_infos}...")
+            if extra_infos.get("type") == "llm":
+                return self.mock_llm(extra_infos.get("prompt"), api_params_dict)
+            elif api_spec.extra_infos.get("type") == "code_executor":
+                return self.mock_code_executor(extra_infos.get("code"), api_params_dict)
             else:
-                raise ValueError(f"Method {api_info.method} not supported.")
+                raise ValueError(f"Mocking result of {api_spec.extra_infos} not supported!")
+        try:
+            if api_spec.method == "POST":
+                # if DEBUG: print(f">> calling [{api_info['name']}] -- {api_info['URL']} with params {api_params_dict}")
+                response = requests.post(api_spec.url, data=json.dumps(api_params_dict))
+            elif api_spec.method == "GET":
+                response = requests.get(api_spec.url, params=api_params_dict)
+            else:
+                raise ValueError(f"Method {api_spec.method} not supported.")
             # check the status code
             response.raise_for_status()
             try:

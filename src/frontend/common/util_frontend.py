@@ -14,7 +14,7 @@ def fake_stream(response: str) -> Iterator[str]:
 
 class StreamlitUtils:
     def show_api_call(self, api_output: APIOutput):
-        content = f"[API call] Got <code>{api_output.response_data}</code> from <code>{self.decode_html(api_output.request)}</code>"
+        content = f"[API call] Got <code>{api_output.name}({api_output.request})</code> from <code>{self.decode_html(api_output.request)}</code>"
         st.markdown(f'<p style="color: green;">{content}</p>', unsafe_allow_html=True)
 
     def show_switch_workflow(self, msg: Union[str, Message]):

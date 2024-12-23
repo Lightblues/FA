@@ -12,7 +12,7 @@ https://platform.openai.com/docs/guides/function-calling
 # from openai.types.chat.chat_completion_message import ChatCompletionMessage
 # from openai.types.chat.chat_completion_tool_param import ChatCompletionToolParam
 
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Any
 from typing_extensions import Literal, Required, TypedDict
 
 from pydantic import BaseModel, Field
@@ -69,7 +69,24 @@ class ChatCompletionMessage(BaseModel):
 Customized Tool Definition with BaseModel
 see https://platform.openai.com/docs/api-reference/chat/create for typings
 """
-ToolParameterType = Literal["string", "number", "integer", "object", "array", "boolean", "null", "int", "float"]
+ToolParameterType = Literal[
+    "string",
+    "number",
+    "integer",
+    "object",
+    "array",
+    "boolean",
+    "null",
+    "int",
+    "float",
+    "bool",
+    "object",
+    "array_string",
+    "array_int",
+    "array_float",
+    "array_bool",
+    "array_object",  # extend from @data_utils.workflow.base.TypeEnum
+]
 
 
 class ToolParameter(BaseModel):
@@ -113,15 +130,12 @@ class ToolDefinition(BaseModel):
 
 
 class ExtToolSpec(ToolSpec):
-    """Extended Tool Specification for Workflow
-    Add: url, method
-    """
+    """Extended Tool Specification for Workflow"""
 
-    name: str
-    description: str = ""
-    parameters: ToolProperties = Field(default_factory=ToolProperties)
-    url: str
-    method: Literal["GET", "POST"]
+    # Add: url, method
+    url: str = ""
+    method: Literal["GET", "POST"] = "GET"
+    extra_infos: Any = None  # used for special needs during development!!!
 
     def to_tool_spec(self) -> ToolSpec:
         return ToolSpec(**self.model_dump())

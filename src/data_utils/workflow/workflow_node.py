@@ -3,11 +3,11 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 from data.pdl.pdl_nodes import AnswerNode, BaseNode, ToolDependencyNode
-from data.pdl.tool import ExtToolSpec, ToolParameter
+from data.pdl.tool import ExtToolSpec, ToolParameter, ToolProperties
 
 from .base import Input, NodeType, TypeEnum
 from .workflow_node_data import APIInfo, NodeDataBase, NodeType_Data_Map, NodeType_Key_Map
-from .workflow_node_data import ToolNodeData
+from .workflow_node_data import ToolNodeData, CodeExecutorNodeData, LLMNodeData
 
 
 class InputParam(BaseModel):
@@ -74,7 +74,7 @@ class WorkflowNode(BaseModel):
             return self._default_node_to_pdl()
         elif self.NodeType == NodeType.ANSWER:
             return self._answer_to_pdl()
-        elif self.NodeType == NodeType.TOOL:
+        elif self.NodeType in (NodeType.CODE_EXECUTOR, NodeType.TOOL, NodeType.LLM):
             return self._tool_to_pdl()
         else:
             raise ValueError(f"Unsupported node type: {self.NodeType}")
@@ -97,11 +97,48 @@ class WorkflowNode(BaseModel):
         )
 
     def to_tool_spec(self) -> ExtToolSpec:
-        node_data: ToolNodeData = self.NodeData
-        return ExtToolSpec(
-            name=self.NodeName,
-            description=self.NodeDesc,
-            parameters=node_data.to_tool_spec(),
-            url=node_data.API.URL,
-            method=node_data.API.Method,
-        )
+        """Convert to tool spec for FC"""
+        if self.NodeType == NodeType.TOOL:
+            node_data: ToolNodeData = self.NodeData
+            return ExtToolSpec(
+                name=self.NodeName,
+                description=self.NodeDesc,
+                parameters=node_data.to_tool_spec(),
+                url=node_data.API.URL,
+                method=node_data.API.Method,
+            )
+        elif self.NodeType == NodeType.CODE_EXECUTOR:
+            node_data: CodeExecutorNodeData = self.NodeData
+            return ExtToolSpec(
+                name=self.NodeName,
+                description=self.NodeDesc,
+                parameters=self._convert_inputs_to_tool_properties(),
+                extra_infos={
+                    "type": "code_executor",
+                    "code": node_data.Code,
+                },
+            )
+        elif self.NodeType == NodeType.LLM:
+            node_data: LLMNodeData = self.NodeData
+            return ExtToolSpec(
+                name=self.NodeName,
+                description=self.NodeDesc,
+                parameters=self._convert_inputs_to_tool_properties(),
+                extra_infos={
+                    "type": "llm",
+                    "prompt": node_data.Prompt,
+                },
+            )
+
+    def _convert_inputs_to_tool_properties(self) -> ToolProperties:
+        """Convert inputs to properties for FC"""
+        properties = {}
+        required = []
+        for input in self.Inputs:
+            name = input.Name
+            properties[name] = ToolParameter(
+                type=input.Type.value.lower(),
+                description=input.Desc,
+            )
+            required.append(name)
+        return ToolProperties(properties=properties, required=required)
