@@ -35,7 +35,7 @@ ui_available_templates:
   # - bot_pdl_ui.jinja
   - bot_pdl_ui_zh.jinja
   - bot_pdl_ui_zh_fc.jinja
-ui_default_model: "gpt-4o"
+ui_default_model: "test-eason"          # default model for dev
 
 ui_greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
 
@@ -46,8 +46,8 @@ bot_pdl_controllers:
   - {name: "node_dependency", config: {if_pre: false, if_post: true}, is_activated: true}
   # - {name: "session_length", config: {if_pre: true, min: 5, max: 15}, is_activated: true}
 
-db_uri: "mongodb://localhost:27017/"
-db_name: "agent-pdl"
+db_uri: "mongodb://9.134.230.111:27017/"
+db_name: "agent-pdl-dev"
 db_collection_single: "dev_single_sessions"
 db_collection_multi: "dev_multi_sessions"
 

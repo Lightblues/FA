@@ -114,16 +114,16 @@ class OpenAIClient(BaseClient):
         kwargs = self._process_openai_kwargs(kwargs)
         return self.client.beta.chat.completions.stream(**kwargs)
 
-    def stream_generator(self, response: Stream[ChatCompletionChunk], collected_deltas: List[ChoiceDelta] = None) -> Iterator[str]:
+    def stream_generator(self, chunk_stream: Stream[ChatCompletionChunk], collected_deltas: List[ChoiceDelta] = None) -> Iterator[str]:
         """yield str from ChatCompletionChunk, and save the deltas to `collected_deltas`
         Args:
             response: the stream response from OpenAI
             collected_deltas: the list to save the deltas
         """
-        for chunk in response:
+        for chunk in chunk_stream:
             # print(f"> chunk: {chunk}") TODO: fix the error of none from 4o-mini
             delta = chunk.choices[0].delta
-            if collected_deltas is not None:
+            if delta is not None:
                 collected_deltas.append(delta)
 
             if delta.content:

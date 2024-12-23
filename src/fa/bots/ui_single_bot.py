@@ -98,7 +98,7 @@ class UISingleBot(ReactBot):
 
     def _parse_react_output(self) -> BotOutput:
         """Parse output with full `Tought, Action, Action Input, Response`."""
-        llm_response = "".join(c.content for c in self.last_llm_chat_completions)
+        llm_response = "".join(c.content or "" for c in self.last_llm_chat_completions)
         self.last_llm_response = llm_response
         if "```" in llm_response:
             llm_response = Formater.parse_codeblock(llm_response, type="").strip()
