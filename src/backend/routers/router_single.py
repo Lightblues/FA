@@ -25,8 +25,8 @@ from fastapi.responses import StreamingResponse
 from loguru import logger
 
 from data import Message
-from common import log_exceptions
-
+from common import log_exceptions, json_line
+from ..common.logger_util import logger_util
 from ..typings import (
     BotOutput,
     SingleBotPredictResponse,
@@ -44,7 +44,7 @@ from .session_context_single import (
 )
 
 
-# TODO: wrap the pre_control to a API?
+# DISCUSS: wrap the pre_control to a API?
 def _pre_control(session_context: SingleSessionContext) -> None:
     """Make pre-control on the bot's action
     will change the PDLBot's prompt!
@@ -58,7 +58,7 @@ def _pre_control(session_context: SingleSessionContext) -> None:
 
 
 def generate_response(session_context: SingleSessionContext) -> Iterator[str]:
-    logger.info(f">>> model={session_context.bot.llm.model} conversation={json.dumps(str(session_context.conv), ensure_ascii=False)}")
+    logger.info(f">>> model={session_context.bot.llm.model} conversation={json_line(str(session_context.conv))}")
     _pre_control(session_context)
 
     stream = session_context.bot.process_stream()
@@ -68,10 +68,11 @@ def generate_response(session_context: SingleSessionContext) -> Iterator[str]:
             "conversation_id": session_context.session_id,
             "chunk": chunk,
         }
-        yield f"data: {json.dumps(chunk_output, ensure_ascii=False)}\n\n"
+        yield f"data: {json_line(chunk_output)}\n\n"
     bot_output = session_context.bot.process_LLM_response()
-    _debug_msg = f"\n{f'({session_context.session_id}) [BOT] ({session_context.workflow.name}) ({session_context.bot.llm.model})'.center(150, '=')}\n<<llm prompt>>\n{session_context.bot.last_llm_prompt}\n\n<<llm response>>\n{session_context.bot.last_llm_response}\n"
-    logger.bind(custom=True).debug(_debug_msg)
+    logger_util.debug_section(f"({session_context.session_id}) [BOT] ({session_context.workflow.name}) ({session_context.bot.llm.model})")
+    logger_util.debug_section_content(session_context.bot.last_llm_prompt, subtitle="llm prompt")
+    logger_util.debug_section_content(session_context.bot.last_llm_response, subtitle="llm response")
     session_context.last_bot_output = bot_output
     logger.info(f"<{session_context.session_id}> [generate_response] done!")
 
@@ -174,8 +175,9 @@ def single_tool(conversation_id: str, bot_output: BotOutput) -> SingleToolRespon
     logger.info(f"<{conversation_id}> [single_tool] calling tool with bot_output: {bot_output}")
     session_context = get_session_context_single(conversation_id)
     api_output = session_context.tool.process(bot_output)
-    _debug_msg = f"\n{f'({session_context.session_id}) [API]'.center(150, '=')}\n<<calling api>>\n{api_output.name}({api_output.request})\n\n<< api response>>\n{api_output.response_data}\n"
-    logger.bind(custom=True).debug(_debug_msg)
+    logger_util.debug_section(f"({session_context.session_id}) [API]")
+    logger_util.debug_section_content(f"{api_output.name}({api_output.request})", subtitle="calling api")
+    logger_util.debug_section_content(f"{api_output.response_data}", subtitle="api response")
     response = SingleToolResponse(api_output=api_output, msg=session_context.conv.get_last_message().content)
     logger.info(f"<{conversation_id}> [single_tool] done! response: {response.api_output}")
     return response

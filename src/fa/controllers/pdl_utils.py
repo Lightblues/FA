@@ -57,5 +57,11 @@ class PDLGraph(BaseModel):
         for api in pdl.APIs:
             node = PDLNode(name=api.name, precondition=api.precondition or [])
             g.add_node(node)
+        # add other tools!
+        for tool in pdl.tools:
+            if tool.function.name in g.name2node:
+                continue
+            node = PDLNode(name=tool.function.name, precondition=[])
+            g.add_node(node)
         g.check_preconditions()
         return g

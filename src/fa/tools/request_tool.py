@@ -70,6 +70,7 @@ class RequestTool(BaseTool, ToolMockMixin):
         self.tool_map = {}
         for api in self.context.data_handler.toolbox:
             self.tool_map[api.name] = api  # also use tool.description as key?
+        logger.info(f">>> tool names: {list(self.tool_map.keys())}")
 
     def process(self, apicalling_info: BotOutput, *args, **kwargs) -> APIOutput:
         """main function to process the request (bot_output)
@@ -121,7 +122,7 @@ class RequestTool(BaseTool, ToolMockMixin):
         api_name, api_arguments = apicalling_info.action, apicalling_info.action_input
         # 1. check the API name
         if "." in api_name:
-            logger.warning(f"API name contains dot: {api_name}")
+            logger.warning(f"API name contains dot! {api_name} -> {api_name.split('.')[-1]}")
             api_name = api_name.split(".")[-1]
         assert api_name in self.tool_map, f"API `{api_name}` not found!"
         api_spec = self.tool_map[api_name]

@@ -5,7 +5,7 @@ from pydantic import Field
 from data import PDL, BotOutput
 
 from .base_controller import BaseController
-from .pdl_utils import PDLGraph, PDLNode
+from .pdl_utils import PDLGraph
 
 
 class NodeDependencyController(BaseController):
@@ -41,10 +41,6 @@ class NodeDependencyController(BaseController):
     def _post_init(self) -> None:
         self.graph = PDLGraph.from_pdl(self.context.data_handler.pdl)
 
-    # def refresh_pdl(self, pdl: PDL):
-    #     super().refresh_pdl(pdl)
-    #     self.graph = self._build_graph(pdl)
-
     def _post_check_with_message(self, bot_output: BotOutput) -> Tuple[bool, str]:
         """Check if the next action is valid (all the preconditions are satisfied)"""
         next_node = bot_output.action
@@ -56,7 +52,7 @@ class NodeDependencyController(BaseController):
         if node.precondition:
             for p in node.precondition:
                 if not self.graph.name2node[p].is_activated:
-                    msg = f"Precondition check failed! {p} not activated for {next_node}!"
+                    msg = f"Precondition check failed! {p} not activated for {next_node}! Please call {p} first!"
                     return False, msg
         # 3. success! set it as activated
         node.is_activated = True

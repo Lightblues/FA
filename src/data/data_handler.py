@@ -1,6 +1,10 @@
-"""updated @240906
-WorkflowType: text, code, flowchart, pdl
+"""updated
+@240906
+- [x] WorkflowType: text, code, flowchart, pdl
     with different subdirs and suffixes!
+
+todos
+- [ ] seperate other WorkflowType from PDL (e.g. another repo `FA_baselines`)
 """
 
 import json
@@ -56,7 +60,7 @@ class DataHandler(BaseModel):  # rename -> Data
     name: Optional[str] = None
     task_description: Optional[str] = None
 
-    workflow: Optional[str] = None
+    workflow_str: Optional[str] = None
     toolbox: List[ExtToolSpec] = Field(default_factory=list)
     pdl: Optional[PDL] = None
     # core_flow: Optional[CoreFlow] = None
@@ -99,13 +103,13 @@ class DataHandler(BaseModel):  # rename -> Data
             _dir = data_manager.DIR_data_workflow / self.cfg.pdl_version / f"{self.id}.yaml"
             self.pdl = PDL.load_from_file(_dir)
             self.pdl.tools = [tool.to_tool_definition() for tool in self.toolbox]  # NOTE to add apis to pdl
-            self.workflow = self.pdl.to_str()  # self.pdl.procedure
+            self.workflow_str = self.pdl.to_str()  # self.pdl.procedure
         else:
             with open(
                 data_manager.DIR_data_workflow / f"{self.type.subdir}/{self.id}{self.type.suffix}",
                 "r",
             ) as f:
-                self.workflow = f.read().strip()
+                self.workflow_str = f.read().strip()
         # if self.type == WorkflowType.CORE:
         #     self.core_flow = CoreFlow.load_from_file(data_manager.DIR_data_workflow / f"core/{self.id}.txt")
         # 3. load the user infos
