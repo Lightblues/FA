@@ -8,6 +8,8 @@ Display logic:
 
 @241208 display v0
 - [x] implement basic UI
+
+- [ ] add a button to select db_collection!
 """
 
 from typing import List

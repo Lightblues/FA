@@ -60,7 +60,7 @@ class UISingleBot(ReactBot):
         state_infos |= self.context.status_for_prompt  # add the status infos from PDL!
         _tool_infos = [tool.model_dump() for tool in data_handler.pdl.tools]
         # _pdl_info = data_handler.pdl.to_str()
-        _pdl_info = (data_handler.pdl.to_json(),)  # NOTE convert to json instead of str!!
+        _pdl_info = data_handler.pdl.to_json()  # NOTE: convert to json instead of str!!
         prompt = jinja_render(
             self.bot_template_fn,
             workflow_name=data_handler.pdl.Name,

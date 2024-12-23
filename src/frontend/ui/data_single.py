@@ -71,7 +71,9 @@ def refresh_session_single():
     _, name_id_map = get_workflow_names_map()
     cfg: Config = ss.cfg
     cfg.workflow_dataset = ss.selected_workflow_dataset
-    cfg.workflow_id = name_id_map[ss.cfg.workflow_dataset][ss.selected_workflow_name]
+    cfg.workflow_id = name_id_map[cfg.workflow_dataset][ss.selected_workflow_name]
+    # print(f">> ss.selected_workflow: {cfg.workflow_dataset} - {cfg.workflow_id} - {ss.selected_workflow_name}")
+    # print(f">> {cfg.workflow_dataset } - {cfg.workflow_id}. name_id_map: {name_id_map[cfg.workflow_dataset]}")
     cfg.pdl_version = ss.selected_pdl_version
     cfg.ui_bot_template_fn = f"flowagent/{ss.selected_template_fn}"
     cfg.ui_bot_llm_name = ss.selected_model_name

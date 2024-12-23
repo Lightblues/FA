@@ -4,8 +4,11 @@
 @241211
 - [x] #bug model the dependncy between select_col3~5 (selected_workflow_dataset, selected_pdl_version, selected_workflow_name)
 - [x] #feat user_additional_constraints
+@241223
+- [x] seperate `Procedure` from PDL
 
 todos
+
 """
 
 import streamlit as st
@@ -173,6 +176,8 @@ def post_sidebar():
         # show the PDL, can be got with single_register
         with st.expander(f"🔍 PDL", expanded=False):
             st.code(f"{ss.client.pdl_str}", language="plaintext")
+        with st.expander(f"🔍 PDL.Procedure", expanded=False):
+            st.code(f"{ss.client.procedure_str}", language="plaintext")
         with st.expander(f"🔍 Template", expanded=False):
             st.code(f"{template}", language="plaintext")
 

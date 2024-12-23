@@ -99,6 +99,7 @@ async def single_register(conversation_id: str, request: SingleRegisterRequest) 
         success=True,
         conversation=session_context.conv,
         pdl_str=session_context.workflow.pdl.to_str(),
+        procedure_str=session_context.workflow.pdl.Procedure,
     )
     logger.info(f"<{conversation_id}> [single_register] done!")
     return response

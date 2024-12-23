@@ -75,7 +75,8 @@ class PDL(BaseModel):
         return s.strip()
 
     def to_str(self):
-        selected_keys = ["Name", "Desc", "SLOTs", "APIs", "ANSWERs", "Procedure"]
+        # selected_keys = ["Name", "Desc", "SLOTs", "APIs", "ANSWERs", "Procedure"]
+        selected_keys = ["Name", "Desc", "SLOTs", "APIs", "ANSWERs"]
         return self._format_with_yaml(selected_keys)
 
     def to_json(self):

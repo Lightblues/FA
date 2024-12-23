@@ -17,7 +17,8 @@ class SingleRegisterResponse(BaseResponse):
     conversation_id: str
     success: bool
     conversation: Conversation
-    pdl_str: str
+    pdl_str: str  # without Procedure
+    procedure_str: str
 
 
 class SinglePostControlResponse(BaseResponse):

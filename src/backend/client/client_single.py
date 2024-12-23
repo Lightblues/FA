@@ -74,6 +74,7 @@ class SingleAgentMixin(BaseClient):
         if response.status_code == 200:
             result = SingleRegisterResponse(**response.json())
             self.pdl_str = result.pdl_str
+            self.procedure_str = result.procedure_str
             self.conv = result.conversation
             return self.conv
         else:

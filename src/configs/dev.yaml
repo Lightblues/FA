@@ -22,6 +22,7 @@ x-available-models: &available_models
 ui_available_workflow_datasets:
   # - "v241127"
   - "pdl_converted_20241221_4o"
+  - pdl_converted_ruled
 ui_default_workflow_dataset: "pdl_converted_20241221_4o"
 
 ui_bot_mode: ui_single_bot
