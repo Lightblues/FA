@@ -1,6 +1,6 @@
 from common import Config
 from data import BotOutput, Conversation, DataHandler
-from flowagent.pdl_controllers import NodeDependencyController
+from fa import NodeDependencyController
 
 
 def test_dep_controller():

@@ -4,6 +4,8 @@
 - [x] add entity linker
 @241221
 - [x] #feat update tool (dict -> ExtToolSpec)
+@241223
+- [x] #feat add LLM & CODE mock! (ToolMockMixin)
 
 - [ ] tackle entity linking??
 """
