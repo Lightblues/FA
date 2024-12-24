@@ -1,0 +1,144 @@
+- name: 查询账户中是否有订单
+  description: ''
+  parameters:
+    type: object
+    properties:
+      uid:
+        type: int
+        description: 用户id
+        enum: null
+        name: null
+    required: []
+  url: http://8.134.222.238:8091/tongcheng/query-order
+  method: GET
+  extra_infos: null
+- name: 代码1
+  description: ''
+  parameters:
+    type: object
+    properties:
+      data1:
+        type: array_object
+        description: 订单信息
+        enum: null
+        name: null
+    required:
+    - data1
+  url: ''
+  method: GET
+  extra_infos:
+    type: code_executor
+    code: "\n# 仅支持数据转换或运算等操作，已引入numpy和pandas，无需import可直接使用。不支持IO操作，如读取文件，网络通信。\n#\
+      \ 请保存函数名为main,输入输出均为dict\ndef main(params: dict) -> dict:\n    return {\n  \
+      \      'order_number': len(params.get('data1', []))\n    }\n"
+- name: 判断是否已提交取消申请的SR工单
+  description: ''
+  parameters:
+    type: object
+    properties:
+      order_id:
+        type: int
+        description: 订单id
+        enum: null
+        name: null
+      uid:
+        type: int
+        description: 用户id
+        enum: null
+        name: null
+    required:
+    - order_id
+    - uid
+  url: http://8.134.222.238:8091/tongcheng/query-order
+  method: GET
+  extra_infos: null
+- name: 识别SR单进度
+  description: ''
+  parameters:
+    type: object
+    properties:
+      order_id:
+        type: int
+        description: 订单id
+        enum: null
+        name: null
+    required:
+    - order_id
+  url: http://8.134.222.238:8091/tongcheng/query-order
+  method: GET
+  extra_infos: null
+- name: 查询订单状态
+  description: ''
+  parameters:
+    type: object
+    properties:
+      order_id:
+        type: int
+        description: 订单id
+        enum: null
+        name: null
+    required:
+    - order_id
+  url: http://8.134.222.238:8091/tongcheng/query-order
+  method: GET
+  extra_infos: null
+- name: 代码2
+  description: ''
+  parameters:
+    type: object
+    properties:
+      data:
+        type: array_object
+        description: SR单信息
+        enum: null
+        name: null
+    required:
+    - data
+  url: ''
+  method: GET
+  extra_infos:
+    type: code_executor
+    code: "\n# 仅支持数据转换或运算等操作，已引入numpy和pandas，无需import可直接使用。不支持IO操作，如读取文件，网络通信。\n#\
+      \ 请保存函数名为main,输入输出均为dict\ndef main(params: dict) -> dict:\n    info = params.get('data',\
+      \ [])\n    if len(info) == 0:\n        return {\"sr_status\": \"\"}\n    else:\n\
+      \        return {\"sr_status\": info[0][\"sr_status\"]}\n"
+- name: 代码3
+  description: ''
+  parameters:
+    type: object
+    properties:
+      data:
+        type: array_object
+        description: 订单进度信息
+        enum: null
+        name: null
+    required:
+    - data
+  url: ''
+  method: GET
+  extra_infos:
+    type: code_executor
+    code: "\n# 仅支持数据转换或运算等操作，已引入numpy和pandas，无需import可直接使用。不支持IO操作，如读取文件，网络通信。\n#\
+      \ 请保存函数名为main,输入输出均为dict\ndef main(params: dict) -> dict:\n    info = params.get('data',\
+      \ [])\n    if len(info) == 0:\n        return {\"order_status\": \"\"}\n   \
+      \ else:\n        return {\"order_status\": info[0][\"order_status\"]}"
+- name: 代码4
+  description: ''
+  parameters:
+    type: object
+    properties:
+      data:
+        type: array_object
+        description: 申请状态信息
+        enum: null
+        name: null
+    required:
+    - data
+  url: ''
+  method: GET
+  extra_infos:
+    type: code_executor
+    code: "\n# 仅支持数据转换或运算等操作，已引入numpy和pandas，无需import可直接使用。不支持IO操作，如读取文件，网络通信。\n#\
+      \ 请保存函数名为main,输入输出均为dict\ndef main(params: dict) -> dict:\n    info = params.get('data',\
+      \ [])\n    if len(info) == 0:\n        return {\"submit_status\": \"\"}\n  \
+      \  else:\n        return {\"submit_status\": info[0][\"submit_status\"]}"
