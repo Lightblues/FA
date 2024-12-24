@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
-from common import Config
-from data import Conversation, DataHandler
+from fa_core.common import Config
+from fa_core.data import Conversation, DataHandler
 
 
 class Bot(BaseModel):

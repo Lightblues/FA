@@ -1,4 +1,4 @@
-from tools import calculator
+from fa_core.tools import calculator
 
 
 def test_calculator():

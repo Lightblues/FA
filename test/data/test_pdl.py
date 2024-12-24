@@ -1,7 +1,7 @@
 import yaml
 
-from common import Config
-from data import PDL, DataManager
+from fa_core.common import Config
+from fa_core.data import PDL, DataManager
 from data.pdl.pdl_nodes import ParameterNode
 
 cfg = Config.from_yaml("default.yaml")

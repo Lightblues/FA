@@ -5,7 +5,8 @@ description = "FlowAgent demo"
 authors = ["easonsshi <easonsshi@tencent.com>"]
 readme = "README.md"
 packages = [
-    { include = "src" }
+    { include = "fa_core", from = "src" },
+    { include = "fa_demo", from = "src" }
 ]
 
 [tool.poetry.dependencies]

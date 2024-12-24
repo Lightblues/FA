@@ -1,7 +1,7 @@
 from tencentcloud.hunyuan.v20230901.models import ChatCompletionsRequest, ChatCompletionsResponse
 
-from common import HunyuanClient
-from tools.tool_hunyuan_search import hunyuan_search, query_hunyuan
+from fa_core.common import HunyuanClient
+from fa_core.tools.tool_hunyuan_search import hunyuan_search, query_hunyuan
 
 
 client = HunyuanClient()

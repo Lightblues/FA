@@ -22,7 +22,7 @@ TODO:
 import json
 from typing import Dict, List
 
-from common import LLM_CFG, Formater, init_client
+from fa_core.common import LLM_CFG, Formater, init_client
 from data.pdl import PDL
 
 from ..workflow import DataManager, Parameter, Workflow

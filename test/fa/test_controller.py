@@ -1,6 +1,6 @@
-from common import Config
-from data import BotOutput, Conversation, DataHandler
-from fa import NodeDependencyController
+from fa_core.common import Config
+from fa_core.data import BotOutput, Conversation, DataHandler
+from fa_core.agents.controllers import NodeDependencyController
 
 
 def test_dep_controller():

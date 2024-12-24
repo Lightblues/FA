@@ -1,4 +1,4 @@
-from tools import function_to_schema, web_search
+from fa_core.tools import function_to_schema, web_search
 
 
 def test_function_to_schema():

@@ -1,4 +1,4 @@
-from common.configs import Config
+from fa_core.common.configs import Config
 
 
 def test_config():

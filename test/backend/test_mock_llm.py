@@ -1,4 +1,4 @@
-from common import init_client
+from fa_core.common import init_client
 
 
 client = init_client("debug")

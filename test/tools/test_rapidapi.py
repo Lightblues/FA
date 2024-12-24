@@ -1,5 +1,5 @@
 import os, requests
-from tools.tool_rapidapi import get_weather_forecast, get_stock_fundamentals, get_stock_news, search_arxiv_paper
+from fa_core.tools.tool_rapidapi import get_weather_forecast, get_stock_fundamentals, get_stock_news, search_arxiv_paper
 
 
 def test_search_arxiv_paper():

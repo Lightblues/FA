@@ -1,5 +1,5 @@
 """
-align with `src/flowagent/ui_conv/page_single_workflow.py`
+align with `ui_conv/page_single_workflow.py`
 
 USAGE::
     # 1. run the backend firsy
@@ -29,8 +29,8 @@ Client
 import datetime
 
 from backend import FrontendClient
-from common import Config, LogUtils
-from data import DataManager
+from fa_core.common import Config, LogUtils
+from fa_core.data import DataManager
 
 
 conversation_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")

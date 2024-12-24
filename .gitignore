@@ -13,3 +13,4 @@ __*/
 
 __pycache__/
 *.pyc
+/dist/

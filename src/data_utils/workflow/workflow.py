@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Annotated, Dict, List, Optional, Union, Any
 
 from pydantic import BaseModel, Field
-from common import json_line
+from fa_core.common import json_line
 from .base import Input, NodeType, TypeEnum
 from .workflow_node import WorkflowNode
 

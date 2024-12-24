@@ -1,6 +1,6 @@
-from common import Config
-from data import APIOutput, BotOutput, Conversation, DataHandler
-from fa import RequestTool, Context
+from fa_core.common import Config
+from fa_core.data import APIOutput, BotOutput, Conversation, DataHandler
+from fa_core.agents import RequestTool, Context
 
 
 # def init_llm_api() -> LLMSimulatedTool:

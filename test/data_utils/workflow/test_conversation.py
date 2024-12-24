@@ -1,6 +1,6 @@
 import json
 
-from data import BotOutput, Message, Role, Conversation
+from fa_core.data import BotOutput, Message, Role, Conversation
 
 
 def test_message():

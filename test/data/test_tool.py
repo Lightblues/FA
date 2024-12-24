@@ -1,4 +1,4 @@
-from data import FunctionDefinition, ToolDefinition, ExtToolSpec, ToolSpec
+from fa_core.data import FunctionDefinition, ToolDefinition, ExtToolSpec, ToolSpec
 import yaml
 
 tool_definition = {

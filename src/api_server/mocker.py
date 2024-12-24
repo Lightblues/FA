@@ -10,7 +10,7 @@ sys.path.append(str(_DIR.parent))
 from dataclasses import dataclass, field
 from typing import Dict
 
-from common import LLM_CFG, Formater, OpenAIClient, init_client
+from fa_core.common import LLM_CFG, Formater, OpenAIClient, init_client
 
 from .api_registry import api_registry
 

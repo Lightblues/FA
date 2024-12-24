@@ -1,6 +1,6 @@
 import json
 
-from common import LLM_CFG, Formater, OpenAIClient, init_client
+from fa_core.common import LLM_CFG, Formater, OpenAIClient, init_client
 from utils.jinja_templates import jinja_render
 
 

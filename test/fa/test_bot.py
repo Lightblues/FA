@@ -1,6 +1,6 @@
-from flowagent import Config, DataManager
-from flowagent.data import Conversation, DataHandler, Message, Role
-from flowagent.roles import UISingleBot
+from fa_core.common import Config, DataManager
+from fa_core.data import Conversation, DataHandler, Message, Role
+from fa_core.agents.bots import UISingleBot
 
 
 def init_ui_bot() -> UISingleBot:

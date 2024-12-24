@@ -2,7 +2,7 @@ from data.pdl.pdl_nodes import ParameterNode
 from .base import TypeEnum
 from pydantic import BaseModel
 from typing import Any
-from common import json_line
+from fa_core.common import json_line
 
 
 class Parameter(BaseModel):

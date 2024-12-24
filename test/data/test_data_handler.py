@@ -1,5 +1,5 @@
-from common import Config
-from data import DataHandler
+from fa_core.common import Config
+from fa_core.data import DataHandler
 
 
 cfg = Config.from_yaml("default.yaml")

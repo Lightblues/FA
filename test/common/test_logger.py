@@ -1,4 +1,4 @@
-from common import init_loguru_logger, log_exceptions
+from fa_core.common import init_loguru_logger, log_exceptions
 
 logger = init_loguru_logger()
 

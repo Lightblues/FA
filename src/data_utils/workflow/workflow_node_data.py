@@ -5,7 +5,7 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from common import json_line
+from fa_core.common import json_line
 from data.pdl.tool import ToolParameter, ToolProperties
 from .base import Input, NodeType, TypeEnum
 

@@ -1,5 +1,5 @@
 import os
-from tools.tool_python_executor import get_output_files, code_interpreter, DIR_DEFAULT
+from fa_core.tools.tool_python_executor import get_output_files, code_interpreter, DIR_DEFAULT
 
 
 def python_executor_tool_old(code: str, exec_dir: str = DIR_DEFAULT):

@@ -1,4 +1,4 @@
-from common import HunyuanClient, init_client
+from fa_core.common import HunyuanClient, init_client
 
 query = "今天上海天气如何?"
 

@@ -14,7 +14,7 @@ USAGE::
 import datetime
 
 from backend import FrontendClient
-from common import Config, LogUtils
+from fa_core.common import Config, LogUtils
 
 
 conversation_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")

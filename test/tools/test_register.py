@@ -1,4 +1,4 @@
-from tools import execute_tool_call
+from fa_core.tools import execute_tool_call
 
 
 def print_stream(stream):

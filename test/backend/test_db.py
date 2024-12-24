@@ -1,7 +1,7 @@
 import pymongo
 
 from backend.common.shared import check_db_connection
-from common import Config
+from fa_core.common import Config
 
 
 def test_db_connection():
