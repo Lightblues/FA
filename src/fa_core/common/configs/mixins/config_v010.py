@@ -51,8 +51,6 @@ class V010Mixin(BaseModel):
     ui_available_workflows: Optional[List[str]] = None  # NOTE: 暂未生效
     ui_default_model: str = "default"
     ui_default_template: str = "bot_pdl_ui.jinja"
-    ui_bot_template_fn: str = "bot_pdl_ui.jinja"
-    ui_bot_llm_name: str = "gpt-4o"
     ui_greeting_msg: str = "Hi, I'm HuaBu bot. How can I help you?"
     ui_user_additional_constraints: Optional[str] = None
     ui_tools: List[Dict] = []

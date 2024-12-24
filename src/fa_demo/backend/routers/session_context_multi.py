@@ -55,7 +55,7 @@ class MultiSessionContext(BaseModel):
                 Used config:
                     ``Workflow``: workflow_type, workflow_id, pdl_version
                         mode | exp_mode | user_mode
-                    ``UISingleBot``: ui_bot_template_fn, bot_llm_name, bot_retry_limit
+                    ``UISingleBot``: bot_template_fn, bot_llm_name, bot_retry_limit
                     ``RequestTool``: api_entity_linking
                         ``EntityLinker``: api_entity_linking_llm, api_entity_linking_template
                     ``controllers``: bot_pdl_controllers

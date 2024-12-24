@@ -15,6 +15,7 @@ import json
 from typing import Dict, Iterator
 
 import requests
+from loguru import logger
 
 from fa_core.common import Config
 from fa_core.data import BotOutput, Conversation, Role
@@ -78,7 +79,7 @@ class SingleAgentMixin(BaseClient):
             self.conv = result.conversation
             return self.conv
         else:
-            print(f"Error: {response.text}")
+            logger.error(f"Error: {response.text}")
             raise NotImplementedError
 
     def single_disconnect(self, conversation_id: str):
@@ -113,7 +114,7 @@ class SingleAgentMixin(BaseClient):
         Returns:
             Iterator[str]: the response of the bot
         """
-        print(f">> single_bot_predict with conversation: {json.dumps(str(self.conv), ensure_ascii=False)}")
+        logger.info(f">> single_bot_predict with conversation: {json.dumps(str(self.conv), ensure_ascii=False)}")
         url = f"{self.url}/single_bot_predict/{conversation_id}"
         return self.process_stream_url(url)
 
@@ -134,7 +135,7 @@ class SingleAgentMixin(BaseClient):
             self.conv.add_message(res.msg, role=Role.BOT)
             return res
         else:
-            print(f"Error: {response.text}")
+            logger.error(f"Error: {response.text}")
             raise NotImplementedError
 
     def single_post_control(self, conversation_id: str, bot_output: BotOutput) -> SinglePostControlResponse:

@@ -26,7 +26,7 @@ Bot
 ```python
 # 原本的依赖
 class PDL_UIBot():
-    ss.cfg: ui_bot_llm_name | ui_bot_template_fn
+    ss.cfg: bot_llm_name | bot_template_fn
     ss.workflow: pdl.status_for_prompt | pdl.to_str_wo_api() | toolbox
     ss.conv: .to_str()
     ss.user_additional_constraints

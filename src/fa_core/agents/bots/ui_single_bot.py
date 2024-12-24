@@ -38,8 +38,9 @@ class UISingleBot(ReactBot):
 
     Used config:
         bot_llm_name
-        ui_bot_template_fn <- bot_template_fn
-        bot_retry_limit
+        bot_template_fn
+        bot_retry_limit (for the .process() method)
+        ui_user_additional_constraints # for UI usage only
     """
 
     names = ["UISingleBot", "ui_single_bot"]
@@ -50,8 +51,8 @@ class UISingleBot(ReactBot):
     ui_user_additional_constraints: str = ""
 
     def _post_init(self) -> None:
-        self.bot_template_fn = self.cfg.ui_bot_template_fn
-        self.bot_llm_name = self.cfg.ui_bot_llm_name
+        self.bot_template_fn = self.cfg.bot_template_fn
+        self.bot_llm_name = self.cfg.bot_llm_name
         self.ui_user_additional_constraints = self.cfg.ui_user_additional_constraints
         self.llm = init_client(
             self.bot_llm_name,

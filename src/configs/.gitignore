@@ -1,5 +1,6 @@
 /*.yaml
 !default.yaml
 !dev.yaml
+!cli.yaml
 !fc.yaml
 !ui_deploy.yaml

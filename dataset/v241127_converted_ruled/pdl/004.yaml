@@ -52,40 +52,40 @@ Procedure: |-
     [用户id] = ANSWER.请用户提供必要信息()
     [data] = API.查询账户中是否有订单([用户id])
     [order_number] = API.代码1([data])
-    if order_number > "0"
+    if order_number > "0":
         [订单id] = ANSWER.请用户提供必要信息()
-        if 订单id is None
+        if 订单id is not None :
             [data] = API.判断是否已提交取消申请的SR工单([订单id,用户id])
             [submit_status] = API.代码4([data])
-            if submit_status == "是"
+            if submit_status == "是":
                 [data] = API.识别SR单进度([订单id])
                 [sr_status] = API.代码2([data])
-                if sr_status == "已通过"
+                if sr_status == "已通过":
                     ANSWER.已通过()
-                elif sr_status == "未通过"
+                elif sr_status == "未通过":
                     ANSWER.未通过()
-                elif sr_status == "处理中"
+                elif sr_status == "处理中":
                     ANSWER.处理中()
-                else
+                else:
                     ANSWER.兜底回复5()
-            else
+            else:
                 [data] = API.查询订单状态([订单id])
                 [order_status] = API.代码3([data])
-                if data == "未支付"
+                if data == "未支付":
                     ANSWER.未支付()
-                elif data == "已确认-可免费取消"
+                elif data == "已确认-可免费取消":
                     ANSWER.已确认-可免费取消()
-                elif data == "已确定-有违约金"
+                elif data == "已确定-有违约金":
                     ANSWER.已确定-有违约金()
-                elif data == "已取消"
+                elif data == "已取消":
                     ANSWER.已取消()
-                elif data == "已入住"
+                elif data == "已入住":
                     ANSWER.已入住()
-                elif data == "已结账"
+                elif data == "已结账":
                     ANSWER.已结账()
-                else
+                else:
                     ANSWER.兜底回复6()
-        else
+        else:
             ANSWER.客户不选择订单()
-    else
+    else:
         ANSWER.结束回复1()

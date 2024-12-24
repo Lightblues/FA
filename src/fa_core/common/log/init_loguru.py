@@ -5,7 +5,21 @@ from loguru import logger
 from loguru._logger import Logger
 
 
-def init_loguru_logger(log_dir="logs") -> "Logger":
+def singleton(func):
+    """Decorator to ensure function is only called once"""
+    func._initialized = False
+
+    def wrapper(*args, **kwargs):
+        if not func._initialized:
+            func._initialized = True
+            return func(*args, **kwargs)
+        return logger  # Return existing logger instance
+
+    return wrapper
+
+
+@singleton
+def init_loguru_logger(log_dir="logs", stdout_level="WARNING") -> "Logger":
     """initialize the loguru logger
 
     Args:
@@ -37,5 +51,5 @@ def init_loguru_logger(log_dir="logs") -> "Logger":
         filter=lambda record: "custom" in record["extra"],
     )
     logger.add(f"{log_dir}/app.log", rotation="10 MB", compression="zip", level="INFO")
-    logger.add(sys.stdout, level="INFO")
+    logger.add(sys.stdout, level=stdout_level)
     return logger

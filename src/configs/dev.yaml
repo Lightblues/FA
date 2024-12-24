@@ -27,10 +27,8 @@ ui_default_workflow_dataset: v241127_converted_ruled
 
 ui_bot_mode: ui_single_bot
 ui_default_template: "bot_pdl_ui_zh.jinja"
-ui_bot_template_fn: "bot_pdl_ui_zh.jinja"
 # ui_bot_mode: ui_single_fc_bot                         # NOTE: FC mode for open-source LLM is pretty bad!
 # ui_default_template: "bot_pdl_ui_zh_fc.jinja"
-# ui_bot_template_fn: "bot_pdl_ui_zh_fc.jinja"
 ui_available_models: *available_models
 ui_available_templates:
   # - bot_pdl_ui.jinja

@@ -49,7 +49,7 @@ class SingleSessionContext(BaseModel):
                 Used config:
                     ``Workflow``: workflow_type, workflow_id, pdl_version
                         mode | exp_mode | user_mode
-                    ``UISingleBot``: ui_bot_template_fn, bot_llm_name, bot_retry_limit
+                    ``UISingleBot``: bot_template_fn, bot_llm_name, bot_retry_limit
                     ``RequestTool``: api_entity_linking
                         ``EntityLinker``: api_entity_linking_llm, api_entity_linking_template
                     ``controllers``: bot_pdl_controllers
@@ -62,7 +62,7 @@ class SingleSessionContext(BaseModel):
         conv = Conversation.create(session_id)
         conv.add_message(msg=cfg.ui_greeting_msg.format(name=data_handler.pdl.Name), role=Role.BOT)
         _context = Context(cfg=cfg, data_handler=data_handler, conv=conv)
-        # TODO: check the config `ui_bot_llm_name`
+        # TODO: check the config `bot_llm_name`
         bot = BOT_NAME2CLASS[cfg.ui_bot_mode](cfg=cfg, context=_context)
         tool = RequestTool(cfg=cfg, context=_context)
         controllers = {}
