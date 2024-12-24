@@ -18,9 +18,11 @@ poetry install      # or you can use pip to install the dependencies, if you lik
 # 3. run!
 cd src/
 tmux new/attach -t huabu
-# 3.1 run backend
-uvicorn backend.main:app --host 0.0.0.0 --port 8100 --reload --reload-dir ./backend
-# 3.2 run frontend
-streamlit run run_flowagent_ui2.py -- --config=ui_deploy.yaml
+# 3.1 run backend & frontend
+python run_demo_backend.py --config=dev.yaml --port=8101 --reload
+streamlit run run_demo_frontend.py --server.port 8502 -- --config=dev.yaml --page_default_index=0
 # ... interct in the UI!
+
+# or, can also install the package
+pip install -e .
 ```

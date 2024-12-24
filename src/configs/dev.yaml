@@ -23,14 +23,14 @@ ui_available_workflow_datasets:
   - "v241127"
   - "pdl_converted_20241221_4o"
   - pdl_converted_ruled
-ui_default_workflow_dataset: "pdl_converted_20241221_4o"
+ui_default_workflow_dataset: "pdl_converted_ruled"
 
 ui_bot_mode: ui_single_bot
 ui_default_template: "bot_pdl_ui_zh.jinja"
-ui_bot_template_fn: "flowagent/bot_pdl_ui_zh.jinja"
+ui_bot_template_fn: "bot_pdl_ui_zh.jinja"
 # ui_bot_mode: ui_single_fc_bot                         # NOTE: FC mode for open-source LLM is pretty bad!
 # ui_default_template: "bot_pdl_ui_zh_fc.jinja"
-# ui_bot_template_fn: "flowagent/bot_pdl_ui_zh_fc.jinja"
+# ui_bot_template_fn: "bot_pdl_ui_zh_fc.jinja"
 ui_available_models: *available_models
 ui_available_templates:
   # - bot_pdl_ui.jinja
@@ -48,8 +48,10 @@ bot_pdl_controllers:
   # - {name: "session_length", config: {if_pre: true, min: 5, max: 15}, is_activated: true}
 
 db_uri: "mongodb://9.134.230.111:27017/"
-db_name: "agent-pdl-dev"
+db_name: "agent-pdl"
 db_collection_single: "dev_single_sessions"
 db_collection_multi: "dev_multi_sessions"
+
+exp_version: "exp_converted_ruled_241224"     # NOTE: to set the exp_version!
 
 backend_url: "http://localhost:8101"

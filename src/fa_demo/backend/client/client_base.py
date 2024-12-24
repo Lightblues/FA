@@ -14,9 +14,10 @@ class BaseClient:
     url: str = None
     conv: Conversation = None  # the conversation that sync with backend
     pdl_str: str = None  # the pdl that sync with backend
+    procedure_str: str = None
 
-    def __init__(self, config: Config):
-        self.url = config.backend_url
+    def __init__(self, backend_url: str):
+        self.url = backend_url
 
     def process_stream_url(self, url: str, data: dict = None) -> Iterator[str]:
         """Process the stream url and return the iterator of the stream

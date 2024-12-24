@@ -4,8 +4,6 @@
 
 """
 
-import datetime
-import json
 from typing import Dict, List
 
 import streamlit as st
@@ -13,12 +11,12 @@ import streamlit as st
 
 ss = st.session_state
 
-from fa_core.common import LLM_CFG, Config
+from fa_core.common import LLM_CFG, Config, get_session_id, json_line
 from fa_core.data import DataManager
 
 
 def debug_print_infos_single() -> None:
-    print(f"[DEBUG] Conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
+    print(f"[DEBUG] Conversation: {json_line(str(ss.conv))}")
     print(f"  > mode: {ss.mode}")
     print(f"  > cfg.bot_pdl_controllers: {ss.cfg.bot_pdl_controllers}")
 
@@ -41,11 +39,6 @@ def get_workflow_dirs(workflow_dataset) -> List[str]:
 @st.cache_data
 def get_workflow_names_map() -> Dict[str, List[str]]:
     return DataManager.get_workflow_names_map()
-
-
-def get_session_id():
-    # "%Y-%m-%d %H:%M:%S.%f"
-    return datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 
 
 def _collect_ui_config_controllers():

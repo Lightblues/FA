@@ -36,9 +36,9 @@ ui_tools:
 # mui_available_workflows:
 #   - 114挂号
 #   - 新闻查询
-mui_agent_main_template_fn: "flowagent/bot_mui_main_agent.jinja"
+mui_agent_main_template_fn: "bot_mui_main_agent.jinja"
 mui_agent_main_llm_name: "gpt-4o"
-mui_agent_workflow_template_fn: "flowagent/bot_mui_workflow_agent.jinja"
+mui_agent_workflow_template_fn: "bot_mui_workflow_agent.jinja"
 mui_available_models: *available_models
 mui_agent_main_available_templates:
   - bot_mui_main_agent.jinja
@@ -66,13 +66,13 @@ exp_check_if_run: false    # DONOT check this experiment if it has been run if s
 
 user_mode: "input_user"   # dummy_user, input_user, llm_profile, llm_oow
 user_llm_name: "gpt-4o-mini"
-user_template_fn: null    # "flowagent/user_llm.jinja"
+user_template_fn: null    # "user_llm.jinja"
 # user_profile: true      # -> exp_mode
 user_profile_id: 0
 user_oow_ratio: 0.2
 
 bot_mode: "pdl_bot"       # dummy_bot, react_bot, pdl_bot, core_bot
-bot_template_fn: null     # "flowagent/bot_flowbench.jinja"
+bot_template_fn: null     # "bot_flowbench.jinja"
 bot_llm_name: "gpt-4o"
 bot_action_limit: 10       # FIXME: to check & set the out-of-action response!
 bot_pdl_controllers:
@@ -82,11 +82,11 @@ bot_pdl_controllers:
 
 
 api_mode: "request"           # dummy_api, llm, core, request
-api_template_fn: null         # "flowagent/api_llm.jinja"
+api_template_fn: null         # "api_llm.jinja"
 api_llm_name: "gpt-4o-mini"
 api_entity_linking: false            # FIXME: note that stop EL for now!!!
 api_entity_linking_llm: "gpt-4o"
-api_entity_linking_template: "flowagent/entity_linking.jinja"
+api_entity_linking_template: "entity_linking.jinja"
 
 conversation_turn_limit: 20
 log_utterence_time: false
@@ -94,6 +94,8 @@ log_to_db: true
 
 db_uri: 'mongodb://localhost:27017'
 db_name: "agent-pdl"
+db_collection_single: "backend_single_sessions"
+db_collection_multi: "backend_multi_sessions"
 
 backend_url: "http://localhost:8100"
 

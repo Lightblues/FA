@@ -38,7 +38,7 @@ class SingleAgentMixin(BaseClient):
     Usage::
 
         # see `test/backend/test_ui_backend_single.py`
-        client = FrontendClient(cfg)
+        client = FrontendClient(cfg.backend_url)
         # 1. init the conversation
         _ = client.single_register(conversation_id, cfg)
         # 2. query loop

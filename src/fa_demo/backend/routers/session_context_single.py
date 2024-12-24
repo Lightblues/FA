@@ -118,6 +118,7 @@ def db_upsert_session_single(ss: SingleSessionContext):
     logger.info(f"[db_upsert_session] {ss.session_id} into {db}")
     _session_info = {
         # model_llm_name, template, tools, etc
+        "exp_version": ss.cfg.exp_version,
         "session_id": ss.session_id,
         "user": ss.user_identity,
         "mode": "single",

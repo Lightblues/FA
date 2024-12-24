@@ -24,6 +24,7 @@ from fa_core.data import BotOutput
 
 from .react_bot import ReactBot
 from .bot_tools import tool_response
+from .re_utils import re_parse_react_output
 
 
 class UISingleBot(ReactBot):
@@ -141,9 +142,7 @@ class UISingleBot(ReactBot):
         self.last_llm_response = llm_response
         if "```" in llm_response:
             llm_response = Formater.parse_codeblock(llm_response, type="").strip()
-        pattern = r"(Thought|Action|Action Input):\s*(.*?)\s*(?=Thought:|Action:|Action Input:|\Z)"
-        matches = re.finditer(pattern, llm_response, re.DOTALL)
-        result = {match.group(1): match.group(2).strip() for match in matches}
+        result = re_parse_react_output(llm_response)
 
         # validate result
         try:

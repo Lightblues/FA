@@ -16,10 +16,10 @@ x-available-models: &available_models
 
 # ui_bot_mode: ui_single_bot
 # ui_default_template: "bot_pdl_ui_zh.jinja"
-# ui_bot_template_fn: "flowagent/bot_pdl_ui_zh.jinja"
+# ui_bot_template_fn: "bot_pdl_ui_zh.jinja"
 ui_bot_mode: ui_single_fc_bot
 ui_default_template: "bot_pdl_ui_zh_fc.jinja"
-ui_bot_template_fn: "flowagent/bot_pdl_ui_zh_fc.jinja"
+ui_bot_template_fn: "bot_pdl_ui_zh_fc.jinja"
 ui_available_models: *available_models
 ui_available_templates:
   - bot_pdl_ui_zh_fc.jinja

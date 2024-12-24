@@ -142,7 +142,7 @@ def main_single():
     init_sidebar()  # need cfg
 
     if "client" not in ss:
-        ss.client = FrontendClient(ss.cfg)
+        ss.client = FrontendClient(ss.cfg.backend_url)
     if ("mode" not in ss) or (ss.mode == "multi") or ("session_id" not in ss):
         ss.mode = "single"
         refresh_session_single()  # single_register

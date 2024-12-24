@@ -26,16 +26,13 @@ Client
     .multi_tool_workflow(conversation_id, bot_output)
 """
 
-import datetime
-
-from backend import FrontendClient
-from fa_core.common import Config, LogUtils
-from fa_core.data import DataManager
+from fa_demo.backend import FrontendClient
+from fa_core.common import Config, LogUtils, get_session_id
 
 
-conversation_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 cfg = Config.from_yaml("default.yaml")
-client = FrontendClient(cfg)
+client = FrontendClient(cfg.backend_url)
+conversation_id = get_session_id()
 
 
 def step_tool(agent_main_output):

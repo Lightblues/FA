@@ -12,10 +12,22 @@ Action: 科室名称归一化
 Action Input: {"department_name": "口腔科"}
 Response:
 """.strip()
+llm_response = """
+Thought: 用户提供了医院名称“301”，需要验证该医院是否存在。
+Action: check_hospital_exist
+Action Input: {"hos_name": "北京301医院"}
+[END]
+""".strip()
 
 
 def test_react_re():
-    pattern = r"(Thought|Action|Action Input|Response):\s*(.*?)\s*(?=Thought:|Action:|Action Input:|Response:|\Z)"
+    """
+    `(.*?)` -- Match any characters (except newline) 0 or more times. The `?` is a non-greedy match.
+    `(?:\s*\[END\])?` -- Unmatch `[END]`. The `(?:...)` is a non-capturing group. The last `?` is an optional.
+    `re.DOTALL` -- The dot matches any character including newline.
+    """
+
+    pattern = r"(Thought|Action|Action Input):\s*(.*?)(?:\s*\[END\])?\s*(?=Thought:|Action:|Action Input:|\Z)"
     matches = re.finditer(pattern, llm_response, re.DOTALL)
     result = {match.group(1): match.group(2).strip() for match in matches}
     print(result)

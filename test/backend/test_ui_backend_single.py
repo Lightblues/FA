@@ -11,16 +11,14 @@ USAGE::
 - [x] standardize the conversation logic (with FrontendClient)
 """
 
-import datetime
-
-from backend import FrontendClient
-from fa_core.common import Config, LogUtils
+from fa_demo.backend import FrontendClient
+from fa_core.common import Config, LogUtils, get_session_id
 
 
-conversation_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+conversation_id = get_session_id()
 cfg = Config.from_yaml("default.yaml")
 
-client = FrontendClient(cfg)
+client = FrontendClient(cfg.backend_url)
 
 
 def main():
