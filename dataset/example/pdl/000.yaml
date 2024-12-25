@@ -4,10 +4,13 @@ Desc: 根据特定需求查询新闻
 SLOTs:
 - name: news_location
   desc: 新闻发生地
+  type: string
 - name: news_type
   desc: 新闻类型
+  type: string
 - name: news_time
   desc: 新闻时间
+  type: string
 
 APIs:
 - name: check_location
