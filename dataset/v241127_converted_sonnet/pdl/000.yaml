@@ -111,32 +111,28 @@ SLOTs:
   type: string
 APIs:
 - name: 查验目的地清关政策
-  desc: ''
-  precondition: null
 - name: 转换收件国家到简码
-  desc: ''
-  precondition: null
 - name: 销售信息查询
-  desc: ''
-  precondition: null
+  precondition:
+    - 查验目的地清关政策
 - name: 检查发件邮编城市
-  desc: ''
-  precondition: null
+  precondition:
+    - 查验目的地清关政策
 - name: 检查国家或地区是否有邮编
-  desc: ''
-  precondition: null
+  precondition:
+    - 检查发件邮编城市
 - name: 检查收件邮编城市
-  desc: ''
-  precondition: null
+  precondition:
+    - 检查国家或地区是否有邮编
 - name: 检查收件城市
-  desc: ''
-  precondition: null
+  precondition:
+    - 检查国家或地区是否有邮编
 - name: 运费时效包裹类
-  desc: ''
-  precondition: null
+  precondition:
+    - 检查国家或地区是否有邮编
 - name: 运费时效文件类
-  desc: ''
-  precondition: null
+  precondition:
+    - 检查国家或地区是否有邮编
 ANSWERs:
 - name: 俄罗斯白俄罗斯
   desc: 您好，DHL快递发往俄罗斯和白俄罗斯的服务临时暂停，恢复时间待另行通知。谢谢。

@@ -24,11 +24,9 @@ SLOTs:
   type: string
 APIs:
 - name: 预定接口
-  desc: ''
-  precondition: null
 - name: 查询附近门店
-  desc: ''
-  precondition: null
+  precondition:
+    - 预定接口
 ANSWERs:
 - name: 很抱歉，我们这没有提供对应时间段的用餐服务
   desc: 很抱歉，我们这没有提供{{mealtime}} 的用餐服务

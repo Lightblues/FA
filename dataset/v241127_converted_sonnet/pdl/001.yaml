@@ -18,14 +18,12 @@ SLOTs:
   type: string
 APIs:
 - name: 查询开票方式
-  desc: ''
-  precondition: null
 - name: 开票进度查询
-  desc: ''
-  precondition: null
+  precondition:
+    - 查询开票方式
 - name: 会员身份查询
-  desc: ''
-  precondition: null
+  precondition:
+    - 开票进度查询
 ANSWERs:
 - name: 结束回复1
   desc: 您的同程开发票操作已成功执行，开票方式为{{invoicingMethod}}   。

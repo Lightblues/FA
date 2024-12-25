@@ -9,29 +9,19 @@ SLOTs:
   type: int
 APIs:
 - name: 查询账户中是否有订单
-  desc: ''
-  precondition: null
 - name: 代码1
-  desc: ''
-  precondition: null
 - name: 判断是否已提交取消申请的SR工单
-  desc: ''
-  precondition: null
+  precondition:
+    - 查询账户中是否有订单
 - name: 识别SR单进度
-  desc: ''
-  precondition: null
+  precondition:
+    - 判断是否已提交取消申请的SR工单
 - name: 查询订单状态
-  desc: ''
-  precondition: null
+  precondition:
+    - 判断是否已提交取消申请的SR工单
 - name: 代码2
-  desc: ''
-  precondition: null
 - name: 代码3
-  desc: ''
-  precondition: null
 - name: 代码4
-  desc: ''
-  precondition: null
 ANSWERs:
 - name: 结束回复1
   desc: 抱歉，未查询到您账户下有订单，现在为您转接人工服务，请稍等
