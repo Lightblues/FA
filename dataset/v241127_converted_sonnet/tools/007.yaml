@@ -1,0 +1,83 @@
+- name: 查验目的地清关政策
+  description: ''
+  parameters:
+    type: object
+    properties:
+      adapter:
+        type: string
+        description: ''
+        enum: null
+        name: null
+      key:
+        type: string
+        description: ''
+        enum: null
+        name: null
+      countryCode:
+        type: string
+        description: 收件国家
+        enum: null
+        name: null
+    required:
+    - adapter
+    - countryCode
+  url: https://leonxing.cn/robot/dhlTask
+  method: POST
+  extra_infos: null
+- name: 物品目的地清关提示
+  description: ''
+  parameters:
+    type: object
+    properties:
+      countryCode:
+        type: string
+        description: 收件国家
+        enum: null
+        name: null
+      goodsName:
+        type: string
+        description: 包裹内容
+        enum: null
+        name: null
+    required: []
+  url: https://wippe2-pc.cndhl.com/api/wiplus/base/large-model/itemsCustomsTips
+  method: POST
+  extra_infos: null
+- name: 转换收件国家到简码
+  description: ''
+  parameters:
+    type: object
+    properties:
+      countryName:
+        type: string
+        description: 国家名称
+        enum: null
+        name: null
+    required:
+    - countryName
+  url: ''
+  method: GET
+  extra_infos:
+    type: llm
+    prompt: 请将国家名称{{countryName}}          转换为对应的ISO 3166-1二位字母代码；如将"中国"转换为"CN"; "美国"转换为"US";
+      "德国"转换为"DE"。请直接返回转换后的字母代码结果无需返回其他内容，格式如："DE"。
+- name: 包裹内容归类
+  description: ''
+  parameters:
+    type: object
+    properties:
+      name:
+        type: string
+        description: 包裹内容
+        enum: null
+        name: null
+    required:
+    - name
+  url: ''
+  method: GET
+  extra_infos:
+    type: llm
+    prompt: '将包裹内容''{{name}}  ''归类如下：玻璃制品,茶叶,电路及电路板,电脑配件,电脑软件,电信设备,电子设备,纺织用品,个人物品,古董和艺术品,护照,化妆品,机器配件,技术手册,酒精饮料,咖啡（包括样品）,,食品,手机以及配件,书籍（非商业使用）,塑料及塑料制品,陶瓷制品,通信设备,玩具,文件类,文具,橡胶制品,鞋,眼镜,药品（处方）,药品（非处方）,液体（非危险品）,医疗/牙科用品和设备,杂志/期刊,证件,其他
+
+
+      直接输出归类结果'

@@ -4,8 +4,6 @@ from enum import Enum
 from typing import Annotated, Dict, List, Optional, Union, Any
 
 from pydantic import BaseModel, Field
-from fa_core.common import json_line
-from .base import Input, NodeType, TypeEnum
 from .workflow_node import WorkflowNode
 
 
@@ -41,11 +39,7 @@ class Workflow(BaseModel):
     WorkflowName: str
     WorkflowDesc: str
     Nodes: List[WorkflowNode]
-    # Edge: str  # JSON string of edges
     Edges: List[WorkflowEdge]
-
-    def model_post_init(self, __context: Any) -> None:
-        self.WorkflowDesc = json_line(self.WorkflowDesc)
 
     def __str__(self) -> str:
         s = f"Name: {self.WorkflowName}\nDesc: {self.WorkflowDesc}\n"

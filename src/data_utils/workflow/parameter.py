@@ -1,8 +1,8 @@
-from data.pdl.pdl_nodes import ParameterNode
-from .base import TypeEnum
+from fa_core.data import ParameterNode
 from pydantic import BaseModel
 from typing import Any
-from fa_core.common import json_line
+
+from .base import TypeEnum
 
 
 class Parameter(BaseModel):
@@ -19,9 +19,6 @@ class Parameter(BaseModel):
     parameter_type: TypeEnum
     parameter_correct_example: str = None
     parameter_wrong_example: str = None
-
-    def model_post_init(self, __context: Any) -> None:
-        self.parameter_desc = json_line(self.parameter_desc)
 
     def __str__(self):
         return f"Parameter(name={self.parameter_name}, id={self.parameter_id}, desc={self.parameter_desc}, type={self.parameter_type})"

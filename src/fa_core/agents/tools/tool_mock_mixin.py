@@ -1,16 +1,30 @@
 import jinja2
 from loguru import logger
+from pydantic import BaseModel
 from typing import Dict, Any
-from fa_core.common import init_client, json_line
+from fa_core.common import init_client, json_line, OpenAIClient
 
 
-class ToolMockMixin:
-    client = init_client("gpt-4o-mini")
+class ToolMockMixin(BaseModel):
+    """Mixin class for mocking tool responses
+
+    Usage::
+
+        class Tool(BaseTool, ToolMockMixin):
+            def _post_init(self) -> None:
+                self.init_mock(self.cfg)  # init the mock client
+    """
+
+    mock_client: OpenAIClient = None
+
+    def init_mock_llm(self, cfg) -> None:
+        """Initialize mock client"""
+        self.mock_client = init_client(cfg.api_mock_llm_name)
 
     def mock_llm(self, template: str, slots: Dict = {}):
         template = jinja2.Template(template)
         prompt = template.render(**slots)
-        response = self.client.query_one(query=prompt)
+        response = self.mock_client.query_one(query=prompt)
         logger.info(f"> Mocked result of {json_line(prompt)}: {json_line(response)}")
         return response
 

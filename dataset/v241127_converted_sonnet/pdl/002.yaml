@@ -1,0 +1,88 @@
+Name: 订餐流程
+Desc: "#描述：当用户提出需要订餐服务时，触发此流程。\n需要收集用户订餐的具体日期和用餐餐段，查询餐厅内是否有空余桌位可预定，给予客户一个友好的耐心的回复。以帮助用户完成整个用餐预定的过程。\n\
+  #示例：你好，我想预定今天的晚餐。我想再预定一个新的订单。"
+SLOTs:
+- name: 用餐人数
+  desc: 到店用餐的人数，包含小孩，可以问客人是否有小孩，几个大人几个小孩，然后需要知道总的人数，就是用餐的人数。将汉字转换为阿拉伯数字。比如，五位用餐为5，八人为8，一家四口为4，十个左右为10，两个大人一个小孩为3，一对夫妻为2。
+  type: int
+- name: 订餐用户称呼
+  desc: 订餐用户的称呼方式，可以中文称呼。也可以是英文称呼，但是英文称呼应该转为中文称呼，不区分构词语法。#示例：王（是姓氏）、王先生/女士、姓王、王五、John、Sophia、William。
+  type: string
+- name: 联系方式
+  desc: 用户提供的通讯方式。可以是手机号，由11个阿拉伯数字组成的字符串，手机号作为参数传递给后端接口。也可以是微信号，由任何字符组成的字符串。
+  type: string
+- name: 预定日期
+  desc: "#描述：预定日期，识别后需要转换为：yyyy-MM-dd，其中yyyy表示年份，MM表示月份，dd表示日。\n如果用户说的是明天或者下周一，需要转换为基于当下日期的明天或者下周一日期，具体格式为：yyyy-MM-dd。例如：今天是2024-07-15，周一，那么下周一是2024-07-22\n\
+    #示例：今天是2024-07-15，今晚指2024-07-15的晚上，明晚指2024-07-16的晚上"
+  type: string
+- name: 用餐餐段
+  desc: "用餐餐段。如果用户提及了用餐或抵达餐馆的时间，根据以下步骤将用餐时间转成用餐餐段：\n步骤1：判断用户提及的时间是否是相对于现在时间的偏移量。如果是，计算基于现在时间+偏移量后的绝对时间。否则，直接提取绝对时间。\n\
+    步骤2：基于绝对时间，按以下规则映射到用餐餐段。\n11点前->早餐\n11点到下午2点->中餐（lunch）\n下午2点后到下午4点半前->下午茶\n下午4点半到晚上9点->晚餐（dinner）"
+  type: string
+- name: 是否查询附近门店
+  desc: 本店已满，询问是否查询附近门店。
+  type: string
+APIs:
+- name: 预定接口
+  desc: ''
+  precondition: null
+- name: 查询附近门店
+  desc: ''
+  precondition: null
+ANSWERs:
+- name: 很抱歉，我们这没有提供对应时间段的用餐服务
+  desc: 很抱歉，我们这没有提供{{mealtime}} 的用餐服务
+- name: 超过最大容纳量
+  desc: 不好意思，您的用餐人数超过了我们的最大桌位容量，无法提供服务。祝您生活愉快，再见。
+- name: 系统错误1
+  desc: 很抱歉，由于系统错误，您的预定流程失败，请稍后重试。
+- name: 结束回复4
+  desc: 你这边预定的是{{reserve}}    的{{diningtime}}    ，用餐人数是{{diner}}    ，已经帮你预定了本店的{{tableNumber}}
+       号桌，稍后会发送短信给您，请注意查收。
+- name: 结束回复5
+  desc: 好的，非常抱歉，欢迎下次光临。
+- name: 预定成功-附近门店
+  desc: 好的，{{customerName}}  ，附近门店{{date}}  的{{mealType}}  餐段还有合适的桌位，{{tableNumber}}
+     号桌已经帮您预定好了。稍后会发送短信给您，请注意查收。祝您在附近门店用餐愉快！再见！
+- name: 附近门店已经订满
+  desc: 非常抱歉，刚刚查询到，附近门店合适的座位也都已经订满了，欢迎您下次光临，祝您生活愉快。
+- name: 系统错误2
+  desc: 很抱歉，由于系统错误，您的预定流程失败，请稍后重试。
+- name: 兜底回复
+  desc: 兜底回复
+- name: 兜底回复2
+  desc: 兜底回复
+- name: 兜底回复3
+  desc: 兜底回复
+Procedure: "\n<antThinking>This is an excellent candidate for an artifact as it's\
+  \ a substantial, self-contained procedure that the user might want to reference\
+  \ or modify later.</antThinking>\n\n<Antartifact identifier=\"dining-reservation-procedure\"\
+  \ type=\"application/vnd.ant.code\" language=\"python\" title=\"订餐流程 Procedure\"\
+  >\ndef 订餐流程(): True:\n        # 获取预\n    while定日期\n        [预定日期] = ANSWER.请用户提供必要信息()\n\
+  \        \n        # 获取用餐餐段\n        [用餐餐段] = ANSWER.请问你预定的餐段是()\n        \n   \
+  \     # 检查餐段是否合法\n        if 用餐餐段 not in ['lunch', 'dinner']:\n            ANSWER.很抱歉，我们这没有提供对应时间段的用餐服务(mealtime=用餐餐段)\n\
+  \            continue\n        \n        # 获取用餐人数\n        [用餐人数] = ANSWER.获取用餐人数()\n\
+  \        \n        # 检查用餐人数是否超过最大容量\n        if 用餐人数 >= 22:\n            ANSWER.超过最大容纳量()\n\
+  \            break\n        \n        # 获取用户信息\n        [订餐用户称呼, 联系方式] = ANSWER.请问您贵姓，怎么称呼()\n\
+  \        \n        # 调用预定接口\n        [预定结果] = API.预定接口(\n            customerName=订餐用户称呼,\
+  \ \n            contactInfo=联系方式, \n            date=预定日期, \n            mealType=用餐餐段,\
+  \ \n            numberOfPeople=用餐人数\n        )\n        \n        # 处理预定结果\n   \
+  \     if 预定结果.code == 10002:\n            ANSWER.系统错误1()\n            break\n  \
+  \      elif 预定结果.code == 10001:\n            # 本店已满，询问是否查询附近门店\n            [是否查询附近门店]\
+  \ = ANSWER.本店已满，询问是否查询附近门店()\n            \n            if 是否查询附近门店 == '是':\n  \
+  \              # 查询附近门店\n                [附近门店结果] = API.查询附近门店(\n              \
+  \      customerName=订餐用户称呼, \n                    contactInfo=联系方式, \n         \
+  \           date=预定日期, \n                    mealType=用餐餐段, \n                 \
+  \   numberOfPeople=用餐人数\n                )\n                \n                #\
+  \ 处理附近门店查询结果\n                if 附近门店结果.code == 10000:\n                    ANSWER.预定成功_附近门店(\n\
+  \                        customerName=订餐用户称呼, \n                        date=预定日期,\
+  \ \n                        mealType=用餐餐段, \n                        tableNumber=附近门店结果.data.tableNumber\n\
+  \                    )\n                    break\n                elif 附近门店结果.code\
+  \ == 10001:\n                    ANSWER.附近门店已经订满()\n                    break\n\
+  \                elif 附近门店结果.code == 10002:\n                    ANSWER.系统错误2()\n\
+  \                    break\n            else:\n                ANSWER.结束回复5()\n\
+  \                break\n        elif 预定结果.code == 10000:\n            ANSWER.结束回复4(\n\
+  \                reserve=预定日期, \n                diningtime=用餐餐段, \n           \
+  \     diner=用餐人数, \n                tableNumber=预定结果.data.tableNumber\n        \
+  \    )\n            break\n        else:\n            ANSWER.兜底回复()\n          \
+  \  break\n\n# 启动订餐流程\n订餐流程()\n</Antartifact>"

@@ -40,6 +40,7 @@ class V010Mixin(BaseModel):
     api_entity_linking: bool = False
     api_entity_linking_llm: str = "gpt-4o"
     api_entity_linking_template: str = "entity_linking.jinja"
+    api_mock_llm_name: str = "gpt-4o"
 
     ui_bot_mode: str = "ui_single_bot"  # ui_single_bot
     # ui_bot_if_fc: bool = True         # DEPRECATED! seperate to `ui_single_fc_bot` and `ui_single_bot`

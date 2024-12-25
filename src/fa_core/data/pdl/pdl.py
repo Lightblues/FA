@@ -6,7 +6,7 @@ from typing import Union
 from fa_core.common import json_line
 
 from fa_core.data.pdl.pdl_nodes import AnswerNode, BaseNode, ParameterNode, ToolDependencyNode
-from fa_core.data.pdl.tool import FunctionDefinition, ToolDefinition
+from fa_core.data.pdl.tool import ToolDefinition
 
 
 # def base_node_representer(dumper, data):
@@ -23,7 +23,7 @@ class MyDumper(yaml.SafeDumper):
     def represent_scalar(self, tag, value, style=None):
         if style is None:
             if "\n" in value:
-                style = "|"
+                style = "|-"
         return super(MyDumper, self).represent_scalar(tag, value, style)
 
 
@@ -74,9 +74,11 @@ class PDL(BaseModel):
         s += f"\nProcedure: |-\n{_indented_procedure}"
         return s.strip()
 
-    def to_str(self):
+    def to_str(self, add_procedure: bool = False):
         # selected_keys = ["Name", "Desc", "SLOTs", "APIs", "ANSWERs", "Procedure"]
         selected_keys = ["Name", "Desc", "SLOTs", "APIs", "ANSWERs"]
+        if add_procedure:
+            selected_keys.append("Procedure")
         return self._format_with_yaml(selected_keys)
 
     def to_json(self):
@@ -85,6 +87,9 @@ class PDL(BaseModel):
 
     def _format_with_yaml(self, selected_keys: List[str]) -> str:
         infos = self.model_dump()
+        if "Procedure" in selected_keys:
+            infos["Procedure"] = "\n" + infos["Procedure"]
+
         infos_selected = {k: infos[k] for k in selected_keys}
         s = yaml.dump(
             infos_selected,
@@ -92,5 +97,6 @@ class PDL(BaseModel):
             Dumper=MyDumper,
             default_flow_style=False,
             allow_unicode=True,
+            indent=2,
         )
         return s.strip()

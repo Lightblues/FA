@@ -1,0 +1,45 @@
+- name: 查询开票方式
+  description: ''
+  parameters:
+    type: object
+    properties:
+      order_id:
+        type: string
+        description: 订单编号
+        enum: null
+        name: null
+    required:
+    - order_id
+  url: http://11.141.203.151:8089/get_invoicing_method
+  method: GET
+  extra_infos: null
+- name: 开票进度查询
+  description: ''
+  parameters:
+    type: object
+    properties:
+      name:
+        type: string
+        description: 姓名
+        enum: null
+        name: null
+    required:
+    - name
+  url: http://11.141.203.151:8089/search_invoicing_progress
+  method: POST
+  extra_infos: null
+- name: 会员身份查询
+  description: ''
+  parameters:
+    type: object
+    properties:
+      card_id:
+        type: string
+        description: 会员卡ID
+        enum: null
+        name: null
+    required:
+    - card_id
+  url: http://11.141.203.151:8089/get_card_type
+  method: POST
+  extra_infos: null

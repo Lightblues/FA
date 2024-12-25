@@ -2,7 +2,8 @@ import yaml
 
 from fa_core.common import Config
 from fa_core.data import PDL, DataManager
-from data.pdl.pdl_nodes import ParameterNode
+from fa_core.data.pdl.pdl_nodes import ParameterNode
+
 
 cfg = Config.from_yaml("default.yaml")
 data_manager = DataManager(cfg)

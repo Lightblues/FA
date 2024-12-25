@@ -1,0 +1,77 @@
+Name: 同程开发票
+Desc: 咨询开具发票的方法
+SLOTs:
+- name: 会员卡ID
+  desc: 用户的会员卡ID号码，一般是一串阿拉伯数字
+  type: string
+- name: 姓名
+  desc: 用户提供的姓名
+  type: string
+- name: 订单编号
+  desc: 订单的编号，一般是一串3到6位的阿拉伯数字，比如：123456，12345等等。如果用户提取出来的订单编号不是3到6位的阿拉伯数字时，订单编号取值为空""
+  type: string
+- name: 发票类型
+  desc: 发票的类型，参数值只支持“电子普票”、“纸质普票”、“纸质专票”三种，请不要提取其他内容。
+  type: string
+- name: 发票类型
+  desc: 发票的类型，包含电子普票、纸质普票、纸质专票三种
+  type: string
+APIs:
+- name: 查询开票方式
+  desc: ''
+  precondition: null
+- name: 开票进度查询
+  desc: ''
+  precondition: null
+- name: 会员身份查询
+  desc: ''
+  precondition: null
+ANSWERs:
+- name: 结束回复1
+  desc: 您的同程开发票操作已成功执行，开票方式为{{invoicingMethod}}   。
+- name: 兜底回复
+  desc: 兜底回复
+- name: 结束回复3
+  desc: "您存在发票信息，请前往mis售后地图查看详细进度，根据用户实际咨询场景回复不同话术\\\\~  \n\nhttp://nyd.mis.elong.com:8080/aftersale/index?orderId=1954364687&type=1【按钮】"
+- name: 兜底回复1
+  desc: 兜底回复1
+- name: 兜底回复2
+  desc: 兜底回复2
+- name: 白金电子普票开具
+  desc: "电子普票支持的开票内容为代订住宿费或者代订房费。\n\n可 [点击这里](http://nyd.mis.elong.com/invoice/electronic?orderIds=1959238331)\
+    \ 提交开通电子普票的申请，跳转对应订单开发票页面；提交后，离店日24小时内发送至您的邮箱。\n\n【疑问：超链接提示forbidden，是否是人工内网操作帮助客户提交发票，而非客户自行申请？机器人自动操作后预期提供接口还是转工单继续人工开票？】"
+- name: 白金纸质发票开具
+  desc: "纸质普票支持的开票内容为代订住宿费或者代订房费。  \n\n可[点击这里](https://www.baidu.com/)提交开通纸质普票的申请，跳转对应订单开发票页面；提交后，离店后5个工作日内送达。\n\
+    \n【疑问：超链接提示forbidden，是否是人工内网操作帮助客户提交发票，而非客户自行申请？机器人自动操作后预期提供接口还是转工单继续人工开票？】"
+- name: 白金纸质专票开具
+  desc: "纸质专票开通【疑问：无后续流程，是否人工根据下述对客话术收集的信息直接开具？机器人自动操作后预期提供接口还是转工单继续人工开票】\n\n对客话术：\
+    \  \n\n①纸质专票烦您提供：发票抬头、纳税人识别号、注册地址、公司电话、开户银行、银行账号、发票金额  \n\n②是否需要备注订单信息（酒店名称、入住日期、离店日期）呢？\
+    \  \n\n③请您提供下收件人、联系电话、地址（省市区）哦\n\n/"
+- name: 兜底回复3
+  desc: 兜底回复3
+- name: 非白金电子票开具
+  desc: "电子普票支持的开票内容为代订住宿费或者代订房费。  \n\n可[点击这里](https://www.baidu.com/)提交开通电子普票的申请，跳转对应订单开发票页面；提交后，离店日24小时内发送至您的邮箱。\n\
+    \n【疑问：超链接提示forbidden，是否是人工内网操作帮助客户提交发票，而非客户自行申请？机器人自动操作后预期提供接口还是转工单继续人工开票？】"
+- name: 非白金纸质普票
+  desc: "纸质普票支持的开票内容为代订住宿费或者代订房费。\n\n可 [点击这里](https://www.baidu.com/) 提交开通纸质普票的申请，跳转对应订单开发票页面；提交后，离店后5个工作日内送达。\n\
+    \n根据您的会员等级，您申请纸质发票邮寄需要10元邮费哦，申请成功后会给您订单手机号发送支付短链，您可点开短链支付。"
+- name: 非白金纸质专票
+  desc: "纸质专票支持的开票内容为代订住宿费或者代订房费。\n\n可 [点击这里](https://www.baidu.com/) 提交开通纸质专票的申请，跳转对应订单开发票页面；提交后，离店后5个工作日内送达。\n\
+    \n根据您的会员等级，您申请纸质发票邮寄需要10元邮费哦，申请成功后会给您订单手机号发送支付短链，您可点开短链支付。"
+- name: 兜底回复4
+  desc: 兜底回复4
+Procedure: "\n[订单编号, 会员卡ID, 姓名] = ANSWER.订单、会员卡id、姓名参数()\n\n[invoicing_method] = API.查询开票方式([订单编号])\n\
+  \nif invoicing_method == '酒店开具':\n    ANSWER.结束回复1([invoicing_method])\nelif invoicing_method\
+  \ == '平台开具':\n    [invoicing_progress] = API.开票进度查询([姓名])\n    \n    if invoicing_progress\
+  \ == 'null':\n        ANSWER.结束回复3()\n    elif invoicing_progress != 'null':\n \
+  \       [card_type] = API.会员身份查询([会员卡ID])\n        \n        if card_type == '白金卡':\n\
+  \            [发票类型] = ANSWER.白金卡开票类型澄清()\n            \n            if 发票类型 == '电子普票':\n\
+  \                ANSWER.白金电子普票开具()\n            elif 发票类型 == '纸质普票':\n         \
+  \       ANSWER.白金纸质发票开具()\n            elif 发票类型 == '纸质专票':\n                ANSWER.白金纸质专票开具()\n\
+  \            else:\n                ANSWER.兜底回复3()\n        \n        elif card_type\
+  \ == '非白金卡':\n            [发票类型] = ANSWER.非白金卡开票类型澄清()\n            \n         \
+  \   if 发票类型 == '电子普票':\n                ANSWER.非白金电子票开具()\n            elif 发票类型\
+  \ == '纸质普票':\n                ANSWER.非白金纸质普票()\n            elif 发票类型 == '纸质专票':\n\
+  \                ANSWER.非白金纸质专票()\n            else:\n                ANSWER.兜底回复4()\n\
+  \        \n        else:\n            ANSWER.兜底回复2()\n    \n    else:\n        ANSWER.兜底回复1()\n\
+  \nelse:\n    ANSWER.兜底回复()"

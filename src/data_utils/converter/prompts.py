@@ -11,10 +11,15 @@ new API: (p1, p2) -> (o2)
 template_procudure = """
 <任务>
 1. 对于一个图结构的工作流, 请你将其核心流程转为 Procedure 的形式.
-2. Procedure 语法: 整体上采用 Python/伪代码 的形式, 其中,
-    通过 `[变量] = API.API_NAME([参数])` 的形式调用 API;
-    通过 `ANSWER.ANSWER_NAME()` 的形式调用 ANSWER.
-3. 仅支持 API 和 ANSWER 两类节点, 节点名称需要和已有的名称完全一致.
+2. Procedure 语法:
+    2.1 整体上采用 Python/伪代码 的形式, 其中包括 API 和 ANSWER 两类特殊函数;
+    2.2 通过 `[变量] = API.NAME([参数])` 的形式调用 API;
+    2.3 通过 `ANSWER.NAME()` 的形式调用 ANSWER.
+3. 转换规则:
+    3.1 节点类型: 将原本图结构中 TOOL, LLM, CODE_EXECUTOR 类型的节点转为 API 节点. ANSWER 节点保持不变.
+    3.2 节点名称: 用原本图节点中的 `NodeName` 作为 Procedure 中的 API/ANSWER 名称.
+    3.3 条件判断: 将原本图结构中 LOGIC_EVALUATOR 类型的节点转为 Python 形式的条件判断.
+4. 请给出完整的 Procedure 表述!
 </任务>
 
 <示例>

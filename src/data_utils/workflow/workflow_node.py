@@ -2,12 +2,11 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-from data.pdl.pdl_nodes import AnswerNode, BaseNode, ToolDependencyNode
-from data.pdl.tool import ExtToolSpec, ToolParameter, ToolProperties
+from fa_core.data.pdl.pdl_nodes import AnswerNode, BaseNode, ToolDependencyNode
+from fa_core.data.pdl.tool import ExtToolSpec, ToolParameter, ToolProperties
 
 from .base import Input, NodeType, TypeEnum
-from .workflow_node_data import APIInfo, NodeDataBase, NodeType_Data_Map, NodeType_Key_Map
-from .workflow_node_data import ToolNodeData, CodeExecutorNodeData, LLMNodeData
+from .workflow_node_data import NodeDataBase, ToolNodeData, CodeExecutorNodeData, LLMNodeData, NodeType_Data_Map, NodeType_Key_Map
 
 
 class InputParam(BaseModel):

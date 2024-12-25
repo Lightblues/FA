@@ -41,7 +41,7 @@ def handle_exceptions(func):
     return wrapper
 
 
-class RequestTool(BaseTool, ToolMockMixin):
+class RequestTool(ToolMockMixin, BaseTool):
     """
     Used config:
         api_entity_linking
@@ -66,6 +66,9 @@ class RequestTool(BaseTool, ToolMockMixin):
 
         if self.api_entity_linking:
             self.entity_linker = EntityLinker(cfg=self.cfg, conv=self.context.conv)
+
+        self.init_mock_llm(self.cfg)  # init the mock client
+
         self._build_api_infos_map()
 
     def _build_api_infos_map(self):

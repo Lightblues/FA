@@ -22,7 +22,8 @@ x-available-models: &available_models
 ui_available_workflow_datasets:
   - v241127
   - v241127_converted_ruled
-  - pdl_converted_20241221_4o
+  - pdl_converted_20241225_4o
+  - v241127_converted_sonnet
 ui_default_workflow_dataset: v241127_converted_ruled
 
 ui_bot_mode: ui_single_bot
