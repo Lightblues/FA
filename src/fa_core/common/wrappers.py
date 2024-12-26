@@ -1,8 +1,14 @@
+"""
+@241226
+- [x] fix `@log_exceptions` for coroutine function
+"""
+
 import functools
 import time
 import traceback
 from typing import Callable
 from loguru import logger
+import asyncio
 
 
 class Timer:
@@ -59,17 +65,34 @@ def log_exceptions():
     USAGE::
         @log_exceptions()
         def example_function(xxx):
+
+        @log_exceptions()
+        async def async_function(xxx):
     """
 
     def decorator(f):
-        @functools.wraps(f)
-        def wrapped_f(*args, **kwargs):
-            try:
-                return f(*args, **kwargs)
-            except Exception as e:
-                logger.error(f"Exception in {f.__name__}: {str(e)}")
-                logger.error(f"Traceback:\n{traceback.format_exc()}")
-                raise e
+        # print(f"Wrapper: {f.__name__} is coroutine: {asyncio.iscoroutinefunction(f)}")
+        # NOTE: for coroutine function, MUST use async def wrapped_f(*args, **kwargs):
+        if asyncio.iscoroutinefunction(f):
+
+            @functools.wraps(f)
+            async def wrapped_f(*args, **kwargs):
+                try:
+                    return await f(*args, **kwargs)
+                except Exception as e:
+                    logger.error(f"Exception in {f.__name__}: {str(e)}")
+                    logger.error(f"Traceback:\n{traceback.format_exc()}")
+                    raise e
+        else:
+
+            @functools.wraps(f)
+            def wrapped_f(*args, **kwargs):
+                try:
+                    return f(*args, **kwargs)
+                except Exception as e:
+                    logger.error(f"Exception in {f.__name__}: {str(e)}")
+                    logger.error(f"Traceback:\n{traceback.format_exc()}")
+                    raise e
 
         return wrapped_f
 

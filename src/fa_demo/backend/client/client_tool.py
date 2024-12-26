@@ -17,7 +17,7 @@ class ToolAgentMixin(BaseClient):
     """
 
     def multi_tool_main(self, conversation_id: str, bot_output: BotOutput) -> MultiToolMainResponse:
-        url = f"{self.url}/multi_tool_main/{conversation_id}"
+        url = f"{self.backend_url}/multi_tool_main/{conversation_id}"
         response = requests.post(url, json=bot_output.model_dump())
         if response.status_code == 200:
             res = MultiToolMainResponse(**response.json())
@@ -27,11 +27,11 @@ class ToolAgentMixin(BaseClient):
             raise NotImplementedError
 
     def multi_tool_main_stream(self, conversation_id: str, bot_output: BotOutput) -> Iterator[str]:
-        url = f"{self.url}/multi_tool_main_stream/{conversation_id}"
+        url = f"{self.backend_url}/multi_tool_main_stream/{conversation_id}"
         return self.process_stream_url(url, bot_output.model_dump())
 
     def multi_tool_main_output(self, conversation_id: str) -> MultiToolMainResponse:
-        url = f"{self.url}/multi_tool_main_output/{conversation_id}"
+        url = f"{self.backend_url}/multi_tool_main_output/{conversation_id}"
         response = requests.get(url)
         if response.status_code == 200:
             res = MultiToolMainResponse(**response.json())

@@ -37,7 +37,7 @@ class MultiAgentMixin(BaseClient):
         """
         self.curr_status = "main"
 
-        url = f"{self.url}/multi_register/{conversation_id}"
+        url = f"{self.backend_url}/multi_register/{conversation_id}"
         response = requests.post(
             url,
             json=MultiRegisterRequest(user_identity=user_identity, config=config).model_dump(),
@@ -51,7 +51,7 @@ class MultiAgentMixin(BaseClient):
             raise NotImplementedError
 
     def multi_disconnect(self, conversation_id: str):
-        url = f"{self.url}/multi_disconnect/{conversation_id}"
+        url = f"{self.backend_url}/multi_disconnect/{conversation_id}"
         response = requests.post(url)
         if response.status_code == 200:
             return response.json()
@@ -66,7 +66,7 @@ class MultiAgentMixin(BaseClient):
             query (str): the message of the user
         """
         self.conv.add_message(query, role=Role.USER)
-        url = f"{self.url}/multi_add_message/{conversation_id}"
+        url = f"{self.backend_url}/multi_add_message/{conversation_id}"
         response = requests.post(url, json=self.conv.get_last_message().model_dump())
         if response.status_code == 200:
             return response.json()
@@ -75,11 +75,11 @@ class MultiAgentMixin(BaseClient):
 
     # ---
     def multi_bot_main_predict(self, conversation_id: str) -> Iterator[str]:
-        url = f"{self.url}/multi_bot_main_predict/{conversation_id}"
+        url = f"{self.backend_url}/multi_bot_main_predict/{conversation_id}"
         return self.process_stream_url(url)
 
     def multi_bot_main_predict_output(self, conversation_id: str) -> MultiBotMainPredictResponse:
-        url = f"{self.url}/multi_bot_main_predict_output/{conversation_id}"
+        url = f"{self.backend_url}/multi_bot_main_predict_output/{conversation_id}"
         response = requests.get(url)
         if response.status_code == 200:
             res = MultiBotMainPredictResponse(**response.json())
@@ -93,11 +93,11 @@ class MultiAgentMixin(BaseClient):
 
     # ---
     def multi_bot_workflow_predict(self, conversation_id: str) -> Iterator[str]:
-        url = f"{self.url}/multi_bot_workflow_predict/{conversation_id}"
+        url = f"{self.backend_url}/multi_bot_workflow_predict/{conversation_id}"
         return self.process_stream_url(url)
 
     def multi_bot_workflow_predict_output(self, conversation_id: str) -> MultiBotWorkflowPredictResponse:
-        url = f"{self.url}/multi_bot_workflow_predict_output/{conversation_id}"
+        url = f"{self.backend_url}/multi_bot_workflow_predict_output/{conversation_id}"
         response = requests.get(url)
         if response.status_code == 200:
             res = MultiBotWorkflowPredictResponse(**response.json())
@@ -119,7 +119,7 @@ class MultiAgentMixin(BaseClient):
         Returns:
             MultiPostControlResponse: the response of the post control
         """
-        url = f"{self.url}/multi_post_control/{conversation_id}"
+        url = f"{self.backend_url}/multi_post_control/{conversation_id}"
         response = requests.post(url, json=bot_output.model_dump())
         if response.status_code == 200:
             res = MultiPostControlResponse(**response.json())
@@ -139,7 +139,7 @@ class MultiAgentMixin(BaseClient):
         Returns:
             MultiToolResponse: the response of the tool
         """
-        url = f"{self.url}/multi_tool_workflow/{conversation_id}"
+        url = f"{self.backend_url}/multi_tool_workflow/{conversation_id}"
         response = requests.post(url, json=bot_output.model_dump())
         if response.status_code == 200:
             res = MultiToolWorkflowResponse(**response.json())

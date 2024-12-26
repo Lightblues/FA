@@ -16,6 +16,7 @@ from typing import Dict, Iterator
 
 import requests
 from loguru import logger
+from pydantic import ConfigDict
 
 from fa_core.common import Config
 from fa_core.data import BotOutput, Conversation, Role
@@ -39,7 +40,7 @@ class SingleAgentMixin(BaseClient):
     Usage::
 
         # see `test/backend/test_ui_backend_single.py`
-        client = FrontendClient(cfg.backend_url)
+        client = FrontendClient(backend_url=cfg.backend_url)
         # 1. init the conversation
         _ = client.single_register(conversation_id, cfg)
         # 2. query loop
@@ -60,6 +61,8 @@ class SingleAgentMixin(BaseClient):
         client.single_disconnect(conversation_id)
     """
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     def single_register(self, conversation_id: str, config: Config, user_identity: Dict = None) -> Conversation:
         """Register a new conversation
 
@@ -67,7 +70,7 @@ class SingleAgentMixin(BaseClient):
             conversation_id (str): the id of the conversation
             config (Config): the config of the conversation
         """
-        url = f"{self.url}/single_register/{conversation_id}"
+        url = f"{self.backend_url}/single_register/{conversation_id}"
         response = requests.post(
             url,
             json=SingleRegisterRequest(user_identity=user_identity, config=config).model_dump(),
@@ -83,7 +86,7 @@ class SingleAgentMixin(BaseClient):
             raise NotImplementedError
 
     def single_disconnect(self, conversation_id: str):
-        url = f"{self.url}/single_disconnect/{conversation_id}"
+        url = f"{self.backend_url}/single_disconnect/{conversation_id}"
         response = requests.post(url)
         if response.status_code == 200:
             return response.json()
@@ -98,7 +101,7 @@ class SingleAgentMixin(BaseClient):
             query (str): the message of the user
         """
         self.conv.add_message(query, role=Role.USER)
-        url = f"{self.url}/single_add_message/{conversation_id}"
+        url = f"{self.backend_url}/single_add_message/{conversation_id}"
         response = requests.post(url, json=self.conv.get_last_message().model_dump())
         if response.status_code == 200:
             return response.json()
@@ -115,7 +118,7 @@ class SingleAgentMixin(BaseClient):
             Iterator[str]: the response of the bot
         """
         logger.info(f">> single_bot_predict with conversation: {json.dumps(str(self.conv), ensure_ascii=False)}")
-        url = f"{self.url}/single_bot_predict/{conversation_id}"
+        url = f"{self.backend_url}/single_bot_predict/{conversation_id}"
         return self.process_stream_url(url)
 
     def single_bot_predict_output(self, conversation_id: str) -> SingleBotPredictResponse:
@@ -127,7 +130,7 @@ class SingleAgentMixin(BaseClient):
         Returns:
             SingleBotPredictResponse: the response of the bot
         """
-        url = f"{self.url}/single_bot_predict_output/{conversation_id}"
+        url = f"{self.backend_url}/single_bot_predict_output/{conversation_id}"
         response = requests.get(url)
         if response.status_code == 200:
             res = SingleBotPredictResponse(**response.json())
@@ -148,7 +151,7 @@ class SingleAgentMixin(BaseClient):
         Returns:
             SinglePostControlResponse: the response of the post control
         """
-        url = f"{self.url}/single_post_control/{conversation_id}"
+        url = f"{self.backend_url}/single_post_control/{conversation_id}"
         response = requests.post(url, json=bot_output.model_dump())
         if response.status_code == 200:
             res = SinglePostControlResponse(**response.json())
@@ -168,7 +171,7 @@ class SingleAgentMixin(BaseClient):
         Returns:
             SingleToolResponse: the response of the tool
         """
-        url = f"{self.url}/single_tool/{conversation_id}"
+        url = f"{self.backend_url}/single_tool/{conversation_id}"
         response = requests.post(url, json=bot_output.model_dump())
         if response.status_code == 200:
             res = SingleToolResponse(**response.json())
