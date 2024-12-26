@@ -166,7 +166,7 @@ def setup_workflow_infos(force_refresh: bool = False):
     # 1. set default workflow_infos
     if (not ss.cfg.mui_workflow_infos) or force_refresh:
         ss.cfg.workflow_dataset = ss.selected_workflow_dataset  # NOTE to update the workflow_dataset
-        ss.cfg.mui_workflow_infos = list(FADataManager(cfg=ss.cfg).workflow_infos.values())
+        ss.cfg.mui_workflow_infos = list(FADataManager(workflow_dataset=ss.cfg.workflow_dataset).workflow_infos.values())
         for w in ss.cfg.mui_workflow_infos:
             w["is_activated"] = True
     # 2. filter the available workflows

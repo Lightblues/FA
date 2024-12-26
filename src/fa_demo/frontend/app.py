@@ -32,7 +32,7 @@ def setup_basic(config_version: str):
     if "cfg" not in ss:
         ss.cfg = Config.from_yaml(config_version)
     if "data_manager" not in ss:
-        ss.data_manager = FADataManager(cfg=ss.cfg)
+        ss.data_manager = FADataManager(workflow_dataset=ss.cfg.workflow_dataset)
 
 
 def setup_page():

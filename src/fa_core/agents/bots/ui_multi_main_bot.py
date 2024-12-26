@@ -50,7 +50,7 @@ class UIMultiMainBot(ReactBot):
     def _init_workflow_infos(self, workflow_infos: List[Dict] = []):  # config.workflow_infos
         # 1. set default workflow_infos
         if not workflow_infos:
-            workflow_infos = FADataManager(cfg=self.cfg).workflow_infos.values()
+            workflow_infos = FADataManager(workflow_dataset=self.cfg.workflow_dataset).workflow_infos.values()
             for w in workflow_infos:
                 w["is_activated"] = True
         # if ss.cfg.mui_available_workflows:

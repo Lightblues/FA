@@ -1,17 +1,16 @@
+"""
+- [x] #fix remove Config from DataManager
+"""
+
 import json
 import os
 from pydantic import BaseModel, Field
 from typing import Dict, Optional, ClassVar, TYPE_CHECKING
 from pathlib import Path
-from fa_core.common import Config
 
 
 class FADataManager(BaseModel):
-    cfg: Optional[Config] = None
-
-    workflow_dataset: str = ""
-    data_version: Optional[str] = None
-    workflow_infos: Dict = Field(default_factory=dict)
+    workflow_dataset: str
 
     # NOTE: Use ClassVar to define class-level constants
     DIR_root: ClassVar[Path] = Path(__file__).resolve().parent.parent.parent.parent
@@ -23,30 +22,24 @@ class FADataManager(BaseModel):
     DIR_backend_log: ClassVar[Path] = DIR_root / "log/backend"
     DIR_data_root: ClassVar[Path] = DIR_root / "dataset"
 
-    # 实例变量，但不需要在模型验证中包含
+    # Instance variables
     DIR_data_workflow: Optional[Path] = None
     FN_data_workflow_infos: Optional[Path] = None
+    data_version: Optional[str] = None
+    workflow_infos: Dict = Field(default_factory=dict)
 
     model_config = {
         "arbitrary_types_allowed": True  # Allow Path type
     }
 
     def model_post_init(self, __context) -> None:
-        """替代原来的 __init__ 方法"""
-        if self.cfg:
-            self._build_workflow_infos(self.cfg.workflow_dataset)
+        workflow_dataset = self.workflow_dataset
 
-    def _build_workflow_infos(self, workflow_dataset: str):
         self.DIR_data_workflow = self.DIR_data_root / workflow_dataset
         self.FN_data_workflow_infos = self.DIR_data_workflow / "task_infos.json"
-        infos: dict = json.load(open(self.FN_data_workflow_infos, "r"))
-        self.workflow_dataset = workflow_dataset
-        self.data_version = infos["version"]
-        self.workflow_infos = infos["task_infos"]
-
-    def refresh_config(self, cfg: "Config") -> None:
-        self.cfg = cfg
-        self._build_workflow_infos(cfg.workflow_dataset)
+        _infos: dict = json.load(open(self.FN_data_workflow_infos, "r"))
+        self.data_version = _infos["version"]
+        self.workflow_infos = _infos["task_infos"]
 
     @property
     def num_workflows(self) -> int:
@@ -71,7 +64,7 @@ class FADataManager(BaseModel):
 
     @staticmethod
     def get_workflow_versions(workflow_dataset):
-        _dir = FADataManager.DIR_data_root / workflow_dataset  # cfg.workflow_dataset | "PDL_zh"
+        _dir = FADataManager.DIR_data_root / workflow_dataset
         dirs = [d for d in os.listdir(_dir) if d.startswith("pdl") and os.path.isdir(os.path.join(_dir, d))]
         return dirs
 
