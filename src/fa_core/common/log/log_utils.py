@@ -79,7 +79,9 @@ class LogUtils:
             infos = str(infos)
             infos = pd.DataFrame([infos.split("\n")]).T
         else:
-            raise NotImplementedError
+            # default case: convert to str!
+            infos = str(infos)
+            infos = pd.DataFrame([infos.split("\n")]).T
         # smartly .T the df?
         if auto_transform:
             if infos.shape[1] > infos.shape[0]:

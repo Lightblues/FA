@@ -1,8 +1,9 @@
 # Full configs for non-UI usage
 defaults: !include default.yaml
 
-workflow_dataset: "v241127_converted_ruled"
-workflow_id: "004"
+# workflow_dataset: "v241127_converted_ruled"
+workflow_dataset: "v241127"
+workflow_id: "000"       # 挂号
 
 bot_llm_name: "test-eason"
 bot_template_fn: "bot_pdl_ui_zh.jinja"

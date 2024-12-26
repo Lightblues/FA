@@ -180,11 +180,3 @@ class Conversation(BaseModel):
 
     def __iter__(self) -> Iterator[Message]:
         return iter(self.msgs)
-
-
-class ConversationWithIntention(BaseModel):
-    user_intention: str
-    conversation: Conversation
-
-    def __str__(self) -> str:
-        return f"simulated conversation with {len(self.conversation)} messages.\nUser intention: {self.user_intention}"

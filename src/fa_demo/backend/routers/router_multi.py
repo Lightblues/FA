@@ -102,8 +102,8 @@ def generate_response_workflow(session_context: MultiSessionContext) -> Iterator
 router_multi = APIRouter()
 
 
-@log_exceptions()
 @router_multi.post("/multi_register/{conversation_id}")
+@log_exceptions()
 async def multi_register(conversation_id: str, request: MultiRegisterRequest) -> MultiRegisterResponse:
     """init a new session with session_id & config
 
@@ -124,8 +124,8 @@ async def multi_register(conversation_id: str, request: MultiRegisterRequest) ->
     )
 
 
-@log_exceptions()
 @router_multi.post("/multi_disconnect/{conversation_id}")
+@log_exceptions()
 def multi_disconnect(conversation_id: str) -> None:
     """Disconnect the session"""
     logger.info(f"[multi_disconnect] {conversation_id}")
@@ -133,8 +133,8 @@ def multi_disconnect(conversation_id: str) -> None:
     clear_session_context_multi(conversation_id)
 
 
-@log_exceptions()
 @router_multi.post("/multi_add_message/{conversation_id}")
+@log_exceptions()
 def multi_add_message(conversation_id: str, message: Message) -> None:
     logger.info(f"[multi_add_message] {conversation_id} with message: {message}")
     session_context = get_session_context_multi(conversation_id)
@@ -142,8 +142,8 @@ def multi_add_message(conversation_id: str, message: Message) -> None:
 
 
 # ---
-@log_exceptions()
 @router_multi.post("/multi_bot_main_predict/{conversation_id}")
+@log_exceptions()
 async def multi_bot_main_predict(conversation_id: str) -> StreamingResponse:
     logger.info(f"[multi_bot_main_predict] {conversation_id}")
     session_context = get_session_context_multi(conversation_id)
@@ -151,8 +151,8 @@ async def multi_bot_main_predict(conversation_id: str) -> StreamingResponse:
     return StreamingResponse(generate_response_main(session_context), media_type="text/event-stream")
 
 
-@log_exceptions()
 @router_multi.get("/multi_bot_main_predict_output/{conversation_id}")
+@log_exceptions()
 def multi_bot_main_predict_output(conversation_id: str) -> MultiBotMainPredictResponse:
     logger.info(f"[multi_bot_main_predict_output] {conversation_id}")
     session_context = get_session_context_multi(conversation_id)
@@ -164,8 +164,8 @@ def multi_bot_main_predict_output(conversation_id: str) -> MultiBotMainPredictRe
 
 
 # ---
-@log_exceptions()
 @router_multi.post("/multi_bot_workflow_predict/{conversation_id}")
+@log_exceptions()
 async def multi_bot_workflow_predict(conversation_id: str) -> StreamingResponse:
     logger.info(f"[multi_bot_workflow_predict] {conversation_id}")
     session_context = get_session_context_multi(conversation_id)
@@ -173,8 +173,8 @@ async def multi_bot_workflow_predict(conversation_id: str) -> StreamingResponse:
     return StreamingResponse(generate_response_workflow(session_context), media_type="text/event-stream")
 
 
-@log_exceptions()
 @router_multi.get("/multi_bot_workflow_predict_output/{conversation_id}")
+@log_exceptions()
 def multi_bot_workflow_predict_output(
     conversation_id: str,
 ) -> MultiBotWorkflowPredictResponse:
@@ -187,8 +187,8 @@ def multi_bot_workflow_predict_output(
     )
 
 
-@log_exceptions()
 @router_multi.post("/multi_post_control/{conversation_id}")
+@log_exceptions()
 def multi_post_control(conversation_id: str, bot_output: BotOutput) -> MultiPostControlResponse:
     """Check the validation of bot's action
     NOTE: if not validated, the error infomation will be added to ss.conv!
@@ -209,8 +209,8 @@ def multi_post_control(conversation_id: str, bot_output: BotOutput) -> MultiPost
     )
 
 
-@log_exceptions()
 @router_multi.post("/multi_tool_workflow/{conversation_id}")
+@log_exceptions()
 def multi_tool_workflow(conversation_id: str, bot_output: BotOutput) -> MultiToolWorkflowResponse:
     logger.info(f"[multi_tool_workflow] {conversation_id} with bot_output: {bot_output}")
     session_context = get_session_context_multi(conversation_id)

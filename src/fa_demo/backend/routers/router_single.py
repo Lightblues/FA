@@ -79,8 +79,8 @@ def generate_response(session_context: SingleSessionContext) -> Iterator[str]:
 router_single = APIRouter()
 
 
-@log_exceptions()
 @router_single.post("/single_register/{conversation_id}")
+@log_exceptions()  # NOTE: MUST use `@log_exceptions()` before `@router_single.post()` to catch the exception!
 async def single_register(conversation_id: str, request: SingleRegisterRequest) -> SingleRegisterResponse:
     """init a new session with session_id & config
 
@@ -105,8 +105,8 @@ async def single_register(conversation_id: str, request: SingleRegisterRequest) 
     return response
 
 
-@log_exceptions()
 @router_single.post("/single_disconnect/{conversation_id}")
+@log_exceptions()
 def single_disconnect(conversation_id: str) -> None:
     """Disconnect the session"""
     logger.info(f"<{conversation_id}> [single_disconnect] clearing session context...")
@@ -115,8 +115,8 @@ def single_disconnect(conversation_id: str) -> None:
     logger.info(f"<{conversation_id}> [single_disconnect] done!")
 
 
-@log_exceptions()
 @router_single.post("/single_add_message/{conversation_id}")
+@log_exceptions()
 def single_add_message(conversation_id: str, message: Message) -> None:
     logger.info(f"<{conversation_id}> [single_add_message] adding message: {message}")
     session_context = get_session_context_single(conversation_id)
@@ -124,16 +124,16 @@ def single_add_message(conversation_id: str, message: Message) -> None:
     logger.info(f"<{conversation_id}> [single_add_message] done!")
 
 
-@log_exceptions()
 @router_single.post("/single_bot_predict/{conversation_id}")
+@log_exceptions()
 async def single_bot_predict(conversation_id: str) -> StreamingResponse:
     logger.info(f"<{conversation_id}> [single_bot_predict] predicting...")
     session_context = get_session_context_single(conversation_id)
     return StreamingResponse(generate_response(session_context), media_type="text/event-stream")
 
 
-@log_exceptions()
 @router_single.get("/single_bot_predict_output/{conversation_id}")
+@log_exceptions()
 def single_bot_predict_output(conversation_id: str) -> SingleBotPredictResponse:
     logger.info(f"<{conversation_id}> [single_bot_predict_output] getting bot output...")
     session_context = get_session_context_single(conversation_id)
@@ -145,8 +145,8 @@ def single_bot_predict_output(conversation_id: str) -> SingleBotPredictResponse:
     return response
 
 
-@log_exceptions()
 @router_single.post("/single_post_control/{conversation_id}")
+@log_exceptions()
 def single_post_control(conversation_id: str, bot_output: BotOutput) -> SinglePostControlResponse:
     """Check the validation of bot's action
     NOTE: if not validated, the error infomation will be added to ss.conv!
@@ -168,8 +168,8 @@ def single_post_control(conversation_id: str, bot_output: BotOutput) -> SinglePo
     return response
 
 
-@log_exceptions()
 @router_single.post("/single_tool/{conversation_id}")
+@log_exceptions()
 def single_tool(conversation_id: str, bot_output: BotOutput) -> SingleToolResponse:
     logger.info(f"<{conversation_id}> [single_tool] calling tool with bot_output: {bot_output}")
     session_context = get_session_context_single(conversation_id)

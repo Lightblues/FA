@@ -17,7 +17,7 @@ init_loguru_logger(stdout_level="WARNING")
 class ChatCLI(object):
     def __init__(self, cfg: Config, verbose: bool = False) -> Conversation:
         self.cfg = cfg
-        self.client = FrontendClient(self.cfg.backend_url)
+        self.client = FrontendClient(backend_url=self.cfg.backend_url)
         self.conversation_id = get_session_id()
 
         self.verbose = verbose
@@ -69,7 +69,7 @@ class ChatCLI(object):
         # 2.0. post_control. Request the action and show the result
         res_post_control = self.client.single_post_control(self.conversation_id, bot_response.bot_output)
         if not res_post_control.success:
-            print(LogUtils.format_str_with_color(f"[controller error] {res_post_control.msg}", "red"))
+            self._print_system(f"[controller error] {res_post_control.msg}")
             return False
         return True
 
@@ -89,6 +89,9 @@ class ChatCLI(object):
 
     def _print_tool(self, msg: str):
         print(LogUtils.format_str_with_color(f"[API] {msg}", "green"))
+
+    def _print_system(self, msg: str):
+        print(LogUtils.format_str_with_color(f"[SYSTEM] {msg}", "red"))
 
 
 if __name__ == "__main__":

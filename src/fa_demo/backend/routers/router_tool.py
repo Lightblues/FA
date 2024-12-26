@@ -23,8 +23,8 @@ from .session_context_multi import get_session_context_multi
 router_tool = APIRouter()
 
 
-@log_exceptions()
 @router_tool.post("/multi_tool_main/{conversation_id}")
+@log_exceptions()
 def multi_tool_main(conversation_id: str, bot_output: MainBotOutput) -> MultiToolMainResponse:
     logger.info(f"[multi_tool_main] {conversation_id} with bot_output: {bot_output}")
     try:
@@ -39,8 +39,8 @@ def multi_tool_main(conversation_id: str, bot_output: MainBotOutput) -> MultiToo
         return MultiToolMainResponse(error_code=1, error_msg=str(e))
 
 
-@log_exceptions()
 @router_tool.post("/multi_tool_main_stream/{conversation_id}")
+@log_exceptions()
 def multi_tool_main_stream(conversation_id: str, bot_output: MainBotOutput) -> StreamingResponse:
     """Streaming response for the tool main
 
@@ -83,8 +83,8 @@ def multi_tool_main_stream(conversation_id: str, bot_output: MainBotOutput) -> S
     return StreamingResponse(generate_tool_response(), media_type="text/event-stream")
 
 
-@log_exceptions()
 @router_tool.get("/multi_tool_main_output/{conversation_id}")
+@log_exceptions()
 def multi_tool_main_output(conversation_id: str) -> MultiToolMainResponse:
     session_context = get_session_context_multi(conversation_id)
     return MultiToolMainResponse(

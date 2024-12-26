@@ -41,6 +41,7 @@ def init_loguru_logger(log_dir="logs", stdout_level="WARNING") -> "Logger":
 
     """
     os.makedirs(log_dir, exist_ok=True)
+    # print(f"<init_loguru_logger> logging to {log_dir}")
 
     logger.remove()
     logger.add(

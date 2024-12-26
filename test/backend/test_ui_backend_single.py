@@ -18,7 +18,7 @@ from fa_core.common import Config, LogUtils, get_session_id
 conversation_id = get_session_id()
 cfg = Config.from_yaml("default.yaml")
 
-client = FrontendClient(cfg.backend_url)
+client = FrontendClient(backend_url=cfg.backend_url)
 
 
 def main():

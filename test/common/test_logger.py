@@ -1,6 +1,6 @@
 from fa_core.common import init_loguru_logger, log_exceptions
 
-logger = init_loguru_logger()
+logger = init_loguru_logger(log_dir="/cephp/huabu/log/test")
 
 
 @log_exceptions()
