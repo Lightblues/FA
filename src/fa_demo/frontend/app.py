@@ -21,6 +21,7 @@ from .common.util_st import init_resource
 
 
 SUPERVISED_USERS = ["Unknown", "easonsshi", "ianxxu", "tristanli", "siqiicai"]
+PAGE_URL_NAME_MAPPING = {"single": "👤 Single", "multiple": "👥 Multiple", "inspect": "🔍 Inspect"}
 
 
 def setup_basic(config_version: str):
@@ -34,32 +35,54 @@ def setup_basic(config_version: str):
         ss.data_manager = DataManager(ss.cfg)
 
 
-def setup_page(page_default_index: int = 0):
+def setup_page():
     from .pages.page_inspect import main_inspect
     from .pages.page_multi import main_multi
     from .pages.page_single import main_single
 
-    available_pages = ["👤 Single", "👥 Multiple"]
+    # 1. all the available pages (URL names)
+    available_pages = ["single", "multiple"]
     if ss.user_identity["staffname"] in SUPERVISED_USERS:
-        available_pages += ["🔍 Inspect"]
-    page = st.sidebar.selectbox("Select Mode", available_pages, index=page_default_index)
+        available_pages += ["inspect"]
+
+    # 2. get the page from URL
+    page_from_url = st.query_params.get("page", None)
+    if page_from_url in available_pages:
+        initial_page = page_from_url
+    else:
+        initial_page = ss.cfg.st_default_page if ss.cfg.st_default_page in available_pages else available_pages[0]
+
+    # 3. display the selectbox with friendly names
+    display_names = [PAGE_URL_NAME_MAPPING[p] for p in available_pages]
+    selected_display = st.sidebar.selectbox(
+        "Select Mode",
+        display_names,
+        index=available_pages.index(initial_page),
+        format_func=lambda x: x,  # directly show the friendly name
+    )
+    # convert the display name to URL name
+    page = next(url_name for url_name, display_name in PAGE_URL_NAME_MAPPING.items() if display_name == selected_display)
+
+    # 4. update the URL parameter
+    st.query_params["page"] = page
+
     st.sidebar.markdown("---")
 
     match page:
-        case "👤 Single":
+        case "single":
             main_single()
-        case "👥 Multiple":
+        case "multiple":
             main_multi()
-        case "🔍 Inspect":
+        case "inspect":
             main_inspect()
         case _:
             raise NotImplementedError
 
 
-def main(config_version: str = "default.yaml", page_default_index: int = 0):
+def main(config_version: str = "default.yaml"):
     setup_basic(config_version)
     try:
-        setup_page(page_default_index)
+        setup_page()
     except Exception as e:
         st.image("https://media1.tenor.com/m/t7_iTN0iYekAAAAd/sad-sad-cat.gif")
         st.error(f"Oops, something funny happened with a {type(e).__name__}", icon="😿")

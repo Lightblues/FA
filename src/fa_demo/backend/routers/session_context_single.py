@@ -94,7 +94,7 @@ def create_session_context_single(session_id: str, cfg: Config) -> SingleSession
 
 def get_session_context_single(session_id: str) -> Union[SingleSessionContext, None]:
     if session_id not in SINGLE_SESSION_CONTEXT_MAP:
-        return None
+        raise ValueError(f"session_id {session_id} not found! Existing session_ids: {list(SINGLE_SESSION_CONTEXT_MAP.keys())}")
     return SINGLE_SESSION_CONTEXT_MAP[session_id]
 
 

@@ -14,7 +14,7 @@ todos (see details in [[ROADMAP.md]])
     - [ ] test rule-converted Procedure
 2. PDL standard doc (1.2)
 3. Evaluation (3.1)
+    - [x] ChatCLI
 
-
-- [ ] #bug config default activated controllers in UI
-- [ ] update `UIMultiMainBot` with updated (UISingleBot)
+- [x] #bug config default activated controllers in UI
+- [ ] update `UIMultiMainBot`, ref UISingleBot

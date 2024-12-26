@@ -50,6 +50,19 @@ db_uri: "mongodb://9.134.230.111:27017/"
 db_name: "agent-pdl"
 db_collection_single: "dev_single_sessions"
 db_collection_multi: "dev_multi_sessions"
+db_available_collections:
+  - "backend_single_sessions"
+  - "backend_multi_sessions"
+  - "dev_single_sessions"
+  - "dev_multi_sessions"
+db_available_exp_versions:
+  - "cli_241224"
+  - "default"
+  - "exp_converted_ruled_241224"
+
+st_default_page: inspect
+st_default_db_collection: dev_single_sessions
+st_default_exp_version: "cli_241224"
 
 exp_version: "exp_converted_ruled_241224"     # NOTE: to set the exp_version!
 

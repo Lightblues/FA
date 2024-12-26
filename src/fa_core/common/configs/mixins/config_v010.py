@@ -83,8 +83,14 @@ class V010Mixin(BaseModel):
     # db_meta_collection_name: str = "config"
     db_collection_single: str = "backend_single_sessions"
     db_collection_multi: str = "backend_multi_sessions"
+    db_available_collections: List[str] = [db_collection_single, db_collection_multi]
+    db_available_exp_versions: List[str] = []
 
     backend_url: str = "http://localhost:8100"
+
+    st_default_page: str = "single"
+    st_default_db_collection: str = db_collection_single
+    st_default_exp_version: str = "default"
 
     simulate_num_persona: int = -1
     simulate_max_workers: int = 10

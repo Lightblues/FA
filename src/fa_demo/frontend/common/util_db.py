@@ -33,12 +33,15 @@ class DBUtils:
         if not doc:
             return None
 
-        # 从数据库文档中重建 Config, Conversation 对象
+        # rebuild `Config, Conversation` objects
         config = Config(**doc["config"])
 
         messages = [Message(**msg) for msg in doc["conversation"]]
         conv = Conversation.from_messages(messages)
         return config, conv
 
-    def get_latest_sessionids(self, n: int = 10, collection: str = "ui_multi_sessions") -> List[str]:
-        return [doc["session_id"] for doc in self.db[collection].find().sort("session_id", pymongo.DESCENDING).limit(n)]
+    def get_latest_sessionids(self, limit: int = 10, collection: str = "ui_multi_sessions") -> List[str]:
+        return [doc["session_id"] for doc in self.db[collection].find().sort("session_id", pymongo.DESCENDING).limit(limit)]
+
+    def find_sessionids_by_query(self, query: Dict[str, Any], collection: str = "ui_multi_sessions", limit: int = 10) -> List[str]:
+        return [doc["session_id"] for doc in self.db[collection].find(query).sort("session_id", pymongo.DESCENDING).limit(limit)]

@@ -2,6 +2,9 @@
 Usage::
 
     python -m fa_eval.cli.chat_cli --cfg cli.yaml --backend_url="http://localhost:8101"
+
+
+- [ ] add pre_conversation to support debug
 """
 
 from fa_demo.backend import FrontendClient, SingleBotPredictResponse
@@ -46,7 +49,6 @@ class ChatCLI(object):
     def step_user(self) -> bool:
         user_input = self._print_user()
         if user_input == "END":
-            self.client.single_disconnect(self.conversation_id)
             return True
         self.client.single_user_input(self.conversation_id, user_input)
         return False
