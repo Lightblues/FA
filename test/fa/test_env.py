@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 from fa_core.common import Config
-from fa_core.data import Conversation, DataHandler
+from fa_core.data import Conversation, FAWorkflow
 
 
 class Bot(BaseModel):
@@ -15,7 +15,7 @@ class SessionContext(BaseModel):
     session_id: str = Field(default="123")
     cfg: Config = Field(default=Config())
     conv: Conversation = Field(default=Conversation())
-    workflow: DataHandler = Field(default=DataHandler())
+    workflow: FAWorkflow = Field(default=FAWorkflow())
     bot: Bot = Field(default=None)
 
     def add_bot(self, bot: Bot):

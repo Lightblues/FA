@@ -39,7 +39,7 @@ class NodeDependencyController(BaseController):
     if_add_valid_msg: bool = False
 
     def _post_init(self) -> None:
-        self.graph = PDLGraph.from_pdl(self.context.data_handler.pdl)
+        self.graph = PDLGraph.from_pdl(self.context.workflow.pdl)
 
     def _post_check_with_message(self, bot_output: BotOutput) -> Tuple[bool, str]:
         """Check if the next action is valid (all the preconditions are satisfied)"""
@@ -61,7 +61,7 @@ class NodeDependencyController(BaseController):
 
     def _pre_control(self, prev_bot_output: BotOutput):
         """Update the status for prompt"""
-        all_api_names = {api.name for api in self.context.data_handler.pdl.APIs}
+        all_api_names = {api.name for api in self.context.workflow.pdl.APIs}
         invalid_apis = self.graph.get_invalid_node_names()
         valid_apis = all_api_names - invalid_apis
         if self.if_add_invalid_msg and (len(invalid_apis) > 0):

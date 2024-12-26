@@ -1,0 +1,18 @@
+{"workflow_name":"酒店取消订单","user_queries":["我想取消酒店订单","2141"],"eval_session_id":"81c12093-c286-4f3d-9105-4cd8751a8440","eval_description":"输入一个不在酒店订单信息表里的用户id"}
+{"workflow_name":"酒店取消订单","user_queries":["酒店订单怎么取消","1234","锦江之星"],"eval_session_id":"3b1e7b42-777e-47a2-bfb1-138c02c4edc3","eval_description":"输入酒店名称取消订单"}
+{"workflow_name":"酒店取消订单","user_queries":["取消酒店订单","5678","1212121212"],"eval_session_id":"cd08c432-927f-44df-95f4-ca47e6633725","eval_description":"取消用户id5678、订单号是1212121212的酒店订单"}
+{"workflow_name":"酒店取消订单","user_queries":["用户id7890，帮忙取消订单","4545454545吧"],"eval_session_id":"7df14d66-725d-481b-bf8e-ceb14eb57642","eval_description":"取消用户id7890、订单号是4545454545的酒店订单"}
+{"workflow_name":"酒店取消订单","user_queries":["取消用户1234的订单","取消1111111111订单"],"eval_session_id":"65e8971e-e404-404a-a75e-e959cf373e3d","eval_description":"取消用户id1234、订单号是1111111111的酒店订单"}
+{"workflow_name":"酒店取消订单","user_queries":["取消订单号111111111的酒店订单","12345","抱歉，是1234","抱歉，订单号错了，是1111111111"],"eval_session_id":"0bc31354-44c3-4c66-8445-c39352f51452","eval_description":"输入错误的用户id12345、订单号111111111的情况下取消酒店订单"}
+{"workflow_name":"酒店取消订单","user_queries":["取消酒店订单","是5678","不用了"],"eval_session_id":"8dc62307-088b-4ce7-85d8-7fb85dbed376","eval_description":"原本想取消订单，但临时改变主意不取消"}
+{"workflow_name":"酒店取消订单","user_queries":["取消用户ID是5678的酒店订单","2323232323","再取消用户7890的订单"],"eval_session_id":"4ae07c4f-b639-4c7a-95ec-0cce7c9b5c38","eval_description":"取消用户ID是5678的酒店订单后，再取消用户7890的订单"}
+{"workflow_name":"酒店取消订单","user_queries":["取消1212121212的酒店订单","稍等","是5678","取消1212121212的","那2323232323呢"],"eval_session_id":"8ffc3824-4d75-4d5b-bc60-7db0c87cd5d2","eval_description":"取消用户5678里的所有订单，对话中带有打断"}
+{"workflow_name":"酒店取消订单","user_queries":["帮忙取消酒店订单","1234","万达民宿"],"eval_session_id":"1d551610-7804-4f2b-b59a-8037b8e4ce75","eval_description":"输入酒店名称和错误的订单号111111111111取消酒店订单"}
+{"workflow_name":"酒店取消订单","user_queries":["取消用户Id是5678的酒店订单","1234567890"],"eval_session_id":"d7adcc22-0f0c-4673-b891-9b23f4aa3e59","eval_description":"订单1234567890不属于用户ID5678的酒店订单"}
+{"workflow_name":"酒店取消订单","user_queries":["取消酒店订单","1234","第一个"],"eval_session_id":"ab555a4e-8de7-43bf-ad68-4fb193cbaca7","eval_description":"取消用户1234的第一个订单"}
+{"workflow_name":"酒店取消订单","user_queries":["我要退订","1234","1234567890","还有一个111","111"],"eval_session_id":"56b85a96-215a-4d9f-a67e-3e861ce39b7b","eval_description":"输入错误的订单号"}
+{"workflow_name":"酒店取消订单","user_queries":["不要订单了","567","5678","1212121212"],"eval_session_id":"7265ee1f-5305-46bd-b451-c99b6c06115e","eval_description":"取消订单 亚朵酒店的"}
+{"workflow_name":"酒店取消订单","user_queries":["取消订单 亚朵酒店的","5678","123456789"],"eval_session_id":"77a64826-3a3b-4b2e-83e6-5978199479b7","eval_description":"取消订单 亚朵酒店的"}
+{"workflow_name":"酒店取消订单","user_queries":["取消订单 1234 45666667"],"eval_session_id":"d969d3cd-d208-4f12-8ccb-cfc20a075773","eval_description":"取消订单 1234 45666667"}
+{"workflow_name":"酒店取消订单","user_queries":["取消订单","nhff","用户id是什么","那我的是6845"],"eval_session_id":"c81b5a79-0f45-4d69-9e15-cbb1db81f2fa","eval_description":"直接询问订单号要求"}
+{"workflow_name":"酒店取消订单","user_queries":["酒店订单退掉","5678","第二个订单取消","第一个也取消"],"eval_session_id":"e94eb163-4f16-4bf6-97c7-56cd7fbe72ca","eval_description":"取消用户5678的第一、第二个酒店订单"}

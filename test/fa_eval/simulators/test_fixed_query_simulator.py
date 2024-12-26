@@ -16,8 +16,8 @@ data = {
 fixed_queries = FixedQueries(**data)
 
 cfg = Config.from_yaml("cli.yaml")
-simulator = FixedQuerySimulator(cfg=cfg, fixed_queries=fixed_queries, verbose=True)
-conv = simulator.run()
+simulator = FixedQuerySimulator(cfg=cfg, verbose=True)
+conv = simulator.run(fixed_queries)
 
 print(LogUtils.format_infos_with_tabulate(str(conv)))
 print()

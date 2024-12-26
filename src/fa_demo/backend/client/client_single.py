@@ -65,6 +65,7 @@ class SingleAgentMixin(BaseClient):
 
     def single_register(self, conversation_id: str, config: Config, user_identity: Dict = None) -> Conversation:
         """Register a new conversation
+        # TODO: write out the used configs for `single_register`
 
         Args:
             conversation_id (str): the id of the conversation

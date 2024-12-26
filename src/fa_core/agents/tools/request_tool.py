@@ -73,7 +73,7 @@ class RequestTool(ToolMockMixin, BaseTool):
 
     def _build_api_infos_map(self):
         self.tool_map = {}
-        for api in self.context.data_handler.toolbox:
+        for api in self.context.workflow.toolbox:
             self.tool_map[api.name] = api  # also use tool.description as key?
         logger.info(f">>> tool names: {list(self.tool_map.keys())}")
 

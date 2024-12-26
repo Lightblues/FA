@@ -10,14 +10,14 @@ class UISingleFCBot(UISingleBot):
 
     def _post_init(self) -> None:
         super()._post_init()
-        self.context.data_handler.pdl.add_tool(tool_response)
+        self.context.workflow.pdl.add_tool(tool_response)
         # NOTE: the dep_controller doesn't need to be modified because it is initialized after Bot!
 
     def process_stream(self) -> Iterator[str]:
         self.last_llm_prompt = self._gen_prompt()
         response = self.llm.chat_completions_create(
             query=self.last_llm_prompt,
-            tools=self.context.data_handler.pdl.tools,  # NOTE: used in `tools` field!
+            tools=self.context.workflow.pdl.tools,  # NOTE: used in `tools` field!
             tool_choice="auto",
             stream=True,
         )
@@ -29,7 +29,7 @@ class UISingleFCBot(UISingleBot):
         state_infos = {
             "Current time": PromptUtils.get_formated_time(),
         }
-        data_handler = self.context.data_handler
+        data_handler = self.context.workflow
         # s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
         state_infos |= self.context.status_for_prompt  # add the status infos from PDL!
         prompt = jinja_render(

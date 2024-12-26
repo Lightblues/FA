@@ -43,5 +43,21 @@ class DBUtils:
     def get_latest_sessionids(self, limit: int = 10, collection: str = "ui_multi_sessions") -> List[str]:
         return [doc["session_id"] for doc in self.db[collection].find().sort("session_id", pymongo.DESCENDING).limit(limit)]
 
-    def find_sessionids_by_query(self, query: Dict[str, Any], collection: str = "ui_multi_sessions", limit: int = 10) -> List[str]:
-        return [doc["session_id"] for doc in self.db[collection].find(query).sort("session_id", pymongo.DESCENDING).limit(limit)]
+    def find_sessions_by_query(
+        self,
+        query: Dict[str, Any],
+        collection: str = "ui_multi_sessions",
+        limit: int = 10,
+        returned_fields: List[str] = ["session_id", "exp_version", "exp_id"],
+    ) -> List[Dict[str, Any]]:
+        """Find sessions by query and return specified fields."""
+        cursor = self.db[collection].find(query, {field: 1 for field in returned_fields})
+        cursor = cursor.sort("session_id", pymongo.DESCENDING).limit(limit)
+        return [{field: doc.get(field, "_default") for field in returned_fields} for doc in cursor]
+
+    def count_documents_by_query(self, query: Dict[str, Any], collection: str = "ui_multi_sessions") -> int:
+        return self.db[collection].count_documents(query)
+
+    def get_exp_versions(self, collection: str = "ui_multi_sessions") -> List[str]:
+        exp_versions = self.db[collection].find().distinct("exp_version")
+        return exp_versions

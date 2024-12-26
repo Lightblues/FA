@@ -1,0 +1,21 @@
+{"workflow_name":"同程开发票","user_queries":["订单号10086","王二","25142","电子","再帮我开一张纸质专票"],"eval_session_id":"1dc5d108-6360-42e5-b021-2efada1a36c7","eval_description":"开完电子普票再开纸质专票"}
+{"workflow_name":"同程开发票","user_queries":["开发票","10086"],"eval_session_id":"fe195fbb-fb8c-4d92-a3ff-4ba2308049fe","eval_description":"订单编号10086开票"}
+{"workflow_name":"同程开发票","user_queries":["开发票","666888","张三"],"eval_session_id":"7a839fc9-f850-463e-82b1-45039b74f7f4","eval_description":"开白金纸质专票"}
+{"workflow_name":"同程开发票","user_queries":["订单号10086","王二","24065","电子票","再开专票"],"eval_session_id":"5dc312a7-c7d5-4523-bb31-6d0068576654","eval_description":"开完白金电子普票后，再继续开白金纸质专票"}
+{"workflow_name":"同程开发票","user_queries":["123123 开票"],"eval_session_id":"be85f25b-2bd8-4d2f-9065-ddc6e6cf234e","eval_description":"订单号123123开票"}
+{"workflow_name":"同程开发票","user_queries":["123123 开票","抱歉，订单号是124124","纸质票"],"eval_session_id":"be85f25b-2bd8-4d2f-9065-ddc6e6cf234e","eval_description":"订单号123123开票后，修改订单号124124继续开白金纸质票"}
+{"workflow_name":"同程开发票","user_queries":["张三开票","363636","不是说了吗","张三"],"eval_session_id":"0f7d396e-67c8-4e1f-8e73-ba24cffbdb09","eval_description":"张三开票"}
+{"workflow_name":"同程开发票","user_queries":["666333","李李"],"eval_session_id":"10739403-a978-4b79-a0d3-5e01c31d8ecc","eval_description":"会员号是422，开非白金纸质专票"}
+{"workflow_name":"同程开发票","user_queries":["会员号422开票","123123"],"eval_session_id":"84ecd1bc-f9d4-476c-a3ad-cbb240f84501","eval_description":"会员号422，订单号123123开票"}
+{"workflow_name":"同程开发票","user_queries":["123124 开票","王二","565656","普票"],"eval_session_id":"115b0eb8-6faa-4ba0-952a-a4d23a87d42b","eval_description":"开一张非白金普票"}
+{"workflow_name":"同程开发票","user_queries":["123124 开票","张二，会员号143","纸质专票","还有一个会员号是433，开电子票"],"eval_session_id":"5ad71d4d-dfc6-492f-9dc4-ec4277672049","eval_description":"开一张非白金纸质专票后，再继续开一张白金电子普票"}
+{"workflow_name":"同程开发票","user_queries":["订单号151515，会员号是4226，帮忙开纸质普票"],"eval_session_id":"0d9741fa-d66d-4599-be60-e2fabc06f6f1","eval_description":"开一张非白金电子专票"}
+{"workflow_name":"同程开发票","user_queries":["开一张白金卡发票","我叫李李，订单898989","666"],"eval_session_id":"c7a50636-a4b5-4e70-bb97-26b2409a6db3","eval_description":"开一张白金电子普票后，不同会员号再开一张非白金电子普票"}
+{"workflow_name":"同程开发票","user_queries":["123124 开票","2234"],"eval_session_id":"78be0275-da46-4e8f-bde1-e640fb060de8","eval_description":"开电子普票"}
+{"workflow_name":"同程开发票","user_queries":["23455","是网名吗","angelik"],"eval_session_id":"11cb92a0-c28b-4719-94d9-ba7e9d5afb78","eval_description":"我想开电子普票"}
+{"workflow_name":"同程开发票","user_queries":["123124 开票","额","王集","144","普票"],"eval_session_id":"4d48506e-b5fe-4322-804b-3b76bb0dfdaf","eval_description":"同程开发票"}
+{"workflow_name":"同程开发票","user_queries":["我要开一张纸质发票","666333","丽丽","420","搞错了 是422"],"eval_session_id":"1e8241f8-287c-4e57-969d-9597f865c3b9","eval_description":"纸质发票期望发起澄清是纸质专票还是纸质普票"}
+{"workflow_name":"同程开发票","user_queries":["123123","王二","421","普通发票"],"eval_session_id":"3c790281-78be-4101-9006-ef2d20b26fcc","eval_description":"普通发票提槽结果测试"}
+{"workflow_name":"同程开发票","user_queries":["111","嗯嗯","555"],"eval_session_id":"82b5d96c-2d31-42a2-863e-8113899e6d5e","eval_description":"555开发票"}
+{"workflow_name":"同程开发票","user_queries":["订单123123","李李","555"],"eval_session_id":"ec1b1cab-cdf2-41c2-aec6-8592599777ab","eval_description":"订单123123开发票"}
+{"workflow_name":"同程开发票","user_queries":["开发票 编号为1234567","1","姓蔡","蔡明"],"eval_session_id":"c2952308-a4ee-41c8-9150-750c9ebc739c","eval_description":"开发票测试错误取值"}

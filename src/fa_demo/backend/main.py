@@ -44,7 +44,7 @@ def init_app(config_name: str | None = None) -> FastAPI:
     config_name = config_name or os.environ.get("CONFIG_NAME", "default.yaml")
 
     # Initialize configuration
-    print(f"Loading config: {config_name}")
+    print(f"Backend loading config: {config_name}")
     cfg = Config.from_yaml(config_name)
     init_loguru_logger(FADataManager.DIR_backend_log)
     SharedResources.initialize(cfg)

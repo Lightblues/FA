@@ -10,14 +10,12 @@ class V010Mixin(BaseModel):
     workflow_type: str = "pdl"  # text, code, flowchart
     workflow_id: str = "000"
     exp_version: str = "default"
-    exp_mode: str = "session"  # turn, session
-    exp_save_config: bool = False
-    exp_check_if_run: bool = True
+    exp_id: str = "default"
+    # exp_mode: str = "session"  # not used yet
 
     user_mode: str = "llm_profile"  # llm_oow, manual, llm_profile
     user_llm_name: str = "gpt-4o"
     user_template_fn: Optional[str] = None  # "user_llm.jinja"
-    # user_profile: bool = True # controlled by exp_mode
     user_profile_id: int = 0
     user_retry_limit: int = 3
     user_oow_ratio: float = 0.1
@@ -32,7 +30,6 @@ class V010Mixin(BaseModel):
     # pdl_check_api_dup_calls_threshold: int = 2
     # pdl_check_api_w_tool_manipulation: bool = False  # whether to check API calls with tool manipulation
     bot_pdl_controllers: List[Dict] = []
-    pdl_version: str = "pdl"
 
     api_mode: str = "llm"  # request/v01, llm
     api_template_fn: Optional[str] = None  # "api_llm.jinja"

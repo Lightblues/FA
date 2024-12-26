@@ -58,7 +58,7 @@ def insert_disconnect_js():
         f"""
         <script>
             window.onbeforeunload = function() {{
-                fetch('{ss.client.url}/single_disconnect/{ss.session_id}', {{
+                fetch('{ss.client.backend_url}/single_disconnect/{ss.session_id}', {{
                     method: 'POST'
                 }});
             }};

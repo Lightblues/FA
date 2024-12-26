@@ -2,7 +2,7 @@
 @241210
 - [x] merge from conv_ui
 @241211
-- [x] #bug model the dependncy between select_col3~5 (selected_workflow_dataset, selected_pdl_version, selected_workflow_name)
+- [x] #bug model the dependncy between select_col3~5 (selected_workflow_dataset, selected_workflow_name)
 - [x] #feat user_additional_constraints
 @241223
 - [x] seperate `Procedure` from PDL
@@ -22,7 +22,6 @@ from .data_single import (
     debug_print_infos_single,
     get_model_name_list,
     get_template_name_list,
-    get_workflow_dirs,
     get_workflow_names_map,
     refresh_session_single,
 )
@@ -34,7 +33,6 @@ def init_sidebar():
 
     _model_names = get_model_name_list()
     _template_names = get_template_name_list()
-    # _workflow_dirs = get_workflow_dirs()
     _workflow_names_map, _ = get_workflow_names_map()
     _workflow_datasets = list(_workflow_names_map.keys())
 
@@ -90,14 +88,6 @@ def init_sidebar():
             )
         with select_col4:
             st.selectbox(
-                "选择画布版本",
-                options=get_workflow_dirs(ss.selected_workflow_dataset),
-                key="selected_pdl_version",
-                format_func=lambda x: x.split("/")[-1],  # NOTE: only show the last subdir
-                on_change=update_version_dependencies,
-            )
-        with select_col5:
-            st.selectbox(
                 "选择画布",
                 options=_workflow_names_map[ss.selected_workflow_dataset],
                 key="selected_workflow_name",
@@ -137,14 +127,6 @@ def init_sidebar():
 
 def update_workflow_dependencies():
     """Update dependencies when selected_workflow_dataset changes."""
-    _workflow_names_map, _ = get_workflow_names_map()
-    ss.selected_pdl_version = get_workflow_dirs(ss.selected_workflow_dataset)[0]  # Set to first version
-    ss.selected_workflow_name = _workflow_names_map[ss.selected_workflow_dataset][0]  # Set to first workflow
-    refresh_session_single()
-
-
-def update_version_dependencies():
-    """Update dependencies when selected_pdl_version changes."""
     _workflow_names_map, _ = get_workflow_names_map()
     ss.selected_workflow_name = _workflow_names_map[ss.selected_workflow_dataset][0]  # Set to first workflow
     refresh_session_single()

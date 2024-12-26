@@ -56,7 +56,7 @@ def refresh_session_multi():
     NOTE: will reset a new session!
 
     Used config:
-        ``Workflow``: workflow_type, workflow_id, pdl_version
+        ``Workflow``: workflow_type, workflow_id
             mode | exp_mode | user_mode
         ``UISingleBot``: bot_template_fn, bot_llm_name, bot_retry_limit
         ``RequestTool``: api_entity_linking

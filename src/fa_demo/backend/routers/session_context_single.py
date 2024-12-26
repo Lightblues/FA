@@ -13,7 +13,7 @@ from loguru import logger
 from pydantic import BaseModel
 
 from fa_core.common import Config
-from fa_core.data import BotOutput, Conversation, DataHandler, Role
+from fa_core.data import BotOutput, Conversation, FAWorkflow, Role
 from fa_core.agents import BOT_NAME2CLASS, CONTROLLER_NAME2CLASS, BaseController, RequestTool, UISingleBot, Context
 
 from ..common.shared import get_db
@@ -32,7 +32,7 @@ class SingleSessionContext(BaseModel):
 
     cfg: Config
     conv: Conversation
-    workflow: DataHandler
+    workflow: FAWorkflow
     bot: UISingleBot  # or UISingleFCBot
     tool: RequestTool
     controllers: Dict[str, BaseController]
@@ -47,7 +47,7 @@ class SingleSessionContext(BaseModel):
             session_id (str): session_id
             cfg (Config): config.
                 Used config:
-                    ``Workflow``: workflow_type, workflow_id, pdl_version
+                    ``Workflow``: workflow_type, workflow_id
                         mode | exp_mode | user_mode
                     ``UISingleBot``: bot_template_fn, bot_llm_name, bot_retry_limit
                     ``RequestTool``: api_entity_linking
@@ -58,10 +58,10 @@ class SingleSessionContext(BaseModel):
             SessionContext: session context
         """
         # logger.info(f"cfg.bot_pdl_controllers: {cfg.bot_pdl_controllers}")
-        data_handler = DataHandler.create(cfg)
+        workflow = FAWorkflow.from_config(cfg)
         conv = Conversation.create(session_id)
-        conv.add_message(msg=cfg.ui_greeting_msg.format(name=data_handler.pdl.Name), role=Role.BOT)
-        _context = Context(cfg=cfg, data_handler=data_handler, conv=conv)
+        conv.add_message(msg=cfg.ui_greeting_msg.format(name=workflow.pdl.Name), role=Role.BOT)
+        _context = Context(cfg=cfg, workflow=workflow, conv=conv)
         # TODO: check the config `bot_llm_name`
         bot = BOT_NAME2CLASS[cfg.ui_bot_mode](cfg=cfg, context=_context)
         tool = RequestTool(cfg=cfg, context=_context)
@@ -75,7 +75,7 @@ class SingleSessionContext(BaseModel):
             session_id=session_id,
             cfg=cfg,
             conv=conv,
-            workflow=data_handler,
+            workflow=workflow,
             bot=bot,
             tool=tool,
             controllers=controllers,
@@ -86,7 +86,7 @@ SINGLE_SESSION_CONTEXT_MAP = {}
 
 
 def create_session_context_single(session_id: str, cfg: Config) -> SingleSessionContext:
-    assert session_id not in SINGLE_SESSION_CONTEXT_MAP, "session_id already exists"
+    assert session_id not in SINGLE_SESSION_CONTEXT_MAP, f"session_id {session_id} already exists"
     session_context = SingleSessionContext.from_config(session_id, cfg)
     SINGLE_SESSION_CONTEXT_MAP[session_id] = session_context
     return session_context
@@ -119,6 +119,7 @@ def db_upsert_session_single(ss: SingleSessionContext):
     _session_info = {
         # model_llm_name, template, tools, etc
         "exp_version": ss.cfg.exp_version,
+        "exp_id": ss.cfg.exp_id,
         "session_id": ss.session_id,
         "user": ss.user_identity,
         "mode": "single",

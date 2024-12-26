@@ -48,7 +48,6 @@ def _pre_control(session_context: SingleSessionContext) -> None:
     """Make pre-control on the bot's action
     will change the PDLBot's prompt!
     """
-    # if not (self.cfg.exp_mode == "session" and isinstance(self.bot, PDLBot)):  return
     for controller in session_context.controllers.values():
         if not controller.if_pre_control:
             continue

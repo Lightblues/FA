@@ -1,7 +1,7 @@
 import pymongo
 
-from backend.common.shared import check_db_connection
-from fa_core.common import Config
+from fa_demo.backend.common.shared import check_db_connection
+from fa_core.common import Config, DBUtils
 
 
 def test_db_connection():
@@ -15,5 +15,11 @@ def test_db_connection():
         return client
 
 
-client = test_db_connection()
-print()
+def test_db_utils():
+    db_utils = DBUtils()
+    print(db_utils.get_exp_versions(collection="dev_single_sessions"))
+    print()
+
+
+# client = test_db_connection()
+test_db_utils()

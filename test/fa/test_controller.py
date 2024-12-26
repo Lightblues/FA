@@ -1,12 +1,12 @@
 from fa_core.common import Config
-from fa_core.data import BotOutput, Conversation, DataHandler
+from fa_core.data import BotOutput, Conversation, FAWorkflow
 from fa_core.agents.controllers import NodeDependencyController
 
 
 def test_dep_controller():
     # {name: "api_duplication", config: {if_pre: true, if_post: true, threshold: 2}}
     cfg = Config.from_yaml("default.yaml")
-    workflow = DataHandler.create(cfg)
+    workflow = FAWorkflow.from_config(cfg)
     conv = Conversation()
 
     controller = NodeDependencyController(

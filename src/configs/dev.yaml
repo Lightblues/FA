@@ -55,10 +55,6 @@ db_available_collections:
   - "backend_multi_sessions"
   - "dev_single_sessions"
   - "dev_multi_sessions"
-db_available_exp_versions:
-  - "cli_241224"
-  - "default"
-  - "exp_converted_ruled_241224"
 
 st_default_page: inspect
 st_default_db_collection: dev_single_sessions

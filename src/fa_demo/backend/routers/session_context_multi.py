@@ -16,7 +16,7 @@ from pydantic import BaseModel
 
 from fa_core.common import Config
 from fa_core.agents import CONTROLLER_NAME2CLASS, BaseController, RequestTool, UIMultiMainBot, UIMultiWorkflowBot, Context
-from fa_core.data import BotOutput, Conversation, DataHandler
+from fa_core.data import BotOutput, Conversation, FAWorkflow
 
 from ..common.shared import get_db
 
@@ -53,7 +53,7 @@ class MultiSessionContext(BaseModel):
             session_id (str): session_id
             cfg (Config): config.
                 Used config:
-                    ``Workflow``: workflow_type, workflow_id, pdl_version
+                    ``Workflow``: workflow_id
                         mode | exp_mode | user_mode
                     ``UISingleBot``: bot_template_fn, bot_llm_name, bot_retry_limit
                     ``RequestTool``: api_entity_linking
@@ -63,10 +63,10 @@ class MultiSessionContext(BaseModel):
         Returns:
             SessionContext: session context
         """
-        data_handler = DataHandler.create(cfg)
+        data_handler = FAWorkflow.from_config(cfg)
         conv = Conversation.create(session_id)
         conv.add_message(msg=cfg.mui_greeting_msg, role="bot_main")
-        _context = Context(cfg=cfg, data_handler=data_handler, conv=conv)
+        _context = Context(cfg=cfg, workflow=data_handler, conv=conv)
         agent_main = UIMultiMainBot(cfg=cfg, context=_context)
         tool = RequestTool(cfg=cfg, context=_context)
         return cls(
@@ -97,7 +97,7 @@ class MultiSessionContext(BaseModel):
                     self._workflow_controllers_map,
                 )
             ), "workflow_name already exists"
-            workflow = DataHandler.create(self.cfg, id_or_name=workflow_name)
+            workflow = FAWorkflow(workflow_dataset=self.cfg.workflow_dataset, workflow_id=workflow_name)
             self._workflow_agent_map[workflow_name] = UIMultiWorkflowBot(cfg=self.cfg, conv=self.conv, workflow=workflow)
             self._workflow_tool_map[workflow_name] = RequestTool(cfg=self.cfg, conv=self.conv, data_handler=workflow)
             self._workflow_controllers_map[workflow_name] = {}

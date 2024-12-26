@@ -8,8 +8,21 @@ from fa_eval.data import FixedQueries
 
 
 class FixedQuerySimulator(BaseModel):
+    """Simulator for fixed user queries
+
+    Args:
+        cfg (Config): The configuration for the simulator
+            1. used configs: `backend_url, bot_action_limit`
+            2. others: see `single_register`
+        verbose (bool, optional): Whether to print the verbose output. Defaults to False.
+
+    Usage::
+
+        simulator = FixedQuerySimulator(cfg=cfg, verbose=True)
+        conv = simulator.run(fixed_queries)
+    """
+
     cfg: Config
-    fixed_queries: FixedQueries
     verbose: bool = False
 
     conversation_id: str = ""
@@ -21,9 +34,9 @@ class FixedQuerySimulator(BaseModel):
         self.client = FrontendClient(backend_url=self.cfg.backend_url)
         return super().model_post_init(__context)
 
-    def run(self) -> Conversation:
+    def run(self, fixed_queries: FixedQueries) -> Conversation:
         conv = self.step_register()
-        for query in self.fixed_queries.user_queries:
+        for query in fixed_queries.user_queries:
             self.step_user(query)
             for i_bot_actions in range(self.cfg.bot_action_limit):
                 bot_response = self.step_bot_predict()
@@ -39,6 +52,14 @@ class FixedQuerySimulator(BaseModel):
                     raise NotImplementedError
         self.client.single_disconnect(self.conversation_id)
         return conv
+
+    def run_with_try_catch(self, fixed_queries: FixedQueries) -> bool:
+        try:
+            self.run(fixed_queries)
+            return True
+        except Exception as e:
+            print(f">>> [error] {e}")
+            return False
 
     def step_post_control(self, bot_response: SingleBotPredictResponse) -> bool:
         res_post_control = self.client.single_post_control(self.conversation_id, bot_response.bot_output)

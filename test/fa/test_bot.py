@@ -1,5 +1,5 @@
 from fa_core.common import Config, DataManager
-from fa_core.data import Conversation, DataHandler, Message, Role
+from fa_core.data import Conversation, FAWorkflow, Message, Role
 from fa_core.agents.bots import UISingleBot
 
 
@@ -10,7 +10,7 @@ def init_ui_bot() -> UISingleBot:
     cfg.workflow_dataset = "PDL_zh"
     cfg.workflow_type = "pdl"
 
-    workflow = DataHandler.create(cfg)
+    workflow = FAWorkflow.from_config(cfg)
     conv = Conversation()
     bot = UISingleBot(cfg=cfg, conv=conv, workflow=workflow)
     return bot

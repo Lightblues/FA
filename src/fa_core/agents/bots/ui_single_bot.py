@@ -59,14 +59,14 @@ class UISingleBot(ReactBot):
             stop=["[END]"],
         )
 
-        self.context.data_handler.pdl.add_tool(tool_response)  # NOTE: add "response_to_user" as a special tool!
+        self.context.workflow.pdl.add_tool(tool_response)  # NOTE: add "response_to_user" as a special tool!
 
     def _gen_prompt(self) -> str:
         # - [x]: format apis
         state_infos = {
             "Current time": PromptUtils.get_formated_time(),
         }
-        data_handler = self.context.data_handler
+        data_handler = self.context.workflow
         # s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
         state_infos |= self.context.status_for_prompt  # add the status infos from PDL!
         _tool_infos = [tool.model_dump() for tool in data_handler.pdl.tools]

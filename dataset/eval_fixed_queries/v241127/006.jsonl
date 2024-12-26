@@ -1,0 +1,27 @@
+{"workflow_name":"挂号","user_queries":["身份证号310105199810084207，麻烦帮忙挂号","北大第一医院","儿科","不用了，谢谢"],"eval_session_id":"d129f53b-e150-4076-82fe-cdc9516067ef","eval_description":"在北大第一医院没有儿科的情况下拒绝了其他医院的挂号"}
+{"workflow_name":"挂号","user_queries":["挂朝阳医院3月22号的针灸科","陈红医生是哪个号呀？","专家号","310105199810084207","那普通号呢"],"eval_session_id":"5147fa37-7d91-4e68-9402-bb35a1e84348","eval_description":"挂朝阳医院3月22号的针灸科，在陈红医生没有专家号的情况下换挂普通号"}
+{"workflow_name":"挂号","user_queries":["东方医院的妇科怎么挂号","3.24号的","就挂3.24号的"],"eval_session_id":"a98edcb9-cf95-4c25-8e6e-33077a8b01e1","eval_description":"挂东方医院的妇科，3.24号没有号源，可以换医院但不改挂号时间"}
+{"workflow_name":"挂号","user_queries":["挂东方医院的妇科","25号的","3月25号哦"],"eval_session_id":"ed953b64-41fa-49cd-a99d-ece7790c00a9","eval_description":"挂东方医院的妇科，没有具体的挂号月份"}
+{"workflow_name":"挂号","user_queries":["请帮我挂一个天坛医院、神经科、3.25日的普通号","可以"],"eval_session_id":"e2e8a10c-157b-42d3-ac14-94f3c9b77d61","eval_description":"请帮我挂一个天坛医院、神经科、3.25日的普通号"}
+{"workflow_name":"挂号","user_queries":["可以挂号吗","儿童医院，挂3月4号的儿科","是新生儿科"],"eval_session_id":"554386da-e44e-4471-9112-dac4910c6003","eval_description":"儿童医院没有儿科，换了新生儿科，日期不变"}
+{"workflow_name":"挂号","user_queries":["挂北大第三医院的号","是的"],"eval_session_id":"1590f6bd-5b4f-4211-be29-61ffc23dfd00","eval_description":"挂北大第三医院的骨科号"}
+{"workflow_name":"挂号","user_queries":["挂安贞医院的号","神经内科","可以的","3.11","好","专家号，身份证：400032200002143319"],"eval_session_id":"a90559fa-8d16-426b-8173-0f4e37ccead6","eval_description":"挂安贞医院的神经内科号"}
+{"workflow_name":"挂号","user_queries":["帮忙挂301医院的号","病理科","那挂骨科","3.20","123456789123456789"],"eval_session_id":"a81838f8-a8f1-4da5-b0be-8acde263c906","eval_description":"挂301医院3.20骨科的号"}
+{"workflow_name":"挂号","user_queries":["我想挂号","你们都支持哪些医院的","协和医院吧","外科"],"eval_session_id":"6224a3ea-3b0c-4a15-9283-fc3cfa212b1c","eval_description":"无法挂到预期医院的号"}
+{"workflow_name":"挂号","user_queries":["挂号","那个叫协什么的医院","噢噢，是协和医院","内科","3月11日"],"eval_session_id":"7e3c6fcb-9578-4828-a71d-9e5977ca2f0b","eval_description":"医院名称的澄清"}
+{"workflow_name":"挂号","user_queries":["hi","北大第一医院","外科","其他医院也没有是吗"],"eval_session_id":"bf1b6286-33ea-4785-96af-0cbc55743cec","eval_description":"改挂其他医院的号"}
+{"workflow_name":"挂号","user_queries":["挂301医院的内科号"],"eval_session_id":"3fb8224b-6c2b-4c2b-98d3-0eff9686d6f1","eval_description":"直接指定医院和科室进行挂号"}
+{"workflow_name":"挂号","user_queries":["挂个号吧","天坛的普外"],"eval_session_id":"38f2d633-7e3c-4239-acd3-301d13857e4e","eval_description":"无指定日期的号源"}
+{"workflow_name":"挂号","user_queries":["我要挂医院的号","儿童医院","小儿中医"],"eval_session_id":"a1e58d25-2874-430d-82f2-e567bbf358f8","eval_description":"输出了一个未在范围内的科室，但没有反问澄清"}
+{"workflow_name":"挂号","user_queries":["挂301医院的骨科","11月23日","好","专家号","那就普通号","112233445566778899"],"eval_session_id":"0ac0bc8b-fb3e-456b-90d3-c6b4db4a1198","eval_description":"挂301医院的骨科专家号"}
+{"workflow_name":"挂号","user_queries":["挂301医院的号","胸外科","下周六","可以","就普通号","112233445566778899"],"eval_session_id":"a60b80dd-fc24-4fbe-8fb6-63b5aebe8777","eval_description":"挂北京301医院胸外科，时间是下周六"}
+{"workflow_name":"挂号","user_queries":["看病","北京301","是","外科"],"eval_session_id":"f41821f9-cbcc-4d7f-9044-2cb688b9c97e","eval_description":"挂北京301外科"}
+{"workflow_name":"挂号","user_queries":["挂号","301","是的","眼科","3月15日","好啊","那就东直门医院","可以","121234345656787899"],"eval_session_id":"221a91e2-4b64-4a1d-ace6-9d7127c34972","eval_description":"挂后天北京301医院的眼科"}
+{"workflow_name":"挂号","user_queries":["挂号","额，我想想，301吧","嗯，胸口不舒服，应该挂哪个科？","那就心内科吧","3.19","那就看看其他医院","可以啊","挂专家号，身份证是443322115566778899"],"eval_session_id":"8e28c1b7-fc00-40ea-8d94-1a04935d383b","eval_description":"模拟用户自己胸口不舒服，也不知道挂什么科室，随便的进行一个挂号尝试"}
+{"workflow_name":"挂号","user_queries":["挂号 宣武医院","眼科","换成东直门吧，近一点","下周三","可以","不是说普通号嘛，就这个吧，身份证是112233445566778899"],"eval_session_id":"3219513e-46e8-48f0-b5e1-e17c66d189c0","eval_description":"挂号，看眼睛"}
+{"workflow_name":"挂号","user_queries":["挂号，看眼睛","北大第一医院","明天","后天呢，有没有号","好吧","对，专家号。身份证是4458871998122274824"],"eval_session_id":"1dbce9fc-4309-470d-92b4-7813212859c4","eval_description":"挂号，看眼睛"}
+{"workflow_name":"挂号","user_queries":["挂个明天的号","天坛","是的","我有点发烧，应该挂什么科室","那就先挂个内科","哦，123456789123456789"],"eval_session_id":"30d6244a-dd70-4346-a71c-8a205635826b","eval_description":"挂个明天的号，发烧应该挂什么科室"}
+{"workflow_name":"挂号","user_queries":["后天看骨科行不行","北大医院，后天是几号来着，我手里没有时间啊","嗯对","不了"],"eval_session_id":"34a8b258-0490-41d0-ae37-1a8f585fc905","eval_description":"后天看骨科行不行"}
+{"workflow_name":"挂号","user_queries":["挂号，明天的","积水什么谭医院？","哦对对","口腔科","11月28日","可以","什么医院的号啊","那好","12345678987654321"],"eval_session_id":"34bf70d6-d705-468f-9427-9ace289c09bf","eval_description":"挂号，口腔科"}
+{"workflow_name":"挂号","user_queries":["挂号","301医院","有哪些科室","内科有吗"],"eval_session_id":"2127204c-767d-4b93-a357-d4b0c26ab2bd","eval_description":"询问医院有哪些科室。根据模型输出的科室名称进行回复"}
+{"workflow_name":"挂号","user_queries":["挂号","201","是","有哪些科室","心内科","3.11","不了，你不是说301医院有心内科吗","不用了"],"eval_session_id":"56144449-cf9e-4ef4-853a-df9bdc216821","eval_description":"询问医院有哪些科室。根据模型输出的科室名称进行回复"}

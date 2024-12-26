@@ -8,13 +8,13 @@ from typing import Dict
 from pydantic import BaseModel, Field
 
 from fa_core.common import Config
-from fa_core.data import BotOutput, Conversation, DataHandler
+from fa_core.data import BotOutput, Conversation, FAWorkflow
 
 
 class Context(BaseModel):
-    cfg: Config = Field(default=Config())
-    data_handler: DataHandler = Field(default=DataHandler())
-    conv: Conversation = Field(default=Conversation())
+    cfg: Config
+    workflow: FAWorkflow
+    conv: Conversation
 
     status_for_prompt: Dict[str, str] = Field(default_factory=dict)  # for PDLBot's prompt
 

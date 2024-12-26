@@ -5,7 +5,7 @@ from fa_core.common import Config
 
 class FixedQueries(BaseModel):
     workflow_dataset: str = None
-    workflow_id: str
+    workflow_name: str = None
     user_queries: List[str]
 
     eval_session_id: str = None

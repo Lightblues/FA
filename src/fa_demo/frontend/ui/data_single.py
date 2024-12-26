@@ -32,11 +32,6 @@ def get_model_name_list():
 
 
 @st.cache_data
-def get_workflow_dirs(workflow_dataset) -> List[str]:
-    return FADataManager.get_workflow_versions(workflow_dataset)
-
-
-@st.cache_data
 def get_workflow_names_map() -> Dict[str, List[str]]:
     return FADataManager.get_workflow_names_map()
 
@@ -53,7 +48,7 @@ def refresh_session_single():
     NOTE: will reset a new session!
 
     Used config:
-        ``Workflow``: workflow_type, workflow_id, pdl_version
+        ``Workflow``: workflow_type, workflow_id
             mode | exp_mode | user_mode
         ``UISingleBot``: bot_template_fn, bot_llm_name, bot_retry_limit
         ``RequestTool``: api_entity_linking
@@ -67,7 +62,6 @@ def refresh_session_single():
     cfg.workflow_id = name_id_map[cfg.workflow_dataset][ss.selected_workflow_name]
     # print(f">> ss.selected_workflow: {cfg.workflow_dataset} - {cfg.workflow_id} - {ss.selected_workflow_name}")
     # print(f">> {cfg.workflow_dataset } - {cfg.workflow_id}. name_id_map: {name_id_map[cfg.workflow_dataset]}")
-    cfg.pdl_version = ss.selected_pdl_version
     cfg.bot_template_fn = f"{ss.selected_template_fn}"
     cfg.bot_llm_name = ss.selected_model_name
 

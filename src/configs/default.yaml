@@ -49,8 +49,6 @@ mui_agent_main_default_model: *default_model
 mui_default_workflow_dataset: "v241127"
 mui_greeting_msg: "你好，有什么可以帮您?"
 
-pdl_version: "pdl"    # set as default
-
 
 # NOTE: the following 5 fields identify one experiment!!!
 # specifically, workflow_dataset & workflow_type should be all same for one exp_version
@@ -60,8 +58,6 @@ workflow_type: "pdl"       # text, code, flowchart, pdl, core
 workflow_id: "000"
 exp_version: "default"
 exp_mode: "session"        # session, turn
-exp_save_config: false
-exp_check_if_run: false    # DONOT check this experiment if it has been run if set as false!
 
 user_mode: "input_user"   # dummy_user, input_user, llm_profile, llm_oow
 user_llm_name: "default"
@@ -102,10 +98,7 @@ db_available_collections:
   - "backend_multi_sessions"
   - "dev_single_sessions"
   - "dev_multi_sessions"
-db_available_exp_versions:
-  - "cli_241224"
-  - "default"
-  - "exp_converted_ruled_241224"
+# db_available_exp_versions: []
 
 backend_url: "http://localhost:8100"
 

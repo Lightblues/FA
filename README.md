@@ -15,6 +15,8 @@ todos (see details in [[ROADMAP.md]])
 2. PDL standard doc (1.2)
 3. Evaluation (3.1)
     - [x] ChatCLI
+    - [x] Data structure of `FixedQueries` evaluation
+    - [x] `FixedQuerySimulator`
 
 - [x] #bug config default activated controllers in UI
 - [ ] update `UIMultiMainBot`, ref UISingleBot

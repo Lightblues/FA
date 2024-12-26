@@ -4,52 +4,71 @@
 
 import json
 import os
+from functools import cache
 from pydantic import BaseModel, Field
 from typing import Dict, Optional, ClassVar, TYPE_CHECKING
 from pathlib import Path
 
+if TYPE_CHECKING:
+    from fa_core.data.workflow import FAWorkflow
 
-class FADataManager(BaseModel):
-    workflow_dataset: str
 
-    # NOTE: Use ClassVar to define class-level constants
+class PathConfig(BaseModel):
+    # Base directories
     DIR_root: ClassVar[Path] = Path(__file__).resolve().parent.parent.parent.parent
     DIR_src_base: ClassVar[Path] = DIR_root / "src"
+
+    # Configuration and template directories
     DIR_config: ClassVar[Path] = DIR_root / "src/configs"
     DIR_template: ClassVar[Path] = DIR_root / "src/templates/flowagent"
+
+    # Log directories
     DIR_wandb: ClassVar[Path] = DIR_root / "log/_wandb"
     DIR_ui_log: ClassVar[Path] = DIR_root / "log/ui"
     DIR_backend_log: ClassVar[Path] = DIR_root / "log/backend"
-    DIR_data_root: ClassVar[Path] = DIR_root / "dataset"
 
-    # Instance variables
-    DIR_data_workflow: Optional[Path] = None
-    FN_data_workflow_infos: Optional[Path] = None
-    data_version: Optional[str] = None
-    workflow_infos: Dict = Field(default_factory=dict)
+    # Data directory
+    DIR_data_root: ClassVar[Path] = DIR_root / "dataset"
+    DIR_data_eval_fixed_queries: ClassVar[Path] = DIR_data_root / "eval_fixed_queries"
 
     model_config = {
         "arbitrary_types_allowed": True  # Allow Path type
     }
 
-    def model_post_init(self, __context) -> None:
-        workflow_dataset = self.workflow_dataset
 
-        self.DIR_data_workflow = self.DIR_data_root / workflow_dataset
-        self.FN_data_workflow_infos = self.DIR_data_workflow / "task_infos.json"
-        _infos: dict = json.load(open(self.FN_data_workflow_infos, "r"))
-        self.data_version = _infos["version"]
-        self.workflow_infos = _infos["task_infos"]
+class FADataManager(PathConfig):
+    @cache
+    @staticmethod
+    def get_workflow_infos(workflow_dataset: str) -> dict:
+        """Get the workflow infos map"""
+        fn = FADataManager.DIR_data_root / workflow_dataset / "task_infos.json"
+        return json.load(open(fn, "r"))["task_infos"]
 
-    @property
-    def num_workflows(self) -> int:
-        return len(self.workflow_infos)
+    @cache
+    @staticmethod
+    def get_workflow(workflow_dataset: str, workflow_id: str) -> "FAWorkflow":
+        return FAWorkflow(workflow_dataset=workflow_dataset, workflow_id=workflow_id)
 
-    def get_workflow_dataset_names(self):
-        # return folder name in self.DIR_data_root
-        all_entries = os.listdir(self.DIR_data_root)
-        names = [entry for entry in all_entries if os.path.isdir(os.path.join(self.DIR_data_root, entry))]
-        return names
+    # TODO: unifiedly index workflow by name!
+    @staticmethod
+    def unify_workflow_name(workflow_dataset: str, workflow_name_or_id: str) -> str:
+        workflow_infos = FADataManager.get_workflow_infos(workflow_dataset)
+        workflow_name_id_map = {info["name"]: id for id, info in workflow_infos.items()}
+        if workflow_name_or_id in workflow_name_id_map:
+            workflow_name_or_id = workflow_name_id_map[workflow_name_or_id]
+        else:
+            assert workflow_name_or_id in workflow_infos, f"[ERROR] {workflow_name_or_id} not found in {workflow_infos.keys()}"
+        return workflow_name_or_id
+
+    @staticmethod
+    def unify_workflow_id(workflow_dataset: str, workflow_id_or_name: str) -> str:
+        workflow_infos = FADataManager.get_workflow_infos(workflow_dataset)
+        workflow_id_name_map = {id: info["name"] for id, info in workflow_infos.items()}
+        if workflow_id_or_name in workflow_id_name_map:
+            workflow_id_or_name = workflow_id_name_map[workflow_id_or_name]
+        else:
+            assert workflow_id_or_name in workflow_infos, f"[ERROR] {workflow_id_or_name} not found in {workflow_infos.keys()}"
+        return workflow_id_or_name
 
     # --------------------- for ui ---------------------
     @staticmethod
@@ -57,28 +76,19 @@ class FADataManager(BaseModel):
         fns = [fn for fn in os.listdir(FADataManager.DIR_template) if fn.startswith(prefix)]
         return sorted(fns)
 
-    @staticmethod
-    def get_workflow_dirs():
-        dirs = [entry for entry in os.listdir(FADataManager.DIR_data_root) if os.path.isdir(os.path.join(FADataManager.DIR_data_root, entry))]
-        return dirs
-
-    @staticmethod
-    def get_workflow_versions(workflow_dataset):
-        _dir = FADataManager.DIR_data_root / workflow_dataset
-        dirs = [d for d in os.listdir(_dir) if d.startswith("pdl") and os.path.isdir(os.path.join(_dir, d))]
-        return dirs
-
+    @cache
     @staticmethod
     def get_workflow_names_map():
         """
+        TODO: add `dataset_infos.json` to register dataset unifiedly
         Return:
             names_map: {PDL_zh: ["task1", "task2"]}
             name_id_map: {PDL_zh: {"task1": "000"}}
         """
-        dirs = FADataManager.get_workflow_dirs()
+        dataset_infos = json.load(open(FADataManager.DIR_data_root / "dataset_infos.json", "r"))
         names_map = {}  # {PDL_zh: ["task1", "task2"]}
         name_id_map = {}  # {PDL_zh: {"task1": "000"}}
-        for dir in dirs:
+        for dir in dataset_infos.keys():
             fn = FADataManager.DIR_data_root / dir / "task_infos.json"
             if not os.path.exists(fn):
                 continue

@@ -1,14 +1,6 @@
 from fa_core.common import Config
-from fa_core.data import APIOutput, BotOutput, Conversation, DataHandler
+from fa_core.data import APIOutput, BotOutput, Conversation, FAWorkflow
 from fa_core.agents import RequestTool, Context
-
-
-# def init_llm_api() -> LLMSimulatedTool:
-#     cfg = Config.from_yaml("default.yaml")
-#     conv = Conversation()
-#     pdl = DataHandler.create(cfg)
-#     tool = LLMSimulatedTool(cfg=cfg, conv=conv, workflow=pdl)
-#     return tool
 
 
 def test_request_tool_llm():
@@ -20,8 +12,8 @@ def test_request_tool_llm():
     cfg.workflow_dataset = "pdl_converted_20241223_hyturbo"
     cfg.workflow_id = "006"  # GuaHao, with LLM nodes
     conv = Conversation()
-    data_handler = DataHandler.create(cfg)
-    context = Context(cfg=cfg, conv=conv, data_handler=data_handler)
+    data_handler = FAWorkflow.from_config(cfg)
+    context = Context(cfg=cfg, conv=conv, workflow=data_handler)
     tool = RequestTool(cfg=cfg, context=context)
 
     bot_output = BotOutput(
@@ -43,8 +35,8 @@ def test_request_tool_code_executor():
     cfg.workflow_dataset = "pdl_converted_20241223_hyturbo"
     cfg.workflow_id = "006"  # GuaHao, with LLM nodes
     conv = Conversation()
-    data_handler = DataHandler.create(cfg)
-    context = Context(cfg=cfg, conv=conv, data_handler=data_handler)
+    data_handler = FAWorkflow.from_config(cfg)
+    context = Context(cfg=cfg, conv=conv, workflow=data_handler)
     tool = RequestTool(cfg=cfg, context=context)
 
     bot_output = BotOutput(

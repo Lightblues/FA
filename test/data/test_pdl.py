@@ -5,10 +5,7 @@ from fa_core.data import PDL, FADataManager
 from fa_core.data.pdl.pdl_nodes import ParameterNode
 
 
-cfg = Config.from_yaml("default.yaml")
-data_manager = FADataManager(workflow_dataset=cfg.workflow_dataset)
-
-fn = data_manager.DIR_data_workflow / "pdl/000.yaml"
+fn = FADataManager.DIR_data_root / "PDL/pdl/000.yaml"
 pdl = PDL.load_from_file(fn)
 
 
