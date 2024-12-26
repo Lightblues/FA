@@ -55,7 +55,7 @@ from .parameter import Parameter
 from .workflow import Workflow
 
 
-class DataManager(BaseModel):
+class WorkflowDataManager(BaseModel):
     DIR_root: pathlib.Path = pathlib.Path(__file__).resolve().parent.parent.parent.parent
     DIR_data: pathlib.Path = DIR_root / "data"
     DIR_dataset: pathlib.Path = DIR_root / "dataset"

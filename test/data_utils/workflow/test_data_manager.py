@@ -7,7 +7,7 @@ EDA: explore dumped workflow data
 
 from typing import *
 
-from data_utils.workflow import DataManager
+from data_utils.workflow import WorkflowDataManager
 
 
-data_manager = DataManager()
+data_manager = WorkflowDataManager()

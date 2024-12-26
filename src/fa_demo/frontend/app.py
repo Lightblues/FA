@@ -15,7 +15,7 @@ import streamlit as st
 
 ss = st.session_state
 from fa_core.common import Config, init_loguru_logger
-from fa_core.data import DataManager
+from fa_core.data import FADataManager
 
 from .common.util_st import init_resource
 
@@ -27,12 +27,12 @@ PAGE_URL_NAME_MAPPING = {"single": "👤 Single", "multiple": "👥 Multiple", "
 def setup_basic(config_version: str):
     init_resource()  # headers, user_identity
     if "logger" not in ss:
-        ss.logger = init_loguru_logger(DataManager.DIR_ui_log)
+        ss.logger = init_loguru_logger(FADataManager.DIR_ui_log)
     # logger, config and data_manager
     if "cfg" not in ss:
         ss.cfg = Config.from_yaml(config_version)
     if "data_manager" not in ss:
-        ss.data_manager = DataManager(ss.cfg)
+        ss.data_manager = FADataManager(cfg=ss.cfg)
 
 
 def setup_page():

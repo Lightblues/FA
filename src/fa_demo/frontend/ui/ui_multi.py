@@ -18,7 +18,7 @@ import streamlit as st
 
 ss = st.session_state
 from fa_core.common import Config
-from fa_core.data import DataManager
+from fa_core.data import FADataManager
 
 from .data_multi import debug_print_infos_multi, refresh_session_multi
 from .data_single import (
@@ -166,7 +166,7 @@ def setup_workflow_infos(force_refresh: bool = False):
     # 1. set default workflow_infos
     if (not ss.cfg.mui_workflow_infos) or force_refresh:
         ss.cfg.workflow_dataset = ss.selected_workflow_dataset  # NOTE to update the workflow_dataset
-        ss.cfg.mui_workflow_infos = list(DataManager(ss.cfg).workflow_infos.values())
+        ss.cfg.mui_workflow_infos = list(FADataManager(cfg=ss.cfg).workflow_infos.values())
         for w in ss.cfg.mui_workflow_infos:
             w["is_activated"] = True
     # 2. filter the available workflows

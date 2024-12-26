@@ -9,8 +9,8 @@ repos:
     # -   id: check-yaml
     -   id: debug-statements
     -   id: end-of-file-fixer
-    -   id: trailing-whitespace
-        args: [--markdown-linebreak-ext=md]
+    # -   id: trailing-whitespace
+    #     args: [--markdown-linebreak-ext=md]
     -   id: no-commit-to-branch
         args: ['--branch', 'main']
 

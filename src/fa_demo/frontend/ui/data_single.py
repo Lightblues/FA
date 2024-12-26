@@ -12,7 +12,7 @@ import streamlit as st
 ss = st.session_state
 
 from fa_core.common import LLM_CFG, Config, get_session_id, json_line
-from fa_core.data import DataManager
+from fa_core.data import FADataManager
 
 
 def debug_print_infos_single() -> None:
@@ -23,7 +23,7 @@ def debug_print_infos_single() -> None:
 
 @st.cache_data
 def get_template_name_list():
-    return DataManager.get_template_name_list()
+    return FADataManager.get_template_name_list()
 
 
 @st.cache_data
@@ -33,12 +33,12 @@ def get_model_name_list():
 
 @st.cache_data
 def get_workflow_dirs(workflow_dataset) -> List[str]:
-    return DataManager.get_workflow_versions(workflow_dataset)
+    return FADataManager.get_workflow_versions(workflow_dataset)
 
 
 @st.cache_data
 def get_workflow_names_map() -> Dict[str, List[str]]:
-    return DataManager.get_workflow_names_map()
+    return FADataManager.get_workflow_names_map()
 
 
 def _collect_ui_config_controllers():

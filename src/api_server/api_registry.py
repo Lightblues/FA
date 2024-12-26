@@ -1,13 +1,11 @@
 # api_registry.py
 import json
-from dataclasses import dataclass
 from typing import Dict, Type
 
 from pydantic import BaseModel
 
 
-@dataclass
-class APIInfo:
+class APIInfo(BaseModel):
     name: str
     description: str
     request_model: Type[BaseModel]

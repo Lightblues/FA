@@ -25,7 +25,7 @@ from typing import Dict, List
 from fa_core.common import Formater, init_client
 from fa_core.data import PDL
 
-from ..workflow import DataManager, Parameter, Workflow
+from ..workflow import WorkflowDataManager, Parameter, Workflow
 from ..workflow.base import NodeType
 from . import prompts
 
@@ -53,7 +53,7 @@ class WorkflowPDLConverter:
         export_version: str = "export-1732628942",
         llm_name: str = "gpt-4o",
     ) -> None:
-        self.data_manager = DataManager(data_version=data_version, export_version=export_version)
+        self.data_manager = WorkflowDataManager(data_version=data_version, export_version=export_version)
         self.llm = init_client(llm_name, **llm_kwargs)
 
     def convert(self, workflow_id: str):

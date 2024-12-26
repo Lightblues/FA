@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-from enum import Enum
 from typing import Dict, Optional, Union
 
 from pydantic import BaseModel
@@ -16,12 +14,10 @@ from pydantic import BaseModel
 #         self.description = description
 
 
-@dataclass
-class UserOutput:
-    response_content: str = None
+class UserOutput(BaseModel):
+    response_content: str = ""
 
-    response_str = "Response"
-    end_flag = "[END]"
+    end_flag: str = "[END]"
 
     @property
     def is_end(self) -> bool:

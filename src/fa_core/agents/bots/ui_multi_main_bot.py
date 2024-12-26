@@ -14,7 +14,7 @@ from fa_core.common import (
     init_client,
     jinja_render,
 )
-from fa_core.data import DataManager, MainBotOutput
+from fa_core.data import FADataManager, MainBotOutput
 from fa_core.tools import TOOL_SCHEMAS, TOOLS_MAP
 
 from .react_bot import ReactBot
@@ -50,7 +50,7 @@ class UIMultiMainBot(ReactBot):
     def _init_workflow_infos(self, workflow_infos: List[Dict] = []):  # config.workflow_infos
         # 1. set default workflow_infos
         if not workflow_infos:
-            workflow_infos = DataManager(self.cfg).workflow_infos.values()
+            workflow_infos = FADataManager(cfg=self.cfg).workflow_infos.values()
             for w in workflow_infos:
                 w["is_activated"] = True
         # if ss.cfg.mui_available_workflows:

@@ -1,7 +1,7 @@
-from data_utils.workflow import DataManager
+from data_utils.workflow import WorkflowDataManager
 
 
-dm = DataManager()
+dm = WorkflowDataManager()
 
 
 def test_LLM_to_tool():

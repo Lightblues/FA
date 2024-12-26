@@ -3,11 +3,11 @@ import pathlib
 import sys
 
 import jinja2
+from pydantic import BaseModel
 
 
 _DIR = pathlib.Path(__file__).parent
 sys.path.append(str(_DIR.parent))
-from dataclasses import dataclass, field
 from typing import Dict
 
 from fa_core.common import LLM_CFG, Formater, OpenAIClient, init_client
@@ -15,11 +15,9 @@ from fa_core.common import LLM_CFG, Formater, OpenAIClient, init_client
 from .api_registry import api_registry
 
 
-@dataclass
-class APICalling_Info:
+class APICalling_Info(BaseModel):
     name: str = ""
-    # args: List
-    kwargs: Dict = field(default_factory=dict)
+    kwargs: Dict = {}
 
 
 template = """## Task

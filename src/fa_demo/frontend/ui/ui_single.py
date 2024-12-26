@@ -16,7 +16,7 @@ import streamlit as st
 
 ss = st.session_state
 from fa_core.common import Config
-from fa_core.data import DataManager
+from fa_core.data import FADataManager
 
 from .data_single import (
     debug_print_infos_single,
@@ -169,7 +169,7 @@ def post_sidebar():
 
         # show the PDL and template
         st.divider()
-        data_manager: DataManager = ss.data_manager
+        data_manager: FADataManager = ss.data_manager
         with open(f"{data_manager.DIR_template}/{ss.selected_template_fn}", "r") as f:
             template = f.read()
 

@@ -1,12 +1,12 @@
 import yaml
 
 from fa_core.common import Config
-from fa_core.data import PDL, DataManager
+from fa_core.data import PDL, FADataManager
 from fa_core.data.pdl.pdl_nodes import ParameterNode
 
 
 cfg = Config.from_yaml("default.yaml")
-data_manager = DataManager(cfg)
+data_manager = FADataManager(cfg=cfg)
 
 fn = data_manager.DIR_data_workflow / "pdl/000.yaml"
 pdl = PDL.load_from_file(fn)

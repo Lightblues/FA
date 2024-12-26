@@ -8,7 +8,6 @@ todos
 """
 
 import json
-from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
@@ -16,7 +15,7 @@ import yaml
 from pydantic import BaseModel, Field
 
 from fa_core.common import Config
-from fa_core.data.data_manager import DataManager
+from fa_core.data.data_manager import FADataManager
 from fa_core.data.pdl import PDL, ExtToolSpec
 
 
@@ -72,7 +71,7 @@ class DataHandler(BaseModel):  # rename -> Data
     cfg: Optional[Config] = None
 
     @classmethod
-    def create(cls, cfg: Config, data_manager: Optional[DataManager] = None, id_or_name: Optional[str] = None) -> "DataHandler":
+    def create(cls, cfg: Config, data_manager: Optional[FADataManager] = None, id_or_name: Optional[str] = None) -> "DataHandler":
         """Factory method to create a Workflow instance with all the initialization logic
         Args:
             cfg (Config): config
@@ -85,7 +84,7 @@ class DataHandler(BaseModel):  # rename -> Data
         4. load .workflow (f"{self.type.subdir}/{self.id}{self.type.suffix}")
         """
         self = cls(cfg=cfg)  # Initialize with basic fields
-        data_manager = data_manager or DataManager(cfg)
+        data_manager = data_manager or FADataManager(cfg=cfg)
         self.type = WorkflowType[cfg.workflow_type.upper()]
         self.id = self._get_workflow_id(id_or_name or cfg.workflow_id, data_manager.workflow_infos)
 

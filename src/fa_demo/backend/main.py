@@ -29,7 +29,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from fa_core.common import Config, init_loguru_logger
-from fa_core.data import DataManager
+from fa_core.data import FADataManager
 
 from .common.shared import SharedResources
 
@@ -46,7 +46,7 @@ def init_app(config_name: str | None = None) -> FastAPI:
     # Initialize configuration
     print(f"Loading config: {config_name}")
     cfg = Config.from_yaml(config_name)
-    init_loguru_logger(DataManager.DIR_backend_log)
+    init_loguru_logger(FADataManager.DIR_backend_log)
     SharedResources.initialize(cfg)
 
     app = FastAPI(
