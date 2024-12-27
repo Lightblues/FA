@@ -1,0 +1,2 @@
+2024-12-27 15:59:49.815 | INFO     | fa_server.client.client_single:single_bot_predict:121 - >> single_bot_predict with conversation: "[BOT] 你好，我是 114挂号 机器人，有什么可以帮您?\n[USER] 你能干啥"
+2024-12-27 16:04:10.874 | ERROR    | fa_server.client.client_single:single_register:86 - Error: Internal Server Error

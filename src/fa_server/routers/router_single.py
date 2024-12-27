@@ -25,8 +25,8 @@ from loguru import logger
 
 from fa_core.data import Message
 from fa_core.common import log_exceptions, json_line
-from fa_demo.backend.common import logger_util
-from fa_demo.backend.typings import (
+from fa_server.common import logger_util
+from fa_server.typings import (
     BotOutput,
     SingleBotPredictResponse,
     SinglePostControlResponse,

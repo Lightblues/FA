@@ -1,7 +1,7 @@
 from typing import Any, Optional
 from pydantic import BaseModel
 
-from fa_demo.backend import FrontendClient, SingleBotPredictResponse
+from fa_server import FrontendClient, SingleBotPredictResponse
 from fa_core.common import Config, LogUtils, get_session_id
 from fa_core.data import BotOutput, Conversation
 from fa_eval.data import FixedQueries

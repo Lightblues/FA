@@ -7,11 +7,12 @@ Usage::
 - [ ] add pre_conversation to support debug
 """
 
-from fa_demo.backend import FrontendClient, SingleBotPredictResponse
+from fa_server.client import FrontendClient
+from fa_server.typings import SingleBotPredictResponse
 from fa_core.common import Config, LogUtils, get_session_id, init_loguru_logger
 from fa_core.data import BotOutput, Conversation
 
-init_loguru_logger(stdout_level="WARNING")
+init_loguru_logger(stdout_level="WARNING")  # CHECK: does it work?
 
 
 class ChatCLI(object):

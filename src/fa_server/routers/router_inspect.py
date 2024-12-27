@@ -3,7 +3,7 @@ from loguru import logger
 
 from fa_core.common import log_exceptions, json_line
 from fa_core.data import FAWorkflow
-from fa_demo.backend.typings import InspectGetWorkflowQuery, InspectGetWorkflowResponse
+from fa_server.typings import InspectGetWorkflowQuery, InspectGetWorkflowResponse
 
 router_inspect = APIRouter()
 

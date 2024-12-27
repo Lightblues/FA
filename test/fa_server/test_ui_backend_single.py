@@ -11,7 +11,7 @@ USAGE::
 - [x] standardize the conversation logic (with FrontendClient)
 """
 
-from fa_demo.backend import FrontendClient
+from fa_server import FrontendClient
 from fa_core.common import Config, LogUtils, get_session_id
 
 

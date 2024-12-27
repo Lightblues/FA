@@ -1,15 +1,4 @@
 """
-Usage::
-
-    # Method 1: Run with uvicorn directly
-    cd src
-    CONFIG_NAME=default.yaml uvicorn fa_demo.backend.main:app --host 0.0.0.0 --port 8100 --reload --reload-dir ./fa_demo/backend
-
-    # Method 2: Run with python script
-    cd src
-    python run_demo_backend.py --config=default.yaml
-    python run_demo_backend.py --config=default.yaml --port=8100 --reload
-
 @241208
 - [x] basic implement with FastAPI
 @241209
@@ -21,11 +10,13 @@ Usage::
 - [x] #structure seperate the `setup_router()`
 @241212
 - [x] #feat set `--reload_dir ./backend` for `uvicorn`
+@241227
+- [x] #fix seperate `create_app` into fastapi_app.py from `main.py`, so that `app = init_app()` will not run when import!
 """
 
 import os
 from contextlib import asynccontextmanager
-
+from loguru import logger
 from fastapi import FastAPI
 
 from fa_core.common import Config, init_loguru_logger
@@ -44,9 +35,10 @@ def init_app(config_name: str | None = None) -> FastAPI:
     config_name = config_name or os.environ.get("CONFIG_NAME", "default.yaml")
 
     # Initialize configuration
-    print(f"Backend loading config: {config_name}")
     cfg = Config.from_yaml(config_name)
     init_loguru_logger(FADataManager.DIR_backend_log)
+
+    logger.info(f"Backend loading config: {config_name}")
     SharedResources.initialize(cfg)
 
     app = FastAPI(
@@ -91,8 +83,3 @@ def create_app(config_name: str) -> FastAPI:
     app = init_app(config_name)
     setup_router(app)
     return app
-
-
-# For direct usage with uvicorn (environment variable based)
-app = init_app()
-setup_router(app)

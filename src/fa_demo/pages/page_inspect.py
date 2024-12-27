@@ -23,8 +23,8 @@ import pandas as pd
 
 ss = st.session_state
 from fa_core.common import Config, DBUtils, get_session_id
-from fa_demo.backend import FrontendClient
-from fa_demo.backend.typings import InspectGetWorkflowQuery
+from fa_server import FrontendClient
+from fa_server.typings import InspectGetWorkflowQuery
 
 
 def get_latest_sessionids() -> List[str]:

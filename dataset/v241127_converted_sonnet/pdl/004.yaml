@@ -49,7 +49,7 @@ ANSWERs:
   desc: 兜底回复5
 - name: 兜底回复6
   desc: 兜底回复6
-Procedure: "\n# 获取用户ID\n[user_id] = API.参数提取1()\n\n# 查询用户账户下的订单\n[order_info] = API.查询账户中是否有订单([user_id])\n\
+Procedure: "\n# 获取用户ID\n[user_id] = ANSWER.询问相关信息()\n\n# 查询用户账户下的订单\n[order_info] = API.查询账户中是否有订单([user_id])\n\
   [order_count] = API.代码1([order_info])\n\n# 判断是否有订单\nif order_count > 0:\n    # 让用户选择要取消的订单\n\
   \    [order_id] = API.用户选择订单()\n    \n    # 判断用户是否选择了订单\n    if order_id is not\
   \ None:\n        # 检查是否已提交取消申请\n        [sr_info] = API.判断是否已提交取消申请的SR工单([order_id,\

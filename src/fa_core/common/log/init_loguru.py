@@ -19,7 +19,7 @@ def singleton(func):
 
 
 @singleton
-def init_loguru_logger(log_dir="logs", stdout_level="WARNING") -> "Logger":
+def init_loguru_logger(log_dir="logs", stdout_level="INFO") -> "Logger":
     """initialize the loguru logger
 
     Args:
@@ -54,3 +54,11 @@ def init_loguru_logger(log_dir="logs", stdout_level="WARNING") -> "Logger":
     logger.add(f"{log_dir}/app.log", rotation="10 MB", compression="zip", level="INFO")
     logger.add(sys.stdout, level=stdout_level)
     return logger
+
+
+def set_log_level(level: str):
+    logger.level(level)
+
+
+def get_log_level():
+    return logger.level

@@ -38,7 +38,7 @@ ss = st.session_state
 import json
 from typing import Union
 
-from fa_demo.backend import FrontendClient
+from fa_server import FrontendClient
 from fa_core.common import retry_wrapper
 from fa_core.data import (
     APIOutput,

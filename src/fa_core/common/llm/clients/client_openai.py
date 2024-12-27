@@ -114,7 +114,7 @@ class OpenAIClient(BaseClient):
         kwargs = self._process_openai_kwargs(kwargs)
         return self.client.beta.chat.completions.stream(**kwargs)
 
-    def stream_generator(self, chunk_stream: Stream[ChatCompletionChunk], collected_deltas: List[ChoiceDelta] = None) -> Iterator[str]:
+    def stream_generator(self, chunk_stream: Stream[ChatCompletionChunk], collected_deltas: List[ChoiceDelta] = []) -> Iterator[str]:
         """yield str from ChatCompletionChunk, and save the deltas to `collected_deltas`
         Args:
             response: the stream response from OpenAI

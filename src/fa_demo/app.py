@@ -41,7 +41,8 @@ def setup_page():
     from .pages.page_single import main_single
 
     # 1. all the available pages (URL names)
-    available_pages = ["single", "multiple"]
+    # available_pages = ["single", "multiple"]
+    available_pages = ["single"]
     if ss.user_identity["staffname"] in SUPERVISED_USERS:
         available_pages += ["inspect"]
 

@@ -22,7 +22,7 @@ from loguru import logger
 from fa_core.common import log_exceptions
 from fa_core.data import Message
 
-from fa_demo.backend.typings import (
+from fa_server.typings import (
     BotOutput,
     MultiBotMainPredictResponse,
     MultiBotWorkflowPredictResponse,

@@ -6,7 +6,7 @@ Usage:
 
 import argparse
 import uvicorn
-from fa_demo.backend.main import create_app
+from fa_server import create_app
 
 
 def main():
@@ -22,7 +22,7 @@ def main():
         import os
 
         os.environ["CONFIG_NAME"] = args.config
-        app_path = "fa_demo.backend.main:app"
+        app_path = "fa_server.main:app"
     else:
         # in non-hot reload mode, can directly pass config
         app = create_app(args.config)

@@ -26,7 +26,7 @@ Client
     .multi_tool_workflow(conversation_id, bot_output)
 """
 
-from fa_demo.backend import FrontendClient
+from fa_server import FrontendClient
 from fa_core.common import Config, LogUtils, get_session_id
 
 

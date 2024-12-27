@@ -6,16 +6,21 @@ Usage::
 @241226
 - [x] Implement basic version
 - [x] add `exp_id`
+
+todos:
+- [ ] add option to duplicated exp_id (count_documents_by_query)
 """
 
 import argparse
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
 
-from fa_core.common import Config, DBUtils
+from fa_core.common import Config, DBUtils, set_log_level
 from fa_core.data import FADataManager
 from fa_eval.data import FAEvalDataHandler, FixedQueries
 from fa_eval.simulators import FixedQuerySimulator
+
+set_log_level("WARNING")
 
 
 def get_args() -> argparse.Namespace:

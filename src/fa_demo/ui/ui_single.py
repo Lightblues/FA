@@ -158,7 +158,7 @@ def post_sidebar():
         # show the PDL, can be got with single_register
         with st.expander(f"🔍 PDL", expanded=False):
             st.code(f"{ss.client.pdl_str}", language="plaintext")
-        with st.expander(f"🔍 PDL.Procedure", expanded=False):
+        with st.expander(f"🔍 PDL.Procedure", expanded=True):
             st.code(f"{ss.client.procedure_str}", language="plaintext")
         with st.expander(f"🔍 Template", expanded=False):
             st.code(f"{template}", language="plaintext")

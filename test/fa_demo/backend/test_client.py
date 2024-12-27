@@ -1,6 +1,6 @@
-from fa_demo.backend import FrontendClient
+from fa_server import FrontendClient
 from fa_core.common import Config
-from fa_demo.backend.typings import InspectGetWorkflowQuery, SingleRegisterRequest
+from fa_server.typings import InspectGetWorkflowQuery, SingleRegisterRequest
 
 client = FrontendClient(backend_url="http://localhost:8101")
 

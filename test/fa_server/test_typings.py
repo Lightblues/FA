@@ -1,4 +1,4 @@
-from backend.typings.typings_multi import MultiPostControlResponse
+from fa_server.typings.typings_multi import MultiPostControlResponse
 
 
 def test_multi_post_control_response():

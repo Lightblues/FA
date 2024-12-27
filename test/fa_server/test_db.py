@@ -1,6 +1,6 @@
 import pymongo
 
-from fa_demo.backend.common.shared import check_db_connection
+from fa_server.common import check_db_connection
 from fa_core.common import Config, DBUtils
 
 

@@ -4,7 +4,9 @@ query = "今天上海天气如何?"
 
 
 def test_openai():
-    client = init_client("gpt-4o")
+    # client = init_client("gpt-4o")
+    # client = init_client("test-ian")
+    client = init_client("test-eason")
     res = client.query_one(query)
     print(res)
 
@@ -25,6 +27,5 @@ def test_hunyuan():
     print()
 
 
-# test_hunyuan_request()
-test_hunyuan()
 test_openai()
+# test_hunyuan()
