@@ -13,6 +13,7 @@ Display logic:
 - [x] add a `select_by` to select exp_id/session_id!  -- stay simply!
 @241227
 - [x] refactor!
+- [x] add PDL to the sidebar
 """
 
 from typing import List
@@ -21,18 +22,13 @@ import streamlit as st
 import pandas as pd
 
 ss = st.session_state
-from fa_core.common import Config, DBUtils
-from fa_core.data import Conversation
+from fa_core.common import Config, DBUtils, get_session_id
 from fa_demo.backend import FrontendClient
+from fa_demo.backend.typings import InspectGetWorkflowQuery
 
 
 def get_latest_sessionids() -> List[str]:
-    """set ss.latest_sessionids.
-    NOTE: set refresh=True when ``ss.db_collection`` changes
-
-    Args:
-        refresh (bool, optional): weather to refresh cached data. Defaults to False.
-    """
+    """set ss.latest_sessionids."""
     # if ("latest_sessionids" not in ss) or refresh:
     db_utils: DBUtils = ss.db_utils
     query = {}
@@ -102,72 +98,72 @@ def sidebar_setup_db(cfg: Config, db_utils: DBUtils):
 
 
 def sidebar_select_sessionid():
-    """Select session_id by `session_idx` or `exp_idx`
+    """Select session_id by `selected_session_idx` or `selected_exp_idx`
 
     Ensure:
-        `session_id` is set!
+        `selected_session_id` is set!
 
     NOTE:
         - two selection modes: session_id & exp_id!
     """
     col1, col2, col3 = st.columns([4, 1, 2])
-    # NOTE: use `on_change` to update `ss.session_id` & `ss.exp_id`
+    # NOTE: use `on_change` to update `ss.selected_session_id` & `ss.selected_exp_id`
     with col1:
         select_by = st.selectbox("2️⃣ Select session by", ["session_id", "exp_id"], index=0)
         if select_by == "session_id":
 
             def on_change_session_idx():
-                ss.session_id = ss.latest_sessionids[ss.session_idx]
-                ss.exp_id = ss.sessionid_expid_map[ss.session_id]
+                ss.selected_session_id = ss.latest_sessionids[ss.selected_session_idx]
+                ss.selected_exp_id = ss.sessionid_expid_map[ss.selected_session_id]
 
             st.selectbox(
                 "session_id",
                 options=list(range(len(ss.latest_sessionids))),
                 format_func=lambda x: ss.latest_sessionids[x],
-                key="session_idx",
+                key="selected_session_idx",
                 on_change=on_change_session_idx,
             )
             customized_session_id = st.text_input("Or input a customized session_id:")
             if customized_session_id:
-                ss.session_id = customized_session_id
-                ss.exp_id = ss.sessionid_expid_map[ss.session_id]
+                ss.selected_session_id = customized_session_id
+                ss.selected_exp_id = ss.sessionid_expid_map[ss.selected_session_id]
         else:
 
             def on_change_exp_idx():
-                ss.exp_id = ss.latest_expids[ss.exp_idx]
-                ss.session_id = ss.expid_sessionid_map[ss.exp_id]
+                ss.selected_exp_id = ss.latest_expids[ss.selected_exp_idx]
+                ss.selected_session_id = ss.expid_sessionid_map[ss.selected_exp_id]
 
             st.selectbox(
                 "exp_id",
                 options=list(range(len(ss.latest_expids))),
                 format_func=lambda x: ss.latest_expids[x],
-                key="exp_idx",
+                key="selected_exp_idx",
                 on_change=on_change_exp_idx,
             )
             customized_exp_id = st.text_input("Or input a customized exp_id:")
             if customized_exp_id:
-                ss.exp_id = customized_exp_id
-                ss.session_id = ss.expid_sessionid_map[ss.exp_id]
+                ss.selected_exp_id = customized_exp_id
+                ss.selected_session_id = ss.expid_sessionid_map[ss.selected_exp_id]
         # check the session_id & exp_id!!
-        if ("session_id" not in ss) or (ss.session_id not in ss.latest_sessionids):
-            ss.session_id = ss.latest_sessionids[0]
-            ss.exp_id = ss.sessionid_expid_map[ss.session_id]
+        if ("selected_session_id" not in ss) or (ss.selected_session_id not in ss.latest_sessionids):
+            ss.selected_session_id = ss.latest_sessionids[0]
+            ss.selected_exp_id = ss.sessionid_expid_map[ss.selected_session_id]
 
         with col3:
             st.write("")  # Add some vertical space
             st.button("Refresh", on_click=get_latest_sessionids)
             if st.button("⬆️ Prev", key="prev_session"):
-                current_idx = ss.latest_sessionids.index(ss.session_id)
+                current_idx = ss.latest_sessionids.index(ss.selected_session_id)
                 if current_idx > 0:
-                    ss.session_id = ss.latest_sessionids[current_idx - 1]
-                    ss.exp_id = ss.sessionid_expid_map[ss.session_id]
+                    ss.selected_session_id = ss.latest_sessionids[current_idx - 1]
+                    ss.selected_exp_id = ss.sessionid_expid_map[ss.selected_session_id]
                 else:
                     st.warning("No previous session found.")
             if st.button("⬇️ Next", key="next_session"):
-                current_idx = ss.latest_sessionids.index(ss.session_id)
+                current_idx = ss.latest_sessionids.index(ss.selected_session_id)
                 if current_idx < len(ss.latest_sessionids) - 1:
-                    ss.session_id = ss.latest_sessionids[current_idx + 1]
-                    ss.exp_id = ss.sessionid_expid_map[ss.session_id]
+                    ss.selected_session_id = ss.latest_sessionids[current_idx + 1]
+                    ss.selected_exp_id = ss.sessionid_expid_map[ss.selected_session_id]
                 else:
                     st.warning("No next session found.")
 
@@ -180,8 +176,8 @@ def sidebar_select_sessionid():
 
 def show_info():
     info_str = f"- exp_version: `{ss.exp_version}` (#exps: ${ss.total_exp_count}$) \n"
-    info_str += f"- exp_id: `{ss.exp_id}` \n"
-    info_str += f"- session_id: `{ss.session_id}` \n"
+    info_str += f"- exp_id: `{ss.selected_exp_id}` \n"
+    info_str += f"- session_id: `{ss.selected_session_id}` \n"
     st.info(info_str)
 
 
@@ -214,24 +210,25 @@ def show_config(cfg: Config):
         st.write(cfg.model_dump())
 
 
-def sidebar_show_pdl(cfg: Config):
+def sidebar_show_pdl(exp_cfg: Config):
     st.divider()
-    # if "client" not in ss:
-    #     ss.client = FrontendClient(backend_url=cfg.backend_url)
-    # with st.expander(f"🔍 PDL", expanded=False):
-    #     st.code(f"{ss.client.pdl_str}", language="plaintext")
-    # with st.expander(f"🔍 PDL.Procedure", expanded=False):
-    #     st.code(f"{ss.client.procedure_str}", language="plaintext")
+    if "client" not in ss:
+        ss.client = FrontendClient(backend_url=ss.cfg.backend_url)
+    workflow = ss.client.inspect_get_workflow("xxx", exp_cfg.workflow_dataset, exp_cfg.workflow_id).workflow
+    with st.expander(f"🔍 PDL", expanded=False):
+        st.code(f"{workflow.pdl.to_str()}", language="plaintext")
+    with st.expander(f"🔍 PDL.Procedure", expanded=False):
+        st.code(f"{workflow.pdl.Procedure}", language="plaintext")
 
     # show the user identity
     st.divider()
-    st.info(f"- sessionid: {ss.session_id}\n- name: {ss.user_identity['staffname']}")
+    st.info(f"- name: {ss.user_identity['staffname']}")
 
 
 def main_inspect():
     cfg: Config = ss.cfg
     if "db_utils" not in ss:
-        ss.db_utils = DBUtils()
+        ss.db_utils = DBUtils(mongo_uri=cfg.db_uri, db_name=cfg.db_name)
     db_utils: DBUtils = ss.db_utils
 
     with st.sidebar:
@@ -241,12 +238,12 @@ def main_inspect():
         sidebar_select_sessionid()
 
     # ------------------ main --------------------
-    if ("session_id" not in ss) or (not ss.session_id):
+    if ("selected_session_id" not in ss) or (not ss.selected_session_id):
         st.warning("Please select a session_id first.")
         return
-    exp_cfg, exp_conv = db_utils.get_data_by_sessionid(ss.session_id, collection=ss.db_collection)
+    exp_cfg, exp_conv = db_utils.get_data_by_sessionid(ss.selected_session_id, collection=ss.db_collection)
     if len(exp_conv.msgs) == 0:
-        st.warning(f"Conversation `{ss.session_id}` is empty.")
+        st.warning(f"Conversation `{ss.selected_session_id}` is empty.")
         return
     df = exp_conv.to_dataframe()
 
@@ -255,4 +252,5 @@ def main_inspect():
     show_conversation(df)
     show_config(exp_cfg)
 
-    sidebar_show_pdl(cfg)
+    with st.sidebar:
+        sidebar_show_pdl(exp_cfg)

@@ -39,7 +39,7 @@ class FAWorkflow(BaseModel):
     name: Optional[str] = None
     task_description: Optional[str] = None
 
-    toolbox: List[ExtToolSpec] = Field(default_factory=list)
+    toolbox: Optional[List[ExtToolSpec]] = None
     pdl: Optional[PDL] = None
 
     def model_post_init(self, __context: Any) -> None:

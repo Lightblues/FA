@@ -6,7 +6,7 @@ from pydantic import BaseModel
 class V010Mixin(BaseModel):
     mode: str = "ui"  # exp, sim
 
-    workflow_dataset: str = "STAR"
+    workflow_dataset: str = "v241127"
     workflow_type: str = "pdl"  # text, code, flowchart
     workflow_id: str = "000"
     exp_version: str = "default"

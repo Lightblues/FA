@@ -36,7 +36,7 @@ def get_args() -> argparse.Namespace:
 def main():
     args = get_args()
     cfg = Config.from_yaml(args.config_fn)
-    db_utils = DBUtils()
+    db_utils = DBUtils(mongo_uri=cfg.db_uri, db_name=cfg.db_name)
 
     if args.workflow_dataset:
         cfg.workflow_dataset = args.workflow_dataset

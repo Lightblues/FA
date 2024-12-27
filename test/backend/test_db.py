@@ -16,7 +16,8 @@ def test_db_connection():
 
 
 def test_db_utils():
-    db_utils = DBUtils()
+    cfg = Config.from_yaml("default.yaml")
+    db_utils = DBUtils(mongo_uri=cfg.db_uri, db_name=cfg.db_name)
     print(db_utils.get_exp_versions(collection="dev_single_sessions"))
     print()
 
