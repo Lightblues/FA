@@ -7,11 +7,7 @@ from pydantic import BaseModel, Field
 class BaseClient(BaseModel):
     kwargs: Dict = Field(default_factory=dict)
 
-    @property
-    def model(self):
-        return self.kwargs.get("model", "gpt-4o")
-
-    class Config:
+    class Config:  # for openai.OpenAI
         arbitrary_types_allowed = True
 
     @abstractmethod
@@ -23,3 +19,7 @@ class BaseClient(BaseModel):
     def query_one_stream(self, query: str = None, messages: List[Dict] = None, **args) -> Iterator[str]:
         """Query one response from the LLM, and stream the response"""
         pass
+
+    @property
+    def model_name(self):
+        return self.kwargs["model"]

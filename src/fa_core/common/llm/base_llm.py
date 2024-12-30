@@ -73,11 +73,6 @@ def add_hunyuan_models():
 def add_local_models():
     global LLM_CFG
 
-    fn_local_models_config = os.getenv("LOCAL_MODELS_CONFIG_PATH", None)
-    if (fn_local_models_config is not None) and (os.path.exists(fn_local_models_config)):
-        with open(fn_local_models_config, "r") as f:
-            LLM_CFG |= yaml.load(f, Loader=yaml.FullLoader)
-
     fn_local_models_info = os.getenv("LOCAL_MODELS_INFO_PATH", None)
     if (fn_local_models_info is not None) and (os.path.exists(fn_local_models_info)):
         spec = importlib.util.spec_from_file_location("model_urls", fn_local_models_info)
@@ -100,10 +95,16 @@ def add_local_models():
                 "api_key": "xxx",  # NOTE: api_key 不能为 "" 不然也会报错
             }
 
+    fn_local_models_config = os.getenv("LOCAL_MODELS_CONFIG_PATH", None)
+    if (fn_local_models_config is not None) and (os.path.exists(fn_local_models_config)):
+        with open(fn_local_models_config, "r") as f:
+            LLM_CFG |= yaml.load(f, Loader=yaml.FullLoader)
+
 
 add_openai_models()
 add_hunyuan_models()
 add_local_models()
+# print(f"> LLM_CFG: {LLM_CFG}")
 
 
 def init_client(model: str, **kwargs):

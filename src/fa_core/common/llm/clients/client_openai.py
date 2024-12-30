@@ -216,7 +216,7 @@ class OpenAIClient(BaseClient):
         embedding_resp = None
         for attempt in range(self.retries):
             try:
-                embedding_resp = self.client.embeddings.create(model=self.model, input=[text])
+                embedding_resp = self.client.embeddings.create(model=self.model_name, input=[text])
                 break
             except Exception as e:
                 logger.error(f"Attempt {attempt + 1} failed with error: {e}")

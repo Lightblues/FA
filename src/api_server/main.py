@@ -31,8 +31,7 @@ def register_apis(app: FastAPI, config: dict):
 
 
 def load_config():
-    with open(DIR / "config.yaml", "r") as f:
-        return yaml.safe_load(f)
+    return {"model_name": "gpt-4o-mini"}
 
 
 config = load_config()

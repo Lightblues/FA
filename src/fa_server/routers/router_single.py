@@ -56,7 +56,7 @@ def _pre_control(session_context: SingleSessionContext) -> None:
 
 
 def generate_response(session_context: SingleSessionContext) -> Iterator[str]:
-    logger.info(f">>> model={session_context.bot.llm.model} conversation={json_line(str(session_context.conv))}")
+    logger.info(f">>> model={session_context.bot.llm.model_name} conversation={json_line(str(session_context.conv))}")
     _pre_control(session_context)
 
     stream = session_context.bot.process_stream()
@@ -68,7 +68,7 @@ def generate_response(session_context: SingleSessionContext) -> Iterator[str]:
         }
         yield f"data: {json_line(chunk_output)}\n\n"
     bot_output = session_context.bot.process_LLM_response()
-    logger_util.debug_section(f"({session_context.session_id}) [BOT] ({session_context.workflow.name}) ({session_context.bot.llm.model})")
+    logger_util.debug_section(f"({session_context.session_id}) [BOT] ({session_context.workflow.name}) ({session_context.bot.llm.model_name})")
     logger_util.debug_section_content(session_context.bot.last_llm_prompt, subtitle="llm prompt")
     logger_util.debug_section_content(session_context.bot.last_llm_response, subtitle="llm response")
     session_context.last_bot_output = bot_output
