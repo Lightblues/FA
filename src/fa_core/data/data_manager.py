@@ -4,6 +4,7 @@
 
 import json
 import os
+import yaml
 from functools import cache
 from pydantic import BaseModel, Field
 from typing import Dict, Optional, ClassVar, TYPE_CHECKING
@@ -85,7 +86,7 @@ class FADataManager(PathConfig):
             names_map: {PDL_zh: ["task1", "task2"]}
             name_id_map: {PDL_zh: {"task1": "000"}}
         """
-        dataset_infos = json.load(open(FADataManager.DIR_data_root / "dataset_infos.json", "r"))
+        dataset_infos = yaml.load(open(FADataManager.DIR_data_root / "dataset_infos.yaml", "r"), Loader=yaml.FullLoader)
         names_map = {}  # {PDL_zh: ["task1", "task2"]}
         name_id_map = {}  # {PDL_zh: {"task1": "000"}}
         for dir in dataset_infos.keys():

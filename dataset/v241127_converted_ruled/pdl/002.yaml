@@ -63,33 +63,34 @@ ANSWERs:
 Procedure: |-
     [预定日期] = ANSWER.请用户提供必要信息()
     [用餐餐段] = ANSWER.请用户提供必要信息()
-    if     [用餐人数] = ANSWER.请用户提供必要信息()
-        if 用餐人数 < "22"
-            [订餐用户称呼,联系方式] = ANSWER.请用户提供必要信息()
-            [API,data] = API.预定接口([订餐用户称呼,联系方式,预定日期,用餐餐段,用餐人数])
-            if API == "10002"
-                ANSWER.系统错误1()
-            elif API == "10001"
-                [是否查询附近门店] = ANSWER.请用户提供必要信息()
-                if 是否查询附近门店 == "是"
-                    [API,data] = API.查询附近门店([订餐用户称呼,联系方式,预定日期,用餐餐段,用餐人数])
-                    if API == "10000"
-                        ANSWER.预定成功-附近门店([订餐用户称呼,预定日期,用餐餐段,data.tableNumber])
-                    elif API == "10001"
-                        ANSWER.附近门店已经订满()
-                    elif API == "10002"
-                        ANSWER.系统错误2()
-                    else
-                        ANSWER.兜底回复3()
-                elif 是否查询附近门店 == "否"
-                    ANSWER.结束回复5()
-                else
-                    ANSWER.兜底回复2()
-            elif API == "10000"
-                ANSWER.结束回复4([预定日期,用餐餐段,用餐人数,data.tableNumber])
-            else
-                ANSWER.兜底回复()
-        else
-            ANSWER.超过最大容纳量()
-    else
+    if (用餐餐段 == "lunch") or (用餐餐段 == "dinner"):
+        [用餐人数] = ANSWER.请用户提供必要信息()
+            if 用餐人数 < "22":
+                [订餐用户称呼,联系方式] = ANSWER.请用户提供必要信息()
+                    [[code,data]] = API.预定接口([订餐用户称呼,联系方式,预定日期,用餐餐段,用餐人数])
+                        if code == "10002":
+                            ANSWER.系统错误1()
+                        elif code == "10001":
+                            [是否查询附近门店] = ANSWER.请用户提供必要信息()
+                                if 是否查询附近门店 == "是":
+                                    [[code,data]] = API.查询附近门店([订餐用户称呼,联系方式,预定日期,用餐餐段,用餐人数])
+                                        if code == "10000":
+                                            ANSWER.预定成功-附近门店([订餐用户称呼,预定日期,用餐餐段,data.tableNumber])
+                                        elif code == "10001":
+                                            ANSWER.附近门店已经订满()
+                                        elif code == "10002":
+                                            ANSWER.系统错误2()
+                                        else:
+                                            ANSWER.兜底回复3()
+                                elif 是否查询附近门店 == "否":
+                                    ANSWER.结束回复5()
+                                else:
+                                    ANSWER.兜底回复2()
+                        elif code == "10000":
+                            ANSWER.结束回复4([预定日期,用餐餐段,用餐人数,data.tableNumber])
+                        else:
+                            ANSWER.兜底回复()
+            else:
+                ANSWER.超过最大容纳量()
+    else:
         ANSWER.很抱歉，我们这没有提供对应时间段的用餐服务([用餐餐段])

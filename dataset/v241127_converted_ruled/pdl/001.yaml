@@ -92,38 +92,38 @@ ANSWERs:
       desc: 兜底回复
 Procedure: |-
     [订单编号,会员卡ID,姓名] = ANSWER.请用户提供必要信息()
-    [invoicing_method] = API.查询开票方式([订单编号])
-    if invoicing_method == "平台开具"
-        [invoicing_progress] = API.开票进度查询([姓名])
-        if invoicing_progress == "null"
-            ANSWER.结束回复3()
-        elif invoicing_progress != "null"
-            [card_type] = API.会员身份查询([会员卡ID])
-            if card_type == "白金卡"
-                [发票类型] = ANSWER.请用户提供必要信息()
-                if 发票类型 == "电子普票"
-                    ANSWER.白金电子普票开具()
-                elif 发票类型 == "纸质普票"
-                    ANSWER.白金纸质发票开具()
-                elif 发票类型 == "纸质专票"
-                    ANSWER.白金纸质专票开具()
-                else
-                    ANSWER.兜底回复3()
-            elif card_type == "非白金卡"
-                [发票类型] = ANSWER.请用户提供必要信息()
-                if 发票类型 == "电子普票"
-                    ANSWER.非白金电子票开具()
-                elif 发票类型 == "纸质普票"
-                    ANSWER.非白金纸质普票()
-                elif 发票类型 == "纸质专票"
-                    ANSWER.非白金纸质专票()
-                else
-                    ANSWER.兜底回复4()
-            else
-                ANSWER.兜底回复2()
-        else
-            ANSWER.兜底回复1()
-    elif invoicing_method == "酒店开具"
+    [[invoicing_method]] = API.查询开票方式([订单编号])
+    if invoicing_method == "平台开具":
+        [[invoicing_progress]] = API.开票进度查询([姓名])
+            if invoicing_progress == "null":
+                ANSWER.结束回复3()
+            elif invoicing_progress != "null":
+                [[card_type]] = API.会员身份查询([会员卡ID])
+                    if card_type == "白金卡":
+                        [发票类型] = ANSWER.请用户提供必要信息()
+                            if 发票类型 == "电子普票":
+                                ANSWER.白金电子普票开具()
+                            elif 发票类型 == "纸质普票":
+                                ANSWER.白金纸质发票开具()
+                            elif 发票类型 == "纸质专票":
+                                ANSWER.白金纸质专票开具()
+                            else:
+                                ANSWER.兜底回复3()
+                    elif card_type == "非白金卡":
+                        [发票类型] = ANSWER.请用户提供必要信息()
+                            if 发票类型 == "电子普票":
+                                ANSWER.非白金电子票开具()
+                            elif 发票类型 == "纸质普票":
+                                ANSWER.非白金纸质普票()
+                            elif 发票类型 == "纸质专票":
+                                ANSWER.非白金纸质专票()
+                            else:
+                                ANSWER.兜底回复4()
+                    else:
+                        ANSWER.兜底回复2()
+            else:
+                ANSWER.兜底回复1()
+    elif invoicing_method == "酒店开具":
         ANSWER.结束回复1([invoicing_method])
-    else
+    else:
         ANSWER.兜底回复()

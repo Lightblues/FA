@@ -34,8 +34,6 @@ APIs:
       precondition:
         - 科室校验
     - name: 指定时间号源查询
-      precondition:
-        - 科室校验
     - name: 同医院同科室其他日期号源
       precondition:
         - 指定时间号源查询
@@ -43,29 +41,9 @@ APIs:
       precondition:
         - 同医院同科室其他日期号源
     - name: 本医院挂号执行
-      precondition:
-        - 指定时间号源查询
 ANSWERs:
     - name: 医院不存在
       desc: 抱歉，目前无法提供该医院的挂号服务，您考虑下其他医院吗？
-    - name: 无号回复
-      desc: 非常抱歉，最近您想挂的科室，平台已出号的医院近期均无号源，建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
-    - name: 拒绝挂号回复
-      desc: 那建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
-    - name: 本医院挂号成功
-      desc: 好的，已为您成功挂了{{变量1}} {{Content}} {{挂号时间}}的号源，稍后也会短信发送到您的来电号码，感谢您的来电，再见。
-    - name: 结束回复13
-      desc: 非常抱歉，暂时没有{{变量1}} {{Content}} {{挂号时间}} 的{{号类}} ；建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
-    - name: 兜底回复6
-      desc: 兜底回复6
-    - name: 结束回复16
-      desc: 兜底回复16
-    - name: 兜底回复5
-      desc: 兜底回复5
-    - name: 兜底回复4
-      desc: 兜底回复4
-    - name: 兜底回复3
-      desc: 兜底回复3
     - name: 拒绝其他医院科室回复
       desc: 那建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
     - name: 结束回复15
@@ -78,172 +56,96 @@ ANSWERs:
       desc: 兜底回复1
     - name: 兜底回复
       desc: 兜底回复
+    - name: 兜底回复4
+      desc: 兜底回复4
+    - name: 兜底回复3
+      desc: 兜底回复3
+    - name: 无号回复
+      desc: 非常抱歉，最近您想挂的科室，平台已出号的医院近期均无号源，建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
+    - name: 拒绝挂号回复
+      desc: 那建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
+    - name: 结束回复16
+      desc: 兜底回复16
+    - name: 兜底回复5
+      desc: 兜底回复5
+    - name: 本医院挂号成功
+      desc: 好的，已为您成功挂了{{变量1}} {{变量2}} {{挂号时间}}的号源，稍后也会短信发送到您的来电号码，感谢您的来电，再见。
+    - name: 结束回复13
+      desc: 非常抱歉，暂时没有{{变量1}} {{变量2}} {{挂号时间}} 的{{号类}} ；建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
+    - name: 兜底回复6
+      desc: 兜底回复6
 Procedure: |-
     [医院名称,科室名称] = ANSWER.请用户提供必要信息()
-    [变量1] = API.医院名称归一化(医院名称)
-    [变量2] = API.科室名称归一化(科室名称)
-    [type] = API.校验挂号医院([变量1])
-    if type == "0"
+    [[变量1]] = API.医院名称归一化([医院名称])
+    [[变量2]] = API.科室名称归一化([科室名称])
+    [[type]] = API.校验挂号医院([变量1])
+    if type == "0":
         ANSWER.医院不存在()
-    elif type == "1"
-        [type] = API.科室校验([变量2,变量1])
-        if type == "0"
-            [hos_name,num] = API.查询对应科室可选医院([变量2])
-            if num > "0"
-                [挂号意愿] = ANSWER.请用户提供必要信息()
-                if 挂号意愿 == "愿意"
-                    [挂号时间] = ANSWER.请用户提供必要信息()
-                    [num,haolist,zhuan_num,pu_num] = API.指定时间号源查询([变量1,变量2,挂号时间])
-                    if num == "0"
-                        [data,num,data_num_type] = API.同医院同科室其他日期号源([变量1,变量2])
-                        [g_time,num_type] = API.获取挂号时间和号类([data,data_num_type])
-                        if num == "0"
-                            [num,hos_name,doc_name] = API.其他医院号源推荐([变量2,挂号时间])
-                            if num == "0"
-                                ANSWER.无号回复()
-                            elif num > "0"
-                                [其他医院挂号意愿] = ANSWER.请用户提供必要信息()
-                                if 其他医院挂号意愿 == "不愿意"
-                                    ANSWER.拒绝挂号回复()
-                                elif 其他医院挂号意愿 == "愿意"
-                                    [号类,身份证号] = ANSWER.请用户提供必要信息()
-                                    [type] = API.本医院挂号执行([身份证号,号类,变量1,变量2,挂号时间])
-                                    if type > "0"
-                                        ANSWER.本医院挂号成功([变量1,变量2,挂号时间])
-                                    elif type == "0"
-                                        ANSWER.结束回复13([变量1,变量2,挂号时间,号类])
-                                    else
-                                        ANSWER.兜底回复6()
-                                else
-                                    ANSWER.结束回复16()
-                            else
-                                ANSWER.兜底回复5()
-                        elif num > "0"
-                            [其他日期挂号意愿] = ANSWER.请用户提供必要信息()
-                            if 其他日期挂号意愿 == "不愿意"
-                                [num,hos_name,doc_name] = API.其他医院号源推荐([变量2,挂号时间])
-                                if num == "0"
-                                    ANSWER.无号回复()
-                                elif num > "0"
-                                    [其他医院挂号意愿] = ANSWER.请用户提供必要信息()
-                                    if 其他医院挂号意愿 == "不愿意"
-                                        ANSWER.拒绝挂号回复()
-                                    elif 其他医院挂号意愿 == "愿意"
-                                        [号类,身份证号] = ANSWER.请用户提供必要信息()
-                                        [type] = API.本医院挂号执行([身份证号,号类,变量1,变量2,挂号时间])
-                                        if type > "0"
-                                            ANSWER.本医院挂号成功([变量1,变量2,挂号时间])
-                                        elif type == "0"
-                                            ANSWER.结束回复13([变量1,变量2,挂号时间,号类])
-                                        else
-                                            ANSWER.兜底回复6()
-                                    else
-                                        ANSWER.结束回复16()
-                                else
-                                    ANSWER.兜底回复5()
-                            else
-                                [号类,身份证号] = ANSWER.请用户提供必要信息()
-                                [type] = API.本医院挂号执行([身份证号,号类,变量1,变量2,挂号时间])
-                                if type > "0"
-                                    ANSWER.本医院挂号成功([变量1,变量2,挂号时间])
-                                elif type == "0"
-                                    ANSWER.结束回复13([变量1,变量2,挂号时间,号类])
-                                else
-                                    ANSWER.兜底回复6()
-                        else
-                            ANSWER.兜底回复4()
-                    elif num > "0"
-                        [号类,身份证号] = ANSWER.请用户提供必要信息()
-                        [type] = API.本医院挂号执行([身份证号,号类,变量1,变量2,挂号时间])
-                        if type > "0"
-                            ANSWER.本医院挂号成功([变量1,变量2,挂号时间])
-                        elif type == "0"
-                            ANSWER.结束回复13([变量1,变量2,挂号时间,号类])
-                        else
-                            ANSWER.兜底回复6()
-                    else
-                        ANSWER.兜底回复3()
-                elif 挂号意愿 == "不愿意"
-                    ANSWER.拒绝其他医院科室回复()
-                else
-                    ANSWER.结束回复15()
-            elif num == "0"
-                ANSWER.无对应科室医院回复([变量1])
-            else
-                ANSWER.兜底回复2()
-        elif type == "1"
-            [挂号时间] = ANSWER.请用户提供必要信息()
-            [num,haolist,zhuan_num,pu_num] = API.指定时间号源查询([变量1,变量2,挂号时间])
-            if num == "0"
-                [data,num,data_num_type] = API.同医院同科室其他日期号源([变量1,变量2])
-                [g_time,num_type] = API.获取挂号时间和号类([data,data_num_type])
-                if num == "0"
-                    [num,hos_name,doc_name] = API.其他医院号源推荐([变量2,挂号时间])
-                    if num == "0"
-                        ANSWER.无号回复()
-                    elif num > "0"
-                        [其他医院挂号意愿] = ANSWER.请用户提供必要信息()
-                        if 其他医院挂号意愿 == "不愿意"
-                            ANSWER.拒绝挂号回复()
-                        elif 其他医院挂号意愿 == "愿意"
-                            [号类,身份证号] = ANSWER.请用户提供必要信息()
-                            [type] = API.本医院挂号执行([身份证号,号类,变量1,变量2,挂号时间])
-                            if type > "0"
-                                ANSWER.本医院挂号成功([变量1,变量2,挂号时间])
-                            elif type == "0"
-                                ANSWER.结束回复13([变量1,变量2,挂号时间,号类])
-                            else
-                                ANSWER.兜底回复6()
-                        else
-                            ANSWER.结束回复16()
-                    else
-                        ANSWER.兜底回复5()
-                elif num > "0"
-                    [其他日期挂号意愿] = ANSWER.请用户提供必要信息()
-                    if 其他日期挂号意愿 == "不愿意"
-                        [num,hos_name,doc_name] = API.其他医院号源推荐([变量2,挂号时间])
-                        if num == "0"
-                            ANSWER.无号回复()
-                        elif num > "0"
-                            [其他医院挂号意愿] = ANSWER.请用户提供必要信息()
-                            if 其他医院挂号意愿 == "不愿意"
-                                ANSWER.拒绝挂号回复()
-                            elif 其他医院挂号意愿 == "愿意"
-                                [号类,身份证号] = ANSWER.请用户提供必要信息()
-                                [type] = API.本医院挂号执行([身份证号,号类,变量1,变量2,挂号时间])
-                                if type > "0"
-                                    ANSWER.本医院挂号成功([变量1,变量2,挂号时间])
-                                elif type == "0"
-                                    ANSWER.结束回复13([变量1,变量2,挂号时间,号类])
-                                else
-                                    ANSWER.兜底回复6()
-                            else
-                                ANSWER.结束回复16()
-                        else
-                            ANSWER.兜底回复5()
-                    else
-                        [号类,身份证号] = ANSWER.请用户提供必要信息()
-                        [type] = API.本医院挂号执行([身份证号,号类,变量1,变量2,挂号时间])
-                        if type > "0"
-                            ANSWER.本医院挂号成功([变量1,变量2,挂号时间])
-                        elif type == "0"
-                            ANSWER.结束回复13([变量1,变量2,挂号时间,号类])
-                        else
-                            ANSWER.兜底回复6()
-                else
-                    ANSWER.兜底回复4()
-            elif num > "0"
-                [号类,身份证号] = ANSWER.请用户提供必要信息()
-                [type] = API.本医院挂号执行([身份证号,号类,变量1,变量2,挂号时间])
-                if type > "0"
-                    ANSWER.本医院挂号成功([变量1,变量2,挂号时间])
-                elif type == "0"
-                    ANSWER.结束回复13([变量1,变量2,挂号时间,号类])
-                else
-                    ANSWER.兜底回复6()
-            else
-                ANSWER.兜底回复3()
-        else
-            ANSWER.兜底回复1()
-    else
+    elif type == "1":
+        [[type]] = API.科室校验([变量2,变量1])
+            if type == "0":
+                [[hos_name,num]] = API.查询对应科室可选医院([变量2])
+                    if num > "0":
+                        [挂号意愿] = ANSWER.请用户提供必要信息()
+                            if 挂号意愿 == "愿意":
+                                func2([变量1,变量2])
+                            elif 挂号意愿 == "不愿意":
+                                ANSWER.拒绝其他医院科室回复()
+                            else:
+                                ANSWER.结束回复15()
+                    elif num == "0":
+                        ANSWER.无对应科室医院回复([变量1])
+                    else:
+                        ANSWER.兜底回复2()
+            elif type == "1":
+                func2([变量1,变量2])
+            else:
+                ANSWER.兜底回复1()
+    else:
         ANSWER.兜底回复()
+
+    def func2([变量1,变量2]):
+        [挂号时间] = ANSWER.请用户提供必要信息()
+            [[num,haolist,zhuan_num,pu_num]] = API.指定时间号源查询([变量1,变量2,挂号时间])
+                if num == "0":
+                    [[data,num,data_num_type]] = API.同医院同科室其他日期号源([变量1,变量2])
+                        [[g_time,num_type]] = API.获取挂号时间和号类([data,data_num_type])
+                            if num == "0":
+                                func1([变量1,变量2,挂号时间])
+                            elif num > "0":
+                                [其他日期挂号意愿] = ANSWER.请用户提供必要信息()
+                                    if 其他日期挂号意愿 == "不愿意":
+                                        func1([变量1,变量2,挂号时间])
+                                    else:
+                                        func3([变量1,变量2,挂号时间])
+                            else:
+                                ANSWER.兜底回复4()
+                elif num > "0":
+                    func3([变量1,变量2,挂号时间])
+                else:
+                    ANSWER.兜底回复3()
+
+    def func1([变量1,变量2,挂号时间]):
+        [[num,hos_name,doc_name]] = API.其他医院号源推荐([变量2,挂号时间])
+            if num == "0":
+                ANSWER.无号回复()
+            elif num > "0":
+                [其他医院挂号意愿] = ANSWER.请用户提供必要信息()
+                    if 其他医院挂号意愿 == "不愿意":
+                        ANSWER.拒绝挂号回复()
+                    elif 其他医院挂号意愿 == "愿意":
+                        func3([变量1,变量2,挂号时间])
+                    else:
+                        ANSWER.结束回复16()
+            else:
+                ANSWER.兜底回复5()
+
+    def func3([变量1,变量2,挂号时间]):
+        [号类,身份证号] = ANSWER.请用户提供必要信息()
+            [[type]] = API.本医院挂号执行([身份证号,号类,变量1,变量2,挂号时间])
+                if type > "0":
+                    ANSWER.本医院挂号成功([变量1,变量2,挂号时间])
+                elif type == "0":
+                    ANSWER.结束回复13([变量1,变量2,挂号时间,号类])
+                else:
+                    ANSWER.兜底回复6()
