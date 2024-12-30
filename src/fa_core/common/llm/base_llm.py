@@ -8,7 +8,7 @@ import yaml
 from .clients.client_openai import OpenAIClient
 from .clients.client_hunyuan import HunyuanClient
 
-LLM_CFG = {}  # Link llm_name -> base_url, api_key, model
+LLM_CFG = {}  # Link llm_name -> base_url, api_key
 
 HUNYUAN_MODEL_LIST = [
     "hunyuan-turbo",
@@ -119,8 +119,8 @@ def init_client(model: str, **kwargs):
 
     assert model in LLM_CFG, f"{model} not in LLM_CFG"
     client = OpenAIClient(
-        base_url=LLM_CFG[model].get("base_url", os.getenv("OPENAI_PROXY_BASE_URL")),
-        api_key=LLM_CFG[model].get("api_key", os.getenv("OPENAI_PROXY_API_KEY")),
-        kwargs={"model": LLM_CFG[model].get("model", "gpt-4o"), **kwargs},
+        base_url=LLM_CFG[model]["base_url"],
+        api_key=LLM_CFG[model]["api_key"],
+        kwargs={"model": LLM_CFG[model]["model"], **kwargs},  # NOTE: overwrite the model name!
     )
     return client

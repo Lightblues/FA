@@ -1,0 +1,281 @@
+- name: 校验挂号医院
+  description: ''
+  parameters:
+    type: object
+    properties:
+      hos_name:
+        type: string
+        description: 医院名称
+        enum: null
+        name: null
+    required:
+    - hos_name
+  url: http://8.134.222.238:8091/check-hospital-exist
+  method: GET
+  extra_infos: null
+- name: 科室校验
+  description: ''
+  parameters:
+    type: object
+    properties:
+      keshi_name:
+        type: string
+        description: 科室名称
+        enum: null
+        name: null
+      hos_name:
+        type: string
+        description: 医院名称
+        enum: null
+        name: null
+    required:
+    - keshi_name
+    - hos_name
+  url: http://8.134.222.238:8091/check-department-exist
+  method: GET
+  extra_infos: null
+- name: 查询对应科室可选医院
+  description: ''
+  parameters:
+    type: object
+    properties:
+      keshi_name:
+        type: string
+        description: 科室名称
+        enum: null
+        name: null
+    required:
+    - keshi_name
+  url: http://8.134.222.238:8091/get-hospital-by-department
+  method: GET
+  extra_infos: null
+- name: 指定时间号源查询
+  description: ''
+  parameters:
+    type: object
+    properties:
+      hos_name:
+        type: string
+        description: 医院名称
+        enum: null
+        name: null
+      keshi_name:
+        type: string
+        description: 科室名称
+        enum: null
+        name: null
+      time:
+        type: string
+        description: 挂号时间
+        enum: null
+        name: null
+    required:
+    - hos_name
+    - keshi_name
+    - time
+  url: http://8.134.222.238:8091/get-appointment-info
+  method: GET
+  extra_infos: null
+- name: 同医院同科室其他日期号源
+  description: ''
+  parameters:
+    type: object
+    properties:
+      hos_name:
+        type: string
+        description: 医院名称
+        enum: null
+        name: null
+      keshi_name:
+        type: string
+        description: 科室名称
+        enum: null
+        name: null
+    required:
+    - hos_name
+    - keshi_name
+  url: http://8.134.222.238:8091/get-available-date
+  method: GET
+  extra_infos: null
+- name: 获取挂号时间和号类
+  description: ''
+  parameters:
+    type: object
+    properties:
+      data:
+        type: array_object
+        description: 可挂号日期信息
+        enum: null
+        name: null
+      data_num_type:
+        type: array_object
+        description: 号类信息
+        enum: null
+        name: null
+    required:
+    - data
+    - data_num_type
+  url: ''
+  method: GET
+  extra_infos:
+    type: code_executor
+    code: "\n# 仅支持数据转换或运算等操作, 请勿手动import, 已引入numpy和pandas以及部分内置的运算相关的包；不支持IO操作，如读取文件，网络通信等。\n\
+      # 请保存函数名为main,输入输出均为dict；最终结果会以json字符串方式返回，请勿直接返回不支持json.dumps的对象（numpy和pandas已增加额外处理）\n\
+      def main(params: dict) -> dict:\n    data_time = params.get(\"data\", [])\n\
+      \    if len(data_time) == 0:\n        return {'g_time':'', 'num_type':''}\n\
+      \    return {\n        'g_time': data_time[0][\"time\"],\n        \"num_type\"\
+      : data_time[0][\"num_type\"]\n    }\n"
+- name: 其他医院号源推荐
+  description: ''
+  parameters:
+    type: object
+    properties:
+      keshi_name:
+        type: string
+        description: 科室名称
+        enum: null
+        name: null
+      time:
+        type: string
+        description: 挂号时间
+        enum: null
+        name: null
+    required:
+    - keshi_name
+    - time
+  url: http://8.134.222.238:8091/get-other-hospital
+  method: GET
+  extra_infos: null
+- name: 本医院挂号执行
+  description: ''
+  parameters:
+    type: object
+    properties:
+      id_num:
+        type: string
+        description: 身份证号
+        enum: null
+        name: null
+      num_type:
+        type: string
+        description: 号类
+        enum: null
+        name: null
+      hos_name:
+        type: string
+        description: 医院名称
+        enum: null
+        name: null
+      keshi_name:
+        type: string
+        description: 科室名称
+        enum: null
+        name: null
+      time:
+        type: string
+        description: 挂号时间
+        enum: null
+        name: null
+    required:
+    - id_num
+    - num_type
+    - hos_name
+    - keshi_name
+    - time
+  url: http://8.134.222.238:8091/appointment
+  method: GET
+  extra_infos: null
+- name: 医院名称归一化
+  description: ''
+  parameters:
+    type: object
+    properties:
+      hospital:
+        type: string
+        description: 医院名称
+        enum: null
+        name: null
+    required:
+    - hospital
+  url: ''
+  method: GET
+  extra_infos:
+    type: llm
+    prompt: '根据<格式要求>处理<槽位值>中的槽位取值。
+
+
+      <槽位名>
+
+      医院名称
+
+      </槽位名>
+
+
+      <槽位值>
+
+      {{hospital}}
+
+      </槽位值>
+
+
+      <槽位取值范围>
+
+      北京积水潭医院，北京天坛医院，北京安贞医院，北京协和医院，北京中医药大学东方医院，北京朝阳医院，北京中日友好医院，北京世纪坛医院，北京大学人民医院，北京301医院，北京宣武医院，北京儿童医院，北京大学第一医院
+
+      </槽位取值范围>
+
+
+      <格式要求>
+
+      - 如果<槽位取值范围>中存在与<槽位值>匹配的元素，则返回列表中的最匹配的元素作为处理后的槽位值。否则保持当前槽位值不变。
+
+      - 只返回处理后的槽位值。
+
+      </格式要求>'
+- name: 科室名称归一化
+  description: ''
+  parameters:
+    type: object
+    properties:
+      department_name:
+        type: string
+        description: 科室名称
+        enum: null
+        name: null
+    required:
+    - department_name
+  url: ''
+  method: GET
+  extra_infos:
+    type: llm
+    prompt: '根据<格式要求>处理<槽位值>中的槽位取值。
+
+
+      <槽位名>
+
+      科室名称
+
+      </槽位名>
+
+
+      <槽位值>
+
+      {{department_name}}
+
+      </槽位值>
+
+
+      <槽位取值范围>
+
+      营养科，心内科，急诊科，核医学科，神经科，眼科，感染疾病科，泌尿科，整形外科，肿瘤内科，针灸科，消化内科，肾内科，妇科，干部医疗科，内分泌科，妇产科，新生儿科，耳鼻喉科，儿科，口腔科，心血管外科，肿瘤科，康复医学科，骨科，心血管内科，风湿免疫科，乳腺外科，心外科，老年医学科，普通外科，中医科，疼痛科，精神心理科，神经外科，皮肤科，呼吸内科，胸外科
+
+      </槽位取值范围>
+
+
+      <格式要求>
+
+      - 如果<槽位取值范围>中存在与<槽位值>匹配的元素，则返回列表中的最匹配的元素作为处理后的槽位值。否则保持当前槽位值不变。
+
+      - 只返回处理后的槽位值。
+
+      </格式要求>'

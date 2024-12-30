@@ -1,0 +1,296 @@
+- name: 查验目的地清关政策
+  description: ''
+  parameters:
+    type: object
+    properties:
+      countryCode:
+        type: string
+        description: 收件国家
+        enum: null
+        name: null
+      key:
+        type: string
+        description: ''
+        enum: null
+        name: null
+    required:
+    - countryCode
+  url: https://leonxing.cn/robot/dhlTask?adapter=https%3A%2F%2Fwippe2-pc.cndhl.com%2Fapi%2Fwiplus%2Fbase%2Flarge-model%2FserviceTips
+  method: POST
+  extra_infos: null
+- name: 转换收件国家到简码
+  description: ''
+  parameters:
+    type: object
+    properties:
+      countryName:
+        type: string
+        description: 国家名称
+        enum: null
+        name: null
+    required:
+    - countryName
+  url: ''
+  method: GET
+  extra_infos:
+    type: llm
+    prompt: 请将国家名称{{countryName}}         转换为对应的ISO 3166-1二位字母代码；如将"中国"转换为"CN"; "美国"转换为"US";
+      "德国"转换为"DE"。请直接返回结果
+- name: 销售信息查询
+  description: ''
+  parameters:
+    type: object
+    properties:
+      account:
+        type: string
+        description: 账号
+        enum: null
+        name: null
+    required: []
+  url: https://wippe2-pc.cndhl.com/api/wiplus/admin/onlineChat/getSalesInfo
+  method: GET
+  extra_infos: null
+- name: 检查发件邮编城市
+  description: ''
+  parameters:
+    type: object
+    properties:
+      postalCode:
+        type: string
+        description: 发件邮编
+        enum: null
+        name: null
+      city:
+        type: string
+        description: 发件城市
+        enum: null
+        name: null
+      countryCode:
+        type: string
+        description: 发件国家编码
+        enum: null
+        name: null
+    required:
+    - postalCode
+    - city
+  url: https://wippe2-pc.cndhl.com/api/wiplus/base/large-model/checkPostalCodeCity
+  method: POST
+  extra_infos: null
+- name: 检查国家或地区是否有邮编
+  description: ''
+  parameters:
+    type: object
+    properties:
+      countryCode:
+        type: string
+        description: 国家编码
+        enum: null
+        name: null
+    required: []
+  url: https://wippe2-pc.cndhl.com/api/wiplus/base/large-model/checkCountryHasPostalCode
+  method: POST
+  extra_infos: null
+- name: 检查收件邮编城市
+  description: ''
+  parameters:
+    type: object
+    properties:
+      postalCode:
+        type: string
+        description: 收件邮编
+        enum: null
+        name: null
+      city:
+        type: string
+        description: 收件城市
+        enum: null
+        name: null
+      countryCode:
+        type: string
+        description: 收件国家编码
+        enum: null
+        name: null
+    required:
+    - postalCode
+    - city
+    - countryCode
+  url: https://wippe2-pc.cndhl.com/api/wiplus/base/large-model/checkPostalCodeCity
+  method: POST
+  extra_infos: null
+- name: 检查收件城市
+  description: ''
+  parameters:
+    type: object
+    properties:
+      city:
+        type: string
+        description: 收件城市
+        enum: null
+        name: null
+      countryCode:
+        type: string
+        description: 收集实体
+        enum: null
+        name: null
+    required:
+    - city
+    - countryCode
+  url: https://wippe2-pc.cndhl.com/api/wiplus/base/large-model/checkPostalCodeCity
+  method: POST
+  extra_infos: null
+- name: 运费时效包裹类
+  description: ''
+  parameters:
+    type: object
+    properties:
+      fromCountryCode:
+        type: string
+        description: 发件国家编码
+        enum: null
+        name: null
+      fromPostalCode:
+        type: string
+        description: 发件邮编
+        enum: null
+        name: null
+      fromCity:
+        type: string
+        description: 发件城市
+        enum: null
+        name: null
+      toCountryCode:
+        type: string
+        description: 收件国家编码
+        enum: null
+        name: null
+      toPostalCode:
+        type: string
+        description: 收件邮编
+        enum: null
+        name: null
+      toCity:
+        type: string
+        description: 收件城市
+        enum: null
+        name: null
+      productType:
+        type: string
+        description: 类型
+        enum: null
+        name: null
+      declaredValue:
+        type: string
+        description: 申报价值
+        enum: null
+        name: null
+      goodsWeight:
+        type: string
+        description: 包裹重量
+        enum: null
+        name: null
+      goodsLength:
+        type: string
+        description: 包裹长
+        enum: null
+        name: null
+      goodsWidth:
+        type: string
+        description: 包裹宽
+        enum: null
+        name: null
+      goodsHeight:
+        type: string
+        description: 包裹高
+        enum: null
+        name: null
+      goodsName:
+        type: string
+        description: 物品名称
+        enum: null
+        name: null
+      sendTime:
+        type: string
+        description: 发件日期
+        enum: null
+        name: null
+    required:
+    - fromCountryCode
+    - fromPostalCode
+    - fromCity
+    - toCountryCode
+    - toPostalCode
+    - toCity
+    - productType
+    - declaredValue
+    - goodsWeight
+    - goodsLength
+    - goodsWidth
+    - goodsHeight
+    - goodsName
+    - sendTime
+  url: https://wippe2-pc.cndhl.com/api/wiplus/base/large-model/freightTime
+  method: POST
+  extra_infos: null
+- name: 运费时效文件类
+  description: ''
+  parameters:
+    type: object
+    properties:
+      fromCountryCode:
+        type: string
+        description: 发件国家编码
+        enum: null
+        name: null
+      fromPostalCode:
+        type: string
+        description: 发件邮编
+        enum: null
+        name: null
+      fromCity:
+        type: string
+        description: 发件城市
+        enum: null
+        name: null
+      toCountryCode:
+        type: string
+        description: 收件国家编码
+        enum: null
+        name: null
+      toPostalCode:
+        type: string
+        description: 收件邮编
+        enum: null
+        name: null
+      toCity:
+        type: string
+        description: 收件城市
+        enum: null
+        name: null
+      productType:
+        type: string
+        description: 类型
+        enum: null
+        name: null
+      fileWeight:
+        type: string
+        description: 文件重量
+        enum: null
+        name: null
+      sendTime:
+        type: string
+        description: 发件日期
+        enum: null
+        name: null
+    required:
+    - fromCountryCode
+    - fromPostalCode
+    - fromCity
+    - toCountryCode
+    - toPostalCode
+    - toCity
+    - productType
+    - fileWeight
+    - sendTime
+  url: https://wippe2-pc.cndhl.com/api/wiplus/base/large-model/freightTime
+  method: POST
+  extra_infos: null

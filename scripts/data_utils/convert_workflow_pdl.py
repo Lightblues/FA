@@ -2,71 +2,42 @@
 @241221
 - [x] finish overall convertion procedure!
 - [x] add hunyuan results
+
+Usage::
+
+    python scripts/data_utils/convert_workflow_pdl.py \
+        --llm_name=gpt-4-turbo --output_version=v241127_converted_4turbo \
+        --data_version=v241127 --export_version=export-1732628942
 """
 
-from concurrent.futures import ThreadPoolExecutor
-
-import tqdm
-import yaml
-import json
+import argparse
 from data_utils.converter.workflow_pdl_converter import WorkflowPDLConverter
 
-data_version = "v241127"
-export_version = "export-1732628942"
 
-# llm_name="gpt-4o-mini"
-# output_version = "pdl_converted_20241221_4omini"
-# llm_name="hunyuan-turbo"
-# output_version = "pdl_converted_20241221_hyturbo"
-# llm_name = "gpt-4o"
-# output_version = "pdl_converted_20241225_4o"
-# llm_name = "hunyuan-turbo"
-# output_version = "pdl_converted_20241225_hyturbo"
-llm_name = "claude-3-5-sonnet-20241022"
-output_version = "pdl_converted_20241225_sonnet"
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data_version", type=str, default="v241127", help="the dataset to be converted")
+    parser.add_argument("--export_version", type=str, default="export-1732628942", help="the export version")
 
-workflow_ids = ["000", "001", "002", "004", "006", "007"]
-max_workers = 10
+    parser.add_argument("--llm_name", type=str, default="gpt-4o-mini", help="the llm to be used")
+    parser.add_argument("--output_version", type=str, default="pdl_converted_20241221_4omini", help="the output version (directory name)")
+
+    parser.add_argument("--max_workers", type=int, default=10, help="the number of workers to be used")
+    args = parser.parse_args()
+    return args
 
 
-def convert():
-    converter = WorkflowPDLConverter(llm_name=llm_name, data_version=data_version, export_version=export_version)
-    dm = converter.data_manager
-
-    odir = dm.DIR_dataset / f"{output_version}"
-    print(f">>> output dir: {odir}")
-    odir_tools = odir / "tools"
-    odir_pdl = odir / "pdl"
-    odir_debug = odir / "debug"
-    for d in [odir, odir_tools, odir_pdl, odir_debug]:
-        d.mkdir(parents=True, exist_ok=True)
-
-    with open(odir / "task_infos.json", "w") as f:
-        task_infos = dm.get_task_infos()
-        task_infos = {k: v for k, v in task_infos.items() if k in workflow_ids}
-        out = {
-            "version": dm.data_version,
-            "task_infos": task_infos,
-        }
-        f.write(json.dumps(out, ensure_ascii=False, indent=4))
-
-    def process_workflow(workflow_id):
-        res = converter.convert(workflow_id)
-        with open(odir_pdl / f"{workflow_id}.yaml", "w") as f:
-            f.write(res["pdl"].to_str(add_procedure=True))
-        with open(odir_tools / f"{workflow_id}.yaml", "w") as f:
-            tools = [tool.model_dump() for tool in res["tools"]]
-            f.write(yaml.dump(tools, sort_keys=False, allow_unicode=True))
-
-        with open(odir_debug / f"{workflow_id}_llm_prompt.txt", "w") as f:
-            f.write(res["llm_prompt"])
-        with open(odir_debug / f"{workflow_id}_llm_response.txt", "w") as f:
-            f.write(res["llm_response"])
-        return workflow_id
-
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        list(tqdm.tqdm(executor.map(process_workflow, workflow_ids), total=len(workflow_ids)))
+def main():
+    args = get_args()
+    converter = WorkflowPDLConverter(
+        llm_name=args.llm_name,
+        output_version=args.output_version,
+        data_version=args.data_version,
+        export_version=args.export_version,
+        max_workers=args.max_workers,
+    )
+    converter.convert_all()
 
 
 if __name__ == "__main__":
-    convert()
+    main()

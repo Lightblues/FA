@@ -1,0 +1,115 @@
+Name: 挂号
+Desc: 帮助用户实现医院看病挂号的任务
+SLOTs:
+- name: 其他日期挂号意愿
+  desc: 是否愿意选择其他日期的号源进行挂号
+  type: string
+- name: 身份证号
+  desc: 提供患者的身份证号
+  type: string
+- name: 号类
+  desc: 医院挂号的类型，一般有专家号和普通号
+  type: string
+- name: 医院名称
+  desc: 医院的名字
+  type: string
+- name: 科室名称
+  desc: 医院的科室
+  type: string
+- name: 挂号意愿
+  desc: 是否考虑其他医院。
+  type: string
+- name: 其他医院挂号意愿
+  desc: 是否愿意挂其他医院的号
+  type: string
+- name: 挂号时间
+  desc: 挂号的时间，识别后需要转换为“a月b日”的格式，a、b是阿拉伯数字，比如3月20日，不要转换成03月20日，而应该是3月20日
+  type: string
+APIs:
+- name: 校验挂号医院
+  desc: ''
+  precondition: null
+- name: 科室校验
+  desc: ''
+  precondition: null
+- name: 查询对应科室可选医院
+  desc: ''
+  precondition: null
+- name: 指定时间号源查询
+  desc: ''
+  precondition: null
+- name: 同医院同科室其他日期号源
+  desc: ''
+  precondition: null
+- name: 获取挂号时间和号类
+  desc: ''
+  precondition: null
+- name: 其他医院号源推荐
+  desc: ''
+  precondition: null
+- name: 本医院挂号执行
+  desc: ''
+  precondition: null
+- name: 医院名称归一化
+  desc: ''
+  precondition: null
+- name: 科室名称归一化
+  desc: ''
+  precondition: null
+ANSWERs:
+- name: 医院不存在
+  desc: 抱歉，目前无法提供该医院的挂号服务，您考虑下其他医院吗？
+- name: 兜底回复
+  desc: 兜底回复
+- name: 兜底回复1
+  desc: 兜底回复1
+- name: 无对应科室医院回复
+  desc: '{{hos_name}}  没有找到您要挂号的科室，我这边为您转接人工客服咨询一下，请稍等。'
+- name: 拒绝其他医院科室回复
+  desc: 那建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
+- name: 兜底回复2
+  desc: 兜底回复2
+- name: 兜底回复3
+  desc: 兜底回复3
+- name: 兜底回复4
+  desc: 兜底回复4
+- name: 无号回复
+  desc: 非常抱歉，最近您想挂的科室，平台已出号的医院近期均无号源，建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
+- name: 兜底回复5
+  desc: 兜底回复5
+- name: 拒绝挂号回复
+  desc: 那建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
+- name: 本医院挂号成功
+  desc: 好的，已为您成功挂了{{hos_name}} {{keshi_name}} {{time}}的号源，稍后也会短信发送到您的来电号码，感谢您的来电，再见。
+- name: 结束回复13
+  desc: 非常抱歉，暂时没有{{hos_name}} {{keshi_name}} {{time}} 的{{num_type}} ；建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
+- name: 兜底回复6
+  desc: 兜底回复6
+- name: 结束回复15
+  desc: 兜底回复11
+- name: 结束回复16
+  desc: 兜底回复16
+Procedure: "\n# 开始\nwhile True:\n    # 获取医院名称和科室名称\n    [hospital_name, department_name]\
+  \ = ANSWER.请用户提供必要信息()\n    \n    # 校验医院是否存在\n    [hospital_exist] = API.校验挂号医院(hos_name=hospital_name)\n\
+  \    if hospital_exist == '1':\n        break\n    else:\n        ANSWER.医院不存在()\n\
+  \n# 校验科室是否存在\n[department_exist] = API.科室校验(keshi_name=department_name, hos_name=hospital_name)\n\
+  if department_exist == '1':\n    # 获取挂号时间和号类\n    [g_time, num_type] = CODE_EXECUTOR.获取挂号时间和号类(data=data,\
+  \ data_num_type=data_num_type)\n    \n    # 查询可挂号日期信息\n    [num, available_dates]\
+  \ = API.同医院同科室其他日期号源(time=g_time, keshi_name=department_name)\n    if num > 0:\n\
+  \        ANSWER.确认其他日期挂号意愿()\n        [other_date_willing] = API.确认其他日期挂号意愿()\n\
+  \        if other_date_willing == '愿意':\n            # 执行挂号\n            [appointment_status]\
+  \ = API.本医院挂号执行(id_num=id_num, num_type=num_type, hos_name=hospital_name, keshi_name=department_name,\
+  \ time=g_time)\n            if appointment_status == '1':\n                ANSWER.本医院挂号成功(hos_name=hospital_name,\
+  \ keshi_name=department_name, time=g_time)\n            else:\n                ANSWER.结束回复13(hos_name=hospital_name,\
+  \ keshi_name=department_name, time=g_time, num_type=num_type)\n        else:\n \
+  \           ANSWER.拒绝挂号回复()\n    else:\n        # 查询其他医院号源\n        [num, hos_names,\
+  \ doc_names] = API.其他医院号源推荐(keshi_name=department_name, time=g_time)\n        if\
+  \ num > 0:\n            ANSWER.确认其他医院挂号意愿()\n            [other_hos_willing] = API.确认其他医院挂号意愿()\n\
+  \            if other_hos_willing == '愿意':\n                # 执行挂号\n           \
+  \     [appointment_status] = API.本医院挂号执行(id_num=id_num, num_type=num_type, hos_name=hos_names[0],\
+  \ keshi_name=department_name, time=g_time)\n                if appointment_status\
+  \ == '1':\n                    ANSWER.本医院挂号成功(hos_name=hos_names[0], keshi_name=department_name,\
+  \ time=g_time)\n                else:\n                    ANSWER.结束回复13(hos_name=hos_names[0],\
+  \ keshi_name=department_name, time=g_time, num_type=num_type)\n            else:\n\
+  \                ANSWER.拒绝挂号回复()\n        else:\n            ANSWER.无号回复()\nelse:\n\
+  \    ANSWER.无对应科室医院回复(hos_name=hospital_name)"

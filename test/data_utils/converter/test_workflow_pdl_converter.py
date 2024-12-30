@@ -21,7 +21,7 @@ def test_nodes_to_pdl():
 
 
 def test_convert():
-    pdl = converter.convert("001")
+    pdl = converter.convert_one("001")
     print(pdl)
 
 

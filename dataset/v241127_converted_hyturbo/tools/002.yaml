@@ -1,0 +1,73 @@
+- name: 预定接口
+  description: ''
+  parameters:
+    type: object
+    properties:
+      customerName:
+        type: string
+        description: 订餐用户称呼
+        enum: null
+        name: null
+      contactInfo:
+        type: string
+        description: 联系方式
+        enum: null
+        name: null
+      date:
+        type: string
+        description: 预定日期
+        enum: null
+        name: null
+      mealType:
+        type: string
+        description: 用餐餐段
+        enum: null
+        name: null
+      numberOfPeople:
+        type: int
+        description: 用餐人数
+        enum: null
+        name: null
+    required:
+    - customerName
+    - contactInfo
+    - date
+    - mealType
+    - numberOfPeople
+  url: https://ai.zhidianfan.com/api/bookings/book
+  method: GET
+  extra_infos: null
+- name: 查询附近门店
+  description: ''
+  parameters:
+    type: object
+    properties:
+      customerName:
+        type: string
+        description: 订餐用户称呼
+        enum: null
+        name: null
+      contactInfo:
+        type: string
+        description: 联系方式
+        enum: null
+        name: null
+      date:
+        type: string
+        description: 预定日期
+        enum: null
+        name: null
+      mealType:
+        type: string
+        description: 用餐餐段
+        enum: null
+        name: null
+      numberOfPeople:
+        type: int
+        description: 用餐人数
+        enum: null
+        name: null
+    required: []
+  url: https://ai.zhidianfan.com/api/bookings/search-nearby
+  method: GET
+  extra_infos: null

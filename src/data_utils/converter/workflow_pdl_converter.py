@@ -14,19 +14,25 @@
 - [x] finish convert for `001: 同程开发票`!
     nodes: ANSWER, PARAMETER_EXTRACTOR, TOOL, LOGIC_EVALUATOR
 @241230
-- [ ] #data register data infos in unified `dataset/dataset_infos.json`
+- [x] #data register data infos in unified `dataset/dataset_infos.yaml`
 
 TODO:
 - [ ] #feat use LLM to generate summary for each node
 - [ ] #feat support AND/OR dependency controller
 - [ ] #feat generate dependency automatically
 - [ ] #vis draw node graph (e.g. with graphviz | pyecharts)
+- [ ] check the API/tools after conversion (post check)
 """
 
 import json
-from typing import Dict, List
+import yaml
+import tqdm
+from datetime import datetime
+from typing import Dict, List, Any
+from concurrent.futures import ThreadPoolExecutor
 
-from fa_core.common import Formater, init_client
+from pydantic import BaseModel
+from fa_core.common import Formater, init_client, BaseClient
 from fa_core.data import PDL
 
 from ..workflow import WorkflowDataManager, Parameter, Workflow
@@ -50,22 +56,84 @@ llm_kwargs = {
 }
 
 
-class WorkflowPDLConverter:
-    def __init__(
-        self,
-        data_version: str = "v241127",
-        export_version: str = "export-1732628942",
-        llm_name: str = "gpt-4o",
-    ) -> None:
-        self.data_manager = WorkflowDataManager(data_version=data_version, export_version=export_version)
-        self.llm = init_client(llm_name, **llm_kwargs)
+class WorkflowPDLConverter(BaseModel):
+    data_version: str = "v241127"
+    export_version: str = "export-1732628942"
+    llm_name: str = "gpt-4o"
+    output_version: str = "pdl_converted_20241221_4o"
+    max_workers: int = 10
 
-    def convert(self, workflow_id: str):
+    data_manager: WorkflowDataManager = None
+    llm: BaseClient = None
+
+    def model_post_init(self, __context: Any) -> None:
+        self.data_manager = WorkflowDataManager(data_version=self.data_version, export_version=self.export_version)
+        self.llm = init_client(self.llm_name, **llm_kwargs)
+
+    def convert_all(self):
+        """Convert the whole dataset with multi-threading.
+
+        Output structure: `DIR_dataset / self.output_version`
+        """
+        task_infos = self.data_manager.get_task_infos()
+        workflow_ids = sorted(task_infos.keys())
+
+        # 1. prepare the output dir
+        odir = self.data_manager.DIR_dataset / self.output_version
+        for _subdir in ["pdl", "tools", "debug"]:
+            (odir / _subdir).mkdir(parents=True, exist_ok=True)
+        print(f">>> output dir: {odir}")
+
+        # 2. convert each workflow
+        def process_workflow(workflow_id):
+            res = self.convert_one(workflow_id)
+            if res is None:
+                return None
+            with open(odir / "pdl" / f"{workflow_id}.yaml", "w") as f:
+                f.write(res["pdl"].to_str(add_procedure=True))
+            with open(odir / "tools" / f"{workflow_id}.yaml", "w") as f:
+                tools = [tool.model_dump() for tool in res["tools"]]
+                f.write(yaml.dump(tools, sort_keys=False, allow_unicode=True))
+            with open(odir / "debug" / f"{workflow_id}_llm_prompt.txt", "w") as f:
+                f.write(res["llm_prompt"])
+            with open(odir / "debug" / f"{workflow_id}_llm_response.txt", "w") as f:
+                f.write(res["llm_response"])
+            return workflow_id
+
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            success_ids = list(tqdm.tqdm(executor.map(process_workflow, workflow_ids), total=len(workflow_ids)))
+            success_ids = [id for id in success_ids if id is not None]
+            print(f">>> {len(success_ids)}/{len(workflow_ids)} workflows converted successfully")
+
+        # 3. record the conversion infos
+        with open(odir / "task_infos.json", "w") as f:
+            task_infos = {k: v for k, v in task_infos.items() if k in success_ids}
+            out = {
+                "version": self.data_version,
+                "task_infos": task_infos,
+            }
+            f.write(json.dumps(out, ensure_ascii=False, indent=4))
+
+        # 3.2 add the task infos to dataset_infos.yaml
+        with open(self.data_manager.DIR_dataset / "dataset_infos.yaml", "r") as f:
+            dataset_infos = yaml.load(f, Loader=yaml.FullLoader)
+        dataset_infos[self.output_version] = {
+            "updated": datetime.now().strftime("%Y-%m-%d"),
+            "extra": {
+                "llm_name": self.llm_name,
+                "data_version": self.data_version,
+                "export_version": self.export_version,
+            },
+        }
+
+    def convert_one(self, workflow_id: str):
         # 1. load the workflow
-        workflow = self.data_manager.get_workflow_by_id(workflow_id)
-        assert all(
-            node.NodeType in VALID_NODE_TYPES for node in workflow.Nodes
-        ), f"Invalid node type found in workflow, valid types: {VALID_NODE_TYPES}"
+        try:
+            workflow = self.data_manager.get_workflow_by_id(workflow_id)
+            assert all(node.NodeType in VALID_NODE_TYPES for node in workflow.Nodes), f"Invalid node type found in workflow {workflow_id}"
+        except Exception as e:
+            print(f"[WARNING] {workflow_id} {e}")
+            return None
         # 2. convert the nodes
         tools = []
         APIs = []

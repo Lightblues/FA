@@ -1,0 +1,74 @@
+Name: 酒店取消订单
+Desc: "1、当用户需要取消订单时触发此任务流程\n2、如果用户没有表示需要取消订单，请不要进入此任务\n3、如果用户只输入订单号，如：1234567890，请不要进入此任务"
+SLOTs:
+- name: 订单id
+  desc: 指的是订单id，10位阿拉伯数字，例如：1234567890。如果订单id不是10位阿拉伯数字时，订单id取值为空""
+  type: int
+- name: 用户id
+  desc: 指的是用户身份id，4位数阿拉伯数字，如：1234。如果用户id不是4位阿拉伯数字，用户id取值为空""
+  type: int
+APIs:
+- name: 查询账户中是否有订单
+  desc: ''
+  precondition: null
+- name: 代码1
+  desc: ''
+  precondition: null
+- name: 判断是否已提交取消申请的SR工单
+  desc: ''
+  precondition: null
+- name: 识别SR单进度
+  desc: ''
+  precondition: null
+- name: 查询订单状态
+  desc: ''
+  precondition: null
+- name: 代码2
+  desc: ''
+  precondition: null
+- name: 代码3
+  desc: ''
+  precondition: null
+- name: 代码4
+  desc: ''
+  precondition: null
+ANSWERs:
+- name: 结束回复1
+  desc: 抱歉，未查询到您账户下有订单，现在为您转接人工服务，请稍等
+- name: 客户不选择订单
+  desc: 您好，如果您想咨询其他订单，也可以直接输入订单号，这边帮您处理
+- name: 已通过
+  desc: 您提交的取消订单申请，已通过。该订单已取消，取消后退款会1-3个工作日内原路返回。
+- name: 未通过
+  desc: 您好，经过客服的申请，您的该笔订单未通过取消申请，建议您正常入住。
+- name: 处理中
+  desc: 您好，您提交的取消订单申请正在处理中，客服会在30-60分钟内处理完成，处理完成后会通过短信或电话通知您，请您耐心等待。
+- name: 未支付
+  desc: 您好，您的订单还未支付，30分钟内未支付，该订单会自动取消。
+- name: 已确认-可免费取消
+  desc: 您好，您的订单已经确认，若您想取消的话，可点击下方按钮，直接取消。
+- name: 已确定-有违约金
+  desc: 您好，您的订单已经确定，酒店将为您整晚保留订单，不可免费取消。您取消的话，需要收取违约金\*\*\*，建议您正常入住。
+- name: 已取消
+  desc: 您好，您的订单已取消，无需重复取消。
+- name: 已入住
+  desc: 您好，您的订单显示已经入住，无法直接取消呢，您可以点击下方【申请取消】按钮，客服收到您的取消申请，会第一时间帮您和酒店协商处理。感谢您的选择，祝您开心每一天。
+- name: 已结账
+  desc: 您好，您的订单显示已经完结，不可取消，请问还有什么可以帮您
+- name: 兜底回复5
+  desc: 兜底回复5
+- name: 兜底回复6
+  desc: 兜底回复6
+Procedure: "\nwhile True:\n    [用户id] = API.PARAMETER_EXTRACTOR()\n    [订单id] = API.PARAMETER_EXTRACTOR()\n\
+  \    if 用户id and 订单id:\n        break\n    [订单信息] = API.查询账户中是否有订单()\n    [订单数量]\
+  \ = CODE_EXECUTOR(订单信息)\n    if 订单数量 > 0:\n        break\n    ANSWER.请用户提供必要信息()\n\
+  \n[申请状态信息] = API.判断是否已提交取消申请的SR工单(订单id, 用户id)\n[提交状态] = CODE_EXECUTOR(申请状态信息)\n\n\
+  if 提交状态 == \"是\":\n    [SR单信息] = API.识别SR单进度(订单id)\n    [SR单状态] = CODE_EXECUTOR(SR单信息)\n\
+  \    if SR单状态 == \"已通过\":\n        ANSWER.已通过()\n    elif SR单状态 == \"未通过\":\n  \
+  \      ANSWER.未通过()\n    elif SR单状态 == \"处理中\":\n        ANSWER.处理中()\n    else:\n\
+  \        ANSWER.兜底回复5()\nelse:\n    [订单进度信息] = API.查询订单状态(订单id)\n    [订单状态] = CODE_EXECUTOR(订单进度信息)\n\
+  \    if 订单状态 == \"未支付\":\n        ANSWER.未支付()\n    elif 订单状态 == \"已确认-可免费取消\":\n\
+  \        ANSWER.已确认-可免费取消()\n    elif 订单状态 == \"已确定-有违约金\":\n        ANSWER.已确定-有违约金()\n\
+  \    elif 订单状态 == \"已取消\":\n        ANSWER.已取消()\n    elif 订单状态 == \"已入住\":\n  \
+  \      ANSWER.已入住()\n    elif 订单状态 == \"已结账\":\n        ANSWER.已结账()\n    else:\n\
+  \        ANSWER.兜底回复6()"

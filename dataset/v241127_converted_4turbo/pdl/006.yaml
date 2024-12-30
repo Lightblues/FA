@@ -1,0 +1,178 @@
+Name: 挂号
+Desc: 帮助用户实现医院看病挂号的任务
+SLOTs:
+- name: 其他日期挂号意愿
+  desc: 是否愿意选择其他日期的号源进行挂号
+  type: string
+- name: 身份证号
+  desc: 提供患者的身份证号
+  type: string
+- name: 号类
+  desc: 医院挂号的类型，一般有专家号和普通号
+  type: string
+- name: 医院名称
+  desc: 医院的名字
+  type: string
+- name: 科室名称
+  desc: 医院的科室
+  type: string
+- name: 挂号意愿
+  desc: 是否考虑其他医院。
+  type: string
+- name: 其他医院挂号意愿
+  desc: 是否愿意挂其他医院的号
+  type: string
+- name: 挂号时间
+  desc: 挂号的时间，识别后需要转换为“a月b日”的格式，a、b是阿拉伯数字，比如3月20日，不要转换成03月20日，而应该是3月20日
+  type: string
+APIs:
+- name: 校验挂号医院
+  desc: ''
+  precondition: null
+- name: 科室校验
+  desc: ''
+  precondition: null
+- name: 查询对应科室可选医院
+  desc: ''
+  precondition: null
+- name: 指定时间号源查询
+  desc: ''
+  precondition: null
+- name: 同医院同科室其他日期号源
+  desc: ''
+  precondition: null
+- name: 获取挂号时间和号类
+  desc: ''
+  precondition: null
+- name: 其他医院号源推荐
+  desc: ''
+  precondition: null
+- name: 本医院挂号执行
+  desc: ''
+  precondition: null
+- name: 医院名称归一化
+  desc: ''
+  precondition: null
+- name: 科室名称归一化
+  desc: ''
+  precondition: null
+ANSWERs:
+- name: 医院不存在
+  desc: 抱歉，目前无法提供该医院的挂号服务，您考虑下其他医院吗？
+- name: 兜底回复
+  desc: 兜底回复
+- name: 兜底回复1
+  desc: 兜底回复1
+- name: 无对应科室医院回复
+  desc: '{{hos_name}}  没有找到您要挂号的科室，我这边为您转接人工客服咨询一下，请稍等。'
+- name: 拒绝其他医院科室回复
+  desc: 那建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
+- name: 兜底回复2
+  desc: 兜底回复2
+- name: 兜底回复3
+  desc: 兜底回复3
+- name: 兜底回复4
+  desc: 兜底回复4
+- name: 无号回复
+  desc: 非常抱歉，最近您想挂的科室，平台已出号的医院近期均无号源，建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
+- name: 兜底回复5
+  desc: 兜底回复5
+- name: 拒绝挂号回复
+  desc: 那建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
+- name: 本医院挂号成功
+  desc: 好的，已为您成功挂了{{hos_name}} {{keshi_name}} {{time}}的号源，稍后也会短信发送到您的来电号码，感谢您的来电，再见。
+- name: 结束回复13
+  desc: 非常抱歉，暂时没有{{hos_name}} {{keshi_name}} {{time}} 的{{num_type}} ；建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
+- name: 兜底回复6
+  desc: 兜底回复6
+- name: 结束回复15
+  desc: 兜底回复11
+- name: 结束回复16
+  desc: 兜底回复16
+Procedure: "\n# Procedure for hospital registration assistance\n\n# Start of the workflow\n\
+  \n# Step 1: Extract parameters\n[医院名称, 科室名称] = PARAMETER_EXTRACTOR.参数提取1()\n\n#\
+  \ Step 2: Normalize the department and hospital names\n[normalized_hospital_name]\
+  \ = API.医院名称归一化([医院名称])\n[normalized_department_name] = API.科室名称归一化([科室名称])\n\n\
+  # Step 3: Check hospital existence\n[hospital_exist_type] = API.校验挂号医院([normalized_hospital_name])\n\
+  \n# Step 4: Evaluate condition based on hospital existence\nif hospital_exist_type\
+  \ == '0':  # Hospital does not exist\n    ANSWER.医院不存在()\nelif hospital_exist_type\
+  \ == '1':  # Hospital exists\n    # Step 5: Check department existence within the\
+  \ hospital\n    [department_exist_type] = API.科室校验([normalized_department_name,\
+  \ normalized_hospital_name])\n\n    # Step 6: Evaluate condition based on department\
+  \ existence\n    if department_exist_type == '0':  # Department does not exist\n\
+  \        # Step 7: Query for other hospitals with the specific department\n    \
+  \    [available_hospital_name, available_hospital_num] = API.查询对应科室可选医院([normalized_department_name])\n\
+  \n        # Step 8: Evaluate based on the number of available hospitals\n      \
+  \  if available_hospital_num > 0:\n            [挂号意愿] = PARAMETER_EXTRACTOR.确认其他医院科室()\n\
+  \n            # Step 9: Evaluate condition based on willingness to consider other\
+  \ hospitals\n            if 挂号意愿 == '愿意':\n                # Extract registration\
+  \ time and proceed with the time-based registration steps\n                [挂号时间]\
+  \ = PARAMETER_EXTRACTOR.挂号时间()\n                [available_slots, haolist, specialist_count,\
+  \ general_count] = API.指定时间号源查询([normalized_hospital_name, normalized_department_name,\
+  \ 挂号时间])\n\n                # Continue with subsequent steps based on availability\
+  \ of registration slots\n                # ... (additional logic steps will be built\
+  \ here)\n\n            elif 挂号意愿 == '不愿意':\n                ANSWER.拒绝其他医院科室回复()\n\
+  \            else:\n                ANSWER.兜底回复11()\n\n        elif available_hospital_num\
+  \ == 0:\n            ANSWER.无对应科室医院回复(normalized_hospital_name)\n        else:\n\
+  \            ANSWER.兜底回复2()\n    elif department_exist_type == '1':  # Department\
+  \ exists\n        [挂号时间] = PARAMETER_EXTRACTOR.挂号时间()\n        [available_slots,\
+  \ haolist, specialist_count, general_count] = API.指定时间号源查询([normalized_hospital_name,\
+  \ normalized_department_name, 挂号时间])\n\n        # Step 10: Evaluate slots availability\n\
+  \        if available_slots == 0:\n            [alternative_dates_info, date_option_count,\
+  \ type_info] = API.同医院同科室其他日期号源([normalized_hospital_name, normalized_department_name])\n\
+  \n            # Evaluate condition based on alternative dates availability\n   \
+  \         if date_option_count == 0:\n                [other_sources_num, other_hospital_names,\
+  \ other_doctors] = API.其他医院号源推荐([normalized_department_name, 挂号时间])\n\n        \
+  \        if other_sources_num == 0:\n                    ANSWER.无号回复()\n       \
+  \         elif other_sources_num > 0:\n                    [其他医院挂号意愿] = PARAMETER_EXTRACTOR.确认其他医院挂号意愿()\n\
+  \n                    # Step 11: Evaluate condition based on willingness to consider\
+  \ other hospitals\n                    if 其他医院挂号意愿 == '不愿意':\n                 \
+  \       ANSWER.拒绝挂号回复()\n                    elif 其他医院挂号意愿 == '愿意':\n          \
+  \              # Extract `身份证号` and `号类` to proceed with registration\n        \
+  \                [号类, 身份证号] = PARAMETER_EXTRACTOR.号类确认()\n                     \
+  \   # Proceed to execute registration at the selected hospital\n               \
+  \         [registration_status] = API.本医院挂号执行(身份证号, 号类, normalized_hospital_name,\
+  \ normalized_department_name, 挂号时间)\n\n                        # Step 12: Evaluate\
+  \ registration status\n                        if registration_status > 0:\n   \
+  \                         ANSWER.本医院挂号成功(normalized_hospital_name, normalized_department_name,\
+  \ 挂号时间)\n                        elif registration_status == 0:\n              \
+  \              ANSWER.结束回复13(normalized_hospital_name, normalized_department_name,\
+  \ 挂号时间, 号类)\n                        else:\n                            ANSWER.兜底回复6()\n\
+  \                    else:\n                        ANSWER.兜底回复16()\n          \
+  \  else:\n                [其他日期挂号意愿] = PARAMETER_EXTRACTOR.确认其他日期挂号意愿()\n\n    \
+  \            if 其他日期挂号意愿 == '不愿意':\n                    # Navigate to alternative\
+  \ hospital recommendations\n                    [other_sources_num, other_hospital_names,\
+  \ other_doctors] = API.其他医院号源推荐([normalized_department_name, 挂号时间])\n\n        \
+  \            if other_sources_num == 0:\n                        ANSWER.无号回复()\n\
+  \                    elif other_sources_num > 0:\n                        [其他医院挂号意愿]\
+  \ = PARAMETER_EXTRACTOR.确认其他医院挂号意愿()\n\n                        if 其他医院挂号意愿 == '不愿意':\n\
+  \                            ANSWER.拒绝挂号回复()\n                        elif 其他医院挂号意愿\
+  \ == '愿意':\n                            # Extract `身份证号` and `号类` to proceed with\
+  \ registration\n                            [号类, 身份证号] = PARAMETER_EXTRACTOR.号类确认()\n\
+  \                            # Proceed to execute registration at the selected hospital\n\
+  \                            [registration_status] = API.本医院挂号执行(身份证号, 号类, normalized_hospital_name,\
+  \ normalized_department_name, 挂号时间)\n\n                            # Step 12: Evaluate\
+  \ registration status\n                            if registration_status > 0:\n\
+  \                                ANSWER.本医院挂号成功(normalized_hospital_name, normalized_department_name,\
+  \ 挂号时间)\n                            elif registration_status == 0:\n          \
+  \                      ANSWER.结束回复13(normalized_hospital_name, normalized_department_name,\
+  \ 挂号时间, 号类)\n                            else:\n                               \
+  \ ANSWER.兜底回复6()\n                        else:\n                            ANSWER.兜底回复16()\n\
+  \                else:\n                    # When willing to accept other date\n\
+  \                    [g_time, num_type] = API.获取挂号时间和号类(alternative_dates_info,\
+  \ type_info)\n                    # Proceed with selected hospital registration\
+  \ based on alternative date\n                    [registration_status] = API.本医院挂号执行(身份证号,\
+  \ num_type, normalized_hospital_name, normalized_department_name, g_time)\n\n  \
+  \                  # Step 13: Evaluate registration attempt\n                  \
+  \  if registration_status > 0:\n                        ANSWER.本医院挂号成功(normalized_hospital_name,\
+  \ normalized_department_name, g_time)\n                    elif registration_status\
+  \ == 0:\n                        ANSWER.结束回复13(normalized_hospital_name, normalized_department_name,\
+  \ g_time, num_type)\n                    else:\n                        ANSWER.兜底回复6()\n\
+  \        elif available_slots > 0:\n            [号类, 身份证号] = PARAMETER_EXTRACTOR.号类确认()\n\
+  \            [registration_status] = API.本医院挂号执行(身份证号, 号类, normalized_hospital_name,\
+  \ normalized_department_name, 挂号时间)\n\n            if registration_status > 0:\n\
+  \                ANSWER.本医院挂号成功(normalized_hospital_name, normalized_department_name,\
+  \ 挂号时间)\n            elif registration_status == 0:\n                ANSWER.结束回复13(normalized_hospital_name,\
+  \ normalized_department_name, 挂号时间, 号类)\n            else:\n                ANSWER.兜底回复6()\n\
+  \        else:\n            ANSWER.兜底回复3()\n    else:\n        ANSWER.兜底回复1()\n\
+  else:  # Default case for unhandled conditions\n    ANSWER.兜底回复()"

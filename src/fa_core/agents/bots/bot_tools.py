@@ -14,4 +14,17 @@ tool_response = {
     },
 }
 
+tool_switch_main = {
+    "type": "function",
+    "function": {
+        "name": "switch_main",
+        "description": "Switch to main workflow",
+        "parameters": {
+            "type": "object",
+            "properties": {"reason": {"type": "string", "description": "your response content to user"}},
+            "required": ["content"],
+        },
+    },
+}
+
 tool_response = ToolDefinition(**tool_response)

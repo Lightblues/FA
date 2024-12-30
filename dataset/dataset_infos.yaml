@@ -3,4 +3,10 @@ v241127_converted_sonnet:
 v241127_converted_ruled:
   updated: '2024-12-29'
 v241127:
-  updated: '2024-12-29' 
+  updated: '2024-12-29'
+v241127_converted_4turbo:
+  updated: '2024-12-30'
+  extra:
+    llm_name: gpt-4-turbo
+    data_version: v241127
+    export_version: export-1732628942
