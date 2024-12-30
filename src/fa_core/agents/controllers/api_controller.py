@@ -22,8 +22,8 @@ class APIDuplicationController(BaseController):
         if (prev_bot_output is None) or (not prev_bot_output.action):
             return
         if not self.check_validation():
-            content = f"you have called {prev_bot_output.action} with the same parameters too many times! Please obtain the information from the previous calls."
-            self.context.status_for_prompt["Invalid API due to duplicated call"] = content
+            prompt_msg = f"you have called {prev_bot_output.action} with the same parameters too many times! Please obtain the information from the previous calls."
+            self.context.status_for_prompt.api_duplication_controller["Invalid API due to duplicated call"] = prompt_msg
 
     def check_validation(self) -> bool:
         app_calling_info = self.context.conv.get_last_message().content

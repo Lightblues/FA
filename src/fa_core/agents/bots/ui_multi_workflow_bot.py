@@ -11,10 +11,10 @@ from typing import List
 from fa_core.common import LLM_CFG, Formater, PromptUtils, init_client, jinja_render
 from fa_core.data import WorkflowBotOutput
 
-from .react_bot import ReactBot
+from .base_bot import BaseBot
 
 
-class UIMultiWorkflowBot(ReactBot):
+class UIMultiWorkflowBot(BaseBot):
     """UIMultiWorkflowBot
 
     self: llm
@@ -44,17 +44,14 @@ class UIMultiWorkflowBot(ReactBot):
         self.__init__()
 
     def _gen_prompt(self) -> str:
-        state_infos = {
-            "Current time": PromptUtils.get_formated_time(),
-        }
-        state_infos |= self.workflow.pdl.status_for_prompt  # add the status infos from PDL!
+        state_infos = self.context.status_for_prompt  # add the status infos from PDL!
         prompt = jinja_render(
             self.cfg.mui_agent_workflow_template_fn,
             workflow_name=self.workflow.name,
             PDL=self.workflow.pdl.to_str_wo_api(),  # .to_str()
             api_infos=self.workflow.toolbox,
             conversation=self.conv.to_str(),
-            current_state="\n".join(f"{k}: {v}" for k, v in state_infos.items()),
+            current_state=state_infos.to_str(),
         )
         return prompt
 

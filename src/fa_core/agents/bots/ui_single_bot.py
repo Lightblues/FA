@@ -8,6 +8,8 @@
     - [x] fix: roles
     - [x] fix: controllers (testing)
 - [x] #feat add `Context`
+@241230
+- [x] #feat move `user_additional_constraints` to `status_for_prompt`
 
 todos
 - [ ] try seperate Procedure from PDL in prompt!
@@ -18,7 +20,7 @@ from typing import Iterator, List, Tuple, Union
 
 from openai.types.chat.chat_completion_chunk import ChoiceDelta
 
-from fa_core.common import Formater, PromptUtils, init_client, jinja_render
+from fa_core.common import Formater, init_client, jinja_render
 from fa_core.data import BotOutput
 
 from .base_bot import BaseBot
@@ -39,7 +41,6 @@ class UISingleBot(BaseBot):
         bot_llm_name
         bot_template_fn
         bot_retry_limit (for the .process() method)
-        ui_user_additional_constraints # for UI usage only
     """
 
     names = ["UISingleBot", "ui_single_bot"]
@@ -47,13 +48,11 @@ class UISingleBot(BaseBot):
     last_llm_chat_completions: List[ChoiceDelta] = []
     last_llm_prompt: str = ""  # the prompt for logging
     last_llm_response: str = ""  # the llm response (with tool calls) for logging
-    ui_user_additional_constraints: str = ""
 
     def _post_init(self) -> None:
         kwargs = {"seed": 42, "temperature": 0.0}
         self.bot_template_fn = self.cfg.bot_template_fn
         self.bot_llm_name = self.cfg.bot_llm_name
-        self.ui_user_additional_constraints = self.cfg.ui_user_additional_constraints
         self.llm = init_client(
             self.bot_llm_name,
             stop=["[END]"],
@@ -62,14 +61,14 @@ class UISingleBot(BaseBot):
 
         self.context.workflow.pdl.add_tool(tool_response)  # NOTE: add "response_to_user" as a special tool!
 
+        # add user's additional constraints from UI
+        if self.cfg.ui_user_additional_constraints:
+            self.context.status_for_prompt.user_additional_constraints = self.cfg.ui_user_additional_constraints
+
     def _gen_prompt(self) -> str:
         # - [x]: format apis
-        state_infos = {
-            "Current time": PromptUtils.get_formated_time(),
-        }
         data_handler = self.context.workflow
-        # s_current_state = f"Previous action type: {conversation_infos.curr_action_type.actionname}. The number of user queries: {conversation_infos.num_user_query}."
-        state_infos |= self.context.status_for_prompt  # add the status infos from PDL!
+        state_infos = self.context.status_for_prompt  # add the status infos from PDL!
         _tool_infos = [tool.model_dump() for tool in data_handler.pdl.tools]
         # _pdl_info = data_handler.pdl.to_str()
         _pdl_info = data_handler.pdl.to_json()  # NOTE: convert to json instead of str!!
@@ -79,8 +78,7 @@ class UISingleBot(BaseBot):
             PDL=_pdl_info,
             api_infos=_tool_infos,
             conversation=self.context.conv.to_str(),
-            user_additional_constraints=self.ui_user_additional_constraints,
-            current_state="\n".join(f"{k}: {v}" for k, v in state_infos.items()),
+            current_state=state_infos.to_str(),
         )
         return prompt
 

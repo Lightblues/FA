@@ -13,12 +13,14 @@
 @241220
 - [x] finish convert for `001: 同程开发票`!
     nodes: ANSWER, PARAMETER_EXTRACTOR, TOOL, LOGIC_EVALUATOR
+@241230
+- [ ] #data register data infos in unified `dataset/dataset_infos.json`
 
 TODO:
 - [ ] #feat use LLM to generate summary for each node
 - [ ] #feat support AND/OR dependency controller
+- [ ] #feat generate dependency automatically
 - [ ] #vis draw node graph (e.g. with graphviz | pyecharts)
-- [ ] #data register data infos in unified `dataset/dataset_infos.json`
 """
 
 import json

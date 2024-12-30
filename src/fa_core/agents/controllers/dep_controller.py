@@ -65,8 +65,8 @@ class NodeDependencyController(BaseController):
         invalid_apis = self.graph.get_invalid_node_names()
         valid_apis = all_api_names - invalid_apis
         if self.if_add_invalid_msg and (len(invalid_apis) > 0):
-            self.context.status_for_prompt["Current invalid apis"] = (
+            self.context.status_for_prompt.api_dependency_controller["Current invalid apis"] = (
                 f"`{invalid_apis}` are invalid because the precondintion APIs have not been called!"
             )
         if self.if_add_valid_msg and (len(valid_apis) > 0):
-            self.context.status_for_prompt["Current valid apis"] = f"You can call `{valid_apis}`"
+            self.context.status_for_prompt.api_dependency_controller["Current valid apis"] = f"You can call `{valid_apis}`"

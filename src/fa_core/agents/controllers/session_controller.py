@@ -20,7 +20,7 @@ class SessionLengthController(BaseController):
         elif num_user_queries > self.config["max"]:
             msg = f"Current #user_queries = {num_user_queries} is greater than maximum ({self.config['max']}). Try to stop the conversation soon!"
         if msg:
-            self.pdl.status_for_prompt["Session length"] = msg
+            self.context.status_for_prompt.session_length_controller["Session length"] = msg
 
     def _response_check_with_message(self, bot_output: BotOutput) -> Tuple[bool, str]:
         # FIXME: check only when the bot say "byebye"
