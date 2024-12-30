@@ -42,6 +42,7 @@ ui_greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
 
 api_entity_linking: false               # entity linking! FIXME: entity linker message not in log! (mismatch with client)
 
+bot_llm_kwargs: {"seed": 42, "temperature": 0.0}
 bot_pdl_controllers:
   - {name: "api_duplication", config: {if_pre: true, if_post: true, threshold: 2}, is_activated: true}
   - {name: "node_dependency", config: {if_pre: false, if_post: true}, is_activated: true}

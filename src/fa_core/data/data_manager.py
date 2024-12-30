@@ -24,9 +24,10 @@ class PathConfig(BaseModel):
     DIR_template: ClassVar[Path] = DIR_root / "src/templates/flowagent"
 
     # Log directories
-    DIR_wandb: ClassVar[Path] = DIR_root / "log/_wandb"
-    DIR_ui_log: ClassVar[Path] = DIR_root / "log/ui"
-    DIR_backend_log: ClassVar[Path] = DIR_root / "log/backend"
+    DIR_log: ClassVar[Path] = DIR_root / "log"
+    DIR_wandb: ClassVar[Path] = DIR_log / "_wandb"
+    DIR_ui_log: ClassVar[Path] = DIR_log / "ui"
+    DIR_backend_log: ClassVar[Path] = DIR_log / "backend"
 
     # Data directory
     DIR_data_root: ClassVar[Path] = DIR_root / "dataset"

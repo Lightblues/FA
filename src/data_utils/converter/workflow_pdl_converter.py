@@ -9,7 +9,7 @@
     - [x] params
     - [x] ANSWER
     - [x] TOOL
-    - [ ] LOGIC_EVALUATOR
+    - [x] LOGIC_EVALUATOR
 @241220
 - [x] finish convert for `001: 同程开发票`!
     nodes: ANSWER, PARAMETER_EXTRACTOR, TOOL, LOGIC_EVALUATOR

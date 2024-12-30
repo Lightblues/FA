@@ -10,9 +10,11 @@
 - [x] #feat add `Context`
 @241230
 - [x] #feat move `user_additional_constraints` to `status_for_prompt`
+- [x] #feat add `kwargs` for LLM (seed, temperature, etc.)
 
 todos
 - [ ] try seperate Procedure from PDL in prompt!
+- [ ] add `switch_main` tool!
 """
 
 import json
@@ -50,13 +52,12 @@ class UISingleBot(BaseBot):
     last_llm_response: str = ""  # the llm response (with tool calls) for logging
 
     def _post_init(self) -> None:
-        kwargs = {"seed": 42, "temperature": 0.0}
         self.bot_template_fn = self.cfg.bot_template_fn
         self.bot_llm_name = self.cfg.bot_llm_name
         self.llm = init_client(
             self.bot_llm_name,
             stop=["[END]"],
-            **kwargs,
+            **self.cfg.bot_llm_kwargs,
         )
 
         self.context.workflow.pdl.add_tool(tool_response)  # NOTE: add "response_to_user" as a special tool!

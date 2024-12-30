@@ -20,7 +20,6 @@ ui_available_templates:
   # - bot_pdl_ui.jinja
   # - bot_pdl_ui_zh.jinja
 # ui_available_workflow_dirs:
-# ui_available_workflows:
 ui_default_model: default_model
 ui_default_template: "bot_pdl_ui_zh.jinja"
 ui_greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
@@ -69,6 +68,7 @@ user_oow_ratio: 0.2
 bot_mode: "pdl_bot"       # dummy_bot, react_bot, pdl_bot, core_bot
 bot_template_fn: null     # "bot_flowbench.jinja"
 bot_llm_name: "default"
+bot_llm_kwargs: {}
 bot_retry_limit: 3
 bot_action_limit: 10       # FIXME: to check & set the out-of-action response!
 bot_pdl_controllers:
@@ -84,10 +84,6 @@ api_entity_linking: false            # FIXME: note that stop EL for now!!!
 api_entity_linking_llm: "default"
 api_entity_linking_template: "entity_linking.jinja"
 api_mock_llm_name: "default"
-
-conversation_turn_limit: 20
-log_utterence_time: false
-log_to_db: true
 
 db_uri: 'mongodb://localhost:27017'
 db_name: "agent-pdl"

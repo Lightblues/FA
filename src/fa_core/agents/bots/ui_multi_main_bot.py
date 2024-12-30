@@ -8,7 +8,6 @@ import re
 from typing import Dict, List
 
 from fa_core.common import (
-    LLM_CFG,
     Formater,
     PromptUtils,
     init_client,
@@ -17,10 +16,11 @@ from fa_core.common import (
 from fa_core.data import FADataManager, MainBotOutput
 from fa_core.tools import TOOL_SCHEMAS, TOOLS_MAP
 
-from .react_bot import ReactBot
+from .base_bot import BaseBot
+from .re_utils import re_parse_react_output
 
 
-class UIMultiMainBot(ReactBot):
+class UIMultiMainBot(BaseBot):
     """UIMultiMainBot
 
     self: llm
@@ -40,7 +40,6 @@ class UIMultiMainBot(ReactBot):
 
     def _post_init(self) -> None:
         # logger.info(f"init UIMultiMainBot with workflow_infos: {workflow_infos}")
-        # use `config.mui_agent_main_llm_name`
         self.bot_template_fn = self.cfg.mui_agent_main_template_fn
         self.bot_llm_name = self.cfg.mui_agent_main_llm_name
         self.llm = init_client(self.bot_llm_name)

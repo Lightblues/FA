@@ -1,8 +1,11 @@
 import os
 import sys
+from pathlib import Path
 
 from loguru import logger
 from loguru._logger import Logger
+
+DIR_default_log = Path(__file__).resolve().parent.parent.parent.parent.parent / "log/default"
 
 
 def singleton(func):
@@ -19,11 +22,11 @@ def singleton(func):
 
 
 @singleton
-def init_loguru_logger(log_dir="logs", stdout_level="INFO") -> "Logger":
+def init_loguru_logger(log_dir=DIR_default_log, stdout_level="INFO") -> "Logger":
     """initialize the loguru logger
 
     Args:
-        log_dir (str, optional): the directory to save the log files. Defaults to "logs".
+        log_dir (str, optional): the directory to save the log files.
 
     Returns:
         Logger: loguru.logger

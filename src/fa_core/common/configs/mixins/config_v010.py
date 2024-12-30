@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class V010Mixin(BaseModel):
@@ -23,12 +23,9 @@ class V010Mixin(BaseModel):
     bot_mode: str = "react_bot"
     bot_template_fn: Optional[str] = None  # "bot_flowbench.jinja"
     bot_llm_name: str = "gpt-4o"
+    bot_llm_kwargs: Optional[Dict] = Field(default_factory=dict)
     bot_action_limit: int = 5
     bot_retry_limit: int = 3
-    # pdl_check_dependency: bool = True
-    # pdl_check_api_dup_calls: bool = True
-    # pdl_check_api_dup_calls_threshold: int = 2
-    # pdl_check_api_w_tool_manipulation: bool = False  # whether to check API calls with tool manipulation
     bot_pdl_controllers: List[Dict] = []
 
     api_mode: str = "llm"  # request/v01, llm
@@ -40,13 +37,11 @@ class V010Mixin(BaseModel):
     api_mock_llm_name: str = "gpt-4o"
 
     ui_bot_mode: str = "ui_single_bot"  # ui_single_bot
-    # ui_bot_if_fc: bool = True         # DEPRECATED! seperate to `ui_single_fc_bot` and `ui_single_bot`
     ui_available_models: Optional[List[str]] = None
     ui_available_templates: Optional[List[str]] = None
     ui_available_workflow_datasets: Optional[List[str]] = None
     ui_default_workflow_dataset: str = "v241127"
     ui_available_workflow_dirs: Optional[List[str]] = None  # subdirs
-    ui_available_workflows: Optional[List[str]] = None  # NOTE: 暂未生效
     ui_default_model: str = "default"
     ui_default_template: str = "bot_pdl_ui.jinja"
     ui_greeting_msg: str = "Hi, I'm HuaBu bot. How can I help you?"
@@ -70,14 +65,8 @@ class V010Mixin(BaseModel):
     mui_greeting_msg: str = "你好，有什么可以帮您?"
     mui_workflow_infos: List[Dict] = []
 
-    conversation_turn_limit: int = 20
-    log_utterence_time: bool = True
-    log_to_db: bool = True
-
     db_uri: str = "mongodb://localhost:27017/"
     db_name: str = "agent-pdl"
-    # db_message_collection_name: str = "messages"
-    # db_meta_collection_name: str = "config"
     db_collection_single: str = "backend_single_sessions"
     db_collection_multi: str = "backend_multi_sessions"
     db_available_collections: List[str] = [db_collection_single, db_collection_multi]

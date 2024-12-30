@@ -3,16 +3,19 @@ Usage::
 
     python -m fa_eval.cli.chat_cli --cfg cli.yaml --backend_url="http://localhost:8101"
 
+@241230
+- [x] use `init_loguru_logger` to setup logger
 
+todos:
 - [ ] add pre_conversation to support debug
 """
 
 from fa_server.client import FrontendClient
 from fa_server.typings import SingleBotPredictResponse
 from fa_core.common import Config, LogUtils, get_session_id, init_loguru_logger
-from fa_core.data import BotOutput, Conversation
+from fa_core.data import BotOutput, Conversation, FADataManager
 
-init_loguru_logger(stdout_level="WARNING")  # CHECK: does it work?
+init_loguru_logger(log_dir=FADataManager.DIR_log / "cli", stdout_level="WARNING")  # NOTE: set stdout_level to WARNING to avoid verbose logs
 
 
 class ChatCLI(object):
