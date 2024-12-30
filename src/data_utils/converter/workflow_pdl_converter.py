@@ -15,8 +15,10 @@
     nodes: ANSWER, PARAMETER_EXTRACTOR, TOOL, LOGIC_EVALUATOR
 
 TODO:
-- [ ] use LLM to generate summary for each node
-- [ ] draw node graph (e.g. with graphviz | pyecharts)
+- [ ] #feat use LLM to generate summary for each node
+- [ ] #feat support AND/OR dependency controller
+- [ ] #vis draw node graph (e.g. with graphviz | pyecharts)
+- [ ] #data register data infos in unified `dataset/dataset_infos.json`
 """
 
 import json

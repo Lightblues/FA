@@ -14,7 +14,6 @@ todos
 """
 
 import json
-import re
 from typing import Iterator, List, Tuple, Union
 
 from openai.types.chat.chat_completion_chunk import ChoiceDelta
@@ -22,12 +21,12 @@ from openai.types.chat.chat_completion_chunk import ChoiceDelta
 from fa_core.common import Formater, PromptUtils, init_client, jinja_render
 from fa_core.data import BotOutput
 
-from .react_bot import ReactBot
+from .base_bot import BaseBot
 from .bot_tools import tool_response
 from .re_utils import re_parse_react_output
 
 
-class UISingleBot(ReactBot):
+class UISingleBot(BaseBot):
     """
     Usage::
 
@@ -51,12 +50,14 @@ class UISingleBot(ReactBot):
     ui_user_additional_constraints: str = ""
 
     def _post_init(self) -> None:
+        kwargs = {"seed": 42, "temperature": 0.0}
         self.bot_template_fn = self.cfg.bot_template_fn
         self.bot_llm_name = self.cfg.bot_llm_name
         self.ui_user_additional_constraints = self.cfg.ui_user_additional_constraints
         self.llm = init_client(
             self.bot_llm_name,
             stop=["[END]"],
+            **kwargs,
         )
 
         self.context.workflow.pdl.add_tool(tool_response)  # NOTE: add "response_to_user" as a special tool!
@@ -106,36 +107,6 @@ class UISingleBot(ReactBot):
             role="bot",
         )
         return prediction
-
-    # def _parse_react_output(self) -> BotOutput:
-    #     """Parse output with full `Tought, Action, Action Input, Response`."""
-    #     llm_response = "".join(c.content or "" for c in self.last_llm_chat_completions)
-    #     self.last_llm_response = llm_response
-    #     if "```" in llm_response:
-    #         llm_response = Formater.parse_codeblock(llm_response, type="").strip()
-    #     pattern = r"(Thought|Action|Action Input|Response):\s*(.*?)\s*(?=Thought:|Action:|Action Input:|Response:|\Z)"
-    #     matches = re.finditer(pattern, llm_response, re.DOTALL)
-    #     result = {match.group(1): match.group(2).strip() for match in matches}
-
-    #     # validate result
-    #     try:
-    #         thought = result.get("Thought", "")
-    #         action = action_input = None
-    #         if "Action" in result:  # Action
-    #             action = result["Action"]
-    #             if action:
-    #                 if action.startswith("API_"):
-    #                     action = action[4:]
-    #                 action_input = json.loads(result["Action Input"])  # eval: NameError: name 'null' is not defined
-    #         response = result.get("Response", "")
-    #         return BotOutput(
-    #             action=action,
-    #             action_input=action_input,
-    #             response=response,
-    #             thought=thought,
-    #         )
-    #     except Exception as e:
-    #         raise RuntimeError(f"Parse error: {e}\n[LLM output] {llm_response}\n[Result] {result}")
 
     def _parse_react_output(self) -> BotOutput:
         """Parse output with full `Tought, Action, Action Input`."""
