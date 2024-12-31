@@ -50,16 +50,16 @@ ANSWERs:
       desc: 抱歉，未查询到您账户下有订单，现在为您转接人工服务，请稍等
 Procedure: |-
     [用户id] = ANSWER.请用户提供必要信息()
-    [[data]] = API.查询账户中是否有订单([用户id])
-    [[order_number]] = API.代码1([data])
+    [data] = API.查询账户中是否有订单([用户id])
+    [order_number] = API.代码1([data])
     if order_number > "0":
         [订单id] = ANSWER.请用户提供必要信息()
             if 订单id is not None:
-                [[data]] = API.判断是否已提交取消申请的SR工单([订单id,用户id])
-                    [[submit_status]] = API.代码4([data])
+                [data] = API.判断是否已提交取消申请的SR工单([订单id,用户id])
+                    [submit_status] = API.代码4([data])
                         if submit_status == "是":
-                            [[data]] = API.识别SR单进度([订单id])
-                                [[sr_status]] = API.代码2([data])
+                            [data] = API.识别SR单进度([订单id])
+                                [sr_status] = API.代码2([data])
                                     if sr_status == "已通过":
                                         ANSWER.已通过()
                                     elif sr_status == "未通过":
@@ -69,8 +69,8 @@ Procedure: |-
                                     else:
                                         ANSWER.兜底回复5()
                         else:
-                            [[data]] = API.查询订单状态([订单id])
-                                [[order_status]] = API.代码3([data])
+                            [data] = API.查询订单状态([订单id])
+                                [order_status] = API.代码3([data])
                                     if data == "未支付":
                                         ANSWER.未支付()
                                     elif data == "已确认-可免费取消":
