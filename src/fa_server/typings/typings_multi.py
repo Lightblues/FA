@@ -5,10 +5,9 @@ from pydantic import BaseModel
 from fa_core.common import Config
 from fa_core.data import (
     APIOutput,
+    BotOutput,
     Conversation,
-    MainBotOutput,
     Message,
-    WorkflowBotOutput,
 )
 
 from .typings_base import BaseResponse
@@ -36,7 +35,7 @@ class MultiToolWorkflowResponse(BaseResponse):
 
 
 class MultiBotWorkflowPredictResponse(BaseResponse):
-    bot_output: WorkflowBotOutput
+    bot_output: BotOutput
     msg: Message
 
 
@@ -46,5 +45,5 @@ class MultiToolMainResponse(BaseResponse):
 
 
 class MultiBotMainPredictResponse(BaseResponse):
-    bot_output: MainBotOutput
+    bot_output: BotOutput
     msg: Message

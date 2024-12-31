@@ -50,37 +50,37 @@ ANSWERs:
   - name: 请用户提供必要信息
 
 Procedure: |
-  hos_name = ANSWER_请用户提供必要信息()
-  [type] = API_check_hospital_exist([hos_name])
+  hos_name = ANSWER.请用户提供必要信息()
+  [type] = API.check_hospital_exist([hos_name])
   if type == "0"
-      ANSWER_医院不存在()
-  keshi_name = ANSWER_请用户提供必要信息()
-  [type] = API_check_department_exist([keshi_name, hos_name])
+      ANSWER.医院不存在()
+  keshi_name = ANSWER.请用户提供必要信息()
+  [type] = API.check_department_exist([keshi_name, hos_name])
   if type == "0":
       [num] = get_hospital_by_department([keshi_name])
       if num == 0:
-          ANSWER_无对应科室医院回复()
+          ANSWER.无对应科室医院回复()
       else:
-          其他医院挂号意愿 = ANSWER_请用户提供必要信息()
+          其他医院挂号意愿 = ANSWER.请用户提供必要信息()
           if 其他医院挂号意愿 == False:
-              ANSWER_拒绝其他医院科室回复()
-  time = ANSWER_请用户提供必要信息()
-  [num, haolist, zhuan_num, pu_num] = API_get_appointment_info([hos_name, keshi_name, time])
+              ANSWER.拒绝其他医院科室回复()
+  time = ANSWER.请用户提供必要信息()
+  [num, haolist, zhuan_num, pu_num] = API.get_appointment_info([hos_name, keshi_name, time])
   if num == 0:
-      [data, num, data_num_type] = API_get_available_date([keshi_name, time])
+      [data, num, data_num_type] = API.get_available_date([keshi_name, time])
       if num > 0:
           其他日期挂号意愿 = 询问用户是否愿意在其他日期挂号
           if 其他日期挂号意愿 == False:
-              [num, hos_name, doc_num] = API_get_other_hospital([keshi_name, time])
+              [num, hos_name, doc_num] = API.get_other_hospital([keshi_name, time])
               if num == "0":
-                  ANSWER_无号回复()
+                  ANSWER.无号回复()
               else:
-                  其他医院挂号意愿 = ANSWER_请用户提供必要信息()
+                  其他医院挂号意愿 = ANSWER.请用户提供必要信息()
                   if 其他医院挂号意愿 == False:
-                      ANSWER_拒绝挂号回复()
-  num_type = ANSWER_请用户提供必要信息()
-  [type] = API_appointment([id_num, num_type, hos_name, keshi_name, time])
+                      ANSWER.拒绝挂号回复()
+  num_type = ANSWER.请用户提供必要信息()
+  [type] = API.appointment([id_num, num_type, hos_name, keshi_name, time])
   if type == "0":
-      ANSWER_本医院挂号失败()
+      ANSWER.本医院挂号失败()
   else:
-      ANSWER_本医院挂号成功()
+      ANSWER.本医院挂号成功()

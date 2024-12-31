@@ -44,7 +44,6 @@ from fa_core.data import (
     APIOutput,
     BotOutput,
     Conversation,
-    MainBotOutput,
     Message,
 )
 
@@ -108,7 +107,7 @@ def step_agent_workflow_prediction() -> BotOutput:
     step_name="step_agent_main_prediction",
     log_fn=ss.logger.bind(custom=True).error,
 )
-def step_agent_main_prediction() -> Union[MainBotOutput, Message]:
+def step_agent_main_prediction() -> Union[BotOutput, Message]:
     print(f">> conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
     client: FrontendClient = ss.client
     with st.expander(f"{ss['tool_emoji']['think']} Thinking...", expanded=True):
@@ -124,7 +123,7 @@ def step_api_process(bot_output: BotOutput) -> APIOutput:
     return res.api_output
 
 
-def step_tool(agent_main_output: MainBotOutput) -> str:
+def step_tool(agent_main_output: BotOutput) -> str:
     client: FrontendClient = ss.client
     # see @ian /cq8/ianxxu/chatchat/_TaskPlan/UI/v2.1/IanAGI.py
     tool_name, tool_args = agent_main_output.action, agent_main_output.action_input

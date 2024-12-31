@@ -11,6 +11,8 @@ x-available-models: &available_models
   - claude-3-5-sonnet-20241022
   - hunyuan-turbo
   - hunyuan-large
+  - agentWpack_241227
+  - agentWOpack_241227
 
 x-default-model: &default_model "default"
 

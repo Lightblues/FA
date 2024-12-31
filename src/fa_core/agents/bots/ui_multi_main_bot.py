@@ -2,25 +2,25 @@
 @241211
 - [x] #feat implement UIMultiMainBot
     modify from `ui_con/bot_multi_main.py`:
+@241230
+- [ ] tool_call mode for `UIMultiMainBot`
+    - [ ] modify configs: mui_agent_main_template_fn -> template_fn
+    - [ ] #tool wrap the `response_to_user` tool
+    - [ ] #tool add a tool to call the workflow
 """
 
-import re
-from typing import Dict, List
+from typing import Dict, List, Iterator
 
-from fa_core.common import (
-    Formater,
-    PromptUtils,
-    init_client,
-    jinja_render,
-)
-from fa_core.data import FADataManager, MainBotOutput
+from fa_core.common import init_client, jinja_render
+from fa_core.data import FADataManager, BotOutput
 from fa_core.tools import TOOL_SCHEMAS, TOOLS_MAP
+from fa_core.data.pdl.tool import ToolSpec, ToolDefinition
+from fa_core.agents.bots.bot_tools import tool_response
 
-from .base_bot import BaseBot
-from .re_utils import re_parse_react_output
+from .ui_single_bot import UISingleBot
 
 
-class UIMultiMainBot(BaseBot):
+class UIMultiMainBot(UISingleBot):
     """UIMultiMainBot
 
     self: llm
@@ -35,107 +35,93 @@ class UIMultiMainBot(BaseBot):
 
     names = ["UIMultiMainBot", "ui_multi_main_bot"]
 
-    tools: Dict[str, Dict] = {}
-    bot_main_workflow_infos: List[Dict] = []  # [{name, task_description, task_detailed_description}]
+    tool_status: Dict[str, Dict] = {}
+    tool_definitions: List[ToolDefinition] = []
+    bot_main_workflow_infos: List[Dict] = []  # [{name, task_description}]
 
     def _post_init(self) -> None:
         # logger.info(f"init UIMultiMainBot with workflow_infos: {workflow_infos}")
-        self.bot_template_fn = self.cfg.mui_agent_main_template_fn
-        self.bot_llm_name = self.cfg.mui_agent_main_llm_name
-        self.llm = init_client(self.bot_llm_name)
+        self.bot_template_fn = self.cfg.bot_template_fn or "bot_mui_main_agent.jinja"
+        self.bot_llm_name = self.cfg.bot_llm_name
+        self.llm = init_client(
+            self.bot_llm_name,
+            stop=["[END]"],
+            **self.cfg.bot_llm_kwargs,
+        )
         self._init_workflow_infos(self.cfg.mui_workflow_infos)
         self._init_tools(self.cfg.ui_tools)
 
-    def _init_workflow_infos(self, workflow_infos: List[Dict] = []):  # config.workflow_infos
-        # 1. set default workflow_infos
+    def _init_workflow_infos(self, workflow_infos: List[Dict] = []):
         if not workflow_infos:
-            workflow_infos = FADataManager(workflow_dataset=self.cfg.workflow_dataset).workflow_infos.values()
+            workflow_infos = FADataManager.get_workflow_infos(self.cfg.workflow_dataset).values()
             for w in workflow_infos:
                 w["is_activated"] = True
-        # if ss.cfg.mui_available_workflows:
-        #     workflow_names = [w['name'] for w in ss.workflow_infos]
-        #     assert all(w in workflow_names for w in ss.cfg.mui_available_workflows)
-        #     ss.workflow_infos = [w for w in ss.workflow_infos if w['name'] in ss.cfg.mui_available_workflows]
         self.bot_main_workflow_infos = workflow_infos
 
     def _init_tools(self, tools_list: List[Dict]):
-        tools = {}
+        # 1. "API" tools
+        self.tool_definitions = TOOL_SCHEMAS
         for t in tools_list:
             assert t["name"] in TOOLS_MAP, f"{t['name']} not in available tools {TOOLS_MAP.keys()}"
-            tools[t["name"]] = {
-                "is_enabled": t.get("is_enabled", True),
-            }
-        self.tools = tools
+            self.tool_status[t["name"]] = {"is_enabled": t.get("is_enabled", True)}
+        # 2. "response_to_user" tool
+        self.tool_status["response_to_user"] = {"is_enabled": True}
+        self.tool_definitions.append(tool_response)
+        # 3. "call_workflow" tool
+        workflows = [w for w in self.bot_main_workflow_infos if w["is_activated"]]
+        for w in workflows:
+            _tool_name = f"workflow_{w['name']}"
+            tool_definition = ToolDefinition(
+                type="function",
+                function={
+                    "name": _tool_name,
+                    "description": w["task_description"],
+                    "parameters": {},
+                },
+            )
+            self.tool_definitions.append(tool_definition)
+            self.tool_status[_tool_name] = {"is_enabled": True}
 
     def _gen_prompt(self) -> str:
-        state_infos = {
-            "Current time": PromptUtils.get_formated_time(),
-        }
+        # 1. workflows
         workflows = [w for w in self.bot_main_workflow_infos if w["is_activated"]]
-        _shown_keys = ["name", "task_description"]  # remove "task_detailed_description"
-        workflows = [{k: v for k, v in w.items() if k in _shown_keys} for w in workflows]
-        enabled_tools = [k for k, v in self.tools.items() if v["is_enabled"]]
-        tools_info = [s for s in TOOL_SCHEMAS if s["function"]["name"] in enabled_tools]
+        workflows = [{k: v for k, v in w.items() if k in ["name", "task_description"]} for w in workflows]
+        # 2. tools
+        enabled_tools = [k for k, v in self.tool_status.items() if v["is_enabled"]]
+        tools_info = [s.model_dump() for s in self.tool_definitions if s.function.name in enabled_tools]
+        # 3. state
+        state_infos = self.context.status_for_prompt
         prompt = jinja_render(
             self.bot_template_fn,
             workflows=workflows,
             tools_info=tools_info,
             conversation=self.context.conv.to_str(),
-            current_state="\n".join(f"{k}: {v}" for k, v in state_infos.items()),
+            current_state=state_infos.to_str(),
         )
         return prompt
 
-    @staticmethod
-    def _parse_react_output(s: str) -> MainBotOutput:
-        """Parse output with full `Tought, Workflow, Response`."""
-        if "```" in s:
-            s = Formater.parse_codeblock(s, type="").strip()
-        # pattern = r"(Thought|Workflow|Response):\s*(.*?)\s*(?=Thought:|Workflow:|Response:|\Z)"
-        pattern = r"(Thought|Workflow|Action|Action Input|Response):\s*(.*?)\s*(?=Thought:|Workflow:|Action:|Action Input:|Response:|\Z)"
-        matches = re.finditer(pattern, s, re.DOTALL)
-        result = {match.group(1): match.group(2).strip() for match in matches}
-        # print(f"> result: {result}")
+    def process_stream(self) -> Iterator[str]:
+        # reuse the stream from UISingleBot, only change the prompt
+        return super().process_stream()
 
-        # validate result
-        try:
-            thought = result.get("Thought", "")
-            workflow = result.get("Workflow", "")
-            response = result.get("Response", "")
-            if ("Action" in result) and result["Action"]:
-                action = result["Action"]
-                if action.startswith("API_"):
-                    action = action[4:]
-                action_input = Formater.parse_json_or_eval(result["Action Input"])
+    def process_LLM_response(self) -> BotOutput:
+        prediction = self._parse_react_output()
+
+        # TODO: tune the message content
+        if prediction.action:
+            if prediction.action.startswith("workflow_"):
+                msg_content = f"<Call workflow> {prediction.action.split('_', 1)[1]}"
             else:
-                action, action_input = "", {}
-            # return MainBotOutput(workflow=workflow, response=response, thought=thought)
-            return MainBotOutput(
-                workflow=workflow,
-                response=response,
-                thought=thought,
-                action=action,
-                action_input=action_input,
-            )
-        except Exception as e:
-            raise RuntimeError(f"Parse error: {e}\n[LLM output] {s}\n[Result] {result}")
-
-    def process_LLM_response(self, prompt: str, llm_response: str) -> MainBotOutput:
-        prediction = self._parse_react_output(llm_response)
-
-        if prediction.workflow:
-            msg_content = f"<Call workflow> {prediction.workflow}"
-        else:
-            if prediction.action:
                 msg_content = f"<Call Tool> {prediction.action}({prediction.action_input})"
-            elif prediction.response:
-                msg_content = prediction.response
-            else:
-                raise NotImplementedError
+        elif prediction.response:
+            msg_content = prediction.response
+        else:
+            raise RuntimeError("response is empty")
         self.context.conv.add_message(
             msg_content,
             llm_name=self.bot_llm_name,
-            llm_prompt=prompt,
-            llm_response=llm_response,
+            llm_prompt=self.last_llm_prompt,  # generated in process_stream
+            llm_response=self.last_llm_response,  # generated in _parse_react_output
             role="bot_main",
         )
         return prediction

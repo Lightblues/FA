@@ -1,10 +1,13 @@
 import inspect
 from typing import Any, Callable, Dict
 
+from fa_core.data.pdl.tool import ToolSpec, ToolDefinition
+
 
 def function_to_schema(func: Callable[..., Any]) -> Dict[str, Any]:
     """
     Convert a function to an API schema.
+    from https://github.com/openai/swarm/blob/main/swarm/util.py#L31
 
     The output schema is a JSON-compatible dictionary with the following structure:
 
@@ -68,3 +71,8 @@ def function_to_schema(func: Callable[..., Any]) -> Dict[str, Any]:
             },
         },
     }
+
+
+def function_to_tool_definition(func: Callable[..., Any]) -> ToolDefinition:
+    schema = function_to_schema(func)
+    return ToolDefinition(**schema)

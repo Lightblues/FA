@@ -21,9 +21,6 @@ from fa_core.data import BotOutput, Conversation, FAWorkflow
 from ..common.shared import get_db
 
 
-db = get_db()
-
-
 class MultiSessionContext(BaseModel):
     # Add this configuration to allow arbitrary types
     model_config = {"arbitrary_types_allowed": True}
@@ -34,6 +31,7 @@ class MultiSessionContext(BaseModel):
 
     cfg: Config
     conv: Conversation
+    context: Context
     curr_status: str = "main"
     # workflow: Workflow
     agent_main: UIMultiMainBot
@@ -63,21 +61,23 @@ class MultiSessionContext(BaseModel):
         Returns:
             SessionContext: session context
         """
-        data_handler = FAWorkflow.from_config(cfg)
+        workflow = FAWorkflow.from_config(cfg)
         conv = Conversation.create(session_id)
         conv.add_message(msg=cfg.mui_greeting_msg, role="bot_main")
-        _context = Context(cfg=cfg, workflow=data_handler, conv=conv)
-        agent_main = UIMultiMainBot(cfg=cfg, context=_context)
-        tool = RequestTool(cfg=cfg, context=_context)
+        context = Context(cfg=cfg, workflow=workflow, conv=conv)
+        agent_main = UIMultiMainBot(cfg=cfg, context=context)
+        tool = RequestTool(cfg=cfg, context=context)
         return cls(
             session_id=session_id,
             cfg=cfg,
             conv=conv,
+            context=context,
             agent_main=agent_main,
             tool=tool,
         )
 
     def init_workflow_agent(self, workflow_name: str):
+        # 1. check if the workflow_name already exists
         if workflow_name in self._workflow_agent_map:
             assert all(
                 workflow_name in m
@@ -86,7 +86,7 @@ class MultiSessionContext(BaseModel):
                     self._workflow_tool_map,
                     self._workflow_controllers_map,
                 )
-            ), "workflow_name already exists"
+            ), f"workflow_name {workflow_name} already exists"
             return
         else:
             assert not any(
@@ -96,14 +96,23 @@ class MultiSessionContext(BaseModel):
                     self._workflow_tool_map,
                     self._workflow_controllers_map,
                 )
-            ), "workflow_name already exists"
-            workflow = FAWorkflow(workflow_dataset=self.cfg.workflow_dataset, workflow_id=workflow_name)
-            self._workflow_agent_map[workflow_name] = UIMultiWorkflowBot(cfg=self.cfg, conv=self.conv, workflow=workflow)
-            self._workflow_tool_map[workflow_name] = RequestTool(cfg=self.cfg, conv=self.conv, data_handler=workflow)
-            self._workflow_controllers_map[workflow_name] = {}
-            for c in self.cfg.bot_pdl_controllers:
-                if c["is_activated"]:
-                    self._workflow_controllers_map[workflow_name][c["name"]] = CONTROLLER_NAME2CLASS[c["name"]](self.conv, workflow.pdl, c["config"])
+            ), f"workflow_name {workflow_name}'s tool/agent/controller already exists"
+
+        # 2. renew the cfg & context
+        cfg_workflow = self.cfg.copy()
+        cfg_workflow.workflow_id = workflow_name
+        workflow = FAWorkflow(workflow_dataset=cfg_workflow.workflow_dataset, workflow_id=workflow_name)
+        context_workflow = Context(cfg=cfg_workflow, workflow=workflow, conv=self.conv)
+
+        # 3. init the workflow agent, tool, controllers
+        self._workflow_agent_map[workflow_name] = UIMultiWorkflowBot(cfg=cfg_workflow, context=context_workflow)
+        self._workflow_tool_map[workflow_name] = RequestTool(cfg=cfg_workflow, context=context_workflow)
+        self._workflow_controllers_map[workflow_name] = {}
+        for c in cfg_workflow.bot_pdl_controllers:
+            if c["is_activated"]:
+                self._workflow_controllers_map[workflow_name][c["name"]] = CONTROLLER_NAME2CLASS[c["name"]](
+                    context=context_workflow, config=c["config"]
+                )
 
     @property
     def workflow_agent(self) -> UIMultiWorkflowBot:
@@ -121,8 +130,8 @@ class MultiSessionContext(BaseModel):
 MULTI_SESSION_CONTEXT_MAP = {}
 
 
-def create_session_context(session_id: str, cfg: Config) -> MultiSessionContext:
-    assert session_id not in MULTI_SESSION_CONTEXT_MAP, "session_id already exists"
+def create_session_context_multi(session_id: str, cfg: Config) -> MultiSessionContext:
+    assert session_id not in MULTI_SESSION_CONTEXT_MAP, f"session_id {session_id} already exists"
     session_context = MultiSessionContext.from_config(session_id, cfg)
     MULTI_SESSION_CONTEXT_MAP[session_id] = session_context
     return session_context
@@ -130,7 +139,7 @@ def create_session_context(session_id: str, cfg: Config) -> MultiSessionContext:
 
 def get_session_context_multi(session_id: str) -> Union[MultiSessionContext, None]:
     if session_id not in MULTI_SESSION_CONTEXT_MAP:
-        return None
+        raise ValueError(f"session_id {session_id} not found! Existing session_ids: {list(MULTI_SESSION_CONTEXT_MAP.keys())}")
     return MULTI_SESSION_CONTEXT_MAP[session_id]
 
 
@@ -151,7 +160,8 @@ def db_upsert_session_multi(ss: MultiSessionContext):
     # only save conversation when user has queried
     if (not ss) or (len(ss.conv) <= 1):
         return
-    logger.info(f"[db_upsert_session] {ss.session_id}")
+    db = get_db()
+    logger.info(f"[db_upsert_session] {ss.session_id} into {db}")
     _session_info = {
         # model_llm_name, template, etc
         "session_id": ss.session_id,

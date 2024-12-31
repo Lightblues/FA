@@ -19,9 +19,9 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from loguru import logger
 
-from fa_core.common import log_exceptions
+from fa_core.common import log_exceptions, json_line
 from fa_core.data import Message
-
+from fa_server.common import logger_util
 from fa_server.typings import (
     BotOutput,
     MultiBotMainPredictResponse,
@@ -34,29 +34,27 @@ from fa_server.typings import (
 from .session_context_multi import (
     MultiSessionContext,
     clear_session_context_multi,
-    create_session_context,
+    create_session_context_multi,
     db_upsert_session_multi,
     get_session_context_multi,
 )
 
 
 def generate_response_main(session_context: MultiSessionContext) -> Iterator[str]:
-    logger.info(f">> [generate_response_main] with conversation: {json.dumps(str(session_context.conv), ensure_ascii=False)}")
+    logger.info(f">> [generate_response_main] with conversation: {json_line(str(session_context.conv))}")
 
-    prompt, stream = session_context.agent_main.process_stream()
-    llm_response = []
+    stream = session_context.agent_main.process_stream()
     for chunk in stream:
-        llm_response.append(chunk)
         chunk_output = {
             "is_finish": False,
             "conversation_id": session_context.session_id,
             "chunk": chunk,
         }
-        yield f"data: {json.dumps(chunk_output, ensure_ascii=False)}\n\n"
-    llm_response = "".join(llm_response)
-    bot_output = session_context.agent_main.process_LLM_response(prompt, llm_response)
-    _debug_msg = f"\n{f'({session_context.session_id}) [BOT_MAIN] ({session_context.agent_main.llm.model_name})'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
-    logger.bind(custom=True).debug(_debug_msg)
+        yield f"data: {json_line(chunk_output)}\n\n"
+    bot_output = session_context.agent_main.process_LLM_response()
+    logger_util.debug_section(f"({session_context.session_id}) [BOT_MAIN] ({session_context.agent_main.llm.model_name})")
+    logger_util.debug_section_content(session_context.agent_main.last_llm_prompt, subtitle="llm prompt")
+    logger_util.debug_section_content(session_context.agent_main.last_llm_response, subtitle="llm response")
     session_context.last_bot_output = bot_output
     # NOTE: if switched to a workflow, set curr_status & init the workflow agent!
     if bot_output.workflow:
@@ -79,20 +77,20 @@ def generate_response_workflow(session_context: MultiSessionContext) -> Iterator
     logger.info(f">> [generate_response_workflow] with conversation: {json.dumps(str(session_context.conv), ensure_ascii=False)}")
     _pre_control(session_context)
 
-    prompt, stream = session_context.workflow_agent.process_stream()
-    llm_response = []
+    stream = session_context.workflow_agent.process_stream()
     for chunk in stream:
-        llm_response.append(chunk)
         chunk_output = {
             "is_finish": False,
             "conversation_id": session_context.session_id,
             "chunk": chunk,
         }
-        yield f"data: {json.dumps(chunk_output, ensure_ascii=False)}\n\n"
-    llm_response = "".join(llm_response)
-    bot_output = session_context.workflow_agent.process_LLM_response(prompt, llm_response)
-    _debug_msg = f"\n{f'({session_context.session_id}) [BOT_{session_context.workflow_agent.workflow.name}] ({session_context.workflow_agent.llm.model_name})'.center(50, '=')}\n<<lllm prompt>>\n{prompt}\n\n<<llm response>>\n{llm_response}\n"
-    logger.bind(custom=True).debug(_debug_msg)
+        yield f"data: {json_line(chunk_output)}\n\n"
+    bot_output = session_context.workflow_agent.process_LLM_response()
+    logger_util.debug_section(
+        f"({session_context.session_id}) [BOT_{session_context.workflow_agent.context.workflow.name}] ({session_context.workflow_agent.llm.model_name})"
+    )
+    logger_util.debug_section_content(session_context.workflow_agent.last_llm_prompt, subtitle="llm prompt")
+    logger_util.debug_section_content(session_context.workflow_agent.last_llm_response, subtitle="llm response")
     session_context.last_bot_output = bot_output
     # NOTE: set curr_status if switched
     if bot_output.workflow:  # TODO: switch to another workflow? #feat
@@ -115,7 +113,7 @@ async def multi_register(conversation_id: str, request: MultiRegisterRequest) ->
         MultiRegisterResponse: with conversation
     """
     logger.info(f"[multi_register] {conversation_id}")
-    session_context = create_session_context(conversation_id, cfg=request.config)
+    session_context = create_session_context_multi(conversation_id, cfg=request.config)
     session_context.user_identity = request.user_identity
     return MultiRegisterResponse(
         conversation_id=conversation_id,

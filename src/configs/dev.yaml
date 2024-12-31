@@ -37,7 +37,6 @@ ui_available_templates:
   - bot_pdl_ui_zh.jinja
   # - bot_pdl_ui_zh_fc.jinja
 ui_default_model: "test-eason"          # default model for dev
-
 ui_greeting_msg: "你好，我是{name}机器人，有什么可以帮您?"
 
 api_entity_linking: false               # entity linking! FIXME: entity linker message not in log! (mismatch with client)

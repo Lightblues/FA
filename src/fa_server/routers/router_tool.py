@@ -16,7 +16,7 @@ from loguru import logger
 from fa_core.common import log_exceptions
 from fa_core.tools import execute_tool_call
 
-from ..typings import MainBotOutput, MultiToolMainResponse
+from ..typings import MultiToolMainResponse, BotOutput
 from .session_context_multi import get_session_context_multi
 
 
@@ -25,7 +25,7 @@ router_tool = APIRouter()
 
 @router_tool.post("/multi_tool_main/{conversation_id}")
 @log_exceptions()
-def multi_tool_main(conversation_id: str, bot_output: MainBotOutput) -> MultiToolMainResponse:
+def multi_tool_main(conversation_id: str, bot_output: BotOutput) -> MultiToolMainResponse:
     logger.info(f"[multi_tool_main] {conversation_id} with bot_output: {bot_output}")
     try:
         session_context = get_session_context_multi(conversation_id)
@@ -41,7 +41,7 @@ def multi_tool_main(conversation_id: str, bot_output: MainBotOutput) -> MultiToo
 
 @router_tool.post("/multi_tool_main_stream/{conversation_id}")
 @log_exceptions()
-def multi_tool_main_stream(conversation_id: str, bot_output: MainBotOutput) -> StreamingResponse:
+def multi_tool_main_stream(conversation_id: str, bot_output: BotOutput) -> StreamingResponse:
     """Streaming response for the tool main
 
     NOTE:

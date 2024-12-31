@@ -1,7 +1,7 @@
 """
 Usage::
 
-    python -m fa_eval.cli.chat_cli --cfg cli.yaml --backend_url="http://localhost:8101"
+    python -m fa_eval.cli.chat_cli_single --cfg cli.yaml --backend_url="http://localhost:8101"
 
 @241230
 - [x] use `init_loguru_logger` to setup logger
@@ -18,7 +18,7 @@ from fa_core.data import BotOutput, Conversation, FADataManager
 init_loguru_logger(log_dir=FADataManager.DIR_log / "cli", stdout_level="WARNING")  # NOTE: set stdout_level to WARNING to avoid verbose logs
 
 
-class ChatCLI(object):
+class ChatCLISingle(object):
     def __init__(self, cfg: Config, verbose: bool = False) -> Conversation:
         self.cfg = cfg
         self.client = FrontendClient(backend_url=self.cfg.backend_url)
@@ -130,5 +130,5 @@ if __name__ == "__main__":
     if args.ui_greeting_msg:
         cfg.ui_greeting_msg = args.ui_greeting_msg
 
-    cli = ChatCLI(cfg, args.verbose)
+    cli = ChatCLISingle(cfg, args.verbose)
     cli.run()

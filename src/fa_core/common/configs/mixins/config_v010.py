@@ -8,7 +8,7 @@ class V010Mixin(BaseModel):
 
     workflow_dataset: str = "v241127"
     workflow_type: str = "pdl"  # text, code, flowchart
-    workflow_id: str = "000"
+    workflow_id: str = "000"  # id or name!
     exp_version: str = "default"
     exp_id: str = "default"
     # exp_mode: str = "session"  # not used yet

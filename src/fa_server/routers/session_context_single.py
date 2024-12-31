@@ -19,9 +19,6 @@ from fa_core.agents import BOT_NAME2CLASS, CONTROLLER_NAME2CLASS, BaseController
 from ..common.shared import get_db
 
 
-db = get_db()
-
-
 class SingleSessionContext(BaseModel):
     # Add this configuration to allow arbitrary types
     model_config = {"arbitrary_types_allowed": True}
@@ -62,7 +59,6 @@ class SingleSessionContext(BaseModel):
         conv = Conversation.create(session_id)
         conv.add_message(msg=cfg.ui_greeting_msg.format(name=workflow.pdl.Name), role=Role.BOT)
         _context = Context(cfg=cfg, workflow=workflow, conv=conv)
-        # TODO: check the config `bot_llm_name`
         bot = BOT_NAME2CLASS[cfg.ui_bot_mode](cfg=cfg, context=_context)
         tool = RequestTool(cfg=cfg, context=_context)
         controllers = {}
@@ -115,6 +111,7 @@ def db_upsert_session_single(ss: SingleSessionContext):
     # only save conversation when user has queried
     if (not ss) or (len(ss.conv) <= 1):
         return
+    db = get_db()
     logger.info(f"[db_upsert_session] {ss.session_id} into {db}")
     _session_info = {
         # model_llm_name, template, tools, etc

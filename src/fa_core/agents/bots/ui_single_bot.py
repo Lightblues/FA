@@ -34,8 +34,9 @@ class UISingleBot(BaseBot):
     """
     Usage::
 
-        bot = UISingleBot(cfg=cfg, conv=conv, workflow=workflow)
-        prompt, stream = bot.process_stream()
+        context = Context(cfg=cfg, workflow=workflow, conv=conv)
+        bot = UISingleBot(cfg=cfg, context=context)
+        stream = bot.process_stream()
         llm_response = _process_stream(stream)
         bot_output = bot.process_LLM_response(prompt, llm_response)
 
@@ -52,30 +53,30 @@ class UISingleBot(BaseBot):
     last_llm_response: str = ""  # the llm response (with tool calls) for logging
 
     def _post_init(self) -> None:
-        self.bot_template_fn = self.cfg.bot_template_fn
+        # 1. init the LLM client
+        self.bot_template_fn = self.cfg.bot_template_fn or "bot_pdl_ui_zh.jinja"
         self.bot_llm_name = self.cfg.bot_llm_name
         self.llm = init_client(
             self.bot_llm_name,
             stop=["[END]"],
             **self.cfg.bot_llm_kwargs,
         )
+        # 2. add the special tool "response_to_user"
+        self.context.workflow.pdl.add_tool(tool_response)
 
-        self.context.workflow.pdl.add_tool(tool_response)  # NOTE: add "response_to_user" as a special tool!
-
-        # add user's additional constraints from UI
+        # 3. add user's additional constraints from UI
         if self.cfg.ui_user_additional_constraints:
             self.context.status_for_prompt.user_additional_constraints = self.cfg.ui_user_additional_constraints
 
     def _gen_prompt(self) -> str:
-        # - [x]: format apis
-        data_handler = self.context.workflow
+        workflow = self.context.workflow
         state_infos = self.context.status_for_prompt  # add the status infos from PDL!
-        _tool_infos = [tool.model_dump() for tool in data_handler.pdl.tools]
+        _tool_infos = [tool.model_dump() for tool in workflow.pdl.tools]
         # _pdl_info = data_handler.pdl.to_str()
-        _pdl_info = data_handler.pdl.to_json()  # NOTE: convert to json instead of str!!
+        _pdl_info = workflow.pdl.to_json()  # NOTE: convert to json instead of str!!
         prompt = jinja_render(
             self.bot_template_fn,
-            workflow_name=data_handler.pdl.Name,
+            workflow_name=workflow.pdl.Name,
             PDL=_pdl_info,
             api_infos=_tool_infos,
             conversation=self.context.conv.to_str(),

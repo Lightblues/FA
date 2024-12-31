@@ -30,6 +30,13 @@ class BotOutput(BaseModel):
     action_input: Optional[Dict] = None  # api paras. deprecated: Union[str, Dict]
     response: Optional[str] = None
 
+    @property
+    def workflow(self) -> str:
+        """Get the target workflow name (if switched)"""
+        if self.action and self.action.startswith("workflow_"):
+            return self.action.split("_")[1]
+        return None
+
 
 class APIOutput(BaseModel):
     name: Optional[str] = None
@@ -38,17 +45,17 @@ class APIOutput(BaseModel):
     response_data: Optional[Union[str, Dict]] = None
 
 
-class MainBotOutput(BaseModel):
-    thought: Optional[str] = None
-    workflow: Optional[str] = None  # workflow name
-    response: Optional[str] = None
-    action: Optional[str] = None
-    action_input: Optional[Dict] = None
+# class MainBotOutput(BaseModel):
+#     thought: Optional[str] = None
+#     workflow: Optional[str] = None  # workflow name
+#     response: Optional[str] = None
+#     action: Optional[str] = None
+#     action_input: Optional[Dict] = None
 
 
-class WorkflowBotOutput(BaseModel):
-    thought: Optional[str] = None
-    workflow: Optional[str] = None  # workflow name
-    response: Optional[str] = None
-    action: Optional[str] = None  # api name
-    action_input: Optional[Dict] = None  # api paras. deprecated: Union[str, Dict]
+# class WorkflowBotOutput(BaseModel):
+#     thought: Optional[str] = None
+#     workflow: Optional[str] = None  # workflow name
+#     response: Optional[str] = None
+#     action: Optional[str] = None  # api name
+#     action_input: Optional[Dict] = None  # api paras. deprecated: Union[str, Dict]
