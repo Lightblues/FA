@@ -3,6 +3,10 @@ Usage::
 
     python -m fa_eval.cli.chat_cli_single --cfg cli.yaml --backend_url="http://localhost:8101"
 
+@241209
+- [x] test UI backend logic with CLI.
+@241210
+- [x] standardize the conversation logic (with FrontendClient)
 @241230
 - [x] use `init_loguru_logger` to setup logger
 

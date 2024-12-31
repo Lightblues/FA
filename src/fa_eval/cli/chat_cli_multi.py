@@ -3,6 +3,10 @@ Usage::
 
     python -m fa_eval.cli.chat_cli_multi --cfg cli_multi.yaml --backend_url="http://localhost:8101"
 
+@241209
+- [x] test UI backend logic with CLI.
+@241210
+- [x] standardize the conversation logic (with FrontendClient)
 @241230
 - [x] #feat Finish `ChatCLIMulti` -> then `page_multi.py`
 """
