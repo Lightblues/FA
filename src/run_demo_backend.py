@@ -14,7 +14,7 @@ from fa_core.common import Config
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, default="ui_deploy.yaml")
+    parser.add_argument("--config", type=str, default="default.yaml")
     parser.add_argument("--host", type=str, default=None)
     parser.add_argument("--port", type=int, default=None)
     parser.add_argument("--reload", action="store_true")
