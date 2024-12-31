@@ -65,11 +65,9 @@ def refresh_session_multi():
     """
     # 1. collect the selected config
     cfg: Config = ss.cfg
-    cfg.mui_agent_main_llm_name = ss.selected_mui_agent_main_llm_name
-    cfg.mui_agent_main_template_fn = f"{ss.selected_mui_agent_main_template_fn}"
 
-    cfg.bot_template_fn = f"{ss.selected_mui_workflow_main_template_fn}"
-    cfg.bot_llm_name = ss.selected_mui_agent_workflow_llm_name
+    cfg.bot_template_fn = ss.selected_mui_agent_main_template_fn
+    cfg.bot_llm_name = ss.selected_mui_agent_main_llm_name
 
     cfg.workflow_dataset = ss.selected_workflow_dataset
 

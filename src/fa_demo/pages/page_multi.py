@@ -24,6 +24,8 @@ cases: https://doc.weixin.qq.com/sheet/e3_AcMATAZtAPIaxl2WshdR0KQkIBZdF?scode=AJ
 @241211
 - [x] #structure refactor from `ui_conv`
 - [x] testing (debug): inspect prompt and output -> `page_inspect.py`
+@241231
+- [x] #feat update page_multi.py
 
 todos
 - [ ] #bug, repeatly SWITCH workflow
@@ -39,12 +41,12 @@ import json
 from typing import Union
 
 from fa_server import FrontendClient
-from fa_core.common import retry_wrapper
+from fa_server.typings import MultiBotWorkflowPredictResponse, MultiBotMainPredictResponse
+from fa_core.common import retry_wrapper, json_line
 from fa_core.data import (
     APIOutput,
     BotOutput,
     Conversation,
-    Message,
 )
 
 from ..common import StreamlitUtils, fake_stream
@@ -62,7 +64,7 @@ def insert_disconnect_js():
         f"""
         <script>
             window.onbeforeunload = function() {{
-                fetch('{ss.client.url}/multi_disconnect/{ss.session_id}', {{
+                fetch('{ss.client.backend_url}/multi_disconnect/{ss.session_id}', {{
                     method: 'POST'
                 }});
             }};
@@ -107,13 +109,13 @@ def step_agent_workflow_prediction() -> BotOutput:
     step_name="step_agent_main_prediction",
     log_fn=ss.logger.bind(custom=True).error,
 )
-def step_agent_main_prediction() -> Union[BotOutput, Message]:
-    print(f">> conversation: {json.dumps(str(ss.conv), ensure_ascii=False)}")
+def step_agent_main_prediction() -> MultiBotMainPredictResponse:
+    print(f">> conversation: {json_line(str(ss.conv))}")
     client: FrontendClient = ss.client
     with st.expander(f"{ss['tool_emoji']['think']} Thinking...", expanded=True):
         _ = st.write_stream(client.multi_bot_main_predict(ss.session_id))
     res = client.multi_bot_main_predict_output(ss.session_id)
-    return res.bot_output, res.msg
+    return res
 
 
 def step_api_process(bot_output: BotOutput) -> APIOutput:
@@ -143,7 +145,7 @@ def step_tool(agent_main_output: BotOutput) -> str:
         with st.expander(expander_msg, expanded=True):
             _ = st.write_stream(client.multi_tool_main_stream(ss.session_id, agent_main_output))
         res = client.multi_tool_main_output(ss.session_id)
-        return res.tool_output
+        return res
 
 
 def case_workflow():
@@ -181,21 +183,21 @@ def case_workflow():
 def case_main():
     with st.container():
         for num_bot_actions in range(ss.cfg.bot_action_limit):
-            bot_output, msg = step_agent_main_prediction()
-            if bot_output.workflow:
+            res = step_agent_main_prediction()
+            if res.bot_output.workflow:
                 st_utils.show_switch_workflow(ss.conv.get_last_message())
                 break
             else:
-                if bot_output.action:
-                    _ = step_tool(bot_output)
-                elif bot_output.response:
+                if res.bot_output.action:
+                    _ = step_tool(res.bot_output)
+                elif res.bot_output.response:
                     break
                 else:
                     raise NotImplementedError
         else:
             ss.logger.warning(f"<case_main> bot actions exceed the limit: {ss.cfg.bot_action_limit}")
             pass  # TODO:
-    if bot_output.workflow:
+    if res.bot_output.workflow:
         case_workflow()
 
 

@@ -1,6 +1,7 @@
 from typing import Dict, Iterator
 
 import requests
+from loguru import logger
 
 from fa_core.common import Config
 from fa_core.data import BotOutput, Conversation, Role
@@ -56,7 +57,7 @@ class MultiAgentMixin(BaseClient):
         if response.status_code == 200:
             return response.json()
         else:
-            raise NotImplementedError
+            logger.error(f"Error: {response.text}")
 
     def multi_user_input(self, conversation_id: str, query: str):
         """Add a user message to the conversation

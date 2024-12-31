@@ -6,7 +6,7 @@ from fa_core.data.pdl.tool import ToolDefinition
 from .schema import function_to_schema, function_to_tool_definition
 
 
-TOOL_SCHEMAS: List[ToolDefinition] = []  # use ToolDefinition instead of schema
+TOOL_SCHEMAS: Dict[str, ToolDefinition] = {}  # use ToolDefinition instead of schema
 TOOLS_MAP: Dict[str, Callable[..., Any]] = {}
 
 
@@ -25,7 +25,7 @@ def register_tool():
         # generate schema
         schema = function_to_tool_definition(func)
         # register to global
-        TOOL_SCHEMAS.append(schema)
+        TOOL_SCHEMAS[func.__name__] = schema
         TOOLS_MAP[func.__name__] = func
 
         @wraps(func)

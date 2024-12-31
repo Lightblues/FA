@@ -14,10 +14,12 @@ Display logic:
 @241227
 - [x] refactor!
 - [x] add PDL to the sidebar
+@241231
+- [x] #fix add `len(ss.latest_sessionids) == 0` check to avoid error!
 """
 
 from typing import List
-
+from loguru import logger
 import streamlit as st
 import pandas as pd
 
@@ -29,7 +31,6 @@ from fa_server.typings import InspectGetWorkflowQuery
 
 def get_latest_sessionids() -> List[str]:
     """set ss.latest_sessionids."""
-    # if ("latest_sessionids" not in ss) or refresh:
     db_utils: DBUtils = ss.db_utils
     query = {}
     if ss.exp_version:
@@ -45,6 +46,8 @@ def get_latest_sessionids() -> List[str]:
     ss.expid_sessionid_map = {item["exp_id"]: item["session_id"] for item in _res}
     # 3. ss.total_exp_count
     ss.total_exp_count = db_utils.count_documents_by_query(query=query, collection=ss.db_collection)
+
+    logger.info(f"got {len(ss.latest_sessionids)} sessions from {ss.db_collection} with query: {query}")
     return ss.latest_sessionids
 
 
@@ -97,7 +100,7 @@ def sidebar_setup_db(cfg: Config, db_utils: DBUtils):
         get_latest_sessionids()
 
 
-def sidebar_select_sessionid():
+def sidebar_select_sessionid() -> bool:
     """Select session_id by `selected_session_idx` or `selected_exp_idx`
 
     Ensure:
@@ -144,7 +147,11 @@ def sidebar_select_sessionid():
             if customized_exp_id:
                 ss.selected_exp_id = customized_exp_id
                 ss.selected_session_id = ss.expid_sessionid_map[ss.selected_exp_id]
+
         # check the session_id & exp_id!!
+        if len(ss.latest_sessionids) == 0:
+            st.warning("No sessions found. Please select another db_collection/exp_version.")
+            return -1
         if ("selected_session_id" not in ss) or (ss.selected_session_id not in ss.latest_sessionids):
             ss.selected_session_id = ss.latest_sessionids[0]
             ss.selected_exp_id = ss.sessionid_expid_map[ss.selected_session_id]
@@ -172,6 +179,7 @@ def sidebar_select_sessionid():
                 key="display_option",
                 options=["Table", "Dataframe"],
             )
+        return 0
 
 
 def show_info():
@@ -235,7 +243,8 @@ def main_inspect():
         # 1. select `db_collection`
         sidebar_setup_db(cfg, db_utils)
         # 2. select speicific `session_id`
-        sidebar_select_sessionid()
+        if sidebar_select_sessionid() != 0:
+            return
 
     # ------------------ main --------------------
     if ("selected_session_id" not in ss) or (not ss.selected_session_id):

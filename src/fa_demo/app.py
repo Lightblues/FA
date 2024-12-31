@@ -1,7 +1,7 @@
 """
 Run::
     streamlit run run_demo_frontend.py --server.port 8501 -- --config=ui_dev.yaml
-    streamlit run run_demo_frontend.py --server.port 8502 -- --config=dev.yaml --page_default_index=0
+    streamlit run run_demo_frontend.py --server.port 8502 -- --config=dev.yaml
 
 @241212
 - [x] #bug move `from .pages.page_single import main_single` to `setup_page()`
@@ -41,8 +41,7 @@ def setup_page():
     from .pages.page_single import main_single
 
     # 1. all the available pages (URL names)
-    # available_pages = ["single", "multiple"]
-    available_pages = ["single"]
+    available_pages = ["single", "multiple"]
     if ss.user_identity["staffname"] in SUPERVISED_USERS:
         available_pages += ["inspect"]
 

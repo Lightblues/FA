@@ -4,6 +4,8 @@
     modify from `ui_con/bot_multi_workflow.py`:
 """
 
+from loguru import logger
+
 from fa_core.common import jinja_render, init_client
 from fa_core.data import BotOutput
 
@@ -18,6 +20,7 @@ class UIMultiWorkflowBot(UISingleBot):
 
     def _post_init(self) -> None:
         # 1. init the LLM client
+        logger.info(f"init UIMultiWorkflowBot with cfg: {self.cfg}")
         self.bot_template_fn = self.cfg.bot_template_fn or "bot_mui_workflow_agent.jinja"
         self.bot_llm_name = self.cfg.bot_llm_name
         self.llm = init_client(
@@ -33,7 +36,7 @@ class UIMultiWorkflowBot(UISingleBot):
         workflow = self.context.workflow
         state_infos = self.context.status_for_prompt  # add the status infos from PDL!
         prompt = jinja_render(
-            self.cfg.mui_agent_workflow_template_fn,
+            self.cfg.mui_agent_workflow_template_fn,  # FIXME: use self.bot_template_fn
             workflow_name=workflow.pdl.Name,
             PDL=workflow.pdl.to_json(),
             api_infos=[tool.model_dump() for tool in workflow.pdl.tools],
@@ -56,7 +59,7 @@ class UIMultiWorkflowBot(UISingleBot):
             raise RuntimeError("response is empty")
         self.context.conv.add_message(
             msg_content,
-            llm_name=self.cfg.mui_agent_main_llm_name,
+            llm_name=self.bot_llm_name,
             llm_prompt=self.last_llm_prompt,
             llm_response=self.last_llm_response,
             role=f"bot_{self.context.workflow.name}",

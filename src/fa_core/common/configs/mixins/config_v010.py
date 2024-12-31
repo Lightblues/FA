@@ -49,15 +49,10 @@ class V010Mixin(BaseModel):
     ui_tools: List[Dict] = []
 
     mui_available_workflows: Optional[List[str]] = None  # 可用的工作流列表
-    # 下面两个为实际会用到的, 后面为UI配置项
-    mui_agent_main_template_fn: str = "bot_mui_main_agent.jinja"
-    mui_agent_main_llm_name: str = "gpt-4o"
     mui_available_models: Optional[List[str]] = None
     mui_agent_main_available_templates: Optional[List[str]] = None
     mui_agent_main_default_model: str = "gpt-4o"
     mui_agent_main_default_template: str = "bot_mui_main_agent.jinja"
-    # 同上
-    # mui_agent_workflow_llm_name: str = "gpt-4o" # reuse `mui_agent_main_llm_name`
     mui_agent_workflow_template_fn: str = "bot_mui_workflow_agent.jinja"
     mui_agent_workflow_default_template: str = "bot_mui_workflow_agent.jinja"
     mui_agent_workflow_available_templates: Optional[List[str]] = None

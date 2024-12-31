@@ -61,6 +61,7 @@ class MultiSessionContext(BaseModel):
         Returns:
             SessionContext: session context
         """
+        # logger.info(f"init MultiSessionContext with cfg: {cfg}")
         workflow = FAWorkflow.from_config(cfg)
         conv = Conversation.create(session_id)
         conv.add_message(msg=cfg.mui_greeting_msg, role="bot_main")
@@ -164,12 +165,13 @@ def db_upsert_session_multi(ss: MultiSessionContext):
     logger.info(f"[db_upsert_session] {ss.session_id} into {db}")
     _session_info = {
         # model_llm_name, template, etc
+        "exp_version": ss.cfg.exp_version,
+        "exp_id": ss.cfg.exp_id,
         "session_id": ss.session_id,
         "user": ss.user_identity,
         "mode": "multi",
         "conversation": ss.conv.to_list(),  # TODO: only save messages? polish it!
         "config": ss.cfg.model_dump(),  # to_list -> model_dump
-        # "workflow": ss.workflow.model_dump(),
     }
     if db is None:
         logger.warning(f"Skipping database operation for session {ss.session_id} due to connection failure")

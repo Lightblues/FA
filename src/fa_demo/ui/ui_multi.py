@@ -101,7 +101,7 @@ def init_sidebar():
             st.selectbox(
                 "选择workflow-agent模板",
                 options=LIST_shown_workflow_templates,
-                key="selected_mui_workflow_main_template_fn",
+                key="selected_mui_agent_workflow_template_fn",
                 index=LIST_shown_workflow_templates.index(config.mui_agent_workflow_default_template),
                 on_change=refresh_session_multi,
             )
@@ -166,7 +166,7 @@ def setup_workflow_infos(force_refresh: bool = False):
     # 1. set default workflow_infos
     if (not ss.cfg.mui_workflow_infos) or force_refresh:
         ss.cfg.workflow_dataset = ss.selected_workflow_dataset  # NOTE to update the workflow_dataset
-        ss.cfg.mui_workflow_infos = list(FADataManager(workflow_dataset=ss.cfg.workflow_dataset).workflow_infos.values())
+        ss.cfg.mui_workflow_infos = list(FADataManager.get_workflow_infos(ss.cfg.workflow_dataset).values())
         for w in ss.cfg.mui_workflow_infos:
             w["is_activated"] = True
     # 2. filter the available workflows

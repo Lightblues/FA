@@ -39,22 +39,21 @@ class PathConfig(BaseModel):
 
 
 class FADataManager(PathConfig):
+    @classmethod
     @cache
-    @staticmethod
-    def get_workflow_infos(workflow_dataset: str) -> dict:
+    def get_workflow_infos(cls, workflow_dataset: str) -> dict:
         """Get the workflow infos map"""
-        fn = FADataManager.DIR_data_root / workflow_dataset / "task_infos.json"
+        fn = cls.DIR_data_root / workflow_dataset / "task_infos.json"
         return json.load(open(fn, "r"))["task_infos"]
 
+    @classmethod
     @cache
-    @staticmethod
-    def get_workflow(workflow_dataset: str, workflow_id: str) -> "FAWorkflow":
+    def get_workflow(cls, workflow_dataset: str, workflow_id: str) -> "FAWorkflow":
         return FAWorkflow(workflow_dataset=workflow_dataset, workflow_id=workflow_id)
 
-    # TODO: unifiedly index workflow by name!
-    @staticmethod
-    def unify_workflow_name(workflow_dataset: str, workflow_name_or_id: str) -> str:
-        workflow_infos = FADataManager.get_workflow_infos(workflow_dataset)
+    @classmethod
+    def unify_workflow_name(cls, workflow_dataset: str, workflow_name_or_id: str) -> str:
+        workflow_infos = cls.get_workflow_infos(workflow_dataset)
         workflow_name_id_map = {info["name"]: id for id, info in workflow_infos.items()}
         if workflow_name_or_id in workflow_name_id_map:
             workflow_name_or_id = workflow_name_id_map[workflow_name_or_id]
@@ -62,9 +61,9 @@ class FADataManager(PathConfig):
             assert workflow_name_or_id in workflow_infos, f"[ERROR] {workflow_name_or_id} not found in {workflow_infos.keys()}"
         return workflow_name_or_id
 
-    @staticmethod
-    def unify_workflow_id(workflow_dataset: str, workflow_id_or_name: str) -> str:
-        workflow_infos = FADataManager.get_workflow_infos(workflow_dataset)
+    @classmethod
+    def unify_workflow_id(cls, workflow_dataset: str, workflow_id_or_name: str) -> str:
+        workflow_infos = cls.get_workflow_infos(workflow_dataset)
         workflow_id_name_map = {id: info["name"] for id, info in workflow_infos.items()}
         if workflow_id_or_name in workflow_id_name_map:
             workflow_id_or_name = workflow_id_name_map[workflow_id_or_name]
@@ -73,25 +72,25 @@ class FADataManager(PathConfig):
         return workflow_id_or_name
 
     # --------------------- for ui ---------------------
-    @staticmethod
-    def get_template_name_list(prefix: str = "bot_"):
-        fns = [fn for fn in os.listdir(FADataManager.DIR_template) if fn.startswith(prefix)]
+    @classmethod
+    def get_template_name_list(cls, prefix: str = "bot_"):
+        fns = [fn for fn in os.listdir(cls.DIR_template) if fn.startswith(prefix)]
         return sorted(fns)
 
+    @classmethod
     @cache
-    @staticmethod
-    def get_workflow_names_map():
+    def get_workflow_names_map(cls):
         """
         TODO: add `dataset_infos.json` to register dataset unifiedly
         Return:
             names_map: {PDL_zh: ["task1", "task2"]}
             name_id_map: {PDL_zh: {"task1": "000"}}
         """
-        dataset_infos = yaml.load(open(FADataManager.DIR_data_root / "dataset_infos.yaml", "r"), Loader=yaml.FullLoader)
+        dataset_infos = yaml.load(open(cls.DIR_data_root / "dataset_infos.yaml", "r"), Loader=yaml.FullLoader)
         names_map = {}  # {PDL_zh: ["task1", "task2"]}
         name_id_map = {}  # {PDL_zh: {"task1": "000"}}
         for dir in dataset_infos.keys():
-            fn = FADataManager.DIR_data_root / dir / "task_infos.json"
+            fn = cls.DIR_data_root / dir / "task_infos.json"
             if not os.path.exists(fn):
                 continue
             infos = json.load(open(fn, "r"))

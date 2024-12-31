@@ -4,12 +4,12 @@
     modify from `ui_con/bot_multi_main.py`:
 @241230
 - [ ] tool_call mode for `UIMultiMainBot`
-    - [ ] modify configs: mui_agent_main_template_fn -> template_fn
     - [ ] #tool wrap the `response_to_user` tool
     - [ ] #tool add a tool to call the workflow
 """
 
 from typing import Dict, List, Iterator
+from loguru import logger
 
 from fa_core.common import init_client, jinja_render
 from fa_core.data import FADataManager, BotOutput
@@ -24,7 +24,7 @@ class UIMultiMainBot(UISingleBot):
     """UIMultiMainBot
 
     self: llm
-    ss (session_state): cfg.[mui_agent_main_template_fn, mui_agent_main_llm_name], workflow, conv
+    ss (session_state): cfg.[bot_template_fn, bot_llm_name], workflow, conv
 
     Usage::
 
@@ -36,11 +36,10 @@ class UIMultiMainBot(UISingleBot):
     names = ["UIMultiMainBot", "ui_multi_main_bot"]
 
     tool_status: Dict[str, Dict] = {}
-    tool_definitions: List[ToolDefinition] = []
+    tool_definitions: Dict[str, ToolDefinition] = {}
     bot_main_workflow_infos: List[Dict] = []  # [{name, task_description}]
 
     def _post_init(self) -> None:
-        # logger.info(f"init UIMultiMainBot with workflow_infos: {workflow_infos}")
         self.bot_template_fn = self.cfg.bot_template_fn or "bot_mui_main_agent.jinja"
         self.bot_llm_name = self.cfg.bot_llm_name
         self.llm = init_client(
@@ -50,6 +49,9 @@ class UIMultiMainBot(UISingleBot):
         )
         self._init_workflow_infos(self.cfg.mui_workflow_infos)
         self._init_tools(self.cfg.ui_tools)
+        logger.info(
+            f"initialized UIMultiMainBot with {self.bot_llm_name} - {self.bot_template_fn}!\n bot_main_workflow_infos: {self.bot_main_workflow_infos}\n  tool_status: {self.tool_status}"
+        )
 
     def _init_workflow_infos(self, workflow_infos: List[Dict] = []):
         if not workflow_infos:
@@ -66,7 +68,7 @@ class UIMultiMainBot(UISingleBot):
             self.tool_status[t["name"]] = {"is_enabled": t.get("is_enabled", True)}
         # 2. "response_to_user" tool
         self.tool_status["response_to_user"] = {"is_enabled": True}
-        self.tool_definitions.append(tool_response)
+        self.tool_definitions["response_to_user"] = tool_response
         # 3. "call_workflow" tool
         workflows = [w for w in self.bot_main_workflow_infos if w["is_activated"]]
         for w in workflows:
@@ -79,7 +81,7 @@ class UIMultiMainBot(UISingleBot):
                     "parameters": {},
                 },
             )
-            self.tool_definitions.append(tool_definition)
+            self.tool_definitions[_tool_name] = tool_definition
             self.tool_status[_tool_name] = {"is_enabled": True}
 
     def _gen_prompt(self) -> str:
@@ -87,8 +89,7 @@ class UIMultiMainBot(UISingleBot):
         workflows = [w for w in self.bot_main_workflow_infos if w["is_activated"]]
         workflows = [{k: v for k, v in w.items() if k in ["name", "task_description"]} for w in workflows]
         # 2. tools
-        enabled_tools = [k for k, v in self.tool_status.items() if v["is_enabled"]]
-        tools_info = [s.model_dump() for s in self.tool_definitions if s.function.name in enabled_tools]
+        tools_info = [self.tool_definitions[k].model_dump() for k in self.tool_status if self.tool_status[k]["is_enabled"]]
         # 3. state
         state_infos = self.context.status_for_prompt
         prompt = jinja_render(

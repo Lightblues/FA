@@ -44,8 +44,6 @@ def init_loguru_logger(log_dir=DIR_default_log, stdout_level="INFO") -> "Logger"
 
     """
     os.makedirs(log_dir, exist_ok=True)
-    # print(f"<init_loguru_logger> logging to {log_dir}")
-
     logger.remove()
     logger.add(
         f"{log_dir}/custom_debug.log",
@@ -56,6 +54,8 @@ def init_loguru_logger(log_dir=DIR_default_log, stdout_level="INFO") -> "Logger"
     )
     logger.add(f"{log_dir}/app.log", rotation="10 MB", compression="zip", level="INFO")
     logger.add(sys.stdout, level=stdout_level)
+
+    logger.info(f"logging to {log_dir}")
     return logger
 
 
