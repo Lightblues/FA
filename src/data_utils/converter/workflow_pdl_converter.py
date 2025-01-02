@@ -125,6 +125,8 @@ class WorkflowPDLConverter(BaseModel):
                 "export_version": self.export_version,
             },
         }
+        with open(self.data_manager.DIR_dataset / "dataset_infos.yaml", "w") as f:
+            yaml.dump(dataset_infos, f, sort_keys=False, allow_unicode=True)
 
     def convert_one(self, workflow_id: str):
         # 1. load the workflow

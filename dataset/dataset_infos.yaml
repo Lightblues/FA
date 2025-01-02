@@ -12,3 +12,9 @@ v241127_converted_4turbo:
     llm_name: gpt-4-turbo
     data_version: v241127
     export_version: export-1732628942
+v250102:
+  updated: '2025-01-02'
+  extra:
+    llm_name: gpt-4o
+    data_version: v250102
+    export_version: export-1735200707

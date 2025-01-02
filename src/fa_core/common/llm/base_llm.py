@@ -10,6 +10,7 @@ from .clients.client_hunyuan import HunyuanClient
 
 LLM_CFG = {}  # Link llm_name -> base_url, api_key
 
+# https://cloud.tencent.com/document/product/1729/104753
 HUNYUAN_MODEL_LIST = [
     "hunyuan-turbo",
     "hunyuan-large",
@@ -30,6 +31,8 @@ HUNYUAN_MODEL_LIST = [
 def add_openai_models():
     global LLM_CFG
 
+    # https://platform.openai.com/docs/models
+    # https://docs.anthropic.com/en/docs/about-claude/models
     if os.getenv("OPENAI_PROXY_BASE_URL", None) is not None:
         model_list = [
             "gpt-4o",
@@ -41,6 +44,7 @@ def add_openai_models():
             # "claude-3-5-sonnet-20240620",
             "claude-3-5-sonnet-20241022",
             "claude-3-opus-20240229",
+            "claude-3-5-sonnet-latest",
         ]
         for model in model_list:
             LLM_CFG[model] = {

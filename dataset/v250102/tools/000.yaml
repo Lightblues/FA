@@ -1,0 +1,76 @@
+- name: 代码1
+  description: ''
+  parameters:
+    type: object
+    properties:
+      chepaihao1:
+        type: string
+        description: ''
+        enum: null
+        name: null
+      chepaihao2:
+        type: string
+        description: ''
+        enum: null
+        name: null
+    required:
+    - chepaihao1
+    - chepaihao2
+  url: ''
+  method: GET
+  extra_infos:
+    type: code_executor
+    code: "\n# 仅支持数据转换或运算等操作, 请勿手动import, 已引入numpy和pandas以及部分内置的运算相关的包；不支持IO操作，如读取文件，网络通信等。\n\
+      # 请保存函数名为main,输入输出均为dict；最终结果会以json字符串方式返回，请勿直接返回不支持json.dumps的对象（numpy和pandas已增加额外处理）\n\
+      def main(params: dict) -> dict:\n\n    chepaihao2 = params.get('chepaihao2',\
+      \ '')\n    if chepaihao2 != \"\" and chepaihao2 != None:\n        return {\n\
+      \            'result': chepaihao2\n        }\n    return {\n        'result':\
+      \ params.get('chepaihao1', '')\n    }\n"
+- name: 代码2
+  description: ''
+  parameters:
+    type: object
+    properties:
+      chepaisouji:
+        type: string
+        description: ''
+        enum: null
+        name: null
+    required:
+    - chepaisouji
+  url: ''
+  method: GET
+  extra_infos:
+    type: code_executor
+    code: "\n# 仅支持数据转换或运算等操作, 请勿手动import, 已引入numpy和pandas以及部分内置的运算相关的包；不支持IO操作，如读取文件，网络通信等。\n\
+      # 请保存函数名为main,输入输出均为dict；最终结果会以json字符串方式返回，请勿直接返回不支持json.dumps的对象（numpy和pandas已增加额外处理）\n\
+      def main(params: dict) -> dict:\n    license_plate = params.get('chepaisouji',\
+      \ '')\n    if not license_plate.startswith('浙'):\n        return {\n       \
+      \     'result': '外地车牌'\n        }\n    elif len(license_plate) == 7:\n     \
+      \   return {\n            'result': '浙江燃油车'\n        }\n    elif len(license_plate)\
+      \ == 8:\n        return {\n            'result': '浙江新能源车'\n        }\n    else:\n\
+      \        return {\n            'result': '无效的车牌号'\n        }"
+- name: 代码3
+  description: ''
+  parameters:
+    type: object
+    properties:
+      soujichepai2:
+        type: string
+        description: ''
+        enum: null
+        name: null
+    required:
+    - soujichepai2
+  url: ''
+  method: GET
+  extra_infos:
+    type: code_executor
+    code: "\n# 仅支持数据转换或运算等操作, 请勿手动import, 已引入numpy和pandas以及部分内置的运算相关的包；不支持IO操作，如读取文件，网络通信等。\n\
+      # 请保存函数名为main,输入输出均为dict；最终结果会以json字符串方式返回，请勿直接返回不支持json.dumps的对象（numpy和pandas已增加额外处理）\n\
+      def main(params: dict) -> dict:\n    license_plate = params.get('soujichepai2',\
+      \ '')\n    if not license_plate.startswith('浙'):\n        return {\n       \
+      \     'result': '外地车牌'\n        }\n    elif len(license_plate) == 7:\n     \
+      \   return {\n            'result': '浙江燃油车'\n        }\n    elif len(license_plate)\
+      \ == 8:\n        return {\n            'result': '浙江新能源车'\n        }\n    else:\n\
+      \        return {\n            'result': '无效的车牌号'\n        }"
