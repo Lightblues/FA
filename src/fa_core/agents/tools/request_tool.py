@@ -194,8 +194,9 @@ class RequestTool(ToolMockMixin, BaseTool):
                 raise ValueError(f"Mocking result of {api_spec.extra_infos} not supported!")
         try:
             if api_spec.method == "POST":
-                # if DEBUG: print(f">> calling [{api_info['name']}] -- {api_info['URL']} with params {api_params_dict}")
-                response = requests.post(api_spec.url, data=json.dumps(api_params_dict))
+                # Add headers to specify content type as JSON
+                headers = {"Content-Type": "application/json"}
+                response = requests.post(api_spec.url, data=json.dumps(api_params_dict), headers=headers)
             elif api_spec.method == "GET":
                 response = requests.get(api_spec.url, params=api_params_dict)
             else:

@@ -15,7 +15,7 @@
         name: null
     required:
     - countryCode
-  url: https://leonxing.cn/robot/dhlTask?adapter=https%3A%2F%2Fwippe2-pc.cndhl.com%2Fapi%2Fwiplus%2Fbase%2Flarge-model%2FserviceTips
+  url: https://wippe2-pc.cndhl.com/api/wiplus/base/large-model/itemsCustomsTips
   method: POST
   extra_infos: null
 - name: 转换收件国家到简码

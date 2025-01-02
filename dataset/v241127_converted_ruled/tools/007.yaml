@@ -21,7 +21,7 @@
     required:
     - adapter
     - countryCode
-  url: https://leonxing.cn/robot/dhlTask
+  url: https://wippe2-pc.cndhl.com/api/wiplus/base/large-model/serviceTips
   method: POST
   extra_infos: null
 - name: 物品目的地清关提示
