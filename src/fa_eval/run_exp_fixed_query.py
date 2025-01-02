@@ -72,7 +72,7 @@ def main():
 
     with ThreadPoolExecutor(max_workers=args.max_workers) as executor:
         results = list(tqdm(executor.map(lambda task: task[0].run_with_try_catch(task[1]), tasks), total=len(tasks), desc="running tasks"))
-    print(f"NODE! {sum(results)} / {len(results)} success!")
+    print(f"DONE! {sum(results)} / {len(results)} success!")
 
 
 if __name__ == "__main__":

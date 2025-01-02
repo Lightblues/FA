@@ -74,29 +74,29 @@ ANSWERs:
       desc: 非常抱歉，暂时没有{{变量1}} {{变量2}} {{挂号时间}} 的{{号类}} ；建议您关注微信公众号“北京114预约挂号”，根据自身需求随时挂号，感谢您的来电，祝您生活愉快，再见。
     - name: 兜底回复6
       desc: 兜底回复6
-Procedure: |-
-    def func2([变量2,变量1]):
+Procedure: |4
+    def func2([变量1,变量2]):
         [挂号时间] = ANSWER.请用户提供必要信息()
             [num,haolist,zhuan_num,pu_num] = API.指定时间号源查询([变量1,变量2,挂号时间])
                 if num == "0":
                     [data,num,data_num_type] = API.同医院同科室其他日期号源([变量1,变量2])
                         [g_time,num_type] = API.获取挂号时间和号类([data,data_num_type])
                             if num == "0":
-                                func1([变量2,挂号时间,变量1])
+                                func3([变量1,变量2,挂号时间])
                             elif num > "0":
                                 [其他日期挂号意愿] = ANSWER.请用户提供必要信息()
                                     if 其他日期挂号意愿 == "不愿意":
-                                        func1([变量2,挂号时间,变量1])
-                                    else:
                                         func3([变量1,变量2,挂号时间])
+                                    else:
+                                        func1([变量1,变量2,挂号时间])
                             else:
                                 ANSWER.兜底回复4()
                 elif num > "0":
-                    func3([变量1,变量2,挂号时间])
+                    func1([变量1,变量2,挂号时间])
                 else:
                     ANSWER.兜底回复3()
 
-    def func1([变量2,挂号时间,变量1]):
+    def func3([变量1,变量2,挂号时间]):
         [num,hos_name,doc_name] = API.其他医院号源推荐([变量2,挂号时间])
             if num == "0":
                 ANSWER.无号回复()
@@ -105,13 +105,13 @@ Procedure: |-
                     if 其他医院挂号意愿 == "不愿意":
                         ANSWER.拒绝挂号回复()
                     elif 其他医院挂号意愿 == "愿意":
-                        func3([变量1,变量2,挂号时间])
+                        func1([变量1,变量2,挂号时间])
                     else:
                         ANSWER.结束回复16()
             else:
                 ANSWER.兜底回复5()
 
-    def func3([变量1,变量2,挂号时间]):
+    def func1([变量1,变量2,挂号时间]):
         [号类,身份证号] = ANSWER.请用户提供必要信息()
             [type] = API.本医院挂号执行([身份证号,号类,变量1,变量2,挂号时间])
                 if type > "0":
@@ -134,7 +134,7 @@ Procedure: |-
                     if num > "0":
                         [挂号意愿] = ANSWER.请用户提供必要信息()
                             if 挂号意愿 == "愿意":
-                                func2([变量2,变量1])
+                                func2([变量1,变量2])
                             elif 挂号意愿 == "不愿意":
                                 ANSWER.拒绝其他医院科室回复()
                             else:
@@ -144,7 +144,7 @@ Procedure: |-
                     else:
                         ANSWER.兜底回复2()
             elif type == "1":
-                func2([变量2,变量1])
+                func2([变量1,变量2])
             else:
                 ANSWER.兜底回复1()
     else:
