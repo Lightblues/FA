@@ -14,3 +14,7 @@ __*/
 __pycache__/
 *.pyc
 /dist/
+
+nosetests.xml
+coverage.xml
+.coverage

@@ -64,7 +64,8 @@ def format_pdl(pdl: PDL) -> str:
 def format_toolbox(tools: list[ExtToolSpec]) -> str:
     """Format the tools into lines of json.
 
-    Sample line:
+    Sample line::
+
         {"name": "check_hospital_exist", "description": "Check if the hospital exists", "parameters": <json schema>, "required": ["hos_name"]}
     """
     tool_specs = [tool.to_tool_spec() for tool in tools] + [tool_response.function, tool_switch_main.function]

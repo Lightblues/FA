@@ -135,7 +135,7 @@ class ExtToolSpec(ToolSpec):
     # Add: url, method
     url: str = ""
     method: Literal["GET", "POST"] = "GET"
-    extra_infos: Any = None  # used for special needs during development!!!
+    extra_infos: Optional[Any] = None  # used for special needs during development!!!
 
     def to_tool_spec(self) -> ToolSpec:
         return ToolSpec(**self.model_dump())

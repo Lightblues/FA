@@ -6,7 +6,7 @@ from fa_core.agents import RequestTool, Context
 def test_request_tool_llm():
     """
     @241223:
-    - 测试医院名称归一化
+    - test hospital name normalization
     """
     cfg = Config.from_yaml("dev.yaml")
     cfg.workflow_dataset = "pdl_converted_20241223_hyturbo"
@@ -29,7 +29,7 @@ def test_request_tool_llm():
 def test_request_tool_code_executor():
     """
     @241223:
-    - 测试代码执行器
+    - test code executor
     """
     cfg = Config.from_yaml("dev.yaml")
     cfg.workflow_dataset = "pdl_converted_20241223_hyturbo"

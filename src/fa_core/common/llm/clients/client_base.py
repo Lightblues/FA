@@ -1,14 +1,13 @@
 from abc import abstractmethod
 from typing import Dict, Iterator, List
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class BaseClient(BaseModel):
     kwargs: Dict = Field(default_factory=dict)
 
-    class Config:  # for openai.OpenAI
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)  # for openai.OpenAI
 
     @abstractmethod
     def query_one(self, query: str = None, messages: List[Dict] = None, **kwargs) -> str:
